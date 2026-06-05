@@ -1,0 +1,59 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(150deg,#241d3a,#0f1019); gap:0; padding:20px 24px; }
+  .row { display:grid; grid-template-columns:108px 1fr 1fr; gap:10px 16px; align-items:center;
+    padding:14px 0; border-bottom:1px solid rgba(255,255,255,.07); }
+  .row:last-child { border-bottom:none; }
+  .rl { font:700 12px var(--font-jp); color:#fff; } .rl span { display:block; font:400 10px var(--font-latin); color:var(--text-3); margin-top:3px; }
+  .h { font:700 9px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px; }
+  .h.b { color:#ff8a8a; } .h.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; align-items:flex-start; }
+  .stage { display:flex; align-items:center; gap:14px; min-height:64px; }
+  .sub { grid-column:2 / 4; font:500 11px var(--font-jp); color:var(--text-2); }
+  .sub b { color:#fff; }
+  /* ---- BEFORE (overloaded) inlined ---- */
+  .old-it { position:relative; display:inline-flex; align-items:center; gap:4px; height:36px; padding:0 12px;
+    border-radius:16px; color:#fff; font:700 12px var(--font-jp); text-shadow:0 1px 3px #000; background:var(--gradient-colorful);
+    border:1px solid #221c1c; }
+  .old-it img { width:24px; height:24px; filter:drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  .old-post { position:relative; width:64px; height:64px; }
+  .old-post .c { position:absolute; left:4px; top:4px; width:56px; height:56px; border-radius:50%;
+    background:radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, transparent 55%), var(--gradient-colorful);
+    border:1px solid #221c1c; display:flex; align-items:center; justify-content:center; }
+  .old-post .c img { width:28px; height:28px; }
+  .old-post .bg { position:absolute; right:0; top:0; width:24px; height:24px; border-radius:50%;
+    background:var(--gradient-colorful); border:1px solid #221c1c; display:flex; align-items:center; justify-content:center; }
+  .old-post .bg img { width:16px; height:16px; }
+  .old-sp { position:relative; width:64px; height:64px; border-radius:50%; }
+  .old-sp::before { content:""; position:absolute; inset:-6px; border-radius:50%; background:var(--gradient-colorful); filter:blur(7px); opacity:.85; }
+  .old-sp img { position:relative; width:100%; height:100%; border-radius:50%; object-fit:cover;
+    box-shadow:0 0 0 2px rgba(255,255,255,.5), inset 0 0 0 3px rgba(255,255,255,.4); }
+</style></head>
+<body>
+  <div class="eyebrow">バッチA①「効果を盛りすぎ」— IconTextButton / PostButton / SpesialIcon</div>
+
+  <div class="row">
+    <div class="rl">WdIconTextButton<span>special</span></div>
+    <div class="cell"><div class="h b">Before</div><div class="stage"><div class="old-it"><img src="../assets/icons/icon_near.png">近くの投稿を探す</div></div></div>
+    <div class="cell"><div class="h a">After</div><div class="stage"><button class="wd-it-btn"><img src="../assets/icons/icon_near.png">近くの投稿を探す</button></div></div>
+    <div class="sub">引き算: <b>アイコン影＋文字影を削除</b>し、グラデ＋マスクの1群＋ヘアラインに。icon=20・padding16・h40。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdPostButton</div>
+    <div class="cell"><div class="h b">Before</div><div class="stage"><div class="old-post"><div class="c"><img src="../assets/icons/icon_camera.png"></div><div class="bg"><img src="../assets/icons/icon_add.png"></div></div></div></div>
+    <div class="cell"><div class="h a">After</div><div class="stage"><button class="wd-post-btn"><span class="circle"><img src="../assets/icons/icon_camera.png"></span><span class="badge"><img src="../assets/icons/icon_add.png"></span></button></div></div>
+    <div class="sub">引き算: <b>中心の透過マスクとバッジの二重枠を削除</b>。カラフル円＋addバッジの2要素に。icon 28→24。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdSpesialIcon</div>
+    <div class="cell"><div class="h b">Before</div><div class="stage"><div class="old-sp"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"></div></div></div>
+    <div class="cell"><div class="h a">After</div><div class="stage"><div class="wd-spesial-icon"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"></div></div></div>
+    <div class="sub">引き算: <b>外側グロー＋内側リングを削除</b>し、白リング1本に。装飾→1効果。</div>
+  </div>
+</body></html>

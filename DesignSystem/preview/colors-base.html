@@ -1,0 +1,24 @@
+<!-- @dsCard group="Colors" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body { gap: 14px; }
+  .checker { background-image:
+    linear-gradient(45deg,#2a2a2e 25%,transparent 25%),
+    linear-gradient(-45deg,#2a2a2e 25%,transparent 25%),
+    linear-gradient(45deg,transparent 75%,#2a2a2e 75%),
+    linear-gradient(-45deg,transparent 75%,#2a2a2e 75%);
+    background-size: 14px 14px; background-position: 0 0,0 7px,7px -7px,-7px 0; }
+  .glasschip { backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+</style></head>
+<body>
+  <div class="eyebrow">Base &amp; glass — the whole UI is black/white + translucent black glass</div>
+  <div class="grid" style="grid-template-columns: repeat(5,1fr);">
+    <div class="sw"><div class="chip" style="background:#000;"></div><span class="nm">Black</span><span class="hx">#000000</span></div>
+    <div class="sw"><div class="chip" style="background:#fff;border-color:rgba(255,255,255,.2);"></div><span class="nm">White</span><span class="hx">#FFFFFF</span></div>
+    <div class="sw"><div class="chip checker"><div class="glasschip" style="width:100%;height:100%;border-radius:8px;background:var(--glass-fill);"></div></div><span class="nm">Glass fill</span><span class="hx">#000 · 51%</span></div>
+    <div class="sw"><div class="chip checker"><div style="width:100%;height:100%;border-radius:8px;background:var(--scrim);"></div></div><span class="nm">Scrim</span><span class="hx">#000 · 64%</span></div>
+    <div class="sw"><div class="chip checker"><div style="width:100%;height:100%;border-radius:8px;background:var(--scrim-strong);"></div></div><span class="nm">Scrim strong</span><span class="hx">#000 · 80%</span></div>
+  </div>
+</body></html>

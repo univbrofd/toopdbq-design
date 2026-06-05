@@ -1,0 +1,83 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(160deg,#201a33,#0e0e16); gap:0; padding:20px 24px; }
+  .row { display:grid; grid-template-columns:104px 1fr 1fr; gap:10px 16px; align-items:start;
+    padding:16px 0; border-top:1px solid rgba(255,255,255,.07); }
+  .row:first-of-type { border-top:none; }
+  .rl { font:700 12px var(--font-jp); color:#fff; padding-top:18px; }
+  .h { font:700 9px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px; }
+  .h.b { color:#ff8a8a; } .h.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; align-items:flex-start; }
+  .sub { grid-column:2 / 4; font:500 11px var(--font-jp); color:var(--text-2); margin-top:10px; }
+  .sub b { color:#fff; }
+  .dots i { display:inline-block; width:14px; height:14px; border-radius:50%; background:#888; border:1.5px solid #16131f; margin-left:-5px; vertical-align:middle; }
+  .dots i:first-child { margin-left:0; }
+  /* BEFORE: mini card (white border + radius mismatch + 8px×3) */
+  .old-mini { position:relative; width:160px; height:152px; border-radius:8px; overflow:hidden; }
+  .old-mini .img { position:absolute; top:0; left:0; right:0; height:122px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,.53); }
+  .old-mini .img img { width:100%; height:100%; object-fit:cover; }
+  .old-mini .ov { position:absolute; top:0; left:0; right:0; height:122px; border-radius:16px; background:linear-gradient(180deg,transparent,rgba(0,0,0,.56)); }
+  .old-mini .bd { position:absolute; left:5px; top:66px; right:5px; }
+  .old-mini .t { font:600 12px var(--font-latin); color:#fff; }
+  .old-mini .d { margin-top:5px; font:600 8px var(--font-latin); color:#fff; }
+  .old-mini .m { display:flex; justify-content:space-between; margin-top:5px; font:600 9px var(--font-latin); color:#fff; }
+  /* BEFORE: bar big (off-grid pad, w600 desc) */
+  .old-big { position:relative; width:200px; height:200px; border-radius:8px; overflow:hidden; }
+  .old-big img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .old-big .ov { position:absolute; inset:0; background:linear-gradient(180deg,transparent,#000 74%); }
+  .old-big .bd { position:absolute; left:16.5px; right:8px; bottom:14px; }
+  .old-big .t { font:600 22px var(--font-latin); color:#fff; }
+  .old-big .d { margin-top:8px; font:600 12px var(--font-latin); color:#fff; }
+  /* BEFORE: comment sheet (white 70%, pad21, same-weight) */
+  .old-cmt { width:300px; border-radius:8px 8px 0 0; background:rgba(255,255,255,.7); padding:21px; }
+  .old-cmt .c { display:flex; gap:9px; margin-bottom:13px; }
+  .old-cmt .av { width:30px; height:30px; border-radius:50%; background:#bbb; flex:none; }
+  .old-cmt .n { font:400 14px var(--font-jp); color:#000; }
+  .old-cmt .x { font:400 14px var(--font-jp); color:#000; }
+</style></head>
+<body>
+  <div class="eyebrow">バッチB「カード」— MiniCard / CircleBarBig / StoryComment</div>
+
+  <div class="row">
+    <div class="rl">WdCircleMiniCard</div>
+    <div class="cell"><div class="h b">Before</div>
+      <div class="old-mini"><div class="img"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png"></div><div class="ov"></div>
+        <div class="bd"><div class="t">新宿グループ</div><div class="d">新宿エリアの交流グループです。気軽に写真を共有しましょう。</div>
+          <div class="m"><span class="dots"><i></i><i></i><i></i></span><span>1.2km</span></div></div></div></div>
+    <div class="cell"><div class="h a">After</div>
+      <div class="wd-mini-card"><img class="bg" src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png"><div class="scrim"></div>
+        <div class="body"><div class="ttl">新宿グループ</div><div class="desc">新宿エリアの交流グループ</div>
+          <div class="meta"><span class="dots"><i></i><i></i><i></i></span><span>＋86 · 1.2km</span></div></div></div></div>
+    <div class="sub">引き算: <b>53%白ボーダーを削除</b>、角丸 8/16混在→12に統一、説明 8px×3行→<b>11px1行(--text-3)</b>。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdCircleBarBig</div>
+    <div class="cell"><div class="h b">Before</div>
+      <div class="old-big"><img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png"><div class="ov"></div>
+        <div class="bd"><div class="t">渋谷コミュニティ</div><div class="d">渋谷駅周辺のコミュニティです。近くの人とつながろう。</div></div></div></div>
+    <div class="cell"><div class="h a">After</div>
+      <div class="wd-bar-big" style="width:200px"><img class="bg" src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png"><div class="scrim"></div>
+        <div class="body"><div class="top"><div class="ttl">渋谷コミュニティ</div></div>
+          <div class="meta"><span class="dots"><i></i><i></i><i></i></span> ＋128人 · 10.0m</div>
+          <div class="desc">渋谷駅周辺のコミュニティ</div></div></div></div>
+    <div class="sub">引き算: 端数 <b>16.5/366.5 を 16 に正規化</b>、説明 w600→<b>w400/--text-2</b> に降格、見出しを Noto に。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdStoryComment</div>
+    <div class="cell"><div class="h b">Before</div>
+      <div class="old-cmt"><div class="c"><span class="av"></span><div><span class="n">SunnyVi</span> <span class="x">素敵な写真ですね</span></div></div>
+        <div class="c"><span class="av"></span><div><span class="n">Kawaii</span> <span class="x">ここはどこですか？</span></div></div></div></div>
+    <div class="cell"><div class="h a">After</div>
+      <div class="wd-comment-sheet" style="width:300px"><div class="list">
+        <div class="cmt"><span class="av" style="background:#bbb"></span><div><div class="nm">SunnyVi</div><div class="tx">素敵な写真ですね</div></div></div>
+        <div class="cmt"><span class="av" style="background:#bbb"></span><div><div class="nm">Kawaii</div><div class="tx">ここはどこですか？</div></div></div>
+      </div></div></div>
+    <div class="sub">引き算: 地を <b>白70%→94%</b>(黒文字AA)、padding 21→20、ユーザー名を<b>太字=主役</b>・本文を#3aの脇役に分離。</div>
+  </div>
+</body></html>

@@ -1,0 +1,24 @@
+<!-- @dsCard group="Spacing" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body { background:
+    linear-gradient(160deg, rgba(0,0,0,.3), rgba(0,0,0,.62)),
+    radial-gradient(120% 130% at 75% 110%, #46365f, #101019 72%); }
+  .e { display:flex;flex-direction:column;align-items:center;gap:9px; }
+  .e .box { width:88px;height:64px;border-radius:12px;background:#16131f;display:flex;align-items:center;justify-content:center;color:var(--fg-2);font-size:10px; }
+  .e .nm { font-size:10.5px;color:var(--fg-2);text-align:center; }
+  .glass { backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);background:var(--glass-fill);border:1px solid rgba(255,255,255,.0); position:relative; }
+  .glass::after { content:"";position:absolute;inset:0;border-radius:12px;padding:1px;
+    background:var(--gradient-border);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;}
+</style></head>
+<body>
+  <div class="eyebrow">Elevation — soft dark shadows + glass blur, never gray boxes</div>
+  <div class="row" style="justify-content:space-around;">
+    <div class="e"><div class="box glass">glass</div><span class="nm">blur 2 + 51% fill<br>+ gradient hairline</span></div>
+    <div class="e"><div class="box" style="box-shadow:0 2px 8px rgba(0,0,0,.7);">avatar</div><span class="nm">0 2 8 · black 70%</span></div>
+    <div class="e"><div class="box" style="box-shadow:0 8px 24px rgba(0,0,0,.55);">card</div><span class="nm">0 8 24 · black 55%</span></div>
+    <div class="e"><div class="box" style="box-shadow:inset 0 -3px 8px rgba(0,0,0,.45);">inset</div><span class="nm">toggle pill inset</span></div>
+  </div>
+</body></html>

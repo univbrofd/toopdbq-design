@@ -1,0 +1,71 @@
+<!-- @dsCard group="Colors" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; gap:18px; }
+  .cmp { display:grid; grid-template-columns: 116px 1fr 1fr; gap:12px 16px; align-items:center; }
+  .cmp .h { font-family:var(--font-latin); font-weight:700; font-size:10px; letter-spacing:.12em; text-transform:uppercase; }
+  .cmp .h.b { color:#ff8a8a; } .cmp .h.a { color:#7ee0a0; }
+  .rl { font-size:11px; color:var(--fg-2); }
+  .cell { position:relative; }
+  .badge { display:inline-flex; align-items:center; gap:5px; margin-top:7px; font-family:var(--font-latin); font-weight:600; font-size:10px; }
+  .badge i { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .fail i { background:#ff5b5b; } .fail { color:#ff8a8a; }
+  .pass i { background:#3ddc84; } .pass { color:#7ee0a0; }
+  .photo { background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover; border-radius:10px; padding:12px; height:52px; display:flex; align-items:center; }
+</style></head>
+<body>
+  <div class="eyebrow">監査前 / 監査後 — コントラスト是正（WCAG AA 4.5:1）</div>
+  <div class="cmp">
+    <div></div><div class="h b">BEFORE</div><div class="h a">AFTER</div>
+
+    <!-- input field -->
+    <div class="rl">入力フィールド地</div>
+    <div class="cell">
+      <div class="wd-field" style="background:#7f7f7f;height:42px;"><span style="color:#fff;font:600 14px var(--font-latin);">サークル名を入力...</span></div>
+      <span class="badge fail"><i></i>白 on #7F7F7F = 4.0:1 ✕</span>
+    </div>
+    <div class="cell">
+      <div class="wd-field" style="height:42px;"><span style="color:#fff;font:600 14px var(--font-latin);">サークル名を入力...</span></div>
+      <span class="badge pass"><i></i>白 on #2B2B2B = 14:1 ✓</span>
+    </div>
+
+    <!-- toggle off -->
+    <div class="rl">トグル OFF 地</div>
+    <div class="cell">
+      <div class="wd-toggle" style="background:#7e7e7e;"><span class="lab off">OFF</span><span class="pill"></span></div>
+      <span class="badge fail"><i></i>白 on #7E7E7E = 4.0:1 ✕</span>
+    </div>
+    <div class="cell">
+      <div class="wd-toggle"><span class="lab off">OFF</span><span class="pill"></span></div>
+      <span class="badge pass"><i></i>白 on #555 = 7.0:1 ✓</span>
+    </div>
+
+    <!-- micro text -->
+    <div class="rl">サークル説明</div>
+    <div class="cell">
+      <div style="font:300 8px var(--font-latin);color:rgba(255,255,255,.9);">渋谷駅周辺のコミュニティ</div>
+      <span class="badge fail"><i></i>8px・可読下限割れ ✕</span>
+    </div>
+    <div class="cell">
+      <div style="font:400 11px var(--font-latin);color:var(--text-2);">渋谷駅周辺のコミュニティ</div>
+      <span class="badge pass"><i></i>11px・text-2(78%) ✓</span>
+    </div>
+
+    <!-- glass over photo -->
+    <div class="rl">写真上の文字</div>
+    <div class="cell">
+      <div class="photo"><span style="color:#fff;font:600 13px var(--font-jp);text-shadow:0 0 6px #000;">近くの投稿</span></div>
+      <span class="badge fail"><i></i>shadow頼み・保証なし ✕</span>
+    </div>
+    <div class="cell">
+      <div class="photo" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,.45);"></div>
+        <span style="position:relative;color:#fff;font:600 13px var(--font-jp);">近くの投稿</span>
+      </div>
+      <span class="badge pass"><i></i>スクリム45%必須 ✓</span>
+    </div>
+  </div>
+</body></html>

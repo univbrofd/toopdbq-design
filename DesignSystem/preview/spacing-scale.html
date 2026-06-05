@@ -1,0 +1,22 @@
+<!-- @dsCard group="Spacing" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  .bar { display:flex;align-items:flex-end;gap:14px; }
+  .u { display:flex;flex-direction:column;align-items:center;gap:7px; }
+  .u .b { background:var(--grad-pink);border-radius:3px;width:26px; }
+  .u .n { font-size:10px;color:var(--fg-2);font-variant-numeric:tabular-nums; }
+</style></head>
+<body>
+  <div class="eyebrow">Spacing scale — 4 / 8 base, reference frame 393 × 852</div>
+  <div class="bar">
+    <div class="u"><div class="b" style="height:4px;background:var(--grad-yellow);"></div><span class="n">4</span></div>
+    <div class="u"><div class="b" style="height:8px;background:var(--grad-golden);"></div><span class="n">8</span></div>
+    <div class="u"><div class="b" style="height:12px;background:var(--grad-pink);"></div><span class="n">12</span></div>
+    <div class="u"><div class="b" style="height:16px;"></div><span class="n">16</span></div>
+    <div class="u"><div class="b" style="height:24px;background:var(--grad-teal);"></div><span class="n">24</span></div>
+    <div class="u"><div class="b" style="height:36px;background:#60566f;"></div><span class="n">36</span></div>
+  </div>
+  <span class="mono">Gaps: 8 (tight) · 16 (default block) · 24–36 (sections). Sizes are responsive — derived from Get.width/height, never hardcoded.</span>
+</body></html>

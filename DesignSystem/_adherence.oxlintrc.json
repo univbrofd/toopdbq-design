@@ -1,0 +1,228 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "ui_kits/app/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Pacifico|Inter|Noto Sans JP))/i]",
+        "message": "Font not provided by the design system. Available: Pacifico, Inter, Noto Sans JP."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {},
+    "tokens": [
+      "--accent-purple",
+      "--bg",
+      "--black",
+      "--blur-glass",
+      "--border",
+      "--border-hairline",
+      "--dur-fade",
+      "--dur-toggle",
+      "--ease-out",
+      "--ease-standard",
+      "--error",
+      "--fg-1",
+      "--fg-2",
+      "--fg-3",
+      "--fg-4",
+      "--font-body",
+      "--font-display",
+      "--font-jp",
+      "--font-latin",
+      "--glass-fill",
+      "--glass-fill-soft",
+      "--grad-border-dark",
+      "--grad-golden",
+      "--grad-pink",
+      "--grad-teal",
+      "--grad-yellow",
+      "--gradient-auth",
+      "--gradient-border",
+      "--gradient-colorful",
+      "--gradient-colorful-linear",
+      "--gray-150",
+      "--gray-200",
+      "--gray-250",
+      "--gray-300",
+      "--gray-400",
+      "--gray-500",
+      "--gray-600",
+      "--gray-700",
+      "--gray-800",
+      "--gray-900",
+      "--gray-950",
+      "--gray-mid",
+      "--gray-toggle-off",
+      "--ink-1",
+      "--ink-2",
+      "--ink-3",
+      "--like",
+      "--on-primary",
+      "--primary",
+      "--radius-full",
+      "--radius-lg",
+      "--radius-md",
+      "--radius-pill",
+      "--radius-sm",
+      "--scrim",
+      "--scrim-min",
+      "--scrim-strong",
+      "--shadow-avatar",
+      "--shadow-card",
+      "--shadow-text",
+      "--shadow-text-lg",
+      "--space-1",
+      "--space-2",
+      "--space-3",
+      "--space-4",
+      "--space-6",
+      "--space-9",
+      "--state-disabled-opacity",
+      "--state-error",
+      "--state-focus",
+      "--state-like",
+      "--state-success",
+      "--success",
+      "--surface",
+      "--surface-input",
+      "--surface-raised",
+      "--surface-toggle-off",
+      "--text-1",
+      "--text-2",
+      "--text-3",
+      "--text-disabled",
+      "--white"
+    ],
+    "tokenKinds": {
+      "--black": "color",
+      "--white": "color",
+      "--bg": "color",
+      "--surface": "color",
+      "--surface-raised": "color",
+      "--surface-input": "color",
+      "--surface-toggle-off": "color",
+      "--border": "color",
+      "--border-hairline": "color",
+      "--primary": "color",
+      "--on-primary": "color",
+      "--text-1": "font",
+      "--text-2": "font",
+      "--text-3": "font",
+      "--text-disabled": "font",
+      "--scrim-min": "color",
+      "--state-success": "color",
+      "--state-error": "color",
+      "--state-like": "color",
+      "--state-focus": "color",
+      "--state-disabled-opacity": "other",
+      "--glass-fill": "color",
+      "--glass-fill-soft": "color",
+      "--scrim": "color",
+      "--scrim-strong": "color",
+      "--gray-950": "color",
+      "--gray-900": "color",
+      "--gray-800": "color",
+      "--gray-700": "color",
+      "--gray-600": "color",
+      "--gray-500": "color",
+      "--gray-mid": "color",
+      "--gray-400": "color",
+      "--gray-toggle-off": "color",
+      "--gray-300": "color",
+      "--gray-250": "color",
+      "--gray-200": "color",
+      "--gray-150": "color",
+      "--fg-1": "color",
+      "--fg-2": "color",
+      "--fg-3": "color",
+      "--fg-4": "color",
+      "--ink-1": "color",
+      "--ink-2": "color",
+      "--ink-3": "color",
+      "--grad-yellow": "color",
+      "--grad-teal": "color",
+      "--grad-pink": "color",
+      "--grad-golden": "color",
+      "--gradient-colorful": "color",
+      "--gradient-colorful-linear": "color",
+      "--grad-border-dark": "color",
+      "--gradient-border": "color",
+      "--gradient-auth": "color",
+      "--accent-purple": "color",
+      "--like": "color",
+      "--success": "color",
+      "--error": "color",
+      "--radius-sm": "radius",
+      "--radius-md": "radius",
+      "--radius-lg": "radius",
+      "--radius-pill": "radius",
+      "--radius-full": "radius",
+      "--space-1": "spacing",
+      "--space-2": "spacing",
+      "--space-3": "spacing",
+      "--space-4": "spacing",
+      "--space-6": "spacing",
+      "--space-9": "spacing",
+      "--blur-glass": "spacing",
+      "--shadow-text": "shadow",
+      "--shadow-text-lg": "shadow",
+      "--shadow-avatar": "shadow",
+      "--shadow-card": "shadow",
+      "--ease-standard": "other",
+      "--ease-out": "other",
+      "--dur-toggle": "other",
+      "--dur-fade": "other",
+      "--font-display": "font",
+      "--font-jp": "font",
+      "--font-body": "font",
+      "--font-latin": "font"
+    },
+    "fontFamilies": [
+      "Inter",
+      "Noto Sans JP",
+      "Pacifico"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(135deg,#241d3a,#101019); gap:16px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center; }
+  .lab { font:700 10px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px; }
+  .lab.b { color:#ff8a8a; } .lab.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; align-items:flex-start; }
+  /* BEFORE amateur user bar: off-grid 47/15, weak 12px name */
+  .old { display:flex; align-items:center; gap:15px; }
+  .old img { width:47px; height:47px; border-radius:50%; object-fit:cover; box-shadow:0 2px 8px rgba(0,0,0,.7); background:#333; }
+  .old .n { font:500 12px var(--font-latin); color:#fff; }
+  .grid-hint { position:relative; }
+  .sub { font:500 12px var(--font-jp); color:var(--text-2); }
+  .sub b { color:#fff; font-weight:700; }
+  .why { font:400 11px var(--font-jp); color:var(--text-3); }
+</style></head>
+<body>
+  <div class="eyebrow">WdUserBar — ユーザー識別バー</div>
+  <div class="two">
+    <div class="cell"><div class="lab b">Before</div>
+      <div class="old"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"><span class="n">SunnyVi</span></div>
+      <div style="font:400 10px var(--font-latin);color:var(--text-3);margin-top:10px;">47px・gap15・名前12px（グリッド外・弱い）</div>
+    </div>
+    <div class="cell"><div class="lab a">After</div>
+      <div class="wd-user-bar"><img class="av" src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png">
+        <div class="col"><span class="nm">SunnyVi</span><span class="sub" style="color:var(--text-2)">2時間前 · 渋谷コミュニティ</span></div></div>
+      <div style="font:400 10px var(--font-latin);color:var(--text-3);margin-top:10px;">44px・gap12・名前14px（8pt・タップ域44）</div>
+    </div>
+  </div>
+  <div class="sub">引き算: <b>グリッド外寸法(47/15)を 44/12 に正規化</b>。主役の名前を 12→14px(Noto Bold/--text-1)へ昇格、時刻・サークル名を脇役 <b>--text-2</b> に分離。</div>
+  <div class="why">なぜプロに見えるか: 8ptグリッドで“揃って”見え、主役/脇役の強弱が生まれる。アバターは44pxでタップ域も満たし、影は1つ(elevation)だけ。</div>
+</body></html>

@@ -1,0 +1,67 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(160deg,#1a1628,#0d0d15); gap:0; padding:20px 24px; }
+  .row { display:grid; grid-template-columns:112px 1fr 1fr; gap:8px 16px; align-items:start;
+    padding:16px 0; border-top:1px solid rgba(255,255,255,.07); }
+  .row:first-of-type { border-top:none; }
+  .rl { font:700 12px var(--font-jp); color:#fff; padding-top:14px; }
+  .h { font:700 9px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:10px; }
+  .h.b { color:#ff8a8a; } .h.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; }
+  .panel { background:rgba(255,255,255,.04); border-radius:12px; padding:4px 14px; }
+  .sub { grid-column:2 / 4; font:500 11px var(--font-jp); color:var(--text-2); margin-top:10px; }
+  .sub b { color:#fff; }
+  /* BEFORE menu (flat #333 divider, off-grid) */
+  .old-menu .mi { display:flex; align-items:center; gap:10px; height:50px; border-bottom:1px solid #333; }
+  .old-menu .mi:last-child { border-bottom:none; }
+  .old-menu img { width:24px; height:24px; }
+  .old-menu .l { flex:1; font:700 14px var(--font-jp); color:#fff; }
+  .old-menu .c { width:16px; opacity:.5; }
+  /* BEFORE comment (name+body same weight) */
+  .old-c { display:flex; gap:9px; }
+  .old-c .av { width:32px; height:32px; border-radius:50%; background:#444; flex:none; }
+  .old-c .n { font:400 13px var(--font-jp); color:#fff; }
+  .old-c .t { font:400 13px var(--font-jp); color:#fff; }
+</style></head>
+<body>
+  <div class="eyebrow">バッチF「メニュー・設定・コメント」— MenuItem / SettingRow / UserComment</div>
+
+  <div class="row">
+    <div class="rl">WdMenuItem</div>
+    <div class="cell"><div class="h b">Before</div>
+      <div class="panel old-menu">
+        <div class="mi"><img src="../assets/icons/icon_person.png"><span class="l">プロフィール</span><img class="c" src="../assets/icons/icon_next.png"></div>
+        <div class="mi"><img src="../assets/icons/icon_group.png"><span class="l">サークル</span><img class="c" src="../assets/icons/icon_next.png"></div>
+        <div class="mi"><img src="../assets/icons/icon_report.png"><span class="l">通報</span><img class="c" src="../assets/icons/icon_next.png"></div>
+      </div></div>
+    <div class="cell"><div class="h a">After</div>
+      <div class="panel">
+        <div class="wd-menu-item"><img class="ic" src="../assets/icons/icon_person.png"><span class="lbl">プロフィール</span><img class="chev" src="../assets/icons/icon_next.png"></div>
+        <div class="wd-menu-item"><img class="ic" src="../assets/icons/icon_group.png"><span class="lbl">サークル</span><img class="chev" src="../assets/icons/icon_next.png"></div>
+        <div class="wd-menu-item"><img class="ic" src="../assets/icons/icon_report.png"><span class="lbl">通報</span><img class="chev" src="../assets/icons/icon_next.png"></div>
+      </div></div>
+    <div class="sub">引き算: フラット <b>#333 線 → グラデ・ヘアライン</b>（他コンポーネントの縁と統一）。高さ50→52・タップ域確保。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdSettingRow</div>
+    <div class="cell"><div class="h b">After のみ</div>
+      <div class="panel" style="padding:10px 14px"><div class="wd-setting-row"><img class="ic" src="../assets/icons/icon_pin_location.png"><span class="lbl">位置情報を共有</span><div class="wd-toggle on"><span class="lab on">ON</span><span class="pill"></span></div></div></div></div>
+    <div class="cell"><div class="h a">　</div>
+      <div class="panel" style="padding:10px 14px"><div class="wd-setting-row"><img class="ic" src="../assets/icons/icon_near.png"><span class="lbl">近くの通知</span><div class="wd-toggle"><span class="lab off">OFF</span><span class="pill"></span></div></div></div></div>
+    <div class="sub">基準合格: icon24＋ラベル主役＋WdToggl(AA/focus済)。ラベル左・トグル右の <b>spaceBetween</b> を踏襲。</div>
+  </div>
+
+  <div class="row">
+    <div class="rl">WdUserComment</div>
+    <div class="cell"><div class="h b">Before</div>
+      <div class="old-c"><span class="av"></span><div><span class="n">SunnyVi</span> <span class="t">いいね！素敵な写真ですね。</span></div></div></div>
+    <div class="cell"><div class="h a">After</div>
+      <div class="wd-user-comment"><span class="av" style="background:#444"></span><div><div class="nm">SunnyVi</div><div class="tx">いいね！素敵な写真ですね。</div><div class="tm">2時間前</div></div></div></div>
+    <div class="sub">引き算: 名前/本文の同重さ→<b>名前=太字主役・本文=--text-2</b>、時刻を--text-3で分離。</div>
+  </div>
+</body></html>

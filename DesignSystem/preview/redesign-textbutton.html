@@ -1,0 +1,29 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(150deg,#241d3a,#0f1019); gap:16px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:center; }
+  .lab { font:700 10px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:14px; }
+  .lab.b { color:#ff8a8a; } .lab.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; align-items:center; }
+  /* BEFORE = the amateur version, inlined */
+  .old { position:relative; width:280px; height:64px; border-radius:8px; background:var(--gradient-colorful);
+    color:#fff; font:700 18px var(--font-jp); text-shadow:0 4px 16px #000; display:flex; align-items:center; justify-content:center; }
+  .old::after { content:""; position:absolute; inset:0; border-radius:8px; padding:1px; background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
+  .sub { font:500 12px var(--font-jp); color:var(--text-2); }
+  .sub b { color:#fff; font-weight:700; }
+  .why { font:400 11px var(--font-jp); color:var(--text-3); }
+</style></head>
+<body>
+  <div class="eyebrow">WdTextButton — 主役CTA</div>
+  <div class="two">
+    <div class="cell"><div class="lab b">Before</div><div class="old">このサークルを選択</div></div>
+    <div class="cell"><div class="lab a">After</div><button class="wd-text-btn">このサークルを選択</button></div>
+  </div>
+  <div class="sub">引き算: <b>文字の重いドロップ影(0 4 16)を削除</b>。グラデ＋枠＋影の3盛り → グラデ1グループに集約し、中央スクリムで白の可読性を“保証”。寸法 64→56・固定280→intrinsic+padding24(8pt)。</div>
+  <div class="why">なぜプロに見えるか: 効果を1つに絞ると安っぽさが消える。コントラストを偶然(影)でなく構造(中央スクリム)で担保し、文字の光学中心が締まる。</div>
+</body></html>

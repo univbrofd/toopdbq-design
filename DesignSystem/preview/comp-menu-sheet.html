@@ -1,0 +1,193 @@
+<!-- @dsCard group="Components" name="UniverseMenuSheet" subtitle="Self-profile menu bottomSheet · logout / delete · confirm dialogs" viewport="900x1180" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; gap:22px; padding:24px; }
+  .lede { font:500 12px/1.6 var(--font-jp); color:var(--text-2); max-width:760px; }
+  .lede b { color:#fff; font-weight:700; }
+
+  /* ---------- generic icon-as-mask (white PNG → token tint) ---------- */
+  .dic { width:28px; height:28px; flex:none; object-fit:contain; }
+
+  /* ---------- the real bottom sheet (After) ---------- */
+  .stage { position:relative; border-radius:18px; overflow:hidden;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #221d38 0%, #0c0a14 55%),
+      radial-gradient(2px 2px at 18% 30%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1.5px 1.5px at 72% 22%, rgba(255,255,255,.32), transparent),
+      radial-gradient(1.5px 1.5px at 40% 16%, rgba(255,255,255,.30), transparent),
+      radial-gradient(1.5px 1.5px at 86% 44%, rgba(255,255,255,.22), transparent),
+      radial-gradient(2px 2px at 28% 52%, rgba(255,255,255,.18), transparent);
+    display:flex; flex-direction:column; justify-content:flex-end;
+    min-height:300px; padding-top:74px; }
+  .stage .globe { position:absolute; left:50%; top:38px; width:128px; height:128px; transform:translateX(-50%);
+    border-radius:50%; background:radial-gradient(60% 60% at 38% 32%, #2c6f7a, #123 70%, #06080e);
+    box-shadow:0 0 60px rgba(0,95,103,.45), inset -14px -10px 30px rgba(0,0,0,.7); opacity:.92; }
+
+  .sheet { background:var(--surface-raised); border-radius:16px 16px 0 0;
+    box-shadow:0 -8px 24px rgba(0,0,0,.45); padding:0 20px; }
+  .grab { width:36px; height:4px; border-radius:99px; background:var(--gray-mid);
+    margin:10px auto 4px; }
+  .sheet .items { padding:4px 0; }
+
+  /* WdMenuItem — destructive variant. gradient hairline divider, IconImage 28 + gap16 */
+  .mi { display:flex; align-items:center; gap:16px; min-height:56px; position:relative; cursor:pointer; }
+  .mi + .mi::before { content:""; position:absolute; top:0; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.16) 50%, rgba(255,255,255,.04)); }
+  .mi .lbl { flex:1; font:700 16px var(--font-jp); }
+  .mi.danger .lbl { color:var(--state-error); }
+  .sheet .safe { height:24px; }
+
+  /* ---------- compare grid ---------- */
+  .cmp { display:grid; grid-template-columns:120px 1fr 1fr; gap:10px 18px; align-items:start; }
+  .ch { font:700 10px/1 var(--font-latin); letter-spacing:.13em; text-transform:uppercase; }
+  .ch.b { color:#ff8a8a; } .ch.a { color:#7ee0a0; }
+  .rl { font:700 12px var(--font-jp); color:#fff; padding-top:13px; }
+  .panel { background:rgba(255,255,255,.035); border-radius:12px; padding:6px 14px; }
+  .note { grid-column:2 / 4; font:500 11px/1.5 var(--font-jp); color:var(--text-2); margin:8px 0 4px; }
+  .note b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; font:600 10px var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:5px; padding:2px 6px; margin:0 1px; }
+
+  /* BEFORE menu — ad-hoc grays, flat #333, off-system Material icon placeholder */
+  .old .mi { gap:10px; min-height:50px; border-bottom:1px solid #333; }
+  .old .mi:last-child { border-bottom:none; }
+  .old .mi::before { display:none; }
+  .old .lbl { font:700 15px var(--font-jp); color:#ff4444; }
+  .matico { width:24px; height:24px; flex:none; border-radius:5px;
+    background:repeating-linear-gradient(45deg,#3a3a3a 0 4px,#2c2c2c 4px 8px);
+    border:1px dashed #5a5a5a; }
+
+  /* ---------- dialogs ---------- */
+  .dlgwrap { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .scrim { border-radius:14px; padding:30px 22px; display:flex; align-items:center; justify-content:center; }
+  .scrim.b { background:rgba(0,0,0,.64); }
+  .scrim.a { background:var(--scrim-strong); }
+  .dlg { width:100%; max-width:300px; border-radius:16px; padding:22px 20px 14px; }
+  .dlg.b { background:#1a1a1a; }
+  .dlg.a { background:var(--surface-raised); border:1px solid var(--border-hairline); }
+  .dlg .dt { font:700 18px var(--font-jp); color:#fff; }
+  .dlg .db { margin-top:8px; font:400 14px/1.55 var(--font-jp); }
+  .dlg.b .db { color:#999; }
+  .dlg.a .db { color:var(--text-2); }
+  .dlg .acts { display:flex; justify-content:flex-end; gap:6px; margin-top:18px; }
+  .dlg .btn { font:700 14px var(--font-jp); padding:9px 14px; border-radius:10px; cursor:pointer; }
+  .dlg .btn.cancel { color:var(--text-2); }
+  .dlg.a .btn.cancel:hover { background:rgba(255,255,255,.06); }
+  .dlg.b .btn.danger { color:#ff4444; }
+  .dlg.a .btn.danger { color:var(--state-error); }
+  .dlg.a .btn.danger:hover { background:rgba(255,107,107,.12); }
+</style></head>
+<body>
+  <div class="eyebrow">UniverseMenuSheet — 自分のプロフィール時に右上 menu から開く bottomSheet</div>
+  <div class="lede">破壊的アクション専用のサイドメニュー。<b>ログアウト</b>と<b>アカウント削除</b>の2項目のみ。上部のみ <b>r16</b>、上端に <b>36×4</b> のグラブハンドル、下端は <b>SafeArea</b> 余白。各項目は確認ダイアログを開く。実装の逸脱（Material アイコン直書き・場当たりグレー）を役割トークンと <span class="tok">WdMenuItem</span> へ是正。</div>
+
+  <!-- ============ HERO: the corrected sheet ============ -->
+  <div class="cmp" style="grid-template-columns:120px 1fr;">
+    <div class="rl" style="padding-top:0;">完成形</div>
+    <div>
+      <div class="ch a" style="margin-bottom:8px;">After — 仕様準拠</div>
+      <div class="stage">
+        <div class="globe"></div>
+        <div class="sheet" style="max-width:380px; margin:0 auto;">
+          <div class="grab"></div>
+          <div class="items">
+            <div class="mi danger">
+              <img class="dic" src="../assets/icons/icon_leave.png" alt="">
+              <span class="lbl">ログアウト</span>
+            </div>
+            <div class="mi danger">
+              <img class="dic" src="../assets/icons/icon_delete.png" alt="">
+              <span class="lbl">アカウントを削除</span>
+            </div>
+          </div>
+          <div class="safe"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DEVIATIONS: Before / After ============ -->
+  <div class="cmp">
+    <div></div><div class="ch b">Before — 実装</div><div class="ch a">After — システム</div>
+
+    <div class="rl">アイコン</div>
+    <div class="panel old">
+      <div class="mi"><span class="matico"></span><span class="lbl">ログアウト</span></div>
+      <div class="mi"><span class="matico"></span><span class="lbl">アカウントを削除</span></div>
+    </div>
+    <div class="panel">
+      <div class="mi danger"><img class="dic" src="../assets/icons/icon_leave.png" alt=""><span class="lbl">ログアウト</span></div>
+      <div class="mi danger"><img class="dic" src="../assets/icons/icon_delete.png" alt=""><span class="lbl">アカウントを削除</span></div>
+    </div>
+    <div class="note">Material 直書き <span class="tok">Icons.logout</span> <span class="tok">Icons.delete_forever</span> → 白 PNG の <b>IconImage</b>（<span class="tok">leave</span> / <span class="tok">delete</span> variant）。アイコンは<b>白を厳守</b>（README のアイコン規則）、破壊シグナルは<b>ラベル色</b>が担う。区切りもフラット <span class="tok">#333</span> → グラデ・ヘアラインへ統一。</div>
+
+    <div class="rl">カラー</div>
+    <div class="cell" style="padding-top:4px;">
+      <div class="row" style="gap:8px;">
+        <span class="chipx" style="background:#1a1a1a"></span><span class="hx">#1A1A1A</span>
+        <span class="chipx" style="background:#666"></span><span class="hx">#666</span>
+        <span class="chipx" style="background:#ff4444"></span><span class="hx">#FF4444</span>
+      </div>
+    </div>
+    <div class="cell" style="padding-top:4px;">
+      <div class="row" style="gap:8px;">
+        <span class="chipx" style="background:var(--surface-raised)"></span><span class="hx">--surface-raised</span>
+        <span class="chipx" style="background:var(--gray-mid)"></span><span class="hx">--gray-mid</span>
+        <span class="chipx" style="background:var(--state-error)"></span><span class="hx">--state-error</span>
+      </div>
+    </div>
+    <div class="note">場当たりのグレーを役割トークンへ: シート地 <span class="tok">--surface-raised #16131f</span>・グラブ <span class="tok">--gray-mid #808080</span>・破壊項目 <span class="tok">--state-error #FF6B6B</span>・モーダル背景 <span class="tok">--scrim-strong .80</span>。</div>
+  </div>
+
+  <!-- ============ CONFIRM DIALOGS ============ -->
+  <div class="eyebrow" style="margin-top:4px;">確認ダイアログ — タップで遷移（同トーン）</div>
+  <div class="dlgwrap">
+    <div>
+      <div class="ch b" style="margin-bottom:8px;">Before — #1A1A1A / 本文 #999 / #FF4444</div>
+      <div class="scrim b">
+        <div class="dlg b">
+          <div class="dt">ログアウト</div>
+          <div class="db">またいつでも戻ってこられます。ログアウトしますか？</div>
+          <div class="acts"><span class="btn cancel">キャンセル</span><span class="btn danger">ログアウト</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="ch a" style="margin-bottom:8px;">After — トークン化 / --text-2 / --state-error</div>
+      <div class="scrim a">
+        <div class="dlg a">
+          <div class="dt">ログアウト</div>
+          <div class="db">またいつでも戻ってこられます。ログアウトしますか？</div>
+          <div class="acts"><span class="btn cancel">キャンセル</span><span class="btn danger">ログアウト</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="scrim b">
+        <div class="dlg b">
+          <div class="dt">アカウントを削除</div>
+          <div class="db">この操作は取り消せません。投稿とサークルがすべて削除されます。</div>
+          <div class="acts"><span class="btn cancel">キャンセル</span><span class="btn danger">削除</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="scrim a">
+        <div class="dlg a">
+          <div class="dt">アカウントを削除</div>
+          <div class="db">この操作は取り消せません。投稿とサークルがすべて削除されます。</div>
+          <div class="acts"><span class="btn cancel">キャンセル</span><span class="btn danger">削除</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .chipx { width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.12); flex:none; }
+    .hx { font:600 10px var(--font-latin); color:var(--text-2); }
+  </style>
+</body></html>

@@ -1,0 +1,28 @@
+<!-- @dsCard group="Colors" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  .gb { height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:12px; }
+  .label { font-size:11px;color:var(--fg-2);margin-top:7px; }
+  .borderbox { height:60px;border-radius:10px;padding:1.5px;background:var(--gradient-border); }
+  .borderbox > div { width:100%;height:100%;border-radius:9px;background:#16131f;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--fg-2);}
+</style></head>
+<body>
+  <div class="eyebrow">Edge &amp; auth gradients</div>
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr;">
+    <div>
+      <div class="borderbox"><div>1px hairline</div></div>
+      <div class="label">Glass-edge border · #211C1C → white 64%</div>
+    </div>
+    <div>
+      <div class="gb" style="background:var(--gradient-auth);color:#1a1a1a;">Google border</div>
+      <div class="label">#FF5286 · #FAFF9B · #00FFAE · #8D30FF</div>
+    </div>
+    <div>
+      <div class="gb" style="background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0));color:#fff;border:1px solid rgba(255,255,255,.1);">Protection veil</div>
+      <div class="label">black 50% → transparent (behind headers)</div>
+    </div>
+  </div>
+</body></html>

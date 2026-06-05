@@ -1,0 +1,11 @@
+/* ============================================================================
+   TOOPDBQ DESIGN SYSTEM — root stylesheet
+   Single entry point for consumers. Link THIS file; it pulls in the rest.
+   ----------------------------------------------------------------------------
+     @import 'colors_and_type.css'  → all color/spacing/radius/shadow/font
+                                       tokens + semantic type classes (.t-*)
+   Component cosmetics live in preview/components.css (glass / gradient / pill
+   idioms recreated as .wd-* classes) — import it too when you want the
+   ready-made component styles:  @import 'preview/components.css';
+   ============================================================================ */
+@import 'colors_and_type.css';

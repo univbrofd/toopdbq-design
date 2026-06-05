@@ -1,0 +1,26 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(120deg,#26203a,#0f1019); padding:0; gap:0; }
+  .frame { position:relative; padding:18px 14px 26px; background:
+    linear-gradient(180deg, rgba(0,0,0,.5) 4%, rgba(0,0,0,0) 100%); }
+  .prog { display:flex; gap:4px; margin-bottom:14px; }
+  .prog span { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.30); }
+  .prog span.on { background:rgba(255,255,255,.56); }
+  .hdr { display:flex; align-items:center; justify-content:space-between; }
+  .cap { position:absolute; bottom:6px; left:14px; font-size:10px; color:var(--fg-3); }
+</style></head>
+<body>
+  <div class="frame">
+    <div class="prog"><span class="on"></span><span class="on"></span><span></span><span></span></div>
+    <div class="hdr">
+      <div class="wd-icon-btn simple"><img src="../assets/icons/icon_back.png"></div>
+      <span class="t-nav-title" style="font-size:18px;">渋谷コミュニティ</span>
+      <div class="wd-icon-btn simple"><img src="../assets/icons/icon_close.png"></div>
+    </div>
+    <span class="cap">WdNavigationHeader + WdStoryHeader progress (segmented by post count)</span>
+  </div>
+</body></html>

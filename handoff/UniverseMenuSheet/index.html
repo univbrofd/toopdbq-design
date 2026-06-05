@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../DesignSystem/colors_and_type.css">
+<title>design vs flutter</title>
+<style>
+  html,body{margin:0;background:#0d0d0f;color:#fff;font-family:var(--font-jp);}
+  h1{font:700 18px var(--font-jp);padding:20px 24px 4px;}
+  .sub{color:var(--text-2);font:500 12px var(--font-jp);padding:0 24px 12px;}
+  .row{display:flex;gap:20px;padding:16px 24px;align-items:flex-start;border-top:1px solid rgba(255,255,255,.07);}
+  .name{width:150px;flex:none;font:700 14px var(--font-jp);padding-top:26px;}
+  .col{display:flex;flex-direction:column;gap:8px;}
+  .cap{font:700 11px var(--font-latin);letter-spacing:.12em;text-transform:uppercase;}
+  .cap.d{color:#7ee0a0;} .cap.f{color:#7aa7ff;}
+  .frame{width:390px;height:780px;border:1px solid rgba(255,255,255,.10);border-radius:14px;overflow:hidden;background:#000;}
+  iframe{width:390px;height:780px;border:0;display:block;}
+  img{width:390px;height:780px;object-fit:contain;display:block;background:#000;}
+  .ph{display:flex;align-items:center;justify-content:center;height:780px;color:var(--text-2);font:600 13px var(--font-jp);text-align:center;padding:0 20px;}
+</style></head>
+<body>
+  <h1>design vs flutter — 再現度ビューア</h1>
+  <div class="sub">左 = Claude Design / 右 = Flutter スクショ。Flutter 側が空のものは <code>./capture.sh {Name}</code> → <code>./build.sh</code> で埋まる。</div>
+  <div id="rows"></div>
+  <script>
+    // pairs.json: [{name, clean, flutter}]
+    fetch('pairs.json').then(r=>r.json()).then(pairs=>{
+      const root=document.getElementById('rows');
+      for(const p of pairs){
+        const row=document.createElement('div'); row.className='row';
+        row.innerHTML=`
+          <div class="name">${p.name}</div>
+          <div class="col"><div class="cap d">Design</div>
+            <div class="frame"><iframe src="${p.clean}"></iframe></div></div>
+          <div class="col"><div class="cap f">Flutter</div>
+            <div class="frame"><img src="${p.flutter}" onerror="this.outerHTML='&lt;div class=ph&gt;撮影待ち&lt;br&gt;./capture.sh ${p.name}&lt;/div&gt;'"></div></div>`;
+        root.appendChild(row);
+      }
+    });
+  </script>
+</body></html>

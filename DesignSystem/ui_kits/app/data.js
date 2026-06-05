@@ -1,0 +1,58 @@
+/* Sample content — lifted from lib/component/constants/Sample*Data.dart.
+   Only midjourney.com CDN images are used (verified to load); each photo also
+   sits on a gradient fallback so the kit never shows a broken image. */
+(function () {
+  const IMG = {
+    a: 'https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png',
+    b: 'https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png',
+    c: 'https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png',
+    d: 'https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png',
+  };
+  const AV = {
+    sunny: 'https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png',
+    pixel: 'https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png',
+    star:  'https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png',
+  };
+
+  window.ICONS = '../../assets/icons/';
+  window.IMG = IMG;
+  window.AV = AV;
+
+  // Three location circles; each holds a vertical stack of users' stories.
+  window.TOOPDATA = [
+    {
+      id: 'circle1', name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ',
+      cover: IMG.a, members: 128, distance: '10.0', unit: 'm', online: true,
+      pin: { x: 41, y: 47, role: 'main' },
+      stories: [
+        { id: 's1', user: 'SunnyVi', avatar: AV.sunny, image: IMG.a, time: '2時間前', likes: 24, comments: 2, segments: 3 },
+        { id: 's2', user: 'Kawaii', avatar: AV.pixel, image: IMG.b, time: '4時間前', likes: 58, comments: 7, segments: 2 },
+      ],
+    },
+    {
+      id: 'circle2', name: '新宿グループ', desc: '新宿エリアの交流グループ',
+      cover: IMG.b, members: 86, distance: '1.2', unit: 'km', online: true,
+      pin: { x: 63, y: 33, role: 'sub' },
+      stories: [
+        { id: 's3', user: 'Dreamy', avatar: AV.star, image: IMG.c, time: '1時間前', likes: 41, comments: 4, segments: 2 },
+        { id: 's4', user: 'foodie', avatar: AV.sunny, image: IMG.d, time: '3時間前', likes: 12, comments: 1, segments: 4 },
+      ],
+    },
+    {
+      id: 'circle3', name: '原宿コミュニティ', desc: '原宿・表参道周辺のコミュニティ',
+      cover: IMG.c, members: 203, distance: '5.4', unit: 'km', online: false,
+      pin: { x: 30, y: 64, role: 'sub' },
+      stories: [
+        { id: 's5', user: 'Pixel', avatar: AV.pixel, image: IMG.b, time: '30分前', likes: 76, comments: 9, segments: 3 },
+        { id: 's6', user: 'Starry', avatar: AV.star, image: IMG.a, time: '5時間前', likes: 33, comments: 3, segments: 1 },
+      ],
+    },
+  ];
+
+  // extra floating pins (no story) to populate the globe
+  window.EXTRA_PINS = [
+    { x: 52, y: 22, avatar: AV.star }, { x: 73, y: 58, avatar: AV.pixel },
+    { x: 20, y: 35, avatar: AV.sunny }, { x: 48, y: 72, avatar: AV.pixel },
+    { x: 80, y: 41, avatar: AV.sunny },
+  ];
+})();

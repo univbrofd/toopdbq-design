@@ -1,0 +1,42 @@
+<!-- @dsCard group="Components" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0f1019; gap:14px; }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:20px; justify-items:center; }
+  .lab { font:700 10px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; margin-bottom:12px; }
+  .lab.b { color:#ff8a8a; } .lab.a { color:#7ee0a0; }
+  .cell { display:flex; flex-direction:column; align-items:center; }
+  /* BEFORE amateur card */
+  .old { position:relative; width:210px; height:210px; border-radius:16px; overflow:hidden; }
+  .old img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .old .ov { position:absolute; inset:0; background:linear-gradient(180deg, transparent, rgba(0,0,0,.75)); }
+  .old .bd { position:absolute; left:16px; right:16px; bottom:16px; }
+  .old .t { font:700 24px var(--font-latin); color:#fff; text-shadow:0 0 8px #000; }
+  .old .d { margin-top:8px; font:400 12px var(--font-latin); color:#fff; }
+  .sub { font:500 12px var(--font-jp); color:var(--text-2); }
+  .sub b { color:#fff; font-weight:700; }
+  .why { font:400 11px var(--font-jp); color:var(--text-3); }
+</style></head>
+<body>
+  <div class="eyebrow">WdCircleCard — サークルカード</div>
+  <div class="two">
+    <div class="cell"><div class="lab b">Before</div>
+      <div class="old"><img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png">
+        <div class="ov"></div>
+        <div class="bd"><div class="t">渋谷コミュニティ</div>
+          <div class="d">渋谷駅周辺のコミュニティです。気軽に写真を共有して、近くの人とつながりましょう。</div></div></div>
+    </div>
+    <div class="cell"><div class="lab a">After</div>
+      <div class="wd-circle-card" style="width:210px;"><img class="bg" src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png">
+        <div class="scrim"></div>
+        <div class="body"><div class="ttl">渋谷コミュニティ</div>
+          <div class="meta">●●● ＋128人　·　10.0m</div>
+          <div class="desc">渋谷駅周辺のコミュニティ</div></div></div>
+    </div>
+  </div>
+  <div class="sub">引き算: <b>タイトルのグロー影を削除</b>(スクリムと二重)。説明 3行→1行で <b>--text-3</b> へ降格。内側余白を 16→20px に統一、タイトルを Noto に。</div>
+  <div class="why">なぜプロに見えるか: 主役(タイトル)が1つに定まり、メタ/説明が脇役の階層へ。効果はスクリム1枚だけ＝情報が読みやすく、写真が主役のまま。</div>
+</body></html>
