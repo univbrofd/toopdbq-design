@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body{ background:radial-gradient(130% 90% at 50% -10%, #14131b, #0a0a0d 60%, #07070a);
+    padding:28px 30px 40px; gap:22px; }
+
+  .head{ display:flex; flex-direction:column; gap:9px; max-width:980px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:700 22px/1.2 var(--font-jp); color:#fff; }
+  .h1 .en{ font:400 13px var(--font-display); color:var(--grad-golden); }
+  .lede{ font:500 12.5px/1.85 var(--font-jp); color:var(--text-2); max-width:980px; }
+  .lede b{ color:#fff; font-weight:700; }
+  .tok{ display:inline-block; font:600 10.5px/1.4 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10); border-radius:5px; padding:1px 6px; }
+  .goal{ display:flex; gap:10px; flex-wrap:wrap; margin-top:2px; }
+  .goal .g{ display:flex; gap:8px; align-items:flex-start; max-width:312px;
+    background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09); border-radius:10px; padding:9px 12px; }
+  .goal .g .n{ font:700 11px/1.3 var(--font-latin); color:var(--grad-golden); flex:none; }
+  .goal .g .t{ font:500 11px/1.55 var(--font-jp); color:var(--text-2); }
+  .goal .g .t b{ color:#fff; font-weight:700; }
+
+  .grid{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:18px; max-width:980px; }
+  @media (max-width:880px){ .grid{ grid-template-columns:1fr; } }
+  .opt{ border:1px solid rgba(255,255,255,.10); border-radius:16px; overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012)); }
+
+  /* ---------- tilted dark map stage ---------- */
+  .stage{ position:relative; height:286px; overflow:hidden; background:#0a0b10; perspective:720px; }
+  .map{ position:absolute; left:-40%; right:-40%; top:8%; bottom:-46%;
+    transform:rotateX(62deg); transform-origin:50% 42%;
+    background:
+      linear-gradient(0deg, #14161e 0%, #0e0f16 100%);
+  }
+  .map .streets{ position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 46px, rgba(255,255,255,.045) 46px 47px),
+      repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,255,255,.045) 46px 47px); }
+  .map .road-h{ position:absolute; left:0; right:0; top:46%; height:9px; background:rgba(255,255,255,.07); }
+  .map .road-v{ position:absolute; top:0; bottom:0; left:38%; width:9px; background:rgba(255,255,255,.07); }
+  .map .road-d{ position:absolute; left:-10%; right:-10%; top:64%; height:7px; transform:rotate(-22deg);
+    background:rgba(255,255,255,.05); }
+  .map .park{ position:absolute; left:54%; top:18%; width:130px; height:120px; border-radius:16px;
+    background:rgba(96,140,96,.14); }
+  .map .water{ position:absolute; left:8%; top:60%; width:150px; height:120px; border-radius:30px 50px 24px 40px;
+    background:rgba(70,96,140,.16); }
+  /* horizon fade + vignette so the map recedes into space */
+  .stage .fade{ position:absolute; inset:0; pointer-events:none;
+    background:
+      linear-gradient(180deg, #0a0b10 0%, rgba(10,11,16,0) 30%, rgba(10,11,16,0) 70%, rgba(10,11,16,.5) 100%),
+      radial-gradient(120% 80% at 50% 30%, transparent 40%, rgba(0,0,0,.55) 100%); }
+  .stage .tag{ position:absolute; left:12px; top:11px; z-index:9;
+    font:600 8.5px/1 var(--font-latin); letter-spacing:.12em; color:var(--text-3); }
+
+  /* ---------- shared 3D object (naked lit form, #9E9E9E base) ---------- */
+  .unit{ position:absolute; left:50%; bottom:104px; width:0; z-index:6; }
+  .unit > *{ position:absolute; left:50%; transform:translateX(-50%); }
+  .obj3d{ width:60px; height:74px; filter:drop-shadow(0 12px 11px rgba(0,0,0,.5)); }
+  .obj3d::before{ content:""; position:absolute; inset:0;
+    border-radius:50% 50% 47% 47% / 60% 60% 40% 40%;
+    background:
+      radial-gradient(56% 38% at 36% 22%, rgba(255,255,255,.82), rgba(255,255,255,0) 58%),
+      radial-gradient(70% 60% at 70% 92%, rgba(0,0,0,.5), rgba(0,0,0,0) 60%),
+      linear-gradient(150deg, #cdc8c1 0%, #9e9e9e 46%, #6c6b69 100%); }
+  .obj3d .t3d{ position:absolute; right:-3px; bottom:4px; transform:none;
+    font:700 6.5px/1 var(--font-latin); letter-spacing:.12em; color:#fff;
+    background:rgba(0,0,0,.5); border-radius:3px; padding:1px 3px; }
+
+  /* ===================================================================
+     01 — BEACON: ground glow-ring + rising light column
+     =================================================================== */
+  .b-ring{ bottom:-7px; width:74px; height:23px; border-radius:50%;
+    border:1.5px solid rgba(255,255,255,.85);
+    box-shadow:0 0 14px 2px rgba(255,255,255,.35), inset 0 0 10px rgba(255,255,255,.25); }
+  .b-ring::after{ content:""; position:absolute; inset:0; border-radius:50%;
+    background:radial-gradient(60% 120% at 50% 40%, rgba(255,255,255,.28), transparent 70%); }
+  .b-col{ bottom:4px; width:38px; height:78px;
+    clip-path:polygon(34% 100%, 66% 100%, 80% 0, 20% 0);
+    background:linear-gradient(0deg, rgba(255,255,255,.30), rgba(255,255,255,.04) 70%, transparent);
+    filter:blur(.5px); }
+  .b-obj{ bottom:74px; }
+
+  /* ===================================================================
+     02 — HOVER STAGE: glass disc platform + fading tether to ground dot
+     =================================================================== */
+  .h-dot{ bottom:-3px; width:18px; height:7px; border-radius:50%;
+    background:rgba(255,255,255,.9); box-shadow:0 0 8px rgba(255,255,255,.4); }
+  .h-dot::after{ content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:34px; height:13px; border-radius:50%; border:1px solid rgba(255,255,255,.35); }
+  .h-tether{ bottom:4px; width:2px; height:46px;
+    background:linear-gradient(0deg, rgba(255,255,255,.15), rgba(255,255,255,.7)); border-radius:2px; }
+  .h-disc{ bottom:48px; width:62px; height:19px; border-radius:50%;
+    background:radial-gradient(75% 130% at 50% 0%, rgba(255,255,255,.22), rgba(255,255,255,.05) 60%, rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.40);
+    box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.55); }
+  .h-disc::before{ content:""; position:absolute; left:50%; top:18%; transform:translateX(-50%);
+    width:60%; height:55%; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(0,0,0,.5), transparent 75%); filter:blur(1.5px); }
+  .h-obj{ bottom:58px; }
+
+  /* ===================================================================
+     03 — LIGHT CONE: translucent funnel converging to the ground point
+     =================================================================== */
+  .c-point{ bottom:-4px; width:10px; height:10px; border-radius:50%;
+    background:#fff; box-shadow:0 0 12px 3px rgba(255,255,255,.55); }
+  .c-cone{ bottom:0; width:66px; height:84px;
+    clip-path:polygon(50% 100%, 100% 0, 0 0);
+    background:linear-gradient(0deg, rgba(255,255,255,.05), rgba(194,147,95,.16) 55%, rgba(255,255,255,.20));
+    filter:blur(1.2px); opacity:.9; }
+  .c-halo{ bottom:74px; width:54px; height:18px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(255,255,255,.4), transparent 72%); filter:blur(1px); }
+  .c-obj{ bottom:78px; }
+
+  /* ===================================================================
+     04 — FLOAT PIN: modern ground marker + dotted riser + drop shadow
+     =================================================================== */
+  .p-pin{ bottom:0; width:26px; height:34px; }
+  .p-pin .head{ position:absolute; left:50%; top:0; transform:translateX(-50%);
+    width:26px; height:26px; border-radius:50% 50% 50% 50%;
+    background:var(--gradient-colorful);
+    box-shadow:0 4px 10px rgba(0,0,0,.55), inset 0 1px 1px rgba(255,255,255,.5); }
+  .p-pin .head::after{ content:""; position:absolute; left:50%; top:54%; transform:translate(-50%,-50%);
+    width:9px; height:9px; border-radius:50%; background:rgba(0,0,0,.55); }
+  .p-pin .tip{ position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+    width:12px; height:14px; clip-path:polygon(50% 100%, 100% 0, 0 0); background:var(--grad-golden); }
+  .p-pin .grd{ position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+    width:30px; height:10px; border-radius:50%; background:rgba(0,0,0,.45); filter:blur(2px); }
+  .p-riser{ bottom:34px; width:2px; height:40px; transform:translateX(-50%);
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,.75) 0 3px, transparent 3px 7px); }
+  .p-shadow{ bottom:30px; width:42px; height:12px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(0,0,0,.5), transparent 72%); filter:blur(1.5px); }
+  .p-obj{ bottom:74px; }
+
+  /* ===================================================================
+     05 — SHADOW ANCHOR: poleless float, soft cast shadow + exact dot
+     =================================================================== */
+  .s-shadow{ bottom:2px; width:56px; height:18px; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(0,0,0,.6), rgba(0,0,0,.18) 60%, transparent 78%); filter:blur(2px); }
+  .s-dot{ bottom:8px; width:7px; height:7px; border-radius:50%;
+    background:#fff; box-shadow:0 0 9px 2px rgba(255,255,255,.5); }
+  .s-ring{ bottom:3px; width:30px; height:11px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.30); }
+  .s-obj{ bottom:62px; }
+  @keyframes bob{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-5px); } }
+  @media (prefers-reduced-motion: no-preference){
+    .s-obj{ animation:bob 4s var(--ease-standard) infinite; }
+  }
+
+  /* ---------- meta under each option ---------- */
+  .meta{ padding:13px 16px 15px; border-top:1px solid rgba(255,255,255,.07); display:flex; gap:11px; }
+  .meta .onum{ font:700 13px/1 var(--font-latin); color:var(--grad-golden); flex:none; padding-top:1px; }
+  .meta .mc{ display:flex; flex-direction:column; gap:3px; }
+  .meta .oname{ font:700 13px/1.3 var(--font-jp); color:#fff; }
+  .meta .odesc{ font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .meta .odesc b{ color:#fff; font-weight:700; }
+  .meta .ground{ font:600 10px/1.5 var(--font-latin); color:#7ee0a0; margin-top:2px; }
+
+  .foot{ max-width:980px; font:500 11.5px/1.75 var(--font-jp); color:var(--text-3); }
+  .foot b{ color:#fff; font-weight:700; }
+</style></head>
+<body>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">浮遊 3D アンカー — デザイン探索</span>
+      <span class="en">ThreeDTerrestrialView · main / sub</span>
+    </div>
+    <div class="lede">
+      角度をつけたマップ上に 3D オブジェクトを<b>立体表示</b>する時のアンカー。地表に直置きすると<b>マップの視認性</b>が落ちるので<b>浮かせたい</b>。ただ浮かせると違和感が出るため、<b>「この地点にある」と一目で分かる</b>接地表現を探る。<b>main は</b>セグメント／他ユーザーアイコン／サムネを<b>出さない</b>方針。下記 5 方向。
+    </div>
+    <div class="goal">
+      <div class="g"><span class="n">A</span><span class="t"><b>浮遊感</b>：地表から離して立体を主役に</span></div>
+      <div class="g"><span class="n">B</span><span class="t"><b>接地の明示</b>：地点が曖昧にならない</span></div>
+      <div class="g"><span class="n">C</span><span class="t"><b>非干渉</b>：マップの読みを邪魔しない</span></div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 01 BEACON -->
+    <div class="opt">
+      <div class="stage">
+        <div class="map"><div class="streets"></div><div class="road-h"></div><div class="road-v"></div><div class="road-d"></div><div class="park"></div><div class="water"></div></div>
+        <div class="fade"></div><div class="tag">TILTED MAP · pitch ~55°</div>
+        <div class="unit">
+          <div class="b-ring"></div>
+          <div class="b-col"></div>
+          <div class="obj3d b-obj"><span class="t3d">3D</span></div>
+        </div>
+      </div>
+      <div class="meta"><div class="onum">01</div><div class="mc">
+        <div class="oname">ビーコン（接地リング＋光の柱）</div>
+        <div class="odesc">地表に<b>発光リング</b>で地点を打ち、細く立ち上がる<b>光の柱</b>で浮いた3Dへ繋ぐ。最も浮遊感が高く、active 時はリングをカラフルに。</div>
+        <div class="ground">接地 = 発光リング / 柱長 = ポール長に連動</div>
+      </div></div>
+    </div>
+
+    <!-- 02 HOVER STAGE -->
+    <div class="opt">
+      <div class="stage">
+        <div class="map"><div class="streets"></div><div class="road-h"></div><div class="road-v"></div><div class="road-d"></div><div class="park"></div><div class="water"></div></div>
+        <div class="fade"></div><div class="tag">TILTED MAP · pitch ~55°</div>
+        <div class="unit">
+          <div class="h-dot"></div>
+          <div class="h-tether"></div>
+          <div class="h-disc"></div>
+          <div class="obj3d h-obj"><span class="t3d">3D</span></div>
+        </div>
+      </div>
+      <div class="meta"><div class="onum">02</div><div class="mc">
+        <div class="oname">ホバーステージ（ガラス円盤＋テザー）</div>
+        <div class="odesc">3Dを<b>透明ガラスの円盤</b>に乗せ、<b>細いテザー</b>で接地ドットへ降ろす。円盤＝置き場、ドット＝地点。<b>円盤型の正常進化</b>。</div>
+        <div class="ground">接地 = ドット＋リング / テザー長 = ポール長</div>
+      </div></div>
+    </div>
+
+    <!-- 03 LIGHT CONE -->
+    <div class="opt">
+      <div class="stage">
+        <div class="map"><div class="streets"></div><div class="road-h"></div><div class="road-v"></div><div class="road-d"></div><div class="park"></div><div class="water"></div></div>
+        <div class="fade"></div><div class="tag">TILTED MAP · pitch ~55°</div>
+        <div class="unit">
+          <div class="c-point"></div>
+          <div class="c-cone"></div>
+          <div class="c-halo"></div>
+          <div class="obj3d c-obj"><span class="t3d">3D</span></div>
+        </div>
+      </div>
+      <div class="meta"><div class="onum">03</div><div class="mc">
+        <div class="oname">ライトコーン（光の逆円錐）</div>
+        <div class="odesc">地点の一点へ<b>収束する光の逆円錐</b>。クレイの円錐ではなく<b>光</b>で表現するので軽く、浮遊と接地を同時に示す。<b>円錐型の正常進化</b>。</div>
+        <div class="ground">接地 = 収束点 / 円錐高 = ポール長</div>
+      </div></div>
+    </div>
+
+    <!-- 04 FLOAT PIN -->
+    <div class="opt">
+      <div class="stage">
+        <div class="map"><div class="streets"></div><div class="road-h"></div><div class="road-v"></div><div class="road-d"></div><div class="park"></div><div class="water"></div></div>
+        <div class="fade"></div><div class="tag">TILTED MAP · pitch ~55°</div>
+        <div class="unit">
+          <div class="p-pin"><div class="grd"></div><div class="head"></div><div class="tip"></div></div>
+          <div class="p-shadow"></div>
+          <div class="p-riser"></div>
+          <div class="obj3d p-obj"><span class="t3d">3D</span></div>
+        </div>
+      </div>
+      <div class="meta"><div class="onum">04</div><div class="mc">
+        <div class="oname">フロートピン（地点マーカー＋点線）</div>
+        <div class="odesc">マップ慣れした<b>ピン</b>を地点に置き、<b>点線ライザー</b>と<b>落ち影</b>で上の3Dに繋ぐ。地点の意味が最も明確。ピンは active でカラフル。</div>
+        <div class="ground">接地 = ピン / 点線長 = ポール長</div>
+      </div></div>
+    </div>
+
+    <!-- 05 SHADOW ANCHOR -->
+    <div class="opt">
+      <div class="stage">
+        <div class="map"><div class="streets"></div><div class="road-h"></div><div class="road-v"></div><div class="road-d"></div><div class="park"></div><div class="water"></div></div>
+        <div class="fade"></div><div class="tag">TILTED MAP · pitch ~55°</div>
+        <div class="unit">
+          <div class="s-shadow"></div>
+          <div class="s-ring"></div>
+          <div class="s-dot"></div>
+          <div class="obj3d s-obj"><span class="t3d">3D</span></div>
+        </div>
+      </div>
+      <div class="meta"><div class="onum">05</div><div class="mc">
+        <div class="oname">シャドウアンカー（棒なし・落ち影）</div>
+        <div class="odesc">棒で繋がず、<b>真下の落ち影</b>と<b>中心ドット</b>だけで地点を示す。最小・最も上品。浮遊高で影の大小が決まる（軽くゆれる）。</div>
+        <div class="ground">接地 = 影＋ドット / 影サイズ = 浮遊高</div>
+      </div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    どの方向を進めますか？（複数の合わせ技も可：例「<b>02 円盤</b>＋<b>05 落ち影</b>」など）。決まれば、<b>ポール長（上サブ ×3.63 / 下サブ ×⅓）・配置（NW/NE/SW/SE）・pitch 55°</b> の A群ロジックはそのままに、選んだ方向で <span class="tok">comp-terrestrial-3d</span> / <span class="tok">scene</span> を作り直します。3D 本体はロード基底色 <span class="tok">#9E9E9E</span> の枠なし表現のまま。
+  </div>
+
+</body></html>

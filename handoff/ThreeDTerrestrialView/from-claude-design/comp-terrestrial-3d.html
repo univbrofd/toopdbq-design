@@ -1,15 +1,13 @@
-<!-- @dsCard group="Components" name="ThreeDTerrestrialView — タイプ別" subtitle="default=小サムネのみ / main=3D+サムネ(最大) / sub=3Dのみ(小)。逆三角形・白棒アンカーとポール長を注釈" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="ThreeDTerrestrialView — タイプ別" subtitle="ステージビーコン: 接地点+光の柱+ホバーステージに裸3Dが浮く。default=写真サムネ / main=裸3D(装飾なし) / sub=裸3D(小)" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="../colors_and_type.css">
 <link rel="stylesheet" href="card.css">
 <style>
   body{
-    background:
-      radial-gradient(120% 90% at 50% -10%, #14131b 0%, #0a0a0d 55%, #07070a 100%);
+    background:radial-gradient(120% 90% at 50% -10%, #14131b 0%, #0a0a0d 55%, #07070a 100%);
     padding:26px 28px 34px; gap:20px;
   }
-  /* faint starfield to set the Universe context */
   body::before{
     content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
     background-image:
@@ -52,76 +50,64 @@
   .typecard.is-main .cap .role{ background:var(--gradient-colorful); color:#fff;
     text-shadow:0 1px 2px rgba(0,0,0,.45); }
 
-  /* stage where the object stands on its anchor over the map surface */
-  .stage{ position:relative; height:330px;
+  /* stage = a slice of the angled map */
+  .stage{ position:relative; height:336px; overflow:hidden;
     background:
-      linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.28) 100%),
-      radial-gradient(140% 80% at 50% 118%, #2a2734 0%, #131119 46%, transparent 70%);
-    overflow:hidden; }
-  /* the "ground" / map surface line where anchors touch */
-  .ground{ position:absolute; left:0; right:0; bottom:54px; height:1px;
-    background:linear-gradient(90deg, transparent, rgba(255,255,255,.16) 22%, rgba(255,255,255,.16) 78%, transparent); }
-  .ground::after{ content:"地表 (map surface)"; position:absolute; right:14px; top:6px;
+      linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.30) 100%),
+      radial-gradient(150% 90% at 50% 122%, #23222e 0%, #131119 48%, transparent 72%); }
+  /* faint angled map grid receding upward */
+  .stage .mapgrid{ position:absolute; left:-30%; right:-30%; bottom:-30%; top:34%;
+    transform:rotateX(64deg); transform-origin:50% 100%;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 40px, rgba(255,255,255,.05) 40px 41px),
+      repeating-linear-gradient(90deg, transparent 0 40px, rgba(255,255,255,.05) 40px 41px);
+    -webkit-mask:linear-gradient(0deg, #000 30%, transparent 92%);
+            mask:linear-gradient(0deg, #000 30%, transparent 92%); }
+  .ground::after{ content:"地表 (map surface)"; position:absolute; right:14px; bottom:44px;
     font:600 8.5px/1 var(--font-latin); letter-spacing:.08em; color:var(--text-3); }
 
-  /* ---- a pin = object floating on a pole stuck into the ground ---- */
-  .pin{ position:absolute; bottom:54px; display:flex; flex-direction:column; align-items:center; }
-  .pin .obj-wrap{ position:relative; }
+  /* ===== STAGE BEACON anchor system ===== */
+  .beacon{ position:absolute; bottom:56px; width:0; }
+  .beacon > *{ position:absolute; left:50%; transform:translateX(-50%); }
+  /* ground POINT — the single map location the light column rises from */
+  .point{ width:var(--pw); height:var(--pw); border-radius:50%; background:#fff;
+    box-shadow:0 0 11px 3px rgba(255,255,255,.5); }
+  .point.active{ background:#fff;
+    box-shadow:0 0 16px 4px rgba(255,62,136,.55), 0 0 10px 1px rgba(208,160,82,.6); }
+  /* rising light column — its height encodes the pole length */
+  /* light column rises FROM the point, flaring up to support the hover stage */
+  .column{ width:var(--cw); height:var(--pole);
+    clip-path:polygon(40% 100%, 60% 100%, 86% 0, 14% 0);
+    background:linear-gradient(0deg, rgba(255,255,255,.40), rgba(255,255,255,.10) 64%, rgba(255,255,255,.03));
+    filter:blur(.6px); }
+  .column.active{ background:linear-gradient(0deg, rgba(255,62,136,.42),
+    rgba(208,160,82,.16) 55%, rgba(255,170,120,.05) 85%, transparent); }
+  /* translucent glass disc the naked 3D rests on (the stage) */
+  .disc{ width:var(--dw); height:calc(var(--dw) * .30); border-radius:50%;
+    background:radial-gradient(75% 130% at 50% 0%, rgba(255,255,255,.22),
+      rgba(255,255,255,.05) 60%, rgba(255,255,255,.02));
+    border:1px solid rgba(255,255,255,.38);
+    box-shadow:0 3px 12px rgba(0,0,0,.5), inset 0 1px 1px rgba(255,255,255,.5); }
+  .disc::before{ content:""; position:absolute; left:50%; top:14%; transform:translateX(-50%);
+    width:60%; height:58%; border-radius:50%;
+    background:radial-gradient(closest-side, rgba(0,0,0,.5), transparent 76%); filter:blur(1.4px); }
 
-  /* object: 3D viewport (grey #9E9E9E loading base) or thumbnail photo */
-  .obj{ position:relative; border-radius:6px;
-    border:1px solid rgba(255,255,255,1);   /* highlight=1 → 255 alpha */
-    box-shadow:0 0 8px rgba(0,0,0,.45); overflow:hidden; }
-  .obj .inner{ position:absolute; inset:0; border-radius:5px; overflow:hidden; }
-  .obj img{ width:100%; height:100%; object-fit:cover; display:block; }
-  /* 3D model viewport — neutral grey base (_kPlaceholderColor) with a lit-form hint */
-  .obj.three{ background:#9e9e9e; }
-  .obj.three .inner{
+  /* the naked 3D object (#9E9E9E lit form, no frame) */
+  .obj3d{ width:var(--ow); height:var(--oh); filter:drop-shadow(0 9px 9px rgba(0,0,0,.45)); }
+  .obj3d::before{ content:""; position:absolute; inset:0;
+    border-radius:50% 50% 47% 47% / 60% 60% 40% 40%;
     background:
-      radial-gradient(60% 52% at 38% 32%, rgba(255,255,255,.55), rgba(255,255,255,0) 60%),
-      radial-gradient(80% 70% at 64% 88%, rgba(0,0,0,.42), rgba(0,0,0,0) 60%),
-      linear-gradient(150deg, #b9b4ad 0%, #9e9e9e 48%, #7c7b79 100%); }
-  .obj .tag3d{ position:absolute; right:3px; bottom:3px; z-index:3;
-    font:700 7px/1 var(--font-latin); letter-spacing:.12em; color:#fff;
-    background:rgba(0,0,0,.5); border-radius:3px; padding:2px 3px; }
+      radial-gradient(56% 38% at 36% 22%, rgba(255,255,255,.82), rgba(255,255,255,0) 58%),
+      radial-gradient(70% 60% at 70% 92%, rgba(0,0,0,.5), rgba(0,0,0,0) 60%),
+      linear-gradient(150deg, #cdc8c1 0%, #9e9e9e 46%, #6c6b69 100%); }
+  .obj3d .t3d{ position:absolute; right:-3px; bottom:3px; transform:none;
+    font:700 6.5px/1 var(--font-latin); letter-spacing:.12em; color:#fff;
+    background:rgba(0,0,0,.5); border-radius:3px; padding:1px 3px; }
+  /* default: framed photo thumbnail (写真サムネ) instead of a 3D */
+  .photo{ border-radius:6px; border:1px solid #fff; overflow:hidden;
+    box-shadow:0 0 8px rgba(0,0,0,.45); }
+  .photo img{ width:100%; height:100%; object-fit:cover; display:block; }
 
-  /* main: small thumbnail tucked beside the 3D (画像を下敷きに作った3D) */
-  .obj .thumb-inset{ position:absolute; left:4px; bottom:4px; z-index:3;
-    width:30px; height:30px; border-radius:4px; overflow:hidden;
-    border:1px solid rgba(255,255,255,.9); box-shadow:0 1px 5px rgba(0,0,0,.6); }
-  .obj .thumb-inset img{ width:100%; height:100%; object-fit:cover; }
-
-  /* main: StoryViewer-style segments along the top */
-  .segs{ position:absolute; top:4px; left:4px; right:4px; z-index:4; display:flex; gap:2px; }
-  .segs > i{ flex:1; height:2.5px; border-radius:99px; background:rgba(255,255,255,.30);
-    box-shadow:0 .5px 1.5px rgba(0,0,0,.4); }
-  .segs > i.on{ background:#fff; }
-
-  /* main: member avatar row just below the thumbnail */
-  .avatars{ position:absolute; left:50%; transform:translateX(-50%);
-    top:calc(100% + 4px); z-index:5; display:flex; gap:3px; }
-  .avatars .av{ width:17px; height:17px; border-radius:50%; background:#222;
-    border:1.2px solid #fff; box-shadow:0 0 4px rgba(0,0,0,.4); overflow:hidden; }
-  .avatars .av img{ width:100%; height:100%; object-fit:cover; }
-  .avatars .more{ width:17px; height:17px; border-radius:50%; background:#fff; color:#000;
-    border:1px solid #999; display:flex; align-items:center; justify-content:center;
-    font:700 7px/1 var(--font-latin); }
-
-  /* ---- anchor: pole (逆三角形 or 白棒) + base/tip dots + connector ---- */
-  .anchor{ position:relative; display:flex; justify-content:center; }
-  .anchor .base-dot{ position:absolute; bottom:-2.4px; left:50%; transform:translateX(-50%);
-    width:4.8px; height:4.8px; border-radius:50%; background:#fff; z-index:3; }
-  .anchor .tip-dot{ position:absolute; top:-1.8px; left:50%; transform:translateX(-50%);
-    width:3.6px; height:3.6px; border-radius:50%; background:#fff; z-index:3; }
-  /* inverted triangle: narrow apex at ground (bottom), wide top edge under object */
-  .pole-tri{ width:var(--topw); height:var(--pole);
-    background:#fff; clip-path:polygon(0 0, 100% 0, 50% 100%);
-    filter:drop-shadow(1.5px 0 1px rgba(0,0,0,.5)); }
-  /* thin white bar for top-subs (NW/NE) where the pole is very long */
-  .pole-bar{ width:1.6px; height:var(--pole); background:#fff;
-    box-shadow:1.5px 0 1px rgba(0,0,0,.5); border-radius:1px; }
-
-  /* spec table under each card */
   .spec{ display:grid; grid-template-columns:64px 1fr; gap:7px 12px;
     padding:14px 16px 16px; border-top:1px solid rgba(255,255,255,.07); }
   .spec .k{ font:700 10px/1.5 var(--font-latin); color:var(--text-3); letter-spacing:.04em; }
@@ -131,11 +117,12 @@
 
   .foot{ font:500 11px/1.7 var(--font-jp); color:var(--text-3); max-width:880px; }
   .foot b{ color:var(--text-1); font-weight:700; }
-  .legend{ display:flex; gap:20px; flex-wrap:wrap; align-items:center;
-    padding:12px 14px; background:rgba(255,255,255,.035);
+  .legend{ display:flex; gap:22px; flex-wrap:wrap; align-items:center;
+    padding:14px 16px; background:rgba(255,255,255,.035);
     border:1px solid rgba(255,255,255,.08); border-radius:12px; }
-  .legend .item{ display:flex; align-items:center; gap:10px; }
-  .legend .swatch{ width:40px; height:46px; position:relative; display:flex; justify-content:center; align-items:flex-end; }
+  .legend .item{ display:flex; align-items:center; gap:11px; }
+  .legend .swatch{ width:52px; height:58px; position:relative; flex:none; }
+  .legend .swatch > *{ position:absolute; left:50%; transform:translateX(-50%); }
   .legend .lt{ font:500 11px/1.4 var(--font-jp); color:var(--text-2); }
   .legend .lt b{ color:#fff; font-weight:700; }
 </style></head>
@@ -147,11 +134,11 @@
       <span class="en">ThreeDTerrestrialView</span>
     </div>
     <div class="lede">
-      Universe の地球儀に 3D 投稿（<span class="tok">pin.has3D</span> = <span class="tok">TerrestrialType.threeD</span>）を刺すときの、<b>役割（<span class="tok">EarthClusterRole</span>）別の出し分け</b>。各オブジェクトは <b>逆三角形の土台か白棒</b>で地表に接続し、<b>ポール</b>で浮かせる。
+      角度をつけたマップに 3D 投稿（<span class="tok">pin.has3D</span>）を立体表示するときの <b>ステージビーコン</b>。<b>地点の一点</b>から<b>光の柱</b>が伸び、<b>ホバーステージ（ガラス円盤）</b>に裸の3Dが乗る。地表を覆わず「ここにある」が一目で分かる。<b>main は装飾（セグメント・アバター・サムネ）を出さない</b>。
     </div>
     <div class="axis">
-      <div class="pill A"><span class="lab">A 群 / 実装が正</span><span class="tx">アンカー形状・配置・ポール長・傾き。<b>数値どおり</b>に写す（<span class="tok">EarthClusterPolePainter</span> / <span class="tok">LayoutEngine</span>）。</span></div>
-      <div class="pill B"><span class="lab">B 群 / 希望</span><span class="tx">タイプ別の中身（default=画像 / main=3D+サムネ / sub=3D）。これから実装する<b>新しい振る舞い</b>。</span></div>
+      <div class="pill A"><span class="lab">A 群 / 実装が正</span><span class="tx">配置・<b>ポール長</b>（=柱の高さ）・pitch 55°。<b>数値どおり</b>（<span class="tok">LayoutEngine</span> / <span class="tok">SubRoleAssigner</span>）。</span></div>
+      <div class="pill B"><span class="lab">B 群 / 希望</span><span class="tx">接地表現＝<b>ステージビーコン</b>（新提案）。中身は default=画像 / main=裸3D / sub=裸3D。</span></div>
     </div>
   </div>
 
@@ -161,24 +148,20 @@
     <div class="typecard">
       <div class="cap"><span class="nm">デフォルト</span><span class="role">normal</span></div>
       <div class="stage">
-        <div class="ground"></div>
-        <div class="pin" style="left:50%; transform:translateX(-50%);">
-          <div class="obj-wrap">
-            <div class="obj" style="width:58px; height:103px;">
-              <div class="inner"><img src="https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png" alt=""></div>
-            </div>
-          </div>
-          <div class="anchor" style="--pole:46px; --topw:8px;">
-            <div class="pole-tri"></div>
-            <div class="base-dot"></div><div class="tip-dot"></div>
+        <div class="mapgrid"></div><div class="ground"></div>
+        <div class="beacon" style="left:50%;">
+          <div class="point" style="--pw:8px; bottom:-3px;"></div>
+          <div class="column" style="--cw:15px; --pole:42px; bottom:2px;"></div>
+          <div class="photo" style="width:52px; height:92px; bottom:44px;">
+            <img src="https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png" alt="">
           </div>
         </div>
       </div>
       <div class="spec">
-        <span class="k">中身</span><span class="v">小さいサムネ画像のみ<small>3D は出さない（現状の WebView を画像に変更したい）</small></span>
-        <span class="k">アンカー</span><span class="v">逆三角形<small>上辺幅 <span class="tok">clamp 6–16</span>・ここは短いので最小寄り</small></span>
-        <span class="k">ポール</span><span class="v"><span class="tok">max(32, base × activeT)</span><small>中心に近いほど伸びる・最小 32px</small></span>
-        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×1.0</span>（base 36×64）</span>
+        <span class="k">中身</span><span class="v">写真サムネのみ<small>3D は出さない（白1px枠の写真）</small></span>
+        <span class="k">接地</span><span class="v">白の接地点（idle）<small>柱は最小。ホバーステージは無し</small></span>
+        <span class="k">柱長</span><span class="v"><span class="tok">max(32, base × activeT)</span><small>中心に近いほど伸びる・最小 32px</small></span>
+        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×1.0</span></span>
       </div>
     </div>
 
@@ -186,32 +169,19 @@
     <div class="typecard is-main">
       <div class="cap"><span class="nm">メイン</span><span class="role">main</span></div>
       <div class="stage">
-        <div class="ground"></div>
-        <div class="pin" style="left:50%; transform:translateX(-50%);">
-          <div class="obj-wrap">
-            <div class="obj three" style="width:96px; height:170px;">
-              <div class="inner"></div>
-              <div class="segs"><i class="on"></i><i class="on"></i><i></i><i></i></div>
-              <div class="thumb-inset"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""></div>
-              <span class="tag3d">3D</span>
-            </div>
-            <div class="avatars">
-              <span class="av"><img src="https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png" alt=""></span>
-              <span class="av"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""></span>
-              <span class="more">+3</span>
-            </div>
-          </div>
-          <div class="anchor" style="--pole:70px; --topw:13px;">
-            <div class="pole-tri"></div>
-            <div class="base-dot"></div><div class="tip-dot"></div>
-          </div>
+        <div class="mapgrid"></div><div class="ground"></div>
+        <div class="beacon" style="left:50%;">
+          <div class="point" style="--pw:11px; bottom:-3px;"></div>
+          <div class="column" style="--cw:30px; --pole:70px; bottom:4px;"></div>
+          <div class="disc" style="--dw:92px; bottom:60px;"></div>
+          <div class="obj3d" style="--ow:84px; --oh:102px; bottom:70px;"><span class="t3d">3D</span></div>
         </div>
       </div>
       <div class="spec">
-        <span class="k">中身</span><span class="v">3D ＋ サムネ（＋セグメント＋アバター列）<small>3D を主役に・傍に小さくサムネ＝「画像を下敷きにした 3D」</small></span>
-        <span class="k">アンカー</span><span class="v">逆三角形<small>地表に刺さる土台感（下サブと同形）</small></span>
-        <span class="k">ポール</span><span class="v"><span class="tok">max(32, base × 0.5)</span><small>元ポールの半分＝mainPole（サブの基準）</small></span>
-        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×1.0</span>・最大（centerScale 適用）</span>
+        <span class="k">中身</span><span class="v">裸の3D のみ<small>セグメント・他ユーザーアイコン・サムネは出さない</small></span>
+        <span class="k">接地</span><span class="v">白の接地点＋ホバーステージ<small>main も sub と同じ白。柱の高さ・サイズで主役を示す</small></span>
+        <span class="k">柱長</span><span class="v"><span class="tok">max(32, base × 0.5)</span><small>= mainPole（サブ柱の基準）</small></span>
+        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×1.0</span>・最大</span>
       </div>
     </div>
 
@@ -219,45 +189,35 @@
     <div class="typecard">
       <div class="cap"><span class="nm">サブ ×4</span><span class="role">sub</span></div>
       <div class="stage">
-        <div class="ground"></div>
-        <!-- top sub (NW/NE): white bar, very long pole -->
-        <div class="pin" style="left:30%;">
-          <div class="obj-wrap">
-            <div class="obj three" style="width:30px; height:53px;">
-              <div class="inner"></div><span class="tag3d" style="font-size:6px; padding:1px 2px;">3D</span>
-            </div>
-          </div>
-          <div class="anchor" style="--pole:150px;">
-            <div class="pole-bar"></div>
-            <div class="base-dot"></div><div class="tip-dot"></div>
-          </div>
+        <div class="mapgrid"></div><div class="ground"></div>
+        <!-- top sub (NW/NE): long light column -->
+        <div class="beacon" style="left:30%;">
+          <div class="point" style="--pw:8px; bottom:-3px;"></div>
+          <div class="column" style="--cw:16px; --pole:150px; bottom:2px;"></div>
+          <div class="disc" style="--dw:48px; bottom:142px;"></div>
+          <div class="obj3d" style="--ow:42px; --oh:52px; bottom:150px;"><span class="t3d" style="font-size:5.5px;">3D</span></div>
         </div>
-        <!-- bottom sub (SW/SE): inverted triangle, short pole -->
-        <div class="pin" style="left:68%;">
-          <div class="obj-wrap">
-            <div class="obj three" style="width:30px; height:53px;">
-              <div class="inner"></div><span class="tag3d" style="font-size:6px; padding:1px 2px;">3D</span>
-            </div>
-          </div>
-          <div class="anchor" style="--pole:34px; --topw:6px;">
-            <div class="pole-tri"></div>
-            <div class="base-dot"></div><div class="tip-dot"></div>
-          </div>
+        <!-- bottom sub (SW/SE): short light column -->
+        <div class="beacon" style="left:70%;">
+          <div class="point" style="--pw:9px; bottom:-3px;"></div>
+          <div class="column" style="--cw:18px; --pole:34px; bottom:2px;"></div>
+          <div class="disc" style="--dw:50px; bottom:26px;"></div>
+          <div class="obj3d" style="--ow:42px; --oh:52px; bottom:34px;"><span class="t3d" style="font-size:5.5px;">3D</span></div>
         </div>
         <div style="position:absolute; left:30%; bottom:18px; transform:translateX(-50%); text-align:center;">
           <div style="font:700 9px/1.2 var(--font-latin); color:#fff;">NW / NE</div>
-          <div style="font:500 8.5px/1.3 var(--font-jp); color:var(--text-3);">白棒・棒長い</div>
+          <div style="font:500 8.5px/1.3 var(--font-jp); color:var(--text-3);">柱長い（遠）</div>
         </div>
-        <div style="position:absolute; left:68%; bottom:18px; transform:translateX(-50%); text-align:center;">
+        <div style="position:absolute; left:70%; bottom:18px; transform:translateX(-50%); text-align:center;">
           <div style="font:700 9px/1.2 var(--font-latin); color:#fff;">SW / SE</div>
-          <div style="font:500 8.5px/1.3 var(--font-jp); color:var(--text-3);">逆三角形・棒短い</div>
+          <div style="font:500 8.5px/1.3 var(--font-jp); color:var(--text-3);">柱短い（近）</div>
         </div>
       </div>
       <div class="spec">
-        <span class="k">中身</span><span class="v">3D のみ（小・装飾なし）</span>
-        <span class="k">アンカー</span><span class="v">上 NW/NE = 白棒 ／ 下 SW/SE = 逆三角形<small>長すぎる上辺の広がりを避け、上サブだけ棒に戻す</small></span>
-        <span class="k">ポール</span><span class="v">上 <span class="tok">mainPole × 3.63</span> ／ 下 <span class="tok">max(32, mainPole × ⅓)</span><small>上下で約 11 倍の差</small></span>
-        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×0.5</span>（main の半分）</span>
+        <span class="k">中身</span><span class="v">裸の3D のみ（小・装飾なし）</span>
+        <span class="k">接地</span><span class="v">白の接地点＋小ホバーステージ<small>同一システム。柱の高さだけが違う（棒/円錐の出し分け不要に）</small></span>
+        <span class="k">柱長</span><span class="v">上 <span class="tok">mainPole × 3.63</span> ／ 下 <span class="tok">max(32, mainPole × ⅓)</span><small>上下で約 11 倍の差</small></span>
+        <span class="k">サイズ</span><span class="v">係数 <span class="tok">×0.5</span></span>
       </div>
     </div>
 
@@ -266,30 +226,35 @@
   <div class="legend">
     <div class="item">
       <div class="swatch">
-        <div style="position:absolute; bottom:0; width:13px; height:40px; background:#fff; clip-path:polygon(0 0,100% 0,50% 100%); filter:drop-shadow(1.5px 0 1px rgba(0,0,0,.5));"></div>
-        <div style="position:absolute; bottom:-2px; width:4.8px; height:4.8px; border-radius:50%; background:#fff;"></div>
+        <div class="point" style="--pw:10px; bottom:24px;"></div>
       </div>
-      <div class="lt"><b>逆三角形アンカー</b><br>main ＋ 下サブ。白塗り・影 rgba(0,0,0,.5)・blur1・右1.5px</div>
+      <div class="lt"><b>接地点</b><br>地点の一点（光の柱の起点）。白</div>
     </div>
     <div class="item">
       <div class="swatch">
-        <div style="position:absolute; bottom:0; width:1.6px; height:42px; background:#fff; box-shadow:1.5px 0 1px rgba(0,0,0,.5);"></div>
-        <div style="position:absolute; bottom:-2px; width:4.8px; height:4.8px; border-radius:50%; background:#fff;"></div>
-        <div style="position:absolute; top:2px; width:3.6px; height:3.6px; border-radius:50%; background:#fff;"></div>
+        <div class="column" style="--cw:16px; --pole:40px; bottom:8px;"></div>
+        <div class="point" style="--pw:7px; bottom:6px;"></div>
       </div>
-      <div class="lt"><b>白棒アンカー</b><br>上サブ (NW/NE)。線 1.6px・底円 r2.4・先端円 r1.8</div>
+      <div class="lt"><b>光の柱</b><br>浮遊させる。高さ = ポール長（上サブ長・下サブ短）</div>
     </div>
     <div class="item">
-      <div class="swatch" style="align-items:center;">
-        <div style="width:26px; height:30px; background:#9e9e9e; border-radius:5px; border:1px solid #fff;
-          background-image:radial-gradient(60% 52% at 38% 32%, rgba(255,255,255,.55), transparent 60%);"></div>
+      <div class="swatch">
+        <div class="disc" style="--dw:42px; bottom:18px;"></div>
+        <div class="obj3d" style="--ow:26px; --oh:32px; bottom:22px;"></div>
       </div>
-      <div class="lt"><b>3D ビューポート</b><br>three.js / GLB。ロード基底色 <span class="tok">#9E9E9E</span></div>
+      <div class="lt"><b>ホバーステージ（ガラス円盤）</b><br>裸3Dを乗せる台。落ち影で浮遊感</div>
+    </div>
+    <div class="item">
+      <div class="swatch" style="display:flex; align-items:center; justify-content:center;">
+        <div class="obj3d" style="--ow:26px; --oh:33px; position:relative; left:auto; transform:none;
+          filter:drop-shadow(0 4px 5px rgba(0,0,0,.5));"></div>
+      </div>
+      <div class="lt"><b>裸の3D</b><br>枠なし。three.js / GLB、基底色 <span class="tok">#9E9E9E</span></div>
     </div>
   </div>
 
   <div class="foot">
-    接続線は <b>poleTip → オブジェクト下端</b>を <span class="tok">rgba(255,255,255,.6)</span> 0.8px で繋ぐ（単体ピンでは poleTip = 下端でほぼ密着）。オブジェクト枠は <b>白 1px</b>（highlight=1 で α=255）・角丸 6/5・影 <span class="tok">rgba(0,0,0,.45) blur8</span>。数値出どころ：<span class="tok">EarthClusterPolePainter</span> / <span class="tok">EarthClusterLayoutEngine</span>。
+    <b>ステージビーコン</b>は「<b>接地点</b>（地点の一点）＋<b>光の柱</b>（浮遊・ポール長）＋<b>ホバーステージ</b>（ガラス円盤）」の3層。地点の一点から柱が伸び、ホバーステージに裸3Dが乗る。マップを覆わず浮かせつつ地点を明示する新提案。<b>配置（NW/NE/SW/SE）・柱長（上 ×3.63 / 下 ×⅓）・pitch 55°</b> は <span class="tok">EarthClusterLayoutEngine</span> / <span class="tok">EarthSubRoleAssigner</span> の A群どおり。光の柱は長短をなめらかに表せるため、従来の「白棒 vs 逆円錐」の出し分けは不要になる。
   </div>
 
 </body></html>
