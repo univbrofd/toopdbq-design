@@ -1,0 +1,272 @@
+<!-- @dsCard group="Components" name="ThreeDTerrestrialView — シーン" subtitle="pitch 55° の倒した地球儀に main中心1 + sub4 (NW/NE遠・棒長 / SW/SE近・棒短) が刺さった全体像" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body{ background:#050507; padding:24px; gap:16px; align-items:center; }
+
+  .head{ width:100%; max-width:920px; display:flex; flex-direction:column; gap:8px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:700 21px/1.2 var(--font-jp); color:#fff; }
+  .h1 .en{ font:400 13px var(--font-display); color:var(--grad-golden); }
+  .lede{ font:500 12.5px/1.85 var(--font-jp); color:var(--text-2); max-width:920px; }
+  .lede b{ color:#fff; font-weight:700; }
+  .tok{ display:inline-block; font:600 10.5px/1.4 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10);
+    border-radius:5px; padding:1px 6px; }
+
+  /* ---------------- SCENE ---------------- */
+  .scene{ position:relative; width:920px; height:680px; border-radius:18px; overflow:hidden;
+    background:radial-gradient(120% 100% at 50% 8%, #0c0e16 0%, #07070c 46%, #040406 100%);
+    box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  /* starfield */
+  .scene .stars{ position:absolute; inset:0; pointer-events:none;
+    background-image:
+      radial-gradient(1.4px 1.4px at 10% 12%, rgba(255,255,255,.7), transparent),
+      radial-gradient(1px 1px at 30% 8%, rgba(255,255,255,.5), transparent),
+      radial-gradient(1.2px 1.2px at 52% 16%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1px 1px at 72% 7%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1.5px 1.5px at 88% 18%, rgba(255,255,255,.6), transparent),
+      radial-gradient(1px 1px at 18% 26%, rgba(255,255,255,.35), transparent),
+      radial-gradient(1px 1px at 64% 24%, rgba(255,255,255,.4), transparent),
+      radial-gradient(1.1px 1.1px at 42% 30%, rgba(255,255,255,.3), transparent),
+      radial-gradient(1px 1px at 84% 34%, rgba(255,255,255,.3), transparent); }
+
+  /* the globe — a huge sphere whose top cap is the visible, curving ground.
+     pitch 55° read: we look across the curvature, far(north)=top, near(south)=bottom. */
+  .globe{ position:absolute; left:50%; top:182px; width:1500px; height:1500px;
+    transform:translateX(-50%); border-radius:50%;
+    background:
+      radial-gradient(46% 40% at 50% 26%, rgba(208,160,82,.10), rgba(208,160,82,0) 60%),
+      radial-gradient(60% 56% at 50% 88%, #232634 0%, #161824 42%, #0e0f18 70%, #0a0b12 100%);
+    box-shadow:
+      inset 0 6px 40px rgba(255,255,255,.06),
+      inset 0 -30px 120px rgba(0,0,0,.6),
+      0 0 0 1px rgba(255,255,255,.05); }
+  /* latitude rings + longitude meridians (faint structural grid) */
+  .globe .grid{ position:absolute; inset:0; border-radius:50%; opacity:.5;
+    background-image:
+      repeating-radial-gradient(50% 50% at 50% 50%, transparent 0 56px, rgba(255,255,255,.05) 56px 57px),
+      repeating-conic-gradient(from 0deg at 50% 50%, transparent 0 14deg, rgba(255,255,255,.045) 14deg 14.4deg);
+    -webkit-mask:radial-gradient(58% 52% at 50% 86%, #000 0%, rgba(0,0,0,.5) 60%, transparent 78%);
+            mask:radial-gradient(58% 52% at 50% 86%, #000 0%, rgba(0,0,0,.5) 60%, transparent 78%); }
+  /* horizon limb highlight */
+  .globe .limb{ position:absolute; inset:0; border-radius:50%;
+    box-shadow:inset 0 2px 1px rgba(255,255,255,.10); }
+
+  /* top protection veil for the title overlay area */
+  .scene .veil{ position:absolute; left:0; right:0; top:0; height:120px;
+    background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,0)); }
+  .scene .stage-label{ position:absolute; left:18px; top:14px; z-index:6; }
+  .scene .stage-label .pt{ font:700 12px/1 var(--font-latin); color:#fff; letter-spacing:.04em; }
+  .scene .stage-label .pt b{ color:var(--grad-golden); }
+  .scene .stage-label .sub{ margin-top:4px; font:500 10px/1.4 var(--font-jp); color:var(--text-3); }
+
+  /* compass hint bottom-right */
+  .scene .compass{ position:absolute; right:18px; bottom:16px; z-index:6; text-align:center;
+    width:54px; height:54px; border-radius:50%; background:rgba(0,0,0,.45);
+    border:1px solid rgba(255,255,255,.14); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; }
+  .scene .compass .n{ position:absolute; top:5px; font:700 9px/1 var(--font-latin); color:#fff; }
+  .scene .compass .s{ position:absolute; bottom:5px; font:700 9px/1 var(--font-latin); color:var(--text-3); }
+  .scene .compass .needle{ width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent;
+    border-bottom:18px solid var(--grad-pink); transform:translateY(-4px); }
+
+  /* ---- pin ---- */
+  .pin{ position:absolute; transform:translate(-50%,-100%);
+    display:flex; flex-direction:column; align-items:center; z-index:5; }
+  .pin.far{ z-index:3; }
+  .pin .obj-wrap{ position:relative; }
+
+  .obj{ position:relative; border-radius:6px; border:1px solid #fff;
+    box-shadow:0 0 8px rgba(0,0,0,.45); overflow:hidden; }
+  .obj .inner{ position:absolute; inset:0; border-radius:5px; overflow:hidden; }
+  .obj img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .obj.three{ background:#9e9e9e; }
+  .obj.three .inner{
+    background:
+      radial-gradient(60% 52% at 38% 30%, rgba(255,255,255,.58), rgba(255,255,255,0) 60%),
+      radial-gradient(80% 70% at 64% 90%, rgba(0,0,0,.45), rgba(0,0,0,0) 60%),
+      linear-gradient(150deg, #bbb6af 0%, #9e9e9e 48%, #7b7a78 100%); }
+  .obj .tag3d{ position:absolute; right:3px; bottom:3px; z-index:3;
+    font:700 6.5px/1 var(--font-latin); letter-spacing:.1em; color:#fff;
+    background:rgba(0,0,0,.5); border-radius:3px; padding:1px 3px; }
+  .obj .thumb-inset{ position:absolute; left:4px; bottom:4px; z-index:3;
+    width:28px; height:28px; border-radius:4px; overflow:hidden;
+    border:1px solid rgba(255,255,255,.9); box-shadow:0 1px 5px rgba(0,0,0,.6); }
+  .obj .thumb-inset img{ width:100%; height:100%; object-fit:cover; }
+  .segs{ position:absolute; top:4px; left:4px; right:4px; z-index:4; display:flex; gap:2px; }
+  .segs > i{ flex:1; height:2.5px; border-radius:99px; background:rgba(255,255,255,.30);
+    box-shadow:0 .5px 1.5px rgba(0,0,0,.4); }
+  .segs > i.on{ background:#fff; }
+  .avatars{ position:absolute; left:50%; transform:translateX(-50%); top:calc(100% + 4px);
+    z-index:6; display:flex; gap:3px; }
+  .avatars .av{ width:18px; height:18px; border-radius:50%; background:#222;
+    border:1.2px solid #fff; box-shadow:0 0 4px rgba(0,0,0,.4); overflow:hidden; }
+  .avatars .av img{ width:100%; height:100%; object-fit:cover; }
+  .avatars .more{ width:18px; height:18px; border-radius:50%; background:#fff; color:#000;
+    border:1px solid #999; display:flex; align-items:center; justify-content:center;
+    font:700 7px/1 var(--font-latin); }
+
+  .anchor{ position:relative; display:flex; justify-content:center; }
+  .anchor .base-dot{ position:absolute; bottom:-2.4px; left:50%; transform:translateX(-50%);
+    width:4.8px; height:4.8px; border-radius:50%; background:#fff; z-index:3; }
+  .anchor .tip-dot{ position:absolute; top:-1.8px; left:50%; transform:translateX(-50%);
+    width:3.6px; height:3.6px; border-radius:50%; background:#fff; z-index:3; }
+  .pole-tri{ width:var(--topw); height:var(--pole); background:#fff;
+    clip-path:polygon(0 0, 100% 0, 50% 100%); filter:drop-shadow(1.5px 0 1px rgba(0,0,0,.5)); }
+  .pole-bar{ width:1.6px; height:var(--pole); background:#fff;
+    box-shadow:1.5px 0 1px rgba(0,0,0,.5); border-radius:1px; }
+
+  /* floating role chip beside each object */
+  .chip{ position:absolute; z-index:7; white-space:nowrap;
+    background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.14);
+    border-radius:8px; padding:5px 8px; backdrop-filter:blur(2px); }
+  .chip .r{ font:700 9.5px/1.2 var(--font-latin); letter-spacing:.03em; color:#fff; }
+  .chip.main .r{ color:var(--grad-golden); }
+  .chip .m{ font:500 9px/1.45 var(--font-jp); color:var(--text-2); margin-top:1px; }
+  .chip .m .tok{ font-size:9px; padding:0 4px; }
+
+  /* legend below */
+  .legend{ width:920px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .legend .it{ background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.09);
+    border-radius:12px; padding:12px 14px; }
+  .legend .it .t{ font:700 11px/1.3 var(--font-jp); color:#fff; margin-bottom:5px; }
+  .legend .it .d{ font:500 10.5px/1.65 var(--font-jp); color:var(--text-2); }
+  .legend .it .d b{ color:#fff; font-weight:700; }
+  .foot{ width:920px; font:500 11px/1.7 var(--font-jp); color:var(--text-3); }
+  .foot b{ color:var(--text-1); font-weight:700; }
+</style></head>
+<body>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">3D オブジェクト表示 — シーン全体（pitch 55°）</span>
+      <span class="en">ThreeDTerrestrialView</span>
+    </div>
+    <div class="lede">
+      地球儀を <b>pitch 55°</b> に倒した俯瞰。<b>メイン中心 1 個 ＋ サブ 4 個</b>（NW/NE/SW/SE）が、逆三角形か白棒の<b>アンカーで地表に刺さって</b>浮く。北（遠）の上サブは<b>棒が長く</b>、南（近）の下サブは<b>棒が短い</b>——上下で約 11 倍の差が見た目の肝。
+    </div>
+  </div>
+
+  <div class="scene">
+    <div class="stars"></div>
+    <div class="globe"><div class="grid"></div><div class="limb"></div></div>
+    <div class="veil"></div>
+    <div class="stage-label">
+      <div class="pt">PITCH <b>55°</b> · GLOBE PROJECTION</div>
+      <div class="sub">0° 真上 / 55° 既定 / 85° 最大</div>
+    </div>
+    <div class="compass"><span class="n">N</span><span class="s">S</span><span class="needle"></span></div>
+
+    <!-- ===== MAIN (center) ===== -->
+    <div class="pin" style="left:460px; top:470px;">
+      <div class="obj-wrap">
+        <div class="obj three" style="width:84px; height:150px;">
+          <div class="inner"></div>
+          <div class="segs"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+          <div class="thumb-inset"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""></div>
+          <span class="tag3d">3D</span>
+        </div>
+        <div class="avatars">
+          <span class="av"><img src="https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png" alt=""></span>
+          <span class="av"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""></span>
+          <span class="more">+4</span>
+        </div>
+        <div class="chip main" style="left:calc(100% + 10px); top:0;">
+          <div class="r">main · 中心</div>
+          <div class="m">3D＋サムネ・最大<br>pole <span class="tok">max(32, base×0.5)</span></div>
+        </div>
+      </div>
+      <div class="anchor" style="--pole:92px; --topw:16px;">
+        <div class="pole-tri"></div><div class="base-dot"></div><div class="tip-dot"></div>
+      </div>
+    </div>
+
+    <!-- ===== NW (far, long bar) ===== -->
+    <div class="pin far" style="left:316px; top:322px;">
+      <div class="obj-wrap">
+        <div class="obj three" style="width:26px; height:46px; opacity:.92;">
+          <div class="inner"></div><span class="tag3d" style="font-size:5.5px;">3D</span>
+        </div>
+        <div class="chip" style="right:calc(100% + 10px); top:-2px; text-align:right;">
+          <div class="r">subNW · 333°</div>
+          <div class="m">遠 dist 2.7<br>pole <span class="tok">×3.63</span> · 白棒</div>
+        </div>
+      </div>
+      <div class="anchor" style="--pole:208px;">
+        <div class="pole-bar"></div><div class="base-dot"></div><div class="tip-dot"></div>
+      </div>
+    </div>
+
+    <!-- ===== NE (far, long bar) ===== -->
+    <div class="pin far" style="left:606px; top:312px;">
+      <div class="obj-wrap">
+        <div class="obj three" style="width:26px; height:46px; opacity:.92;">
+          <div class="inner"></div><span class="tag3d" style="font-size:5.5px;">3D</span>
+        </div>
+        <div class="chip" style="left:calc(100% + 10px); top:-2px;">
+          <div class="r">subNE · 27°</div>
+          <div class="m">遠 dist 2.7<br>pole <span class="tok">×3.63</span> · 白棒</div>
+        </div>
+      </div>
+      <div class="anchor" style="--pole:216px;">
+        <div class="pole-bar"></div><div class="base-dot"></div><div class="tip-dot"></div>
+      </div>
+    </div>
+
+    <!-- ===== SW (near, short triangle) ===== -->
+    <div class="pin" style="left:236px; top:560px;">
+      <div class="obj-wrap">
+        <div class="obj three" style="width:34px; height:60px;">
+          <div class="inner"></div><span class="tag3d">3D</span>
+        </div>
+        <div class="chip" style="right:calc(100% + 10px); top:-2px; text-align:right;">
+          <div class="r">subSW · 232°</div>
+          <div class="m">近 dist 1.6<br>pole <span class="tok">×⅓</span> · 逆三角形</div>
+        </div>
+      </div>
+      <div class="anchor" style="--pole:32px; --topw:6px;">
+        <div class="pole-tri"></div><div class="base-dot"></div><div class="tip-dot"></div>
+      </div>
+    </div>
+
+    <!-- ===== SE (near, short triangle) ===== -->
+    <div class="pin" style="left:672px; top:574px;">
+      <div class="obj-wrap">
+        <div class="obj three" style="width:34px; height:60px;">
+          <div class="inner"></div><span class="tag3d">3D</span>
+        </div>
+        <div class="chip" style="left:calc(100% + 10px); top:-2px;">
+          <div class="r">subSE · 128°</div>
+          <div class="m">近 dist 1.6<br>pole <span class="tok">×⅓</span> · 逆三角形</div>
+        </div>
+      </div>
+      <div class="anchor" style="--pole:30px; --topw:6px;">
+        <div class="pole-tri"></div><div class="base-dot"></div><div class="tip-dot"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="legend">
+    <div class="it">
+      <div class="t">配置 — 地理楕円の4方位</div>
+      <div class="d"><b>EarthSubRoleAssigner</b> が中心周りの 4 楕円から最寄り候補を winner に。NW 333°/ NE 27° は<b>遠 (2.7)</b>、SW 232°/ SE 128° は<b>近 (1.6)</b>。</div>
+    </div>
+    <div class="it">
+      <div class="t">ポール長 — 上下で約11倍</div>
+      <div class="d">上サブ = <b>mainPole×3.63</b>（長い棒）／ 下サブ = <b>max(32, mainPole×⅓)</b>（短い）。main 自体は <b>max(32, base×0.5)</b>。</div>
+    </div>
+    <div class="it">
+      <div class="t">アンカー出し分け</div>
+      <div class="d">main ＋ 下サブ = <b>逆三角形</b>（地表に刺さる）。上サブ (NW/NE) は pole が極端に長く上辺が広がり過ぎるため <b>白棒</b>に戻す。</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    傾きは MapLibre <b>globe projection ＋ pitch</b>。pitch が立つほどポールは長く・サムネは拡大（55° 付近がピーク）。Flutter 側は投影済み座標を受け取り <b>2D で描く</b>だけ＝この specimen も「倒した絵」を静的に再現。出どころ：<span class="tok">EarthClusterLayoutEngine</span> / <span class="tok">EarthSubRoleAssigner</span> / <span class="tok">EarthPitchCurves</span>。
+  </div>
+
+</body></html>
