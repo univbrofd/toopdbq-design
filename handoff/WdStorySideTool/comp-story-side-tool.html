@@ -1,0 +1,167 @@
+<!-- @dsCard group="Components" name="WdStorySideTool" subtitle="StoryViewer right-edge action rail · like / comment / share" viewport="900x1320" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background:#0d0d0f; gap:22px; padding:24px; }
+  .lede { font:500 12px/1.6 var(--font-jp); color:var(--text-2); max-width:780px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; font:600 10px var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:5px; padding:2px 6px; margin:0 1px; }
+
+  /* ===== canonical rail vocabulary (lifted from ui_kits/app/app.css) ===== */
+  .ibtn { position:relative; display:inline-flex; align-items:center; justify-content:center;
+    width:47px; height:47px; border-radius:50%; flex:none;
+    background:var(--glass-fill); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+  .ibtn::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .ibtn img { object-fit:contain; }
+  .ibtn-lab { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .ibtn-lab .lab { font:700 11px var(--font-latin); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);
+    font-variant-numeric:tabular-nums; }
+  .rail { display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .like-pink { filter:brightness(0) saturate(100%) invert(36%) sepia(82%) saturate(3000%) hue-rotate(312deg); }
+  .like-red  { filter:brightness(0) saturate(100%) invert(13%) sepia(96%) saturate(7460%) hue-rotate(2deg) brightness(101%) contrast(118%); }
+  .ic-white  { filter:brightness(0) invert(1); }  /* normalize off-white asset (icon_share ships green) */
+
+  /* legacy `more` circle: blur only + black drop shadow, no fill / no border */
+  .ibtn-old { position:relative; display:inline-flex; align-items:center; justify-content:center;
+    width:47px; height:47px; border-radius:50%; flex:none;
+    background:transparent; backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+    box-shadow:0 6px 8px rgba(0,0,0,.4); }
+  .lab-old { font:700 12px var(--font-jp); color:#fff; text-shadow:0 2px 4px rgba(0,0,0,.6); margin-top:0; }
+
+  /* photo stages */
+  .photo { position:relative; border-radius:16px; overflow:hidden; background-size:cover; background-position:center; }
+  .photo .veil { position:absolute; inset:0; background:linear-gradient(0deg, rgba(0,0,0,.72), transparent 55%); pointer-events:none; }
+
+  /* compare grid */
+  .cmp { display:grid; grid-template-columns:120px 1fr 1fr; gap:10px 18px; align-items:start; }
+  .ch { font:700 10px/1 var(--font-latin); letter-spacing:.13em; text-transform:uppercase; }
+  .ch.b { color:#ff8a8a; } .ch.a { color:#7ee0a0; }
+  .rl { font:700 12px var(--font-jp); color:#fff; padding-top:6px; }
+  .rl small { display:block; font:500 10px var(--font-latin); color:var(--fg-3); margin-top:3px; letter-spacing:.04em; }
+  .note { grid-column:2 / 4; font:500 11px/1.5 var(--font-jp); color:var(--text-2); margin:2px 0 6px; }
+  .note b { color:#fff; font-weight:700; }
+  .demo { background:url('https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png') center/cover;
+    border-radius:12px; padding:18px; display:flex; align-items:center; justify-content:center; min-height:118px; position:relative; }
+  .demo .veil { position:absolute; inset:0; background:rgba(0,0,0,.28); border-radius:12px; }
+  .demo > * { position:relative; }
+  .chipx { width:24px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,.14); flex:none; }
+  .hx { font:600 10px var(--font-latin); color:var(--text-2); }
+</style></head>
+<body>
+  <div class="eyebrow">WdStorySideTool — StoryViewer 右端の縦アクションレール</div>
+  <div class="lede">フルブリードのストーリー写真の上に浮く縦並びツール。<b>like → comment</b>、位置情報付き投稿のみ <b>share</b> が加わる。投稿者の identity は header の進捗バーが担うため、<b>レール先頭の avatar は置かない</b>。円は header/footer の <span class="tok">WdIconButton</span> と同じ<b>ガラス面＋ヘアライン枠</b>の1語彙に統一し、数値ラベルは Inter。</div>
+
+  <!-- ============ 完成形 : canonical rail over a story photo ============ -->
+  <div class="cmp" style="grid-template-columns:120px 1fr;">
+    <div class="rl" style="padding-top:0;">完成形<small>After</small></div>
+    <div>
+      <div class="ch a" style="margin-bottom:8px;">仕様準拠レール — 写真の可読性は veil（面）で構造保証</div>
+      <div class="photo" style="height:360px; background-image:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png');">
+        <div class="veil"></div>
+        <div class="rail" style="position:absolute; right:16px; bottom:22px;">
+          <div class="ibtn-lab">
+            <span class="ibtn"><img class="like-pink" src="../../DesignSystem/assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
+            <span class="lab" style="color:var(--like);">248</span>
+          </div>
+          <div class="ibtn-lab">
+            <span class="ibtn"><img src="../../DesignSystem/assets/icons/icon_comment.png" style="width:20px;height:20px;"></span>
+            <span class="lab">32</span>
+          </div>
+          <div class="ibtn-lab">
+            <span class="ibtn"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_share.png" style="width:20px;height:20px;"></span>
+            <span class="lab">共有</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ★ 円の語彙を1つに ============ -->
+  <div class="eyebrow" style="margin-top:4px;">★ 円の語彙を1つに統一 — 写真上の可読性は scrim/面で担保し、ドロップシャドウは引き算</div>
+  <div class="cmp">
+    <div></div><div class="ch b">Before — <span class="tok">more</span>: blur のみ＋黒ドロップシャドウ</div><div class="ch a">After — <span class="tok">.ibtn</span>: ガラス面＋ヘアライン枠</div>
+    <div class="rl">like 円</div>
+    <div class="demo">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+        <span class="ibtn-old"><img class="like-red" src="../../DesignSystem/assets/icons/icon_like.png" style="width:24px;height:24px;"></span>
+        <span class="lab-old">248</span>
+      </div>
+    </div>
+    <div class="demo">
+      <div class="ibtn-lab">
+        <span class="ibtn"><img class="like-pink" src="../../DesignSystem/assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
+        <span class="lab" style="color:var(--like);">248</span>
+      </div>
+    </div>
+    <div class="note">枠・面なしの blur 円は写真によって輪郭が消える。<b>ガラス面 <span class="tok">--glass-fill 0x82</span> ＋ 1px ヘアライン <span class="tok">--gradient-border</span></b> に寄せ、header/footer の <span class="tok">WdIconButton</span> と同一語彙へ。黒ドロップシャドウは廃止（効果は blur ＋ 枠の2つに収束）。</div>
+  </div>
+
+  <!-- ============ 論点 resolution table ============ -->
+  <div class="eyebrow" style="margin-top:4px;">残りの論点 — Before / After</div>
+  <div class="cmp">
+    <div></div><div class="ch b">Before — 実装</div><div class="ch a">After — システム</div>
+
+    <div class="rl">like 色</div>
+    <div class="row" style="gap:8px;padding-top:4px;">
+      <span class="chipx" style="background:#ff0000;"></span><span class="hx">#FF0000 純赤</span>
+    </div>
+    <div class="row" style="gap:8px;padding-top:4px;">
+      <span class="chipx" style="background:var(--like);"></span><span class="hx">--like #ff3e88</span>
+    </div>
+    <div class="note">liked 時の <span class="tok">0xFFFF0000</span>（純赤）を、semantic と一致する <b>--like #ff3e88</b>（ピンク）へ。アイコン tint・カウント文字色の両方に適用。</div>
+
+    <div class="rl">アイコン寸法</div>
+    <div class="row" style="gap:14px;padding-top:2px;align-items:flex-end;">
+      <span class="ibtn-old" style="width:40px;height:40px;box-shadow:none;border:1px dashed rgba(255,255,255,.2);"><img src="../../DesignSystem/assets/icons/icon_comment.png" style="width:24px;height:24px;"></span><span class="hx">24 / フラット</span>
+    </div>
+    <div class="row" style="gap:14px;padding-top:2px;align-items:flex-end;">
+      <span class="ibtn" style="width:40px;height:40px;"><img src="../../DesignSystem/assets/icons/icon_comment.png" style="width:20px;height:20px;"></span><span class="hx">20 グリッド・♥19(光学)</span>
+    </div>
+    <div class="note">24 → <b>16/20/24 グリッドの 20</b> に正規化（円の 44%）。♥ は光学質量が重いので <b>19</b> へ気持ち小さく。</div>
+
+    <div class="rl">カウント字体</div>
+    <div class="cell" style="padding-top:2px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;width:56px;">
+        <span class="ibtn-old" style="width:34px;height:34px;box-shadow:none;border:1px dashed rgba(255,255,255,.2);"></span>
+        <span class="lab-old">248</span>
+      </div>
+      <span class="hx" style="display:block;margin-top:4px;">Noto 12 ・ gap 0</span>
+    </div>
+    <div class="cell" style="padding-top:2px;">
+      <div class="ibtn-lab" style="width:56px;">
+        <span class="ibtn" style="width:34px;height:34px;"></span>
+        <span class="lab">248</span>
+      </div>
+      <span class="hx" style="display:block;margin-top:4px;">Inter 11 ・ gap 8</span>
+    </div>
+    <div class="note">数値は規約どおり <b>Inter（--font-latin）</b>。円↔ラベルの間隔は <b>8pt</b> に固定（<span class="tok">.ibtn-lab gap:8</span>）、tabular-nums で桁ブレ防止。</div>
+
+    <div class="rl">share の扱い</div>
+    <div class="cell" style="padding-top:2px;">
+      <div style="display:flex;flex-direction:column;align-items:center;width:56px;">
+        <span class="ibtn-old" style="box-shadow:none;border:1px dashed rgba(255,255,255,.2);"><img src="../../DesignSystem/assets/icons/icon_near.png" style="width:24px;height:24px;"></span>
+      </div>
+      <span class="hx" style="display:block;margin-top:4px;">near ・ ラベルなし空円</span>
+    </div>
+    <div class="cell" style="padding-top:2px;">
+      <div class="ibtn-lab" style="width:56px;">
+        <span class="ibtn"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_share.png" style="width:20px;height:20px;"></span>
+        <span class="lab">共有</span>
+      </div>
+      <span class="hx" style="display:block;margin-top:4px;">share ・ テキストラベル</span>
+    </div>
+    <div class="note">アイコンを <span class="tok">near</span> → <b>share</b> に確定。like/comment が<b>数値ラベル</b>なのに対し share は<b>テキストラベル「共有」</b>でラベル方針を統一（カウントを持たない）。</div>
+
+    <div class="rl">先頭 avatar</div>
+    <div class="note" style="grid-column:2 / 4; margin-top:0;">header（進捗バー）側に投稿者 avatar があるため、サイドツール最上部の avatar は<b>二重</b>になる。→ <b>レールから avatar を外し</b>、identity は header に一本化。レールは純粋なアクション列にする。</div>
+
+    <div class="rl">タップ域</div>
+    <div class="note" style="grid-column:2 / 4; margin-top:0;">円 47px は ≥44 を満たす。<span class="tok">.ibtn-lab</span> 全体（円＋gap8＋ラベル）でヒット域を確保し、レール項目間 gap は <b>16（8pt系）</b>で固定。</div>
+  </div>
+</body></html>

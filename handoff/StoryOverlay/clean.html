@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StoryOverlay — clean preview</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; background:#050507; overflow:hidden; }
+  body { display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-latin); -webkit-font-smoothing:antialiased; }
+
+  .scaler { position:relative; }
+  .frame { position:relative; width:393px; height:852px; overflow:hidden; background:#04060c;
+    box-shadow:0 30px 90px rgba(0,0,0,.7); }
+  .ic-white { filter:brightness(0) invert(1); }
+
+  .frame .bg { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transition:opacity .4s var(--ease-out); }
+  .frame .bg.on { opacity:1; }
+
+  /* globe scene */
+  .globe-bg { position:absolute; inset:0; background:radial-gradient(125% 95% at 50% 16%, #0c1b2f 0%, #060b15 52%, #03040a 100%); }
+  .star { position:absolute; width:2px; height:2px; border-radius:50%; background:#fff; }
+  .globe { position:absolute; left:50%; top:48%; width:340px; height:340px; border-radius:50%; transform:translate(-50%,-50%);
+    background:
+      radial-gradient(120% 120% at 30% 24%, rgba(120,205,210,.30), rgba(0,0,0,0) 44%),
+      radial-gradient(150% 150% at 72% 80%, #04484f 0%, #052730 40%, #04141c 70%, #020a10 100%);
+    box-shadow: inset -22px -26px 64px rgba(0,0,0,.78), inset 14px 16px 40px rgba(60,150,160,.10), 0 0 80px rgba(20,90,100,.22); }
+  .globe .land { position:absolute; border-radius:50%; background:rgba(15,90,80,.45); filter:blur(3px); }
+  .pin { position:absolute; width:14px; height:14px; border-radius:50% 50% 50% 0; transform:rotate(-45deg);
+    background:var(--gradient-colorful); box-shadow:0 2px 8px rgba(0,0,0,.5); }
+  .pin::after { content:""; position:absolute; inset:4px; border-radius:50%; background:rgba(0,0,0,.35); }
+
+  /* scrims */
+  .topscrim { position:absolute; top:0; left:0; right:0; height:150px;
+    background:linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.28) 42%, rgba(0,0,0,0) 100%); pointer-events:none; }
+  .botscrim { position:absolute; bottom:0; left:0; right:0; height:180px;
+    background:linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 100%); pointer-events:none; }
+
+  .statusbar { position:absolute; top:18px; left:26px; right:26px; height:18px; display:flex;
+    align-items:center; justify-content:space-between; font:600 14px var(--font-latin); color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.6); }
+
+  /* account badge */
+  .tl { position:absolute; top:48px; left:8px; }
+  .badge { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+  .badge .av { width:40px; height:40px; border-radius:50%; object-fit:cover; flex:none; }
+  .badge .nm { font:600 14px var(--font-latin); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+
+  /* right cluster */
+  .tr { position:absolute; top:48px; right:8px; display:flex; align-items:center; gap:8px; }
+  .gb { position:relative; display:inline-flex; align-items:center; justify-content:center;
+    width:44px; height:44px; border-radius:50%; flex:none; cursor:pointer;
+    background:var(--glass-fill); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+    transition:transform .12s var(--ease-standard); }
+  .gb:active { transform:scale(.94); }
+  .gb::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .gb img { width:24px; height:24px; object-fit:contain; }
+  .gb.lg { width:48px; height:48px; }
+  .gb.post { background:var(--gradient-colorful); }
+  .gb.post img { filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) brightness(0) invert(1); }
+  .gb .addbadge { position:absolute; right:-2px; top:-2px; width:20px; height:20px; border-radius:50%;
+    background:var(--glass-fill); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; }
+  .gb .addbadge::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; }
+  .gb .addbadge img { width:11px; height:11px; }
+
+  /* footer */
+  .footer { position:absolute; left:0; right:0; bottom:0; padding:0 12px 22px;
+    display:flex; align-items:center; gap:16px; }
+  .wd-circle-bar { position:relative; display:flex; align-items:center; gap:8px; padding:7px 16px 7px 7px;
+    border-radius:99px; flex:1; min-width:0;
+    background:linear-gradient(90deg, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.62) 55%); }
+  .wd-circle-bar::after { content:""; position:absolute; inset:0; border-radius:99px; padding:1px;
+    background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .wd-circle-bar .cover { width:50px; height:50px; border-radius:50%; object-fit:cover; flex:none;
+    box-shadow:0 0 0 1.5px rgba(255,255,255,.35); }
+  .wd-circle-bar .col { display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .wd-circle-bar .nm { font:500 13px var(--font-latin); color:#fff; text-shadow:0 0 8px #000;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wd-circle-bar .ds { font:400 11px var(--font-latin); color:var(--text-2);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cluster { display:flex; align-items:center; gap:8px; flex:none; }
+
+  /* scene toggle (outside frame) */
+  .toggle { position:fixed; top:16px; left:16px; z-index:10; display:flex;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); border-radius:99px; padding:4px; }
+  .toggle button { border:none; background:none; color:var(--text-2); font:600 11px var(--font-latin);
+    padding:6px 16px; border-radius:99px; cursor:pointer; letter-spacing:.02em; }
+  .toggle button.on { background:#fff; color:#111; }
+  .hint { position:fixed; bottom:14px; left:16px; z-index:10;
+    font:500 10px var(--font-latin); color:rgba(255,255,255,.4); letter-spacing:.06em; }
+</style></head>
+<body>
+  <div class="toggle">
+    <button id="t-globe" class="on">Universe · globe</button>
+    <button id="t-photo">StoryViewer · photo</button>
+  </div>
+
+  <div class="scaler" id="scaler">
+    <div class="frame">
+      <!-- globe scene -->
+      <div class="bg-globe">
+        <div class="globe-bg"></div>
+        <span class="star" style="left:38px;top:110px;opacity:.55;"></span>
+        <span class="star" style="left:120px;top:72px;opacity:.4;"></span>
+        <span class="star" style="left:300px;top:140px;opacity:.6;"></span>
+        <span class="star" style="left:350px;top:260px;opacity:.4;"></span>
+        <span class="star" style="left:60px;top:340px;opacity:.5;"></span>
+        <span class="star" style="left:24px;top:540px;opacity:.4;"></span>
+        <span class="star" style="left:366px;top:600px;opacity:.5;"></span>
+        <span class="star" style="left:200px;top:48px;opacity:.35;"></span>
+        <span class="star" style="left:300px;top:700px;opacity:.45;"></span>
+        <span class="star" style="left:90px;top:660px;opacity:.35;"></span>
+        <div class="globe">
+          <span class="land" style="width:96px;height:74px;left:60px;top:84px;"></span>
+          <span class="land" style="width:124px;height:92px;left:152px;top:154px;"></span>
+          <span class="land" style="width:72px;height:62px;left:84px;top:214px;"></span>
+          <span class="pin" style="left:132px;top:122px;"></span>
+          <span class="pin" style="left:214px;top:174px;"></span>
+          <span class="pin" style="left:150px;top:236px;"></span>
+          <span class="pin" style="left:240px;top:250px;"></span>
+        </div>
+      </div>
+      <!-- photo scene -->
+      <div class="bg bg-photo" style="background-image:url('https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png');"></div>
+
+      <div class="topscrim"></div>
+      <div class="botscrim"></div>
+      <div class="statusbar"><span>9:41</span><span>5G</span></div>
+
+      <!-- 左上 account badge -->
+      <div class="tl">
+        <div class="badge">
+          <img class="av" src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png">
+          <span class="nm">SunnyVi</span>
+        </div>
+      </div>
+
+      <!-- 右上 menu + message -->
+      <div class="tr">
+        <span class="gb"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_menu.png"></span>
+        <span class="gb"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_comment.png"></span>
+      </div>
+
+      <!-- 下部 footer -->
+      <div class="footer">
+        <div class="wd-circle-bar">
+          <img class="cover" src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png">
+          <div class="col">
+            <span class="nm">渋谷コミュニティ</span>
+            <span class="ds">渋谷駅周辺のコミュニティ</span>
+          </div>
+        </div>
+        <div class="cluster">
+          <span class="gb"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_search.png"></span>
+          <span class="gb post lg"><img src="../../DesignSystem/assets/icons/icon_camera.png">
+            <span class="addbadge"><img class="ic-white" src="../../DesignSystem/assets/icons/icon_add.png"></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">StoryOverlay · 393 × 852 · After（保護スクリム / ガラス1語彙 / 8pt グリッド）</div>
+
+  <script>
+    // fit-to-viewport scaler (content stays a fixed 393×852, letterboxed)
+    var scaler = document.getElementById('scaler');
+    function fit() {
+      var pad = 56;
+      var s = Math.min((window.innerWidth - pad) / 393, (window.innerHeight - pad) / 852, 1);
+      scaler.style.transform = 'scale(' + s + ')';
+    }
+    window.addEventListener('resize', fit); fit();
+
+    // scene toggle (persisted)
+    var globeEl = document.querySelector('.bg-globe');
+    var photoEl = document.querySelector('.bg-photo');
+    var bG = document.getElementById('t-globe'), bP = document.getElementById('t-photo');
+    function setScene(scene) {
+      var globe = scene !== 'photo';
+      globeEl.style.opacity = globe ? '1' : '0';
+      photoEl.classList.toggle('on', !globe);
+      bG.classList.toggle('on', globe); bP.classList.toggle('on', !globe);
+      try { localStorage.setItem('storyoverlay-scene', scene); } catch (e) {}
+    }
+    bG.onclick = function () { setScene('globe'); };
+    bP.onclick = function () { setScene('photo'); };
+    var saved = 'globe';
+    try { saved = localStorage.getItem('storyoverlay-scene') || 'globe'; } catch (e) {}
+    setScene(saved);
+  </script>
+</body></html>
