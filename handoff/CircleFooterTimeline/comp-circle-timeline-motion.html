@@ -1,0 +1,148 @@
+<!-- @dsCard group="Components" name="CircleTimeline — motion storyboard" subtitle="footer タップ → collapsed → middle → full → 閉じる。遷移条件を矢印注釈" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; padding:24px; gap:18px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:900px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; white-space:nowrap; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+
+  .board { display:flex; align-items:flex-start; gap:0; overflow-x:auto; padding:6px 2px 14px; }
+
+  .step { display:flex; flex-direction:column; align-items:center; gap:10px; flex:none; }
+  .tl-scalebox { position:relative; overflow:hidden; border-radius:16px; flex:none;
+    box-shadow:0 8px 24px rgba(0,0,0,.5); outline:1px solid rgba(255,255,255,.08); outline-offset:-1px; }
+  .tl-phone { position:absolute; top:0; left:0; width:393px; height:852px; transform-origin:top left;
+    background:#0a0a0c; overflow:hidden; }
+  .tl-bg { position:absolute; inset:0; }
+  .tl-bg::after { content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,0) 30%, rgba(0,0,0,.2)); }
+  .tl-tap { position:absolute; left:0; right:0; top:0; display:flex; align-items:flex-end; justify-content:center;
+    padding-bottom:12px; z-index:2; pointer-events:none; }
+  .tl-tap span { font:600 13px var(--font-latin); color:rgba(255,255,255,.6);
+    background:rgba(0,0,0,.32); border-radius:99px; padding:5px 13px; border:1px solid rgba(255,255,255,.12); }
+  .tl-sheet { position:absolute; left:0; right:0; bottom:0; z-index:3;
+    background:rgba(0,0,0,.8); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+    border-radius:16px 16px 0 0; overflow:hidden; }
+  .tl-collapsed-hint { position:absolute; left:0; right:0; bottom:16px; text-align:center; z-index:5;
+    font:600 15px var(--font-latin); color:rgba(255,255,255,.72); }
+
+  .cap { display:flex; flex-direction:column; align-items:center; gap:3px; width:150px; }
+  .cap .nm { font:700 14px var(--font-latin); color:#fff; }
+  .cap .nm.warn { color:var(--state-error); }
+  .cap .frac { font:600 11px var(--font-latin); color:#7ee0a0; font-variant-numeric:tabular-nums; }
+  .cap .jp { font:500 10.5px/1.45 var(--font-jp); color:var(--text-2); text-align:center; }
+
+  /* arrow cell between steps */
+  .arrow { flex:none; width:138px; align-self:stretch; display:flex; flex-direction:column;
+    justify-content:flex-start; padding-top:128px; gap:8px; }
+  .arrow .up, .arrow .dn { font:600 10px/1.4 var(--font-jp); }
+  .arrow .up { color:#8fe6ac; }
+  .arrow .dn { color:var(--text-3); }
+  .arrow .up b, .arrow .dn b { font-weight:800; }
+  .arrow .bar { position:relative; height:2px; background:linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.42)); margin:2px 0; }
+  .arrow .bar::after { content:""; position:absolute; right:-1px; top:-4px; border:5px solid transparent;
+    border-left-color:rgba(255,255,255,.5); }
+  .arrow.single { padding-top:150px; }
+  .arrow .lead { font:600 10.5px/1.5 var(--font-jp); color:#fff; }
+  .arrow .lead b { color:#8fe6ac; font-weight:800; }
+
+  .footnote { font:500 11px/1.7 var(--font-jp); color:var(--text-3); max-width:900px; }
+  .footnote b { color:rgba(255,255,255,.8); font-weight:700; }
+  .eyebrow { text-shadow:none; }
+
+  /* footer (WdCircleFooter standart) inside the first phone */
+  .ftr-wrap { position:absolute; left:0; right:0; bottom:0; z-index:3; padding:120px 12px 22px;
+    background:linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 100%); }
+  .ftr-vstack { display:flex; flex-direction:column; align-items:flex-end; gap:16px; }
+</style></head>
+<body>
+  <div class="eyebrow">CircleTimeline — モーション storyboard（フッタータップ → ドラッグ段階 → 閉じる）</div>
+  <div class="lede"><b>WdCircleBar</b> タップで <span class="tok">showCircleDetail()</span> がシートを起動（初期 fraction = <b>middle 0.5</b>）。以降は縦ドラッグで <b>collapsed ⇄ middle ⇄ full</b> を行き来し、最小段からさらに下げると <b>dismiss</b>。矢印上段＝展開方向（<span style="color:#8fe6ac">↑</span>）、下段＝収納/閉じる方向の条件。</div>
+
+  <div class="board" id="board"></div>
+
+  <div class="footnote">
+    フリック判定は <span class="tok">|velocity| &gt; 800</span>、それ以外はドラッグを離した位置で <span class="tok">_snapToNearest</span>（&lt;0.125 dismiss / 0.125–0.375 collapsed / 0.375–0.71 middle / 0.71– full）。<b>edit タップ → onTimelinePostTap</b> は同じシートを<b>投稿モード</b>で起動（最上部にインライン投稿フォーム）。<b>camera タップ → onStoryPostTap</b> は別フロー（StoryPost エディタ）でタイムラインではない。内側リストのスクロールによる full 化は <span class="tok">_onScroll</span> が空＝<b>未配線</b>。
+  </div>
+
+  <script src="sheet-render.js"></script>
+  <script>
+    const S = 0.30;
+    const FR = TLSheet.FRAC;
+    const board = document.getElementById('board');
+
+    function scaleBox(phone) {
+      const box = document.createElement('div'); box.className = 'tl-scalebox';
+      box.style.width = (393 * S) + 'px'; box.style.height = (852 * S) + 'px';
+      phone.style.transform = 'scale(' + S + ')';
+      box.appendChild(phone);
+      return box;
+    }
+    function step(phone, nm, frac, jp, warn) {
+      const st = document.createElement('div'); st.className = 'step';
+      st.appendChild(scaleBox(phone));
+      const cap = document.createElement('div'); cap.className = 'cap';
+      cap.innerHTML = '<span class="nm' + (warn ? ' warn' : '') + '">' + nm + '</span>' +
+        (frac ? '<span class="frac">' + frac + '</span>' : '') + '<span class="jp">' + jp + '</span>';
+      st.appendChild(cap);
+      board.appendChild(st);
+    }
+    function arrow(opts) {
+      const a = document.createElement('div'); a.className = 'arrow' + (opts.single ? ' single' : '');
+      if (opts.single) {
+        a.innerHTML = '<div class="lead">' + opts.lead + '</div><div class="bar"></div>';
+      } else {
+        a.innerHTML = '<div class="up">' + opts.up + '</div><div class="bar"></div><div class="dn">' + opts.dn + '</div>';
+      }
+      board.appendChild(a);
+    }
+
+    /* ----- frame 0: WdCircleFooter (standart) ----- */
+    function buildFooterPhone() {
+      const phone = document.createElement('div'); phone.className = 'tl-phone';
+      const bg = document.createElement('div'); bg.className = 'tl-bg';
+      const im = document.createElement('img'); im.src = TLSheet.SAMPLE.photo;
+      im.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+      bg.appendChild(im); phone.appendChild(bg);
+      const wrap = document.createElement('div'); wrap.className = 'ftr-wrap';
+      wrap.innerHTML =
+        '<div class="ftr-vstack">' +
+          '<div class="wd-icon-btn" style="width:55px;height:55px;"><img src="../assets/icons/icon_edit.png" style="width:44%;height:44%;object-fit:contain;"></div>' +
+          '<div class="wd-footer" style="width:100%;">' +
+            '<div class="wd-circle-bar" style="flex:1;min-width:0;">' +
+              '<img class="cover" src="' + TLSheet.SAMPLE.avatar + '">' +
+              '<div class="col" style="gap:2px;min-width:0;">' +
+                '<span class="nm">渋谷コミュニティ</span><span class="ds">渋谷駅周辺のコミュニティ</span>' +
+              '</div>' +
+            '</div>' +
+            '<div class="wd-icon-btn color" style="width:55px;height:55px;flex:none;"><img src="../assets/icons/icon_camera.png" style="width:44%;height:44%;object-fit:contain;"><span class="wd-badge"><img src="../assets/icons/icon_camera.png" style="width:11px;height:11px;"></span></div>' +
+          '</div>' +
+        '</div>';
+      phone.appendChild(wrap);
+      return phone;
+    }
+
+    // 0. footer
+    step(buildFooterPhone(), 'WdCircleFooter', '', 'circle-bar ＋ camera。上段 edit は投稿モード起動');
+    arrow({ single: true, lead: 'WdCircleBar タップ →<br><b>シート起動</b>（既定 middle 0.5）' });
+
+    // 1. collapsed
+    step(TLSheet.buildPhone({ fraction: FR.collapsed, showMapShare: true }).phone, 'collapsed', '0.25', 'identity 主体。本体タップ=onHeaderTap');
+    arrow({ up: '<b>↑</b> 上ドラッグ / 上フリック → <b>middle</b>', dn: '<b>↓</b> drag &lt; 0.125 → <b>dismiss</b>' });
+
+    // 2. middle
+    step(TLSheet.buildPhone({ fraction: FR.middle, showMapShare: true }).phone, 'middle', '0.50', '初期表示。投稿フィード（テキスト＋画像）');
+    arrow({ up: '<b>↑</b> drag &gt; 0.71 / 上フリック → <b>full</b>', dn: '<b>↓</b> drag &lt; 0.375 → collapsed' });
+
+    // 3. full
+    step(TLSheet.buildPhone({ fraction: FR.full }).phone, 'full', '0.92', 'タイムライン全画面（clamp 上限）');
+    arrow({ single: true, lead: '下フリック → middle ／<br>close・外タップ → <b>dismiss</b>' });
+
+    // 4. dismiss
+    step(TLSheet.buildPhone({ fraction: FR.collapsed, dismissing: true }).phone, 'dismiss', '→ 0', 'シートを下へ退避し onDismiss', true);
+  </script>
+</body></html>

@@ -1,0 +1,243 @@
+<!-- @dsCard group="Components" name="StoryCommentSheet — light" subtitle="ダーク姉妹=CircleTimelineSheet と同一構文(feed＋composer)の面反転ライト版。コメント専用(画像投稿/表示なし)。共有 part=composer/textfield。default / empty / 入力中(KB)" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body { background:#0d0d0f; padding:24px; gap:20px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:820px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; white-space:nowrap; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+  .note { font:500 11px/1.7 var(--font-jp); color:var(--text-2); max-width:820px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:13px 16px; }
+  .note b { color:#fff; font-weight:700; }
+  .note .tag { display:inline-block; font:800 9px/1 var(--font-latin); letter-spacing:.1em; text-transform:uppercase;
+    color:#fff; background:var(--gradient-colorful-linear); border-radius:5px; padding:4px 7px; margin-right:8px; vertical-align:1px; }
+
+  .frames { display:flex; flex-wrap:wrap; gap:28px 22px; align-items:flex-start; }
+  .frame { display:flex; flex-direction:column; gap:10px; width:197px; }
+
+  /* phone shell (native 393×852, scaled into .sc-scalebox) */
+  .sc-scalebox { position:relative; overflow:hidden; border-radius:20px; flex:none;
+    box-shadow:0 10px 34px rgba(0,0,0,.5); outline:1px solid rgba(255,255,255,.08); outline-offset:-1px; }
+  .sc-phone { position:absolute; top:0; left:0; width:393px; height:852px; transform-origin:top left;
+    background:#0a0a0c; overflow:hidden; }
+  .sc-bg { position:absolute; inset:0; }
+  .sc-bg::after { content:""; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,.30), rgba(0,0,0,0) 28%, rgba(0,0,0,.28)); }
+  .sc-tap { position:absolute; left:0; right:0; top:0; display:flex; align-items:flex-end; justify-content:center;
+    padding-bottom:14px; z-index:2; pointer-events:none; }
+  .sc-tap span { font:600 12px var(--font-latin); color:rgba(255,255,255,.62); letter-spacing:.02em;
+    background:rgba(0,0,0,.32); border-radius:99px; padding:5px 12px; backdrop-filter:blur(2px);
+    border:1px solid rgba(255,255,255,.12); }
+
+  /* === LIGHT sheet (the divergence from CircleTimeline's dark glass) ====== */
+  .sc-sheet { position:absolute; left:0; right:0; bottom:0; z-index:3;
+    background:rgba(247,247,249,.86); backdrop-filter:blur(26px) saturate(1.35); -webkit-backdrop-filter:blur(26px) saturate(1.35);
+    border-radius:18px 18px 0 0; overflow:hidden; box-shadow:0 -10px 40px rgba(0,0,0,.28);
+    border-top:1px solid rgba(255,255,255,.7); }
+  .sc-caret { display:inline-block; width:2px; height:17px; background:var(--grad-pink); border-radius:1px;
+    vertical-align:-3px; animation:sc-blink 1s steps(1) infinite; }
+  @keyframes sc-blink { 50% { opacity:0; } }
+
+  /* caption under each phone */
+  .cap { display:flex; flex-direction:column; gap:5px; }
+  .cap .st { display:flex; align-items:baseline; gap:8px; }
+  .cap .st .nm { font:700 14px var(--font-latin); color:#fff; }
+  .cap .st .frac { font:600 11px var(--font-latin); color:#7ee0a0; font-variant-numeric:tabular-nums; }
+  .cap .jp { font:500 11px/1.5 var(--font-jp); color:var(--text-2); }
+  .cap .meta { font:500 10px/1.5 var(--font-latin); color:var(--text-3); letter-spacing:.01em; }
+  .cap .meta b { color:rgba(255,255,255,.82); font-weight:700; }
+
+  .spec { display:grid; grid-template-columns:120px 1fr; gap:7px 16px; max-width:820px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:18px 20px; }
+  .spec .k { font:700 11px var(--font-latin); color:#7ee0a0; padding-top:1px; }
+  .spec .d { font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .spec .d b { color:#fff; font-weight:700; }
+</style></head>
+<body>
+  <div class="eyebrow">StoryCommentSheet — コメントシート（ライト · 実装が正）</div>
+  <div class="lede"><b>CircleTimeline ドラッグシート</b>と同じ構文（固定ヘッダー＋フィード＋下端 composer）を踏襲しつつ、面を<b>ライト（フロスト白）</b>に反転したコメント専用シート。投稿（Story）への返信コメントを時系列で表示し、下端の固定 composer から送信する。<b>画像の投稿・表示は持たない</b>（テキストコメントのみ）＝ composer に画像添付ボタンを置かず、フィードは画像投稿フレームを描かない。背面は StoryViewer が透け、シート外タップで <span class="tok">onDismiss</span>。</div>
+
+  <div class="note"><span class="tag">CircleTimeline との差分</span>①面色を<b>ダーク → ライト</b>（フロスト白 <span class="tok">rgba(247,247,249,.86)</span> + blur26）。テキストは <b>ink</b>（#111 / 黒60% / 黒45%）。②<b>画像投稿フレームを廃止</b>し feed はテキストコメント行のみ。③composer から<b>画像添付ボタンを削除</b>（コメント＝テキスト専用）。④唯一のアクセントは据え置き：送信ボタンの<b>colorful gradient</b>（活性時）。⑤ヘッダーはサークル identity ではなく <b>「コメント」＋件数＋close</b>。⑥下端 composer・丸入力欄・送信のジオメトリは timeline と同寸（avatar34 / field42 / send42）。</div>
+
+  <div class="frames" id="frames"></div>
+
+  <div class="lede" style="margin-top:4px;">レイアウト数値（基準フレーム <span class="tok">393 × 852</span>・実装が正）。</div>
+  <div class="spec">
+    <span class="k">sheet</span><span class="d">下端ドック・角丸 <b>18 18 0 0</b>。フロスト白 <span class="tok">rgba(247,247,249,.86)</span> + <span class="tok">backdrop blur26 saturate1.35</span>。上辺ハイライト 1px・上方向シャドウ。grab handle <b>36×4</b>（黒16%）</span>
+    <span class="k">header</span><span class="d">高さ <b>52</b>。「コメント」<span class="tok">jp 700 16 #111</span> ＋ 件数 <span class="tok">latin 600 13 黒45%</span> ＋ 右に close（黒5% 丸ボタン 36）。下に hairline <span class="tok">黒8%</span></span>
+    <span class="k">comment 行</span><span class="d">avatar <b>34</b> 丸 ＋ col[ name <span class="tok">jp 700 13 #111</span> ・ time <span class="tok">latin 400 10 黒40%</span>（右寄せ）／ text <span class="tok">jp 400 13/1.45 黒72%</span> ]。行間 gap <b>18</b>・左右 padding <b>20</b>。<b>画像なし</b></span>
+    <span class="k">empty</span><span class="d">中央に <span class="tok">jp 400 14 黒40%</span>「まだコメントがありません」</span>
+    <span class="k">composer</span><span class="d">高さ <b>64</b>・上辺 hairline <span class="tok">黒8%</span>。row[ my avatar 34 ・ pill field（黒5% fill / 黒10% border / radius99 / 高さ42・dark text）・ send 42 ]。<b>画像添付なし</b></span>
+    <span class="k">send</span><span class="d">活性＝<span class="tok">--gradient-colorful</span> ＋ glow。非活性＝黒6% fill ＋ next アイコン 黒30%</span>
+    <span class="k">dismiss</span><span class="d">シート外の透明領域タップ → <span class="tok">onDismiss</span>（背面 StoryViewer が透ける）</span>
+  </div>
+
+<script>
+const SCREEN_W = 393, SCREEN_H = 852;
+const ICONS = 'assets/icons';
+const KB_H = 300;
+const HEADER_H = 52, COMPOSER_H = 64, HANDLE_H = 22, TOP_PAD = 0;
+const ME = 'https://i.pravatar.cc/64?img=68';
+const PHOTO = 'https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png';
+const COMMENTS = [
+  { nm:'Kawaii',    av:'https://i.pravatar.cc/64?img=32', tm:'2分前',  tx:'ここはどこですか？気になります！' },
+  { nm:'SunnyVi',   av:'https://i.pravatar.cc/64?img=5',  tm:'5分前',  tx:'渋谷の夕暮れ、最高でした。また行きたい。' },
+  { nm:'Dreamy',    av:'https://i.pravatar.cc/64?img=12', tm:'12分前', tx:'いい雰囲気ですね。' },
+  { nm:'foodie',    av:'https://i.pravatar.cc/64?img=48', tm:'20分前', tx:'近くにおすすめのカフェありますか？' },
+  { nm:'Pixel',     av:'https://i.pravatar.cc/64?img=15', tm:'25分前', tx:'静かで落ち着く場所。' },
+  { nm:'ZenGarden', av:'https://i.pravatar.cc/64?img=23', tm:'31分前', tx:'写真ありがとうございます！' },
+];
+
+function el(t,cls,css){ const n=document.createElement(t); if(cls)n.className=cls; if(css)n.style.cssText=css; return n; }
+function img(src,css){ const n=el('img',null,css); n.src=src; n.loading='eager'; n.onerror=()=>{n.style.visibility='hidden';}; return n; }
+function icon(name,css){ return img(`${ICONS}/icon_${name}.png`,css); }
+
+function buildHandle(){
+  const w = el('div',null,`height:${HANDLE_H}px;flex:none;display:flex;align-items:center;justify-content:center;`);
+  w.appendChild(el('div',null,'width:36px;height:4px;border-radius:99px;background:rgba(0,0,0,.16);'));
+  return w;
+}
+function buildHeader(count){
+  const row = el('div',null,`height:${HEADER_H}px;flex:none;display:flex;align-items:center;padding:0 12px 0 20px;`);
+  const ti = el('div',null,'font-family:var(--font-jp);font-weight:700;font-size:16px;color:#111;');
+  ti.textContent = 'コメント';
+  const ct = el('div',null,'margin-left:8px;font-family:var(--font-latin);font-weight:600;font-size:13px;color:rgba(0,0,0,.45);font-variant-numeric:tabular-nums;');
+  ct.textContent = count;
+  const close = el('div',null,'margin-left:auto;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.05);display:flex;align-items:center;justify-content:center;');
+  const ci = icon('close','width:40%;height:40%;object-fit:contain;'); ci.style.filter='brightness(0) opacity(.5)';
+  close.appendChild(ci);
+  row.append(ti, ct, close);
+  return row;
+}
+function buildDivider(){
+  return el('div',null,'height:1px;flex:none;margin:0 20px;background:rgba(0,0,0,.08);');
+}
+function buildComment(c){
+  const row = el('div',null,'display:flex;gap:10px;align-items:flex-start;');
+  const av = img(c.av,'width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:#ddd;');
+  const col = el('div',null,'min-width:0;flex:1;');
+  const top = el('div',null,'display:flex;align-items:baseline;gap:8px;');
+  const nm = el('span',null,'font-family:var(--font-jp);font-weight:700;font-size:13px;color:#111;'); nm.textContent=c.nm;
+  const tm = el('span',null,'margin-left:auto;font-family:var(--font-latin);font-weight:400;font-size:10px;color:rgba(0,0,0,.4);'); tm.textContent=c.tm;
+  top.append(nm, tm);
+  const tx = el('div',null,'font-family:var(--font-jp);font-weight:400;font-size:13px;line-height:1.45;color:rgba(0,0,0,.72);margin-top:2px;'); tx.textContent=c.tx;
+  col.append(top, tx);
+  row.append(av, col);
+  return row;
+}
+function buildFeed(feedH, empty){
+  const box = el('div',null,`height:${feedH}px;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 4%,#000 95%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 4%,#000 95%,transparent 100%);`);
+  if(empty){
+    const e = el('div',null,'height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--font-jp);font-weight:400;font-size:14px;color:rgba(0,0,0,.4);');
+    e.textContent = 'まだコメントがありません';
+    box.appendChild(e); return box;
+  }
+  const list = el('div',null,'display:flex;flex-direction:column;gap:18px;padding:14px 20px 16px;');
+  COMMENTS.forEach(c => list.appendChild(buildComment(c)));
+  box.appendChild(list);
+  return box;
+}
+/* bottom-docked comment composer — LIGHT, no image attach (comment = text only) */
+function buildComposer(o){
+  o = o || {};
+  const wrap = el('div',null,`height:${COMPOSER_H}px;flex:none;display:flex;align-items:center;gap:10px;padding:0 16px;border-top:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.35);`);
+  const av = img(ME,'width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none;background:#ddd;');
+  const field = el('div',null,'flex:1;min-width:0;height:42px;border-radius:99px;background:rgba(0,0,0,.05);border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;padding:0 16px;font-family:var(--font-jp);font-size:14px;white-space:nowrap;overflow:hidden;');
+  const hasText = !!o.typed;
+  if(hasText){
+    field.style.color = '#111';
+    const t = el('span',null,''); t.textContent = o.typed; field.appendChild(t);
+    field.appendChild(el('span','sc-caret'));
+  } else {
+    field.style.color = 'rgba(0,0,0,.4)';
+    if(o.active){ field.appendChild(el('span','sc-caret')); const ph=el('span',null,'margin-left:1px;'); ph.textContent='コメントを入力…'; field.appendChild(ph); }
+    else { field.textContent = 'コメントを入力…'; }
+  }
+  const send = el('div',null,`width:42px;height:42px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;${hasText?'background:var(--gradient-colorful);box-shadow:0 2px 12px rgba(208,160,82,.45);':'background:rgba(0,0,0,.06);'}`);
+  const si = icon('next',`width:42%;height:42%;object-fit:contain;`);
+  if(!hasText) si.style.filter='brightness(0) opacity(.3)';
+  send.appendChild(si);
+  wrap.append(av, field, send);
+  return wrap;
+}
+/* iOS keyboard (preview only) */
+function buildKeyboard(){
+  const kb = el('div',null,`position:absolute;left:0;right:0;bottom:0;z-index:5;height:${KB_H}px;display:flex;flex-direction:column;background:#d1d4db;padding:8px 3px 0;`);
+  const cand = el('div',null,'height:38px;flex:none;display:flex;align-items:center;');
+  ['コメント','ここ','是非'].forEach((c,i)=>{ const w=el('div',null,`flex:1;text-align:center;font-family:var(--font-jp);font-size:14px;color:#111;${i?'border-left:1px solid rgba(0,0,0,.12);':''}`); w.textContent=c; cand.appendChild(w); });
+  kb.appendChild(cand);
+  const rows = [['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['shift','z','x','c','v','b','n','m','del'],['123','かな','space','改行']];
+  rows.forEach((row,ri)=>{
+    const r = el('div',null,`flex:1;display:flex;gap:6px;padding:5px ${ri===1?18:3}px;justify-content:center;`);
+    row.forEach(k=>{
+      const special = ['shift','del','123','かな','space','改行'].includes(k);
+      const flex = k==='space'?'5':(special?'1.5':'1');
+      const key = el('div',null,`flex:${flex};display:flex;align-items:center;justify-content:center;height:100%;border-radius:5px;background:${special?'rgba(170,174,182,.9)':'#fff'};box-shadow:0 1px 0 rgba(0,0,0,.25);font-family:var(--font-jp);font-size:${special&&k.length>1?12:17}px;color:#111;`);
+      key.textContent = (k==='del'?'⌫':k==='shift'?'⇧':k==='space'?'':k);
+      r.appendChild(key);
+    });
+    kb.appendChild(r);
+  });
+  const hi = el('div',null,'height:18px;flex:none;display:flex;align-items:center;justify-content:center;');
+  hi.appendChild(el('div',null,'width:120px;height:5px;border-radius:99px;background:rgba(0,0,0,.45);'));
+  kb.appendChild(hi);
+  return kb;
+}
+
+function buildPhone(o){
+  o = Object.assign({ fraction:0.56, empty:false, keyboard:false, typed:'' }, o);
+  const sheetH = o.keyboard ? (SCREEN_H - KB_H) : SCREEN_H * o.fraction;
+  const phone = el('div','sc-phone');
+  const bg = el('div','sc-bg'); bg.appendChild(img(PHOTO,'width:100%;height:100%;object-fit:cover;')); phone.appendChild(bg);
+
+  if(!o.keyboard){
+    const tap = el('div','sc-tap',`bottom:${sheetH}px;`);
+    tap.innerHTML = '<span>外タップで onDismiss</span>';
+    phone.appendChild(tap);
+  }
+
+  const sheet = el('div','sc-sheet',`height:${sheetH}px;bottom:${o.keyboard?KB_H:0}px;`);
+  const inner = el('div',null,'position:absolute;inset:0;display:flex;flex-direction:column;');
+  inner.appendChild(buildHandle());
+  inner.appendChild(buildHeader(o.empty ? '0' : String(COMMENTS.length)));
+  inner.appendChild(buildDivider());
+  const feedH = Math.max(40, sheetH - HANDLE_H - HEADER_H - 1 - COMPOSER_H);
+  inner.appendChild(buildFeed(feedH, o.empty));
+  inner.appendChild(buildComposer({ typed:o.typed, active:o.keyboard }));
+  sheet.appendChild(inner);
+  if(o.keyboard) phone.appendChild(buildKeyboard());
+  phone.appendChild(sheet);
+  return { phone, sheetH, feedH };
+}
+function mount(host,o,scale){
+  const { phone, sheetH, feedH } = buildPhone(o);
+  const box = el('div','sc-scalebox',`width:${SCREEN_W*scale}px;height:${SCREEN_H*scale}px;`);
+  phone.style.transform = `scale(${scale})`;
+  box.appendChild(phone); host.appendChild(box);
+  return { sheetH, feedH };
+}
+
+const SCALE = 0.5;
+const frames = [
+  { fraction:0.56, title:'default', jp:'StoryViewer から開いた既定。コメント時系列（新しい順）＋下端 composer（非活性）', band:'sheet 0.56 × H', metaParts:['header 52','feed','composer 64'] },
+  { fraction:0.42, empty:true, title:'empty', jp:'コメント未投稿。中央に空状態メッセージ。composer は常時表示', band:'sheet 0.42 × H', metaParts:['header 52','empty','composer 64'] },
+  { keyboard:true, typed:'ここ行ってみたいです', title:'入力中（KB）', jp:'入力欄タップ→キーボード起動。シートは KB 上にドック（H−300）。送信が gradient で活性', band:'keyboard up · typed', metaParts:['sheet H−300','composer 64','keyboard 300'] },
+];
+const host = document.getElementById('frames');
+frames.forEach(f=>{
+  const frame = el('div','frame');
+  const { sheetH, feedH } = mount(frame, f, SCALE);
+  const dim = f.keyboard ? ((SCREEN_H-KB_H)+' + KB 300') : (f.fraction+' × H = '+Math.round(SCREEN_H*f.fraction)+'px');
+  const parts = f.metaParts.map(p => p==='feed' ? ('feed '+Math.round(feedH)) : p);
+  const cap = el('div','cap');
+  cap.innerHTML =
+    '<div class="st"><span class="nm">'+f.title+'</span><span class="frac">'+dim+'</span></div>'+
+    '<div class="jp">'+f.jp+'</div>'+
+    '<div class="meta">'+f.band+' · <b>'+parts.join(' / ')+'</b></div>';
+  frame.appendChild(cap);
+  host.appendChild(frame);
+});
+</script>
+</body></html>

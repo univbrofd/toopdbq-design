@@ -1,0 +1,35 @@
+/* Shared styling for design-system specimen cards. Pair with ../colors_and_type.css */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; }
+body {
+  font-family: var(--font-latin);
+  background: #0d0d0f;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.card-photo-bg {            /* for cards that want a glass-over-photo feel */
+  background:
+    linear-gradient(160deg, rgba(0,0,0,0.45), rgba(0,0,0,0.7)),
+    radial-gradient(120% 120% at 80% 110%, #3a2a52, #11131f 70%);
+}
+.row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow {
+  font-family: var(--font-latin); font-weight: 600; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3);
+}
+.mono { font-family: var(--font-latin); font-size: 10.5px; color: var(--fg-2); letter-spacing: .01em; }
+
+/* swatches */
+.sw { display: flex; flex-direction: column; gap: 7px; }
+.sw .chip {
+  width: 100%; height: 56px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.sw .nm { font-weight: 600; font-size: 11.5px; color: var(--white); }
+.sw .hx { font-size: 10px; color: var(--fg-2); font-variant-numeric: tabular-nums; }
+.grid { display: grid; gap: 12px; }

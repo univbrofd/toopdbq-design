@@ -1,0 +1,56 @@
+<!-- @dsCard group="Components" name="WdCircleFooter" subtitle="circle-bar が幅を取り、主役の hero action は1つ。Universe / StoryViewer 共通フッタ" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(120deg,rgba(0,0,0,.2),rgba(0,0,0,.55)), url('https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png');
+    background-size:cover; background-position:center; gap:18px; padding:24px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:760px; text-shadow:0 1px 3px #000; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+
+  /* footer は下端 chrome。保護スクリムの上に乗る前提で組む */
+  .stage { position:relative; width:393px; border-radius:18px; overflow:hidden;
+    padding:120px 12px 18px; background:linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 100%); }
+
+  /* rail: 上段の edit (onTimelinePostTap!=null のときだけ) は右寄せ縦積み */
+  .vstack { display:flex; flex-direction:column; align-items:flex-end; gap:16px; }
+
+  .variants { display:grid; grid-template-columns:128px 1fr; gap:8px 16px; align-items:start; max-width:760px; }
+  .variants .k { font:700 11px var(--font-latin); color:#7ee0a0; padding-top:1px; }
+  .variants .d { font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .variants .d b { color:#fff; font-weight:700; }
+</style></head>
+<body>
+  <div class="eyebrow" style="text-shadow:0 1px 4px #000;">WdCircleFooter — サークル identity ＋ hero action（下端 chrome）</div>
+  <div class="lede"><b>WdCircleBar</b> が幅いっぱいに伸び、右に <b>hero action を1つ</b>だけ置く（taste 原則3: 主役は1つ）。Universe / StoryViewer 共通の下端フッタ。<span class="tok">onTimelinePostTap != null</span> のときだけ上段に投稿(edit)ボタンを右寄せで積む。要素間 gap は <b>8</b>（クラスタ内）/ <b>16</b>（縦積み・バー↔ボタン）。</div>
+
+  <!-- standart: 上段 edit(任意) + [circle-bar + camera(badgeColor)] -->
+  <div class="stage">
+    <div class="vstack">
+      <div class="wd-icon-btn" style="width:55px;height:55px;"><img src="../assets/icons/icon_edit.png"></div>
+      <div class="wd-footer" style="width:100%;">
+        <div class="wd-circle-bar" style="flex:1; min-width:0;">
+          <img class="cover" src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png">
+          <div class="col" style="gap:2px; min-width:0;">
+            <span class="nm">渋谷コミュニティ</span>
+            <span class="ds">渋谷駅周辺のコミュニティ</span>
+          </div>
+        </div>
+        <div class="wd-icon-btn color" style="width:55px;height:55px;flex:none;"><img src="../assets/icons/icon_camera.png"><span class="wd-badge"><img src="../assets/icons/icon_camera.png"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lede" style="margin-top:-4px;">下段 camera は <b><span class="tok">badgeColor</span></b>（カラフル放射グラデ ＋ camera バッジ）＝ StoryPost 投稿へ。上段 edit は <span class="tok">standart</span>（ガラスのみ・バッジ無し）＝ CircleTimeline を timeline 投稿付きで開く。検索を footer に増設しない（散らかり回避・主役は投稿1つ）。</div>
+
+  <div class="variants">
+    <span class="k">standart</span><span class="d">上段 edit(<span class="tok">standart</span>, 任意) ＋ [ <b>circle-bar</b> ＋ camera(<span class="tok">badgeColor</span>) ]。共通フッタの既定</span>
+    <span class="k">simple</span><span class="d"><b>circle-bar</b> のみ（アクション無し）</span>
+    <span class="k">withPost</span><span class="d">[ circle-bar ＋ camera(<span class="tok">badge</span>＝add) ]。AR 検索内のサークルフィルタ用</span>
+    <span class="k">withClose</span><span class="d">上段 close ＋ [ circle-bar ＋ camera(<span class="tok">badge</span>) ]</span>
+    <span class="k">withRelation</span><span class="d">[ circle-bar ＋ 任意 trailing(55×55) ]。Profile の関係ボタン slot</span>
+  </div>
+</body></html>
