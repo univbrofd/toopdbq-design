@@ -1,0 +1,257 @@
+<!-- @dsCard group="Components" name="ThreeDTerrestrialView — ステージビーコン" subtitle="シンプル・未来的に再設計。地点に刺さったホログラム円盤ステージ＋その上に置いた3Dオブジェクト。装飾を削ぎ、薄いリング・細い光の軸・ブランドグラデの淡いアンダーグローだけ。" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body{
+    background:radial-gradient(125% 95% at 50% -8%, #0d0e14 0%, #08080c 55%, #050507 100%);
+    padding:28px 30px 36px; gap:24px;
+  }
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      radial-gradient(1px 1px at 16% 26%, rgba(255,255,255,.45), transparent),
+      radial-gradient(1px 1px at 74% 16%, rgba(255,255,255,.32), transparent),
+      radial-gradient(1px 1px at 42% 70%, rgba(255,255,255,.26), transparent),
+      radial-gradient(1px 1px at 88% 56%, rgba(255,255,255,.28), transparent); }
+  body > *{ position:relative; z-index:1; }
+
+  .head{ display:flex; flex-direction:column; gap:9px; max-width:1000px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:300 24px/1.15 var(--font-jp); color:#fff; letter-spacing:.01em; }
+  .h1 b{ font-weight:700; }
+  .h1 .en{ font:500 11px/1 var(--font-latin); letter-spacing:.22em; text-transform:uppercase;
+    color:rgba(255,255,255,.5); }
+  .lede{ font:400 12.5px/1.9 var(--font-jp); color:var(--text-2); max-width:880px; }
+  .lede b{ color:#fff; font-weight:600; }
+
+  /* ===== map stage shell ===== */
+  .stage{ position:relative; overflow:hidden; border-radius:16px;
+    border:1px solid rgba(255,255,255,.08);
+    background:
+      radial-gradient(130% 80% at 50% 116%, #15161f 0%, #0c0c12 52%, transparent 74%),
+      linear-gradient(180deg, #090a0e, #060609); }
+  .floor{ position:absolute; left:-25%; right:-25%; bottom:-26%; top:34%;
+    transform:rotateX(66deg); transform-origin:50% 100%;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 44px, rgba(255,255,255,.05) 44px 45px),
+      repeating-linear-gradient(90deg, transparent 0 44px, rgba(255,255,255,.05) 44px 45px);
+    -webkit-mask:radial-gradient(70% 80% at 50% 60%, #000 30%, transparent 86%);
+    mask:radial-gradient(70% 80% at 50% 60%, #000 30%, transparent 86%); }
+  .tag{ position:absolute; top:12px; left:13px; z-index:9;
+    font:600 8.5px/1 var(--font-latin); letter-spacing:.16em; text-transform:uppercase;
+    color:var(--text-3); }
+
+  /* =========================================================
+     STAGE BEACON — minimal / futuristic
+     anchor: .beacon → bottom of stack = ground contact point
+     ========================================================= */
+  .beacon{ position:absolute; bottom:var(--base, 44px); width:0; }
+  .beacon > *{ position:absolute; left:50%; transform:translateX(-50%); }
+
+  /* ground contact point (設置点円は削除) — keep only a tiny point where the stem meets ground */
+  .pinpt{ width:4px; height:4px; border-radius:50%; bottom:-1px; background:#fff;
+    box-shadow:0 0 8px 2px rgba(255,255,255,.6); }
+
+  /* 光の軸 — thin light stem that pierces from the point up to the stage */
+  .stem{ width:1.5px; height:var(--stem, 120px); bottom:0;
+    background:linear-gradient(0deg, rgba(255,255,255,.95), rgba(255,255,255,.38) 55%, rgba(255,255,255,.08));
+    box-shadow:0 0 6px rgba(255,255,255,.45); }
+
+  /* ステージ — floating holographic disc */
+  .platform{ bottom:var(--stageb, 110px); width:var(--sw, 120px);
+    height:calc(var(--sw, 120px) * .34); }
+  .platform .ring{ position:absolute; inset:0; border-radius:50%;
+    border:1px solid rgba(255,255,255,.62);
+    background:radial-gradient(60% 120% at 50% 32%, rgba(255,255,255,.12), rgba(255,255,255,.02) 62%, transparent 74%);
+    box-shadow:0 0 16px rgba(255,255,255,.18), inset 0 1px 1px rgba(255,255,255,.5); }
+  .platform .ring.inner{ inset:23% 32%; border-color:rgba(255,255,255,.62);
+    background:radial-gradient(60% 120% at 50% 34%, rgba(255,255,255,.10), rgba(255,255,255,.015) 62%, transparent 74%);
+    box-shadow:0 0 11px rgba(255,255,255,.14), inset 0 1px 1px rgba(255,255,255,.42); }
+  .platform .glow{ position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+    width:78%; height:150%; border-radius:50%; z-index:-1; filter:blur(11px); opacity:.5;
+    background:radial-gradient(closest-side, rgba(255,255,255,.55), rgba(255,255,255,.06) 60%, transparent 76%); }
+
+  /* 3Dオブジェクト — the object placed on the stage */
+  .object{ bottom:var(--objb, 116px); width:var(--objw, 64px); height:auto; display:block;
+    filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)) drop-shadow(0 0 9px rgba(255,255,255,.22));
+    animation:hover 4.2s var(--ease, ease-in-out) infinite; }
+  .object.d1{ animation-delay:-1.4s; }
+  .object.d2{ animation-delay:-2.7s; }
+  @media (prefers-reduced-motion: reduce){ .object{ animation:none; } }
+  @keyframes hover{ 0%,100%{ transform:translateX(-50%) translateY(0); } 50%{ transform:translateX(-50%) translateY(-5px); } }
+
+  /* main accent — brighter white (monochrome) */
+  .beacon.main .ring{ border-color:rgba(255,255,255,.88);
+    box-shadow:0 0 22px rgba(255,255,255,.3), inset 0 1px 1px rgba(255,255,255,.7); }
+  .beacon.main .glow{ opacity:.85; filter:blur(14px); }
+  .beacon.main .stem{ background:linear-gradient(0deg, #fff, rgba(255,255,255,.45) 55%, rgba(255,255,255,.1));
+    box-shadow:0 0 8px rgba(255,255,255,.6); }
+  .beacon.main .pinpt{ background:#fff; box-shadow:0 0 10px 2px rgba(255,255,255,.85); }
+
+  /* tiny labels for the hero */
+  .lbl{ position:absolute; z-index:8; display:flex; align-items:center; gap:8px; }
+  .lbl .ln{ height:1px; width:30px; background:linear-gradient(90deg, rgba(255,255,255,.35), transparent); }
+  .lbl.r .ln{ background:linear-gradient(270deg, rgba(255,255,255,.35), transparent); }
+  .lbl .tx{ font:500 9.5px/1.35 var(--font-jp); color:#fff; white-space:nowrap; }
+  .lbl .tx em{ display:block; font:600 7.5px/1.3 var(--font-latin); letter-spacing:.12em;
+    text-transform:uppercase; color:var(--text-3); font-style:normal; margin-top:1px; }
+
+  /* ===== layout ===== */
+  .hero{ max-width:1000px; }
+  .hero .stage{ height:380px; }
+
+  .rail{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:1000px; }
+  .card{ display:flex; flex-direction:column;
+    background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.012));
+    border:1px solid rgba(255,255,255,.09); border-radius:16px; overflow:hidden; }
+  .card .cap{ display:flex; align-items:center; justify-content:space-between;
+    padding:13px 15px 11px; }
+  .card .cap .nm{ font:600 14px var(--font-jp); color:#fff; }
+  .card .cap .role{ font:600 9px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase;
+    color:var(--text-3); border:1px solid rgba(255,255,255,.14); border-radius:5px; padding:4px 7px; }
+  .card.is-main .cap .role{ color:#0c0c12; border:0;
+    background:#fff; }
+  .card .stage{ height:266px; border:0; border-radius:0; border-top:1px solid rgba(255,255,255,.06); }
+  .desc{ font:400 10.5px/1.6 var(--font-jp); color:var(--text-2); padding:13px 15px 16px;
+    border-top:1px solid rgba(255,255,255,.06); }
+  .desc b{ color:#fff; font-weight:600; }
+
+  .foot{ font:400 11px/1.75 var(--font-jp); color:var(--text-3); max-width:1000px; }
+  .foot b{ color:var(--text-2); font-weight:600; }
+  .foot .mono{ font-family:var(--font-latin); font-weight:600; color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:5px; padding:1px 6px; font-size:10px; }
+</style></head>
+<body>
+
+  <!-- shared 3D object: a clean faceted crystal, cool-lit -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="gemRt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6f8fa"/><stop offset="1" stop-color="#c4ccd2"/>
+    </linearGradient>
+    <linearGradient id="gemLt" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#aeb6bc"/><stop offset="1" stop-color="#787f85"/>
+    </linearGradient>
+    <linearGradient id="gemRb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9aa2a8"/><stop offset="1" stop-color="#646b71"/>
+    </linearGradient>
+    <linearGradient id="gemLb" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6e757b"/><stop offset="1" stop-color="#42484d"/>
+    </linearGradient>
+    <symbol id="gem" viewBox="0 0 80 116">
+      <!-- upper crown -->
+      <path d="M40 3 L9 47 L40 61 Z" fill="url(#gemLt)"/>
+      <path d="M40 3 L71 47 L40 61 Z" fill="url(#gemRt)"/>
+      <!-- lower pavilion -->
+      <path d="M9 47 L40 61 L40 113 Z" fill="url(#gemLb)"/>
+      <path d="M71 47 L40 61 L40 113 Z" fill="url(#gemRb)"/>
+      <!-- bright edges -->
+      <path d="M40 3 L9 47 L40 113 L71 47 Z" fill="none" stroke="rgba(225,248,255,.55)" stroke-width="1"/>
+      <path d="M40 3 L40 113 M9 47 L71 47" stroke="rgba(225,248,255,.32)" stroke-width=".8"/>
+      <!-- top sparkle -->
+      <circle cx="40" cy="9" r="1.6" fill="#fff"/>
+    </symbol>
+  </defs></svg>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">3D オブジェクト表示 — <b>ステージビーコン</b></span>
+      <span class="en">stage marker</span>
+    </div>
+    <div class="lede">
+      装飾を削ぎ、<b>地点に刺さったステージ</b>と<b>その上の3Dオブジェクト</b>だけにした最小構成。地点から<b>細い光の軸</b>が立ち上がり、宙に<b>薄いリングのステージ</b>が浮く。その上に3Dオブジェクトを置き、ステージ下の<b>淡い白のグロー</b>だけで浮かせる。色を持たないモノクロのホログラム。シンプル・クール・未来的。
+    </div>
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <div class="hero">
+    <div class="stage">
+      <div class="floor"></div>
+      <div class="tag">stage beacon · hero</div>
+
+      <div class="beacon main" style="left:50%; --sw:158px; --stem:150px; --stageb:128px; --objb:150px; --objw:78px;">
+        <div class="pinpt"></div>
+        <div class="stem"></div>
+        <div class="platform"><div class="glow"></div><div class="ring inner"></div></div>
+        <svg class="object" viewBox="0 0 80 116"><use href="#gem"></use></svg>
+      </div>
+
+      <!-- labels -->
+      <div class="lbl r" style="left:calc(50% + 52px); bottom:300px;">
+        <div class="ln"></div><div class="tx">3Dオブジェクト<em>object</em></div>
+      </div>
+      <div class="lbl" style="left:calc(50% - 176px); bottom:196px;">
+        <div class="tx" style="text-align:right;">ステージ<em>floating stage</em></div><div class="ln"></div>
+      </div>
+      <div class="lbl r" style="left:calc(50% + 30px); bottom:120px;">
+        <div class="ln"></div><div class="tx">光の軸<em>light stem</em></div>
+      </div>
+      <div class="lbl" style="left:calc(50% - 150px); bottom:40px;">
+        <div class="tx" style="text-align:right;">接地点<em>pinned point</em></div><div class="ln"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TYPES ============ -->
+  <div class="rail">
+
+    <!-- DEFAULT -->
+    <div class="card">
+      <div class="cap"><span class="nm">デフォルト</span><span class="role">default</span></div>
+      <div class="stage">
+        <div class="floor"></div>
+        <div class="beacon" style="left:50%; --sw:104px; --stem:96px; --stageb:84px; --objb:100px; --objw:52px;">
+          <div class="pinpt"></div>
+          <div class="stem"></div>
+          <div class="platform"><div class="glow"></div><div class="ring inner"></div></div>
+          <svg class="object" viewBox="0 0 80 116"><use href="#gem"></use></svg>
+        </div>
+      </div>
+      <div class="desc">基本の1基。<b>ステージ＋オブジェクト</b>のみ。陰影はステージ下の淡い白グローだけ。</div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="card is-main">
+      <div class="cap"><span class="nm">メイン</span><span class="role">main</span></div>
+      <div class="stage">
+        <div class="floor"></div>
+        <div class="beacon main" style="left:50%; --sw:124px; --stem:104px; --stageb:90px; --objb:108px; --objw:64px;">
+          <div class="pinpt"></div>
+          <div class="stem"></div>
+          <div class="platform"><div class="glow"></div><div class="ring inner"></div></div>
+          <svg class="object" viewBox="0 0 80 116"><use href="#gem"></use></svg>
+        </div>
+      </div>
+      <div class="desc">主役。ステージを<b>大きく・明るく</b>し、白グローを<b>より強く</b>。形は共通。</div>
+    </div>
+
+    <!-- SUB -->
+    <div class="card">
+      <div class="cap"><span class="nm">サブ ×2</span><span class="role">sub</span></div>
+      <div class="stage">
+        <div class="floor"></div>
+        <!-- far: long stem -->
+        <div class="beacon" style="left:33%; --sw:74px; --stem:150px; --stageb:138px; --objb:150px; --objw:36px;">
+          <div class="pinpt"></div>
+          <div class="stem"></div>
+          <div class="platform"><div class="glow"></div><div class="ring inner"></div></div>
+          <svg class="object d1" viewBox="0 0 80 116"><use href="#gem"></use></svg>
+        </div>
+        <!-- near: short stem -->
+        <div class="beacon" style="left:71%; --sw:88px; --stem:58px; --stageb:48px; --objb:62px; --objw:44px;">
+          <div class="pinpt"></div>
+          <div class="stem"></div>
+          <div class="platform"><div class="glow"></div><div class="ring inner"></div></div>
+          <svg class="object d2" viewBox="0 0 80 116"><use href="#gem"></use></svg>
+        </div>
+      </div>
+      <div class="desc">同じステージを縮小。<b>軸の長さ</b>＝地点までの距離（遠＝長 / 近＝短）。</div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    ステージビーコン＝「<b>接地点＋光の軸＋浮遊ステージ＋3Dオブジェクト</b>」のみ。可変は<b>軸の長さ</b>と<b>大きさ</b>だけで、配置（NW/NE/SW/SE）・pitch・距離の規則は <span class="mono">EarthClusterLayoutEngine</span> のまま。陰影はステージ下の<b>白グロー</b>に集約（カラーは不使用）。オブジェクトはガラスのクリスタルを既定プレースホルダに。
+  </div>
+
+</body></html>

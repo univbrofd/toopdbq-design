@@ -4,9 +4,9 @@
 (function () {
   const IMG = {
     a: 'https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png',
-    b: 'https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png',
+    b: '../../assets/images/sample_3d.png',
     c: 'https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png',
-    d: 'https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png',
+    d: '../../assets/images/sample_photo.png',
   };
   const AV = {
     sunny: 'https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png',
