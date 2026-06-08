@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toopdbq — Onboarding</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="onboarding.css">
+<style>
+  html,body { height: 100%; }
+  body { background: #0d0d0f; display: grid; place-items: center; padding: 28px; min-height: 100vh; }
+  .wordmark { position: absolute; left: 0; right: 0; top: 96px; z-index: 22; text-align: center;
+    font-family: var(--font-display); font-size: 30px; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,.6); }
+  .wordmark .sub { display: block; font-family: var(--font-latin); font-weight: 600; font-size: 10px;
+    letter-spacing: .26em; text-transform: uppercase; color: var(--text-3); margin-top: 6px; text-shadow: none; }
+  .dotmark { width: 11px; height: 11px; border-radius: 50%;
+    background: var(--gradient-colorful); box-shadow: 0 0 12px rgba(255,62,136,.6); }
+  .mono { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: var(--text-2);
+    letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+  /* summary screen vertical layout */
+  .sum-wrap { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column;
+    padding: 116px 28px calc(28px + 18px); }
+  .sum-head .ob-eyebrow { margin-bottom: 12px; }
+  .sum-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  /* radius label near handle */
+  .range-tag { position: absolute; z-index: 8; padding: 3px 9px; border-radius: 99px;
+    background: var(--surface); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+    font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: #fff;
+    border: 1px solid rgba(255,255,255,.16); }
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- status bar -->
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="sys">
+      <svg class="bars" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg class="wifi" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.6 0 5 1 6.8 2.7l-1.5 1.6A7.4 7.4 0 0 0 8.5 6.3 7.4 7.4 0 0 0 3.2 6.5L1.7 4.9A9.7 9.7 0 0 1 8.5 2.2Zm0 3.8c1.5 0 3 .6 4.1 1.7l-1.6 1.7A3.6 3.6 0 0 0 8.5 9.7c-.9 0-1.8.4-2.5 1l-1.6-1.7A5.7 5.7 0 0 1 8.5 6Zm0 3.4c.7 0 1.3.3 1.8.8L8.5 11.8 6.7 10.2c.5-.5 1.1-.8 1.8-.8Z"/></svg>
+      <svg class="batt" viewBox="0 0 25 13" fill="none"><rect x="0.5" y="0.8" width="21" height="11.4" rx="3" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2.3" width="16.5" height="8.4" rx="1.8" fill="#fff"/><path d="M23 4.2v4.6c1-.4 1-4.2 0-4.6Z" fill="#fff" fill-opacity=".5"/></svg>
+    </span>
+  </div>
+
+  <button class="ob-skip" id="skip">スキップ</button>
+
+  <div class="pager" id="pager">
+
+    <!-- ============ 01 · HOOK ============ -->
+    <section class="ob-screen" data-i="0">
+      <div class="ob-bg map-stage">
+        <div class="map-glow"></div>
+        <div class="map-tilt">
+          <div class="roads"></div>
+          <div class="block park"  style="left:120px;  top:300px; width:220px; height:160px;"></div>
+          <div class="block water" style="left:560px;  top:520px; width:420px; height:300px;"></div>
+          <div class="block plaza" style="left:700px;  top:240px; width:180px; height:180px;"></div>
+          <div class="block park"  style="left:300px;  top:640px; width:160px; height:140px;"></div>
+        </div>
+        <!-- markers -->
+        <div class="mk dim" style="left:18%; top:300px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_photo.png" alt=""></div></div>
+        <div class="mk" style="left:80%; top:268px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_3d.png" alt=""></div></div>
+        <div class="mk dim" style="left:30%; top:208px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:66%; top:200px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <!-- hero floating stage -->
+        <div class="mk hero" style="left:50%; top:360px;">
+          <div class="stage-ring"><img src="../assets/images/sample_3d.png" alt=""></div>
+          <span class="beam"></span>
+          <span class="ground pulse-ground"></span>
+          <span class="ping"></span>
+        </div>
+      </div>
+      <div class="wordmark anim-fade">Toopdbq<span class="sub">Top of People · Dream Believe Quest</span></div>
+      <div class="ob-scrim"></div>
+      <div class="ob-foot">
+        <div class="ob-eyebrow anim-up"><span class="idx">01</span><span class="bar"></span><span>世界</span></div>
+        <h1 class="ob-title anim-up d1">夢中になれることがある。<br>そこに、<span class="glow">仲間がいる。</span></h1>
+        <p class="ob-body anim-up d2">Toopdbq は、地図の上で集まる SNS。いま誰かが夢中になっている場所が、ひとつずつ光っている。</p>
+        <div class="ob-nav anim-up d3">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>次へ<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 · CIRCLE = PLACE, ANYONE CREATES ============ -->
+    <section class="ob-screen" data-i="1">
+      <div class="ob-bg map-stage">
+        <div class="map-glow" style="opacity:.2;"></div>
+        <div class="map-tilt">
+          <div class="roads"></div>
+          <div class="block plaza" style="left:380px; top:360px; width:300px; height:240px;"></div>
+          <div class="block park"  style="left:140px; top:560px; width:200px; height:150px;"></div>
+          <div class="block water" style="left:760px; top:520px; width:340px; height:260px;"></div>
+        </div>
+        <!-- other people's circles already on the map (faint) -->
+        <div class="mk dim" style="left:20%; top:236px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:83%; top:226px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <!-- tap a spot → YOUR new circle blooms there -->
+        <div class="circle-field" style="top:296px;">
+          <div class="circle-range bloom" style="width:250px; height:150px;">
+            <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
+          </div>
+        </div>
+        <div class="newcircle-chip" style="left:50%; top:290px;"><span class="dot"></span>あたらしいサークル</div>
+        <!-- the finger that tapped the spot -->
+        <div class="gesture tap" style="left:50%; top:374px;">
+          <span class="tap-ripple"></span>
+          <span class="hand" style="position:absolute; left:22px; top:22px;"></span>
+        </div>
+      </div>
+      <div class="ob-scrim"></div>
+      <div class="ob-foot">
+        <div class="ob-eyebrow anim-up"><span class="idx">02</span><span class="bar"></span><span>サークル</span></div>
+        <h1 class="ob-title anim-up d1">地図の上に、<span class="glow">サークル</span>をつくる。</h1>
+        <p class="ob-body anim-up d2">フェス会場も、公園も、キャンパスも。特別な権限はいらない。誰でも、好きな場所に。</p>
+        <div class="ob-nav anim-up d3">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>次へ<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 03 · LOCATION + RANGE ============ -->
+    <section class="ob-screen" data-i="2">
+      <div class="ob-bg map-stage">
+        <div class="map-glow" style="opacity:.2;"></div>
+        <div class="map-tilt">
+          <div class="roads"></div>
+          <div class="block park"  style="left:420px; top:420px; width:260px; height:200px;"></div>
+          <div class="block water" style="left:120px; top:520px; width:280px; height:220px;"></div>
+        </div>
+        <div class="circle-field" style="top:330px;">
+          <div class="circle-range">
+            <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
+            <div class="handle"></div>
+          </div>
+        </div>
+        <div class="range-tag" style="left:60%; top:300px;">範囲 · 300m</div>
+        <div class="gesture" style="left:50%; top:330px;"></div>
+      </div>
+      <div class="ob-scrim"></div>
+      <div class="ob-foot">
+        <div class="ob-eyebrow anim-up"><span class="idx">03</span><span class="bar"></span><span>位置と範囲</span></div>
+        <h1 class="ob-title anim-up d1">サークルは、<span class="glow">範囲</span>を持つ。</h1>
+        <p class="ob-body anim-up d2">中心の一点と、まわりの円。地図の上で、ドラッグして、ひろげる。</p>
+        <div class="ob-nav anim-up d3">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>次へ<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 · RULE — INSIDE POSTS / OUTSIDE VIEWS ============ -->
+    <section class="ob-screen" data-i="3">
+      <div class="ob-bg map-stage">
+        <div class="map-glow" style="opacity:.16; top:36%;"></div>
+        <div class="rule-stage">
+          <div class="rule-circle" style="top:268px; width:262px; height:262px;">
+            <span class="ring-lab">サークルの範囲</span>
+          </div>
+          <!-- inside actor: can post -->
+          <div class="actor inside anim-up d1" style="left:50%; top:212px; transform:translateX(-50%);">
+            <img class="av" src="../assets/images/sample_photo.png" alt="">
+            <span class="chip"><img src="../assets/icons/icon_camera.png" alt="">投稿できる</span>
+          </div>
+          <!-- outside actor: view only -->
+          <div class="actor outside anim-up d2" style="left:50%; top:440px; transform:translateX(-50%);">
+            <img class="av" src="../assets/images/sample_3d.png" alt="">
+            <span class="chip"><img src="../assets/icons/icon_explore.png" alt="">閲覧だけ</span>
+          </div>
+        </div>
+      </div>
+      <div class="ob-scrim"></div>
+      <div class="ob-foot">
+        <div class="ob-eyebrow anim-up"><span class="idx">04</span><span class="bar"></span><span>投稿のルール</span></div>
+        <h1 class="ob-title anim-up d1">中にいる人だけが、<span class="glow">投稿</span>できる。</h1>
+        <p class="ob-body anim-up d2">外からは、読むだけ。「いま、そこにいる人の声」だから、信じられる。</p>
+        <div class="ob-nav anim-up d3">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>次へ<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 05 · SUMMARY ============ -->
+    <section class="ob-screen" data-i="4">
+      <div class="ob-bg map-stage">
+        <div class="map-glow" style="opacity:.14; top:18%;"></div>
+        <div class="map-tilt" style="opacity:.5;">
+          <div class="roads"></div>
+        </div>
+      </div>
+      <div class="ob-scrim" style="height:100%; background:linear-gradient(0deg,#08080b 30%,rgba(8,8,11,.86) 62%,rgba(8,8,11,.4) 100%);"></div>
+      <div class="sum-wrap">
+        <div class="sum-head">
+          <div class="ob-eyebrow anim-up"><span class="idx">05</span><span class="bar"></span><span>まとめ</span></div>
+          <h1 class="ob-title anim-up d1" style="font-size:27px;">Toopdbq の、<span class="glow">ぜんぶ。</span></h1>
+        </div>
+        <div class="sum-mid">
+          <div class="sum-list anim-up d2">
+            <div class="sum-row"><span class="n">1</span><span class="tx">サークルは、地図上の<b>場所</b>。</span></div>
+            <div class="sum-row"><span class="n">2</span><span class="tx"><b>誰でも</b>つくれる。</span></div>
+            <div class="sum-row"><span class="n">3</span><span class="tx">位置と、まわりの<b>範囲</b>を持つ。</span></div>
+            <div class="sum-row key"><span class="n">4</span><span class="tx">範囲の<b>中</b>にいる人だけが、<b>投稿</b>できる。</span></div>
+            <div class="sum-row key"><span class="n">5</span><span class="tx"><b>外</b>からは、<b>閲覧</b>だけ。</span></div>
+          </div>
+        </div>
+        <div class="ob-nav anim-up d3" style="margin-top:18px;">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>はじめる<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 06 · START · LOCATION PERMISSION ============ -->
+    <section class="ob-screen" data-i="5">
+      <div class="ob-bg" style="background:#08080b;">
+        <img src="../assets/images/auth_background.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.62;">
+        <div style="position:absolute; inset:0; background:linear-gradient(0deg,#08080b 14%,rgba(8,8,11,.4) 52%,rgba(8,8,11,.55) 100%);"></div>
+      </div>
+      <div class="wordmark anim-fade" style="top:150px;">Toopdbq<span class="sub">夢中を、はじめよう</span></div>
+      <!-- permission sheet -->
+      <div class="perm-sheet anim-up d1">
+        <div class="map-mini">
+          <div class="map-tilt" style="top:24%; transform:translate(-50%,-10%) perspective(420px) rotateX(64deg); width:560px; height:560px;"><div class="roads"></div></div>
+          <div class="map-glow" style="width:240px; height:150px; opacity:.4; top:56%;"></div>
+          <div class="circle-field" style="top:58px;">
+            <div class="circle-range" style="width:186px; height:96px;">
+              <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="pad">
+          <div class="ico"><img src="../assets/icons/icon_pin_location.png" alt="" style="filter:brightness(0) invert(1);"></div>
+          <h3>「Toopdbq」に位置情報の<br>利用を許可しますか？</h3>
+          <p><span class="why">サークルの範囲の中にいるか</span>を判定して、投稿できる場所を見つけるために使います。位置情報が共有されることはありません。</p>
+          <div class="perm-btns">
+            <button class="b allow" data-allow>Appの使用中は許可</button>
+            <button class="b once">一度だけ許可</button>
+            <button class="b deny" data-restart>許可しない</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <div class="home-ind"></div>
+</div>
+
+<script>
+(function () {
+  var pager = document.getElementById('pager');
+  var screens = Array.prototype.slice.call(pager.querySelectorAll('.ob-screen'));
+  var N = screens.length;
+  var KEY = 'toopdbq-onboarding-idx';
+
+  // build dots in every screen
+  screens.forEach(function (s) {
+    var holder = s.querySelector('[data-dots]');
+    if (!holder) return;
+    for (var k = 0; k < N; k++) {
+      var d = document.createElement('i');
+      d.dataset.go = k;
+      holder.appendChild(d);
+    }
+  });
+
+  function current() { return Math.round(pager.scrollLeft / pager.clientWidth); }
+
+  function paint(i) {
+    screens.forEach(function (s, idx) {
+      if (idx === i) s.setAttribute('data-active', ''); else s.removeAttribute('data-active');
+    });
+    pager.querySelectorAll('[data-dots]').forEach(function (h) {
+      Array.prototype.forEach.call(h.children, function (d, k) {
+        d.classList.toggle('on', k === i);
+      });
+    });
+    try { localStorage.setItem(KEY, String(i)); } catch (e) {}
+  }
+
+  function goTo(i, smooth) {
+    i = Math.max(0, Math.min(N - 1, i));
+    pager.scrollTo({ left: i * pager.clientWidth, behavior: smooth === false ? 'auto' : 'smooth' });
+    paint(i);
+  }
+
+  pager.addEventListener('click', function (e) {
+    var next = e.target.closest('[data-next]');
+    var dot = e.target.closest('[data-dots] i');
+    if (next) { goTo(current() + 1); }
+    else if (dot) { goTo(parseInt(dot.dataset.go, 10)); }
+  });
+  document.getElementById('skip').addEventListener('click', function () { goTo(N - 1); });
+  document.querySelector('[data-restart]').addEventListener('click', function () { goTo(0); });
+  document.querySelector('[data-allow]').addEventListener('click', function () {
+    this.textContent = '許可しました ✓';
+    this.style.filter = 'saturate(.6) brightness(.85)';
+  });
+
+  // keep active state in sync while swiping
+  var t;
+  pager.addEventListener('scroll', function () {
+    clearTimeout(t);
+    t = setTimeout(function () { paint(current()); }, 90);
+  });
+
+  // restore last position
+  var start = 0;
+  try { start = parseInt(localStorage.getItem(KEY) || '0', 10) || 0; } catch (e) {}
+  requestAnimationFrame(function () { goTo(start, false); });
+
+  // arrow keys for desktop review
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') goTo(current() + 1);
+    if (e.key === 'ArrowLeft') goTo(current() - 1);
+  });
+})();
+</script>
+</body>
+</html>

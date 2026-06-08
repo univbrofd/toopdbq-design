@@ -1,0 +1,66 @@
+<!-- @dsCard group="Onboarding" name="Onboarding · 06 位置情報の許可" subtitle="はじめる→なぜ位置情報か（範囲内判定）" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="onboarding.css">
+<style>
+  body { background:#0d0d0f; display:grid; place-items:center; min-height:100vh; padding:28px; }
+  /* DS specimen = settled, static state. Motion lives in comp-onboarding-flow.html.
+     The dot's active pill is the colorful gradient; entrance/loops are inert here. */
+  .ob-dots i.on { width:22px; background:var(--gradient-colorful-linear); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="sys">
+      <svg class="bars" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg class="wifi" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.6 0 5 1 6.8 2.7l-1.5 1.6A7.4 7.4 0 0 0 8.5 6.3 7.4 7.4 0 0 0 3.2 6.5L1.7 4.9A9.7 9.7 0 0 1 8.5 2.2Zm0 3.8c1.5 0 3 .6 4.1 1.7l-1.6 1.7A3.6 3.6 0 0 0 8.5 9.7c-.9 0-1.8.4-2.5 1l-1.6-1.7A5.7 5.7 0 0 1 8.5 6Zm0 3.4c.7 0 1.3.3 1.8.8L8.5 11.8 6.7 10.2c.5-.5 1.1-.8 1.8-.8Z"/></svg>
+      <svg class="batt" viewBox="0 0 25 13" fill="none"><rect x="0.5" y="0.8" width="21" height="11.4" rx="3" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2.3" width="16.5" height="8.4" rx="1.8" fill="#fff"/><path d="M23 4.2v4.6c1-.4 1-4.2 0-4.6Z" fill="#fff" fill-opacity=".5"/></svg>
+    </span>
+  </div>
+<section class="ob-screen" data-i="5">
+      <div class="ob-bg" style="background:#08080b;">
+        <img src="../assets/images/auth_background.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.62;">
+        <div style="position:absolute; inset:0; background:linear-gradient(0deg,#08080b 14%,rgba(8,8,11,.4) 52%,rgba(8,8,11,.55) 100%);"></div>
+      </div>
+      <div class="wordmark anim-fade" style="top:150px;">Toopdbq<span class="sub">夢中を、はじめよう</span></div>
+      <!-- permission sheet -->
+      <div class="perm-sheet anim-up d1">
+        <div class="map-mini">
+          <div class="map-tilt" style="top:24%; transform:translate(-50%,-10%) perspective(420px) rotateX(64deg); width:560px; height:560px;"><div class="roads"></div></div>
+          <div class="map-glow" style="width:240px; height:150px; opacity:.4; top:56%;"></div>
+          <div class="circle-field" style="top:58px;">
+            <div class="circle-range" style="width:186px; height:96px;">
+              <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="pad">
+          <div class="ico"><img src="../assets/icons/icon_pin_location.png" alt="" style="filter:brightness(0) invert(1);"></div>
+          <h3>「Toopdbq」に位置情報の<br>利用を許可しますか？</h3>
+          <p><span class="why">サークルの範囲の中にいるか</span>を判定して、投稿できる場所を見つけるために使います。位置情報が共有されることはありません。</p>
+          <div class="perm-btns">
+            <button class="b allow" data-allow>Appの使用中は許可</button>
+            <button class="b once">一度だけ許可</button>
+            <button class="b deny" data-restart>許可しない</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  <div class="home-ind"></div>
+</div>
+<script>
+(function(){
+  var sec=document.querySelector('.ob-screen'); var i=+sec.getAttribute('data-i');
+  var h=document.querySelector('[data-dots]');
+  if(h){ for(var k=0;k<6;k++){ var d=document.createElement('i'); if(k===i)d.className='on'; h.appendChild(d); } }
+})();
+</script>
+</body>
+</html>

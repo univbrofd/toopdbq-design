@@ -1,0 +1,73 @@
+<!-- @dsCard group="Onboarding" name="Onboarding · 01 世界（掴み）" subtitle="地図×SNSの世界観。浮遊ステージのピンで街が光る" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<link rel="stylesheet" href="onboarding.css">
+<style>
+  body { background:#0d0d0f; display:grid; place-items:center; min-height:100vh; padding:28px; }
+  /* DS specimen = settled, static state. Motion lives in comp-onboarding-flow.html.
+     The dot's active pill is the colorful gradient; entrance/loops are inert here. */
+  .ob-dots i.on { width:22px; background:var(--gradient-colorful-linear); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span class="sys">
+      <svg class="bars" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+      <svg class="wifi" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.2c2.6 0 5 1 6.8 2.7l-1.5 1.6A7.4 7.4 0 0 0 8.5 6.3 7.4 7.4 0 0 0 3.2 6.5L1.7 4.9A9.7 9.7 0 0 1 8.5 2.2Zm0 3.8c1.5 0 3 .6 4.1 1.7l-1.6 1.7A3.6 3.6 0 0 0 8.5 9.7c-.9 0-1.8.4-2.5 1l-1.6-1.7A5.7 5.7 0 0 1 8.5 6Zm0 3.4c.7 0 1.3.3 1.8.8L8.5 11.8 6.7 10.2c.5-.5 1.1-.8 1.8-.8Z"/></svg>
+      <svg class="batt" viewBox="0 0 25 13" fill="none"><rect x="0.5" y="0.8" width="21" height="11.4" rx="3" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2.3" width="16.5" height="8.4" rx="1.8" fill="#fff"/><path d="M23 4.2v4.6c1-.4 1-4.2 0-4.6Z" fill="#fff" fill-opacity=".5"/></svg>
+    </span>
+  </div>
+  <button class="ob-skip">スキップ</button>
+<section class="ob-screen" data-i="0">
+      <div class="ob-bg map-stage">
+        <div class="map-glow"></div>
+        <div class="map-tilt">
+          <div class="roads"></div>
+          <div class="block park"  style="left:120px;  top:300px; width:220px; height:160px;"></div>
+          <div class="block water" style="left:560px;  top:520px; width:420px; height:300px;"></div>
+          <div class="block plaza" style="left:700px;  top:240px; width:180px; height:180px;"></div>
+          <div class="block park"  style="left:300px;  top:640px; width:160px; height:140px;"></div>
+        </div>
+        <!-- markers -->
+        <div class="mk dim" style="left:18%; top:300px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_photo.png" alt=""></div></div>
+        <div class="mk" style="left:80%; top:268px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_3d.png" alt=""></div></div>
+        <div class="mk dim" style="left:30%; top:208px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:66%; top:200px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <!-- hero floating stage -->
+        <div class="mk hero" style="left:50%; top:360px;">
+          <div class="stage-ring"><img src="../assets/images/sample_3d.png" alt=""></div>
+          <span class="beam"></span>
+          <span class="ground pulse-ground"></span>
+          <span class="ping"></span>
+        </div>
+      </div>
+      <div class="wordmark anim-fade">Toopdbq<span class="sub">Top of People · Dream Believe Quest</span></div>
+      <div class="ob-scrim"></div>
+      <div class="ob-foot">
+        <div class="ob-eyebrow anim-up"><span class="idx">01</span><span class="bar"></span><span>世界</span></div>
+        <h1 class="ob-title anim-up d1">夢中になれることがある。<br>そこに、<span class="glow">仲間がいる。</span></h1>
+        <p class="ob-body anim-up d2">Toopdbq は、地図の上で集まる SNS。いま誰かが夢中になっている場所が、ひとつずつ光っている。</p>
+        <div class="ob-nav anim-up d3">
+          <div class="ob-dots" data-dots></div>
+          <button class="ob-cta" data-next>次へ<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </div>
+      </div>
+    </section>
+  <div class="home-ind"></div>
+</div>
+<script>
+(function(){
+  var sec=document.querySelector('.ob-screen'); var i=+sec.getAttribute('data-i');
+  var h=document.querySelector('[data-dots]');
+  if(h){ for(var k=0;k<6;k++){ var d=document.createElement('i'); if(k===i)d.className='on'; h.appendChild(d); } }
+})();
+</script>
+</body>
+</html>
