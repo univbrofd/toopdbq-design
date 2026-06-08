@@ -44,9 +44,11 @@
   /* Primary action — the single colorful accent */
   --primary:            var(--gradient-colorful);
   --on-primary:         #ffffff;
-  /* Unread (chat inbox) — the ONE accent; same colorful gradient as --primary.
+  /* Unread indicator (ChatList inbox) — reuses the ONE accent, NOT Material blue.
+     #1E88FF (old impl) is out of world-view. Count → pill; count-less → 9px dot.
      Single-colour fallbacks if the gradient must not multiply: --accent-purple / --state-like. */
   --unread:             var(--gradient-colorful);
+  --on-unread:          #ffffff;
   /* Text on dark / glass — all meet WCAG AA on a scrimmed surface */
   --text-1:             #ffffff;                  /* body & headings   (21:1)    */
   --text-2:             rgba(255,255,255,0.78);   /* secondary body   (≈12:1/5:1)*/

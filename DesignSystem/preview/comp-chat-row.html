@@ -1,0 +1,112 @@
+<!-- @dsCard group="Components" name="ChatList row" subtitle="inbox 1行 anatomy · avatar48+name+time+message+unread · 状態: 未読/既読/ミュート · tap→ChatRoomView(room入力=comp-composer族)" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(160deg,#15131d,#0b0b10); gap: 26px; }
+  .eyebrow { color: var(--text-2); }
+  .grp { display: flex; flex-direction: column; gap: 11px; }
+  .lbl { font: 600 10px/1.3 var(--font-latin); letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+  .surface { width: 100%; max-width: 412px; background: var(--bg); border-radius: 14px; overflow: hidden;
+             box-shadow: inset 0 0 0 1px rgba(255,255,255,.06); }
+
+  /* anatomy spec list */
+  .spec { max-width: 412px; display: flex; flex-direction: column; gap: 0; }
+  .spec div { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: baseline;
+              padding: 7px 2px; font: 500 11px/1.4 var(--font-latin); color: var(--text-2);
+              border-top: 1px solid rgba(255,255,255,.07); }
+  .spec div:first-child { border-top: none; }
+  .spec .key { color: var(--text-1); font-weight: 600; }
+  .spec b { color: var(--text-1); font-weight: 600; }
+  .spec code { font-family: var(--font-latin); color: var(--text-3); font-size: 10.5px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 22px; max-width: 412px;
+            font: 500 11px/1.4 var(--font-latin); color: var(--text-2); }
+  .legend .k { display: inline-flex; align-items: center; gap: 7px; }
+  .swp { width: 22px; height: 14px; border-radius: var(--radius-pill); flex: none; }
+  .dotp { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+  .grad { background: var(--gradient-colorful); }
+  .pur { background: var(--accent-purple); }
+  .like { background: var(--state-like); }
+  .note { max-width: 412px; font: 400 11px/1.6 var(--font-jp); color: var(--text-3); }
+  .note b { color: var(--text-2); font-weight: 600; }
+</style></head>
+<body>
+  <div class="eyebrow">ChatList 行 — アバター48＋名前(主役)＋時刻＋最新メッセージ1行＋未読。区切りはグラデ・ヘアライン。</div>
+
+  <!-- ANATOMY -->
+  <div class="grp">
+    <div class="lbl">Anatomy — padding 16/12 · avatar→text gap 12</div>
+    <div class="surface">
+      <div class="chat-row unread">
+        <div class="av"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png" alt=""></div>
+        <div class="body">
+          <div class="line"><span class="nm">SunnyVi</span><span class="tm">14:32</span></div>
+          <div class="line"><span class="msg">いいね！素敵な写真ですね。</span><span class="chat-unread">3</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <div><span class="key">avatar</span><span><b>.wd-avatar</b> 48 · 正円 · <code>--shadow-avatar</code> · placeholder=<code>--gray-800</code>+icon_person</span></div>
+      <div><span class="key">名前</span><span>主役 · <code>--text-1</code> 太字 · .t-title 16 · 1行省略</span></div>
+      <div><span class="key">時刻</span><span><code>--text-3</code> · Inter 12 · 当日 HH:MM / 他日 M/D</span></div>
+      <div><span class="key">メッセージ</span><span><code>--text-2</code> · .t-body-jp 14 · 1行省略（ellipsis）</span></div>
+      <div><span class="key">未読</span><span><code>--primary</code> pill / dot · <code>--on-primary</code> · <code>--radius-pill</code></span></div>
+      <div><span class="key">区切り</span><span>グラデ・ヘアライン（avatar 分インデント）· Material Divider 不可</span></div>
+    </div>
+  </div>
+
+  <!-- STATES -->
+  <div class="grp">
+    <div class="lbl">States — 未読 / 既読 / ミュート（未読出さず・減光）</div>
+    <div class="surface">
+      <!-- unread (count pill) -->
+      <a class="chat-row unread" href="#">
+        <div class="av"><img src="https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png" alt=""></div>
+        <div class="body">
+          <div class="line"><span class="nm">Dreamy</span><span class="tm">14:32</span></div>
+          <div class="line"><span class="msg">今どこにいますか？近くにいるかも。</span><span class="chat-unread">3</span></div>
+        </div>
+      </a>
+      <!-- unread (dot, count-less) -->
+      <a class="chat-row unread" href="#">
+        <div class="av"><img src="https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png" alt=""></div>
+        <div class="body">
+          <div class="line"><span class="nm">o_cean</span><span class="tm">13:05</span></div>
+          <div class="line"><span class="msg">写真ありがとう！また送りますね。</span><span class="chat-unread dot"></span></div>
+        </div>
+      </a>
+      <!-- read (no indicator) -->
+      <a class="chat-row" href="#">
+        <div class="av"><div class="ph"><img src="../assets/icons/icon_person.png" alt=""></div></div>
+        <div class="body">
+          <div class="line"><span class="nm">foodie</span><span class="tm">6/5</span></div>
+          <div class="line"><span class="msg">こちらこそ、ありがとうございました。</span></div>
+        </div>
+      </a>
+      <!-- muted (dim, no unread, mute glyph) -->
+      <a class="chat-row muted" href="#">
+        <div class="av"><div class="ph"><img src="../assets/icons/icon_person.png" alt=""></div></div>
+        <div class="body">
+          <div class="line"><span class="nm">渋谷コミュニティ</span><img class="mute" src="../assets/icons/icon_mic.png" alt="ミュート"><span class="tm">6/3</span></div>
+          <div class="line"><span class="msg">＋3人が参加中。新しいストーリーが届いています。</span></div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- UNREAD INDICATOR TOKENS -->
+  <div class="grp">
+    <div class="lbl">未読インジケータ — 推奨=カラフルグラデ（唯一のアクセント）</div>
+    <div class="legend">
+      <span class="k"><span class="swp grad"></span>件数 pill <b style="color:var(--text-3);font-weight:500">--primary · .t-label 11</b></span>
+      <span class="k"><span class="dotp grad"></span>件数なし dot 9px</span>
+      <span class="k"><span class="swp pur"></span>単色 fallback <b style="color:var(--text-3);font-weight:500">--accent-purple</b></span>
+      <span class="k"><span class="swp like"></span>単色 fallback <b style="color:var(--text-3);font-weight:500">--state-like</b></span>
+    </div>
+    <div class="note">旧実装の青ベタ <b>#1E88FF</b>（Material blue）は世界観外のため不可。99+丸め固定・<b>ミュート行では出さない</b>。
+    行 tap で <b>ChatRoomView</b>（messenger）へ連続 — room 下端の入力は <b>comp-composer 族</b>（StoryComment / CircleTimeline と共有）と同系。</div>
+  </div>
+</body></html>

@@ -33,13 +33,3 @@ body {
 .sw .nm { font-weight: 600; font-size: 11.5px; color: var(--white); }
 .sw .hx { font-size: 10px; color: var(--fg-2); font-variant-numeric: tabular-nums; }
 .grid { display: grid; gap: 12px; }
-
-/* phone frame for view/screen-level specimens — 393×852 + iOS safe-area zones */
-.phone {
-  position: relative; width: 393px; height: 852px; margin: 0 auto;
-  border-radius: 44px; overflow: hidden; background: #0d0d0f;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06);
-}
-.phone .screen { position: absolute; inset: 0; }        /* full-bleed content */
-.phone .safe-top { position: absolute; top: 0; left: 0; right: 0; height: 59px; }
-.phone .safe-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 34px; }
