@@ -21,6 +21,18 @@
 | **クラスタリール cell** | 画像＋下端にアバター＋ユーザー名＋グラデ＋"main"フラグ | **画像＋枠だけ**（メタ表記は一切無し）。"Insta360 Ace Pro 2" 等は**写真自体に焼き込まれた文字**で UI ではない |
 | **投稿ボタン** | `.wd-icon-btn.color` + `.wd-badge.color`(add アイコン) | `WdIconButton(camera, **badgeColor**)`、badge アイコンも **camera**、55×55 |
 
+## specimen の 3D 表現（重要・回帰防止）
+
+実機スクショは**視覚の参照（レイアウト・サイズ・配置・世界観）**であって、**ピクセルの素材ではない**。
+- **スクショから人物を切り抜いた PNG（背景抜き）を specimen に貼らない**。エッジ・ラベル残り・低解像で
+  「変な表示」になる（実装に寄せすぎた失敗例）。
+- 3D オブジェクトは **DS の中立な角丸プレースホルダカード**（人物シルエット＋小さな 3D キューブ glyph、
+  CSS/SVG のみ・外部素材なし）で表し、**role でサイズだけ変える**（main 巨大／sub 小）。地表に直接置き、
+  リング/棒/三角は出さない。実機が写真由来の人物 GLB であることは legend / lede の注記で伝える。
+- リールは「画像＋枠だけ」。サンプル画像は DS 同梱（`assets/images/sample_*` / `assets/images/uv/reel*`）で可。
+- canonical: `lib-design/DesignSystem/preview/comp-universe-screen.html`（この方針で実装済み）。
+  3D オーバーレイの「3D 本体」はロード演出と同じ **materialize クリスタル**の語彙で可（`comp-universe-3d-overlay.html`）。
+
 ## 実機スクリーンショット（正・これに合わせる）
 
 raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-design/handoff/UniverseView/shots/`

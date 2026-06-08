@@ -1,0 +1,231 @@
+<!-- @dsCard group="Screens" name="UniverseView — 3D オーバーレイ" subtitle="main 3D タップで開く全画面ビューア。暗転 scrim(α.62)の中央に正方形(短辺×0.86)で 3D が枠なしで浮き、タップ元→中央へ 320ms easeOutCubic の Hero 拡大。横ドラッグで 360°回転・背景タップで閉じる(chrome なし=A群)。B群(希望)としてピンチ拡大の自由操作・操作ヒント・閉じる× を Before/After で併記。" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body{ background:radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%);
+    padding:30px 32px 44px; gap:24px; align-items:flex-start; }
+  .head{ display:flex; flex-direction:column; gap:9px; max-width:980px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:300 24px/1.15 var(--font-jp); color:#fff; letter-spacing:.01em; }
+  .h1 b{ font-weight:700; }
+  .h1 .en{ font:500 11px/1 var(--font-latin); letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+  .lede{ font:400 12.5px/1.85 var(--font-jp); color:var(--text-2); max-width:900px; }
+  .lede b{ color:#fff; font-weight:600; }
+
+  .frames{ display:flex; gap:34px; align-items:flex-start; flex-wrap:wrap; }
+  .col{ display:flex; flex-direction:column; gap:12px; }
+  .col-cap{ display:flex; flex-direction:column; gap:5px; max-width:300px; }
+  .ch{ font:700 10px/1 var(--font-latin); letter-spacing:.14em; text-transform:uppercase; }
+  .ch.now{ color:#7ee0a0; } .ch.wish{ color:#ffc46b; } .ch.load{ color:#8fb7ff; }
+  .ct{ font:700 14px/1.2 var(--font-jp); color:#fff; }
+  .ct .en{ font:500 10px var(--font-latin); color:var(--text-3); letter-spacing:.05em; margin-left:7px; }
+  .cd{ font:400 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .cd b{ color:#fff; font-weight:600; }
+  .cd .mono{ font-family:var(--font-latin); font-weight:600; font-size:10px; color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; }
+
+  /* phone */
+  .phone{ position:relative; width:300px; height:650px; flex:none; border-radius:38px;
+    background:#000; padding:4px; box-shadow:0 2px 2px rgba(255,255,255,.1) inset, 0 30px 70px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06); }
+  .screen{ position:relative; width:100%; height:100%; border-radius:34px; overflow:hidden; background:#0a0b0d; }
+  .home-ind{ position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:108px; height:4px; border-radius:3px; background:rgba(255,255,255,.45); z-index:80; }
+
+  /* dimmed map behind the scrim (context) */
+  .map{ position:absolute; inset:0; overflow:hidden; background:#cdd2d6; filter:blur(3px) brightness(.72); }
+  .map .plane{ position:absolute; left:50%; top:30%; width:240%; height:150%;
+    transform:translateX(-50%) perspective(560px) rotateX(56deg); transform-origin:50% 0;
+    background:repeating-linear-gradient(0deg, #e7e9eb 0 70px, #e1e3e6 70px 140px), #e6e8ea; }
+  .map .roads{ position:absolute; left:50%; top:30%; width:240%; height:150%;
+    transform:translateX(-50%) perspective(560px) rotateX(56deg); transform-origin:50% 0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 62px, rgba(255,255,255,.95) 62px 68px, transparent 68px 70px),
+      repeating-linear-gradient(0deg,  transparent 0 62px, rgba(255,255,255,.92) 62px 68px, transparent 68px 70px); }
+
+  /* scrim */
+  .scrim{ position:absolute; inset:0; background:rgba(0,0,0,.62); z-index:10; }
+
+  /* centered 3D square (short side × 0.86 ≈ 258 for 300-wide screen) */
+  .viewer{ position:absolute; left:50%; top:48%; transform:translate(-50%,-50%);
+    width:258px; height:258px; z-index:20; display:flex; align-items:center; justify-content:center; }
+  .viewer.zoom{ width:296px; height:296px; }            /* B群: pinch-zoomed beyond the square */
+  .obj3d{ width:148px; height:auto; display:block;
+    filter:drop-shadow(0 14px 26px rgba(0,0,0,.6)) drop-shadow(0 0 22px rgba(255,255,255,.28));
+    animation:floaty 4.6s ease-in-out infinite; }
+  .viewer.zoom .obj3d{ width:188px; }
+  @media (prefers-reduced-motion: reduce){ .obj3d{ animation:none; } }
+  @keyframes floaty{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-7px); } }
+  /* materialize shimmer ring (loading) */
+  .materialize{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:150px; height:150px; border-radius:50%; z-index:19; pointer-events:none;
+    background:radial-gradient(closest-side, rgba(255,255,255,.10), rgba(255,255,255,0) 72%);
+    box-shadow:0 0 0 1px rgba(255,255,255,.18) inset; }
+  .materialize.spin{ animation:spin 2.4s linear infinite; }
+  .materialize.spin::after{ content:""; position:absolute; inset:0; border-radius:50%;
+    border:1.5px solid transparent; border-top-color:rgba(255,255,255,.6); }
+  @keyframes spin{ to{ transform:translate(-50%,-50%) rotate(360deg); } }
+  .obj3d.forming{ opacity:.5; filter:drop-shadow(0 0 26px rgba(255,255,255,.5)) blur(.4px); }
+
+  /* Hero ghost: tap-origin rect → center connector (A群 only) */
+  .ghost{ position:absolute; z-index:18; pointer-events:none; }
+  .ghost .rect{ position:absolute; width:54px; height:64px; border-radius:8px;
+    border:1.5px dashed rgba(255,255,255,.5); }
+  .ghost .lab{ position:absolute; font:600 8px/1.3 var(--font-latin); letter-spacing:.04em;
+    color:rgba(255,255,255,.7); white-space:nowrap; }
+  .ghost svg{ position:absolute; overflow:visible; }
+
+  /* drag-to-rotate affordance (faint) */
+  .rotate-hint{ position:absolute; left:50%; top:48%; transform:translate(-50%,-50%);
+    width:300px; height:60px; z-index:21; pointer-events:none; opacity:.55; }
+
+  /* B群 chrome: close × + hint chip */
+  .close-x{ position:absolute; top:18px; right:14px; z-index:30; width:40px; height:40px; }
+  .close-x.wd-icon-btn img{ width:16px; height:16px; filter:brightness(0) invert(1); }
+  .hint{ position:absolute; left:50%; bottom:30px; transform:translateX(-50%); z-index:30;
+    display:flex; align-items:center; gap:8px; padding:9px 16px; border-radius:100px;
+    background:var(--glass-fill); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px);
+    font:600 11px var(--font-jp); color:#fff; white-space:nowrap; }
+  .hint::after{ content:""; position:absolute; inset:0; border-radius:100px; padding:1px;
+    background:var(--gradient-border);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .hint .gly{ width:14px; height:14px; filter:brightness(0) invert(1); opacity:.85; }
+
+  /* spec strip under each phone */
+  .spec{ display:flex; flex-direction:column; gap:7px; max-width:300px; }
+  .spec .r{ display:flex; gap:8px; align-items:baseline; font:400 11px/1.5 var(--font-jp); color:var(--text-2); }
+  .spec .r .k{ flex:none; width:64px; font:600 10px var(--font-latin); letter-spacing:.05em;
+    text-transform:uppercase; color:var(--text-3); }
+  .spec .r b{ color:#fff; font-weight:600; }
+  .spec .mono{ font-family:var(--font-latin); font-weight:600; font-size:10px; color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; }
+</style></head>
+<body>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="gemRt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6f8fa"/><stop offset="1" stop-color="#c4ccd2"/></linearGradient>
+    <linearGradient id="gemLt" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#aeb6bc"/><stop offset="1" stop-color="#787f85"/></linearGradient>
+    <linearGradient id="gemRb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa2a8"/><stop offset="1" stop-color="#646b71"/></linearGradient>
+    <linearGradient id="gemLb" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6e757b"/><stop offset="1" stop-color="#42484d"/></linearGradient>
+    <symbol id="gem" viewBox="0 0 80 116">
+      <path d="M40 3 L9 47 L40 61 Z" fill="url(#gemLt)"/>
+      <path d="M40 3 L71 47 L40 61 Z" fill="url(#gemRt)"/>
+      <path d="M9 47 L40 61 L40 113 Z" fill="url(#gemLb)"/>
+      <path d="M71 47 L40 61 L40 113 Z" fill="url(#gemRb)"/>
+      <path d="M40 3 L9 47 L40 113 L71 47 Z" fill="none" stroke="rgba(225,248,255,.55)" stroke-width="1"/>
+      <path d="M40 3 L40 113 M9 47 L71 47" stroke="rgba(225,248,255,.32)" stroke-width=".8"/>
+      <circle cx="40" cy="9" r="1.6" fill="#fff"/>
+    </symbol>
+  </defs></svg>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">UniverseView — <b>3D オーバーレイ</b></span>
+      <span class="en">3D viewer overlay · ThreeDOverlayLayer</span>
+    </div>
+    <div class="lede">
+      地図中心の <b>main 3D をタップ</b>すると開く全画面ビューア。暗転 scrim の中央に<b>正方形(短辺×0.86)</b>で 3D が<b>枠なし</b>で浮き、タップ元から中央へ <b>320ms easeOutCubic</b> の Hero 拡大で着地する。<b>横ドラッグで 360°回転</b>(自動回転は停止)、<b>背景タップで閉じる</b>。現状(A群)は <b>chrome なし</b>のミニマル。B群は希望として<b>ピンチ拡大の自由操作</b>・操作ヒント・閉じる× を併記。
+    </div>
+  </div>
+
+  <div class="frames">
+
+    <!-- ============ LOADING (A群・登場前半) ============ -->
+    <div class="col">
+      <div class="col-cap">
+        <span class="ch load">A群 · 実装が正 — 登場(ロード中)</span>
+        <span class="ct">materialize<span class="en">forming</span></span>
+        <span class="cd">3D 取得までは<b>抽象クリスタルの materialize 演出</b>。中央に小さく、淡い shimmer リングと共に形成される。</span>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="map"><div class="plane"></div><div class="roads"></div></div>
+        <div class="scrim"></div>
+        <div class="materialize spin"></div>
+        <div class="viewer"><svg class="obj3d forming" style="width:96px;" viewBox="0 0 80 116"><use href="#gem"></use></svg></div>
+        <div class="home-ind"></div>
+      </div></div>
+      <div class="spec">
+        <div class="r"><span class="k">scrim</span><span><span class="mono">rgba(0,0,0,.62)</span> · Hero 進行 t に比例フェードイン</span></div>
+        <div class="r"><span class="k">center</span><span>クリスタル materialize · 中央に小さく</span></div>
+      </div>
+    </div>
+
+    <!-- ============ A群 LANDED ============ -->
+    <div class="col">
+      <div class="col-cap">
+        <span class="ch now">A群 · 実装が正 — 着地状態</span>
+        <span class="ct">回転ビューア<span class="en">drag to rotate</span></span>
+        <span class="cd"><b>正方形(短辺×0.86)</b>に 3D が枠なしで浮いた着地状態。<b>chrome なし</b>。横ドラッグで 360°回転、背景タップで閉じる。</span>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="map"><div class="plane"></div><div class="roads"></div></div>
+        <div class="scrim"></div>
+
+        <!-- Hero ghost: origin rect (main pin) → center -->
+        <div class="ghost" style="inset:0;">
+          <div class="rect" style="left:150px; top:430px; transform:translateX(-50%);"></div>
+          <div class="lab" style="left:120px; top:500px;">tap origin (main pin)</div>
+          <svg style="left:0; top:0; width:300px; height:650px;">
+            <path d="M150 430 C 150 360, 150 380, 150 330" stroke="rgba(255,255,255,.4)" stroke-width="1.2" stroke-dasharray="3 4" fill="none"/>
+            <path d="M150 338 l-4 7 l8 0 z" fill="rgba(255,255,255,.55)"/>
+          </svg>
+          <div class="lab" style="left:175px; top:372px;">320ms easeOutCubic</div>
+        </div>
+
+        <div class="viewer"><svg class="obj3d" viewBox="0 0 80 116"><use href="#gem"></use></svg></div>
+
+        <!-- faint drag-to-rotate affordance -->
+        <svg class="rotate-hint" viewBox="0 0 300 60">
+          <path d="M70 30 Q150 8 230 30" stroke="rgba(255,255,255,.5)" stroke-width="1.4" fill="none" stroke-dasharray="2 5"/>
+          <path d="M70 30 l8 -5 l-1 9 z" fill="rgba(255,255,255,.6)"/>
+          <path d="M230 30 l-8 -5 l1 9 z" fill="rgba(255,255,255,.6)"/>
+        </svg>
+
+        <div class="home-ind"></div>
+      </div></div>
+      <div class="spec">
+        <div class="r"><span class="k">square</span><span><b>短辺 × 0.86</b> <span class="mono">≈ 338px @393</span> · 透明背景・枠なし</span></div>
+        <div class="r"><span class="k">enter</span><span>タップ元 → 中央へ <span class="mono">320ms easeOutCubic</span></span></div>
+        <div class="r"><span class="k">gesture</span><span>横ドラッグ=360°回転 / 背景タップ=閉じる</span></div>
+        <div class="r"><span class="k">chrome</span><span><b>なし</b>(閉じる・ヒント・テキスト無し)</span></div>
+      </div>
+    </div>
+
+    <!-- ============ B群 WISH ============ -->
+    <div class="col">
+      <div class="col-cap">
+        <span class="ch wish">B群 · 希望 — これから実装したい</span>
+        <span class="ct">自由操作モード<span class="en">rotate + pinch</span></span>
+        <span class="cd"><b>ピンチで自由拡大</b>を追加(現状は回転のみ)。最小限の<b>操作ヒント</b>と<b>閉じる×</b>を、3D の主役性を消さない範囲で glass チップ / WdIconButton 流用で添える。</span>
+      </div>
+      <div class="phone"><div class="screen">
+        <div class="map"><div class="plane"></div><div class="roads"></div></div>
+        <div class="scrim"></div>
+
+        <div class="viewer zoom"><svg class="obj3d" viewBox="0 0 80 116"><use href="#gem"></use></svg></div>
+
+        <!-- pinch affordance -->
+        <svg class="rotate-hint" style="top:48%; opacity:.5;" viewBox="0 0 300 60">
+          <path d="M118 30 l-22 -16 m0 0 l13 1 m-13 -1 l1 13" stroke="rgba(255,255,255,.7)" stroke-width="1.4" fill="none"/>
+          <path d="M182 30 l22 16 m0 0 l-13 -1 m13 1 l-1 -13" stroke="rgba(255,255,255,.7)" stroke-width="1.4" fill="none"/>
+        </svg>
+
+        <!-- B群 chrome: close × + hint chip -->
+        <span class="close-x wd-icon-btn"><img src="../assets/icons/icon_close.png" alt="close"></span>
+        <div class="hint"><img class="gly" src="../assets/icons/icon_swap.png" alt="">ドラッグで回転 · ピンチで拡大</div>
+
+        <div class="home-ind"></div>
+      </div></div>
+      <div class="spec">
+        <div class="r"><span class="k">add</span><span><b>ピンチ拡大</b>(回転＋拡大の自由操作モード)</span></div>
+        <div class="r"><span class="k">hint</span><span>下端 glass チップ・最小限 <span class="mono">任意</span></span></div>
+        <div class="r"><span class="k">close</span><span>右上 <b>×</b>(WdIconButton 流用) <span class="mono">任意</span></span></div>
+      </div>
+    </div>
+
+  </div>
+
+</body></html>
