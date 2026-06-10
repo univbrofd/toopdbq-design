@@ -12,10 +12,10 @@ Claude Design に**作らせる**ための逆ハンドオフ。ChatList（ダー
 
 ## repo / branch / raw base
 
-- repo: `univbrofd/toopdbq`、branch: **`design/ds-sync`**
-- raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/`
-- DS 索引: `lib-design/DesignSystem/_ds_manifest.json`（cards / tokens / fonts の芋づる索引）
-- 姉妹（既存・ダーク）: `lib-design/handoff/ChatList/preview/comp-chat-list.html` / `comp-chat-row.html`
+- repo: `univbrofd/toopdbq-design`、branch: **`main`**（public repo・raw リンクで直接取得可）
+- raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
+- DS 索引: `DesignSystem/_ds_manifest.json`（cards / tokens / fonts の芋づる索引）
+- 姉妹（既存・ダーク）: `handoff/ChatList/preview/comp-chat-list.html` / `comp-chat-row.html`
 
 ---
 
@@ -23,7 +23,7 @@ Claude Design に**作らせる**ための逆ハンドオフ。ChatList（ダー
 
 **ある:**
 - ダーク役割トークン一式: `--bg(#08080b)` / `--surface-raised(#16131f)` / `--surface-input(#2b2b2b)` /
-  `--text-1/2/3` / `--gradient-colorful`(=`--primary`/`--unread`) / `--border-hairline` / `--shadow-avatar` 等（`colors_and_type.css`）
+  `--text-1/2/3` / `--gradient-colorful`(=`--primary`/`--unread`) / `--border-hairline` / `--shadow-avatar` 等（`DesignSystem/colors_and_type.css` が canonical。Flutter 側 FigmaColors.dart がこれを鏡写しする）
 - ChatList specimen（ダーク・登録済）: `comp-chat-list.html` / `comp-chat-row.html`。行 spec に
   「tap → ChatRoomView（room入力=comp-composer族）」と**次画面への接続が明記済み**
 - avatar: `preview/comp-avatar.html`（正円・`--shadow-avatar`・placeholder=`--gray-800`+icon_person）
@@ -93,9 +93,9 @@ comp-composer 族（共有の背骨・送信=gradient で統一）:
 
 ---
 
-## D. 実装（正）と直すべき逸脱
+## D. 実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。この HANDOFF の値が design 上の正）と直すべき逸脱
 
-| 対象 | 実装ファイル | 現状（世界観外） | 直し（ダーク DS 化） |
+| 対象 | 実装ファイル（参考・素テキスト） | 現状（世界観外） | 直し（ダーク DS 化） |
 |---|---|---|---|
 | 画面 | `lib/feature/Chat/ChatRoomView.dart` | 白 Scaffold＋Material AppBar(白/黒87/elev0.5) | `--bg`/`--surface-raised` ダーク・header=戻る(WdIconButton)＋名前 fade |
 | 自分バブル | `widgets/ChatBubble.dart`（`bg=#1E88FF`） | Material blue（chat-row note が否定済） | `--gradient-colorful`＋`--on-primary`＋glow |
@@ -106,33 +106,33 @@ comp-composer 族（共有の背骨・送信=gradient で統一）:
 
 ---
 
-## E. 参照ファイル（全て raw base からの相対パス）
+## E. 参照ファイル（全て raw base からの相対パス・public repo で直接取得可）
 
 デザイン基盤:
-- `lib-design/DesignSystem/_ds_manifest.json` / `colors_and_type.css` / `USAGE_RULES.md` / `taste.md`
-- `lib-design/DesignSystem/preview/components.css` / `comp-avatar.html` / `comp-textfield.html` / `comp-icon-buttons.html`
+- `DesignSystem/_ds_manifest.json` / `colors_and_type.css` / `USAGE_RULES.md` / `taste.md`
+- `DesignSystem/preview/components.css` / `comp-avatar.html` / `comp-textfield.html` / `comp-icon-buttons.html`
 
 姉妹（ダーク・正・遷移元）:
-- `lib-design/handoff/ChatList/preview/comp-chat-list.html` / `comp-chat-row.html` / `card.css` / `components.css`
-- icons: `lib-design/handoff/ChatList/assets/icons/`（`icon_back.png` / `icon_person.png` 等）
+- `handoff/ChatList/preview/comp-chat-list.html` / `comp-chat-row.html` / `card.css` / `components.css`
+- icons: `handoff/ChatList/assets/icons/`（`icon_back.png` / `icon_person.png` 等）
 
 composer 族（共有の文法）:
-- `lib-design/handoff/StoryCommentSheet/comp-story-comment.html` / `HANDOFF.md`
-- `lib-design/handoff/CircleFooterTimeline/comp-circle-timeline.html`
+- `handoff/StoryCommentSheet/comp-story-comment.html` / `HANDOFF.md`
+- `handoff/CircleFooterTimeline/comp-circle-timeline.html`
 
-実装（正）:
-- `lib/feature/Chat/ChatRoomView.dart` / `ChatRoomController.dart` / `CLAUDE.md` / `SPEC.md`
-- `lib/feature/Chat/widgets/ChatBubble.dart` / `ChatInputBar.dart`
+実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。Claude Design は取得不可。この HANDOFF の値が design 上の正・素テキスト）:
+- lib/feature/Chat/ChatRoomView.dart / ChatRoomController.dart / CLAUDE.md / SPEC.md
+- lib/feature/Chat/widgets/ChatBubble.dart / ChatInputBar.dart
 
 ---
 
 ## F. Claude Design に貼るプロンプト
 
 ```
-design/ds-sync の Toopdbq DS を正として、ChatRoom（1対1メッセンジャールーム・ダーク）を DS に取り込む。
+toopdbq-design(main) の Toopdbq DS を正として、ChatRoom（1対1メッセンジャールーム・ダーク）を DS に取り込む。
 ChatList(ダーク inbox)の行 tap から連続する到達先。下端入力は comp-composer 族に統一する。
-索引: https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-design/DesignSystem/_ds_manifest.json
-HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-design/handoff/ChatRoom/HANDOFF.md
+索引: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/DesignSystem/_ds_manifest.json
+HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/handoff/ChatRoom/HANDOFF.md
 
 土台は USAGE_RULES.md → taste.md → colors_and_type.css。新規発明せず既存トークン/Wd* を使う。
 世界観厳守（ダーク＋カラフル放射グラデ＋ガラス／Noto Sans JP・Inter／絵文字なし／効果1〜2個）。
@@ -158,7 +158,7 @@ HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-
 
 ## G. 取り込み（Claude Design が出した後）
 
-bundle URL を `/design {URL}` で取得・展開 → `references/handoff.md` C の reconcile（Claude 側の新規カード
-`comp-chat-room` / `comp-chat-bubble` / 更新 `comp-composer` を `DesignSystem/preview/` へ、`_ds_manifest.json` を
-superset マージ）→ `design/ds-sync` へ push。以後コードは **実装が正**として specimen を保守
+bundle を `/design {URL}` で取り込み → `references/handoff.md` C の reconcile（Claude 側の新規カード
+`comp-chat-room` / `comp-chat-bubble` / 更新 `comp-composer` を この repo の `DesignSystem/preview/` へ、`_ds_manifest.json`
+superset へ reconcile）→ `univbrofd/toopdbq-design` の `main` へ push。以後コードは **実装が正**として specimen を保守
 （`ChatRoomView` / `ChatBubble` / `ChatInputBar` をダーク DS 値へ寄せ、青ベタ/Material アイコンを撤去）。

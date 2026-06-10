@@ -12,15 +12,13 @@
 
 ## repo / branch / raw リンク
 
-- repo: `univbrofd/toopdbq`、branch: **`design/ds-sync`**（private。Claude Design は GitHub コネクタ＝認証付きで取得）
-- raw 形式: `https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/{path}`
-- DS 索引: `lib-design/DesignSystem/_ds_manifest.json`（pull 済みのはず）
-- ※ private repo のため未認証 raw は 404。Claude Design がリンクを開けないときは
-  「GitHub コネクタで `univbrofd/toopdbq` の `design/ds-sync` を読んで」と添える。
+- repo: `univbrofd/toopdbq-design`、branch: **`main`**
+- raw 形式: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/{path}`
+- DS 索引: `DesignSystem/_ds_manifest.json`
 
 ## 成果物（Claude Design が作るもの）
 
-`lib-design/DesignSystem/preview/` に specimen を起こし、`_ds_manifest.json` の `cards` に登録
+`DesignSystem/preview/` に specimen を起こし、`_ds_manifest.json` の `cards` に登録
 （各 specimen 先頭に `<!-- @dsCard group="Components" name="..." subtitle="..." -->`）。色は
 `colors_and_type.css` の役割トークン、font は Noto Sans JP / Inter、display は Pacifico。
 
@@ -96,9 +94,9 @@
 - pitch が立つほどポールは長く・サムネは拡大（55° 付近がピーク）。Flutter 側は投影済み座標を
   受け取るだけ（Matrix4 変換はしない）＝ specimen も「倒した絵」を静的に描けば良い。
 
-## 参照ファイル（全て上記 raw リンクで取得可）
+## 参照ファイル
 
-実装（正）:
+実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。HANDOFF が design 上の正）:
 - `lib/component/ui/view/Earth/ThreeDTerrestrialView.dart`（3D 形態の本体・role 別装飾）
 - `lib/component/ui/view/Earth/EarthClusterPolePainter.dart`（逆三角形・棒・影・接続線）
 - `lib/component/ui/view/Earth/EarthClusterLayoutEngine.dart`（role 別サイズ・ポール長・anchor/tip 計算）
@@ -110,19 +108,18 @@
 - `lib/model/EarthPin.dart` / `lib/model/StoryData.dart`（thumbnailUrl / threeDPath の出どころ）
 
 DS 基盤:
-- `lib-design/DesignSystem/USAGE_RULES.md` / `taste.md` / `colors_and_type.css`
-- `lib-design/DesignSystem/preview/components.css`（既存クラス語彙）
-- `lib-design/DesignSystem/_ds_manifest.json`（索引）
+- `DesignSystem/USAGE_RULES.md` / `taste.md` / `colors_and_type.css`
+- `DesignSystem/preview/components.css`（既存クラス語彙）
+- `DesignSystem/_ds_manifest.json`（索引）
 
 ## Claude Design に貼るプロンプト
 
 ```
-design/ds-sync の DS を正として、Universe の 3D オブジェクト表示
+toopdbq-design の DS を正として、Universe の 3D オブジェクト表示
 ThreeDTerrestrialView のタイプ別 specimen を起こして。
-private repo なので GitHub コネクタで univbrofd/toopdbq の design/ds-sync を読むこと。
 
-索引: https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-design/DesignSystem/_ds_manifest.json
-HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq/design/ds-sync/lib-design/handoff/ThreeDTerrestrialView/HANDOFF.md
+索引: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/DesignSystem/_ds_manifest.json
+HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/handoff/ThreeDTerrestrialView/HANDOFF.md
 
 作るもの:
 1. comp-terrestrial-3d.html — タイプ別3状態を1枚で。
@@ -141,6 +138,6 @@ font=Noto Sans JP/Inter、display=Pacifico。各specimen先頭に
 
 ## 取り込み（ダウンロード後）
 
-Claude Design が bundle を出したら `/design {bundle URL}` で取り込み →
-`references/handoff.md` C の reconcile（新規カードを repo へ、manifest を superset マージ）→
-`design/ds-sync` へ push。実装段階で B群（タイプ別の中身）を `ThreeDTerrestrialView` に反映する。
+Claude Design が bundle を出したら `/design {URL}` 取り込み → `DesignSystem/preview/`
+＋ `_ds_manifest.json` superset reconcile → `univbrofd/toopdbq-design` `main` push。
+実装段階で B群（タイプ別の中身）を `ThreeDTerrestrialView` に反映する（検証は別 repo のアプリ側 skill が ephemeral に行う）。
