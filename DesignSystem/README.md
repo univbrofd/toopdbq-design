@@ -103,7 +103,7 @@ Two variants (`grid`, `shuffle`) fall back to **Material rounded** icons (`grid_
 **Usage guidance.**
 - Always render icons **white** over photos/glass; tint to `#000` only inside light chips (e.g. the relation badge on an avatar).
 - Pair icons with the glass circle-button treatment (`WdIconButton`) rather than placing bare icons on photos.
-- For HTML mocks, reference the real PNGs from `assets/icons/` (e.g. `<img src="assets/icons/icon_like.png">` with a white tint). **Do not** redraw them as inline SVG or substitute emoji.
+- For HTML mocks, reference the real PNGs from `assets/icons/` (e.g. `<img src="../assets/icons/icon_like.png">` with a white tint). **Do not** redraw them as inline SVG or substitute emoji.
 - If you need an icon not in the set, match the existing style (simple, monoline, white) — or flag it.
 
 ---

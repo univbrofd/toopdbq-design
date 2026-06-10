@@ -55,7 +55,7 @@
         <div class="unit">
           <div class="lbl"><span class="dot"></span><b>peer</b> 左寄せ · --surface-raised + hairline · --text-1 · avatar 36 (--gray-800 + icon_person, tap→Profile)</div>
           <div class="chat-row peer" style="margin:0;">
-            <div class="chat-av"><img src="assets/icons/icon_person.png" alt=""></div>
+            <div class="chat-av"><img src="../../assets/icons/icon_person.png" alt=""></div>
             <div class="bubble peer">渋谷、今ちょうど着いたよ。どこにいる？</div>
           </div>
         </div>
@@ -106,7 +106,7 @@
     row.className = 'chat-row ' + m.who + (sameAsPrev ? ' same' : '');
     if (m.who === 'peer') {
       const av = document.createElement('div'); av.className = 'chat-av' + (sameAsNext ? ' hold' : '');
-      if (!sameAsNext) { const im = document.createElement('img'); im.src = 'assets/icons/icon_person.png'; av.appendChild(im); }
+      if (!sameAsNext) { const im = document.createElement('img'); im.src = '../../assets/icons/icon_person.png'; av.appendChild(im); }
       row.appendChild(av);
     }
     const b = document.createElement('div');

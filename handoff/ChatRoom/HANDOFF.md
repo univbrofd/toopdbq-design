@@ -53,7 +53,7 @@ Claude Design に**作らせる**ための逆ハンドオフ。ChatList（ダー
 - header の **名前 fade**（操作後 6.4s で名前が opacity 0→戻りは戻るボタンのみ。実装の `nameVisible` 挙動）
 
 anatomy:
-- **header**: 左=戻る（`WdIconButton` + `assets/icons/icon_back.png`、最小 44pt）＋ 名前（`--text-1` / 14 / w600 / 省略）。
+- **header**: 左=戻る（`WdIconButton` + `../../assets/icons/icon_back.png`、最小 44pt）＋ 名前（`--text-1` / 14 / w600 / 省略）。
   **ヘッダーにアバターは出さない**（実装通り）。`titleSpacing 16`。下端に 1px ヘアライン（`--border-hairline`）。
 - **message list**: 下が最新・上が最古（`reverse`）。上端ページング時は 18px スピナーを上端に。
 - **composer**: 下端固定。B-3 の最小 composer（丸入力欄＋送信）。

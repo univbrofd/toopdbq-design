@@ -27,7 +27,7 @@
 | トークン（唯一の正） | `DesignSystem/colors_and_type.css` |
 | MenuItem の Before/After 参照 | `DesignSystem/preview/batchF-misc.html` |
 | specimen カードの雛形 | `DesignSystem/preview/comp-circle-bar.html` |
-| アイコン PNG | `DesignSystem/assets/icons/icon_leave.png` / `icon_delete.png` |
+| アイコン PNG | `../../assets/icons/icon_leave.png` / `icon_delete.png` |
 | 使用ルール・美学・概要 | `USAGE_RULES.md` / `taste.md` / `README.md` |
 
 ### B. 実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。HANDOFF が design 上の正）
