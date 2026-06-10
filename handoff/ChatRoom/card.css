@@ -1,0 +1,26 @@
+/* Shared styling for design-system specimen cards. Pair with colors_and_type.css */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; }
+body {
+  font-family: var(--font-latin);
+  background: #0d0d0f;
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.col { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow {
+  font-family: var(--font-latin); font-weight: 600; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-3);
+}
+.mono { font-family: var(--font-latin); font-size: 10.5px; color: var(--fg-2); letter-spacing: .01em; }
+
+/* phone frame — native 393×852, SafeArea-aware. Scaled by JS into .phone-box */
+.phone-box { position:relative; overflow:hidden; border-radius:20px; flex:none;
+  box-shadow:0 10px 34px rgba(0,0,0,.5); outline:1px solid rgba(255,255,255,.08); outline-offset:-1px; }
+.phone { position:absolute; top:0; left:0; width:393px; height:852px; transform-origin:top left;
+  background:var(--bg); overflow:hidden; display:flex; flex-direction:column; }

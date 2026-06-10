@@ -1,0 +1,121 @@
+<!-- @dsCard group="Components" name="ChatBubble — dark" subtitle="新規パーツ。会話の2者バブル(me=白ソリッド+暗インク / peer=ダークガラス+avatar36)。モノクロ・アクセント無し。used in=ChatRoom。テキスト専用・時刻/既読/日付セパレータ無し" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="chat.css">
+<style>
+  body { background:#0d0d0f; padding:24px; gap:20px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:880px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; white-space:nowrap; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+  .note { font:500 11px/1.7 var(--font-jp); color:var(--text-2); max-width:880px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:13px 16px; }
+  .note b { color:#fff; font-weight:700; }
+  .note .tag { display:inline-block; font:800 9px/1 var(--font-latin); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--bg); background:#fff; border-radius:5px; padding:4px 7px; margin-right:8px; vertical-align:1px; }
+
+  .stage { display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start; }
+  .frame { display:flex; flex-direction:column; gap:11px; }
+  .cap { display:flex; flex-direction:column; gap:4px; max-width:380px; }
+  .cap .nm { font:700 13px var(--font-latin); color:#fff; }
+  .cap .jp { font:500 11px/1.5 var(--font-jp); color:var(--text-2); }
+
+  /* a slice of dark room surface to host the bubbles at native scale */
+  .surface { width:373px; background:var(--bg); border-radius:14px; overflow:hidden;
+    border:1px solid rgba(255,255,255,.08); }
+  .surface .chat-feed { padding:18px 10px; }
+
+  /* annotation — labels sit clear of the bubbles, in their own band */
+  .anat { width:373px; background:var(--bg); border-radius:14px;
+    border:1px solid rgba(255,255,255,.08); padding:22px 14px; display:flex; flex-direction:column; gap:8px; }
+  .anat .unit { display:flex; flex-direction:column; gap:7px; }
+  .anat .unit.r { align-items:flex-end; }
+  .anat .lbl { font:600 9.5px/1.5 var(--font-latin); color:var(--text-3); letter-spacing:.02em; }
+  .anat .lbl b { color:#fff; font-weight:700; font-size:10px; }
+  .anat .lbl .dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--text-3); margin-right:6px; vertical-align:1px; }
+  .anat .sep { height:1px; background:rgba(255,255,255,.06); margin:6px 0; }
+
+  .spec { display:grid; grid-template-columns:108px 1fr; gap:7px 16px; max-width:880px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:18px 20px; }
+  .spec .k { font:700 11px var(--font-latin); color:rgba(255,255,255,.9); padding-top:1px; }
+  .spec .d { font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .spec .d b { color:#fff; font-weight:700; }
+</style></head>
+<body>
+  <div class="eyebrow">ChatBubble — チャットバブル（新規パーツ · ダーク · used in ChatRoom）</div>
+  <div class="lede">ChatList の到達先 <b>ChatRoom</b> の会話フィードを構成する 2 者バブル。コメント sheet の単列行とは別パーツとして起こす。<b>自分 (me)</b> は右寄せ・<span class="tok">--white</span> のソリッド地＋<span class="tok">--bg</span> の暗インク（アクセント色は使わない・glow 無し）、アバター無し。<b>相手 (peer)</b> は左寄せ・<span class="tok">--surface-raised</span> のダークガラス地＋<span class="tok">--text-1</span> 文字、左に<b>アバター 36</b>（placeholder＝<span class="tok">--gray-800</span> ＋ icon_person、tap → Profile）。テキスト専用。</div>
+
+  <div class="note"><span class="tag">直すべき逸脱</span>旧実装の青ベタバブル <span class="tok">#1E88FF</span>（Material blue）は世界観外につき<b>不可</b>。世界観のアクセント（colorful gradient）も<b>あえて使わず</b>、me＝<b>白ソリッド＋暗インク</b>／peer＝<b>ダークガラス＋ヘアライン</b>の<b>モノクロ 2 色</b>に整理（#000・#fff＋クールグレーの土台どおり）。<b>実装が正の制約（捏造禁止）</b>：バブルに<b>時刻・既読マーカー・日付セパレータは無い</b>（現状実装はテキストのみ）。装飾を足さない。画像バブルも持たない。</div>
+
+  <div class="stage">
+    <!-- anatomy: one peer + one me, annotated -->
+    <div class="frame">
+      <div class="anat">
+        <div class="unit">
+          <div class="lbl"><span class="dot"></span><b>peer</b> 左寄せ · --surface-raised + hairline · --text-1 · avatar 36 (--gray-800 + icon_person, tap→Profile)</div>
+          <div class="chat-row peer" style="margin:0;">
+            <div class="chat-av"><img src="assets/icons/icon_person.png" alt=""></div>
+            <div class="bubble peer">渋谷、今ちょうど着いたよ。どこにいる？</div>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="unit r">
+          <div class="lbl"><span class="dot"></span><b>me</b> 右寄せ · --white ソリッド · --bg 暗インク · glow無 · アバター無し</div>
+          <div class="chat-row me" style="margin:0;">
+            <div class="bubble me">ハチ公の前にいる！すぐ行く</div>
+          </div>
+          <div class="lbl">角丸 <b>16</b> · 送信者側の下角だけ tail <b>4</b> · max-width <b>72%</b></div>
+        </div>
+      </div>
+      <div class="cap"><span class="nm">anatomy</span><span class="jp">peer＝アバター 36＋ガラス。me＝白ソリッド＋暗インク。送信者側の下角だけ tail 4。</span></div>
+    </div>
+
+    <!-- conversation: grouping & wrap -->
+    <div class="frame">
+      <div class="surface" id="convo"></div>
+      <div class="cap"><span class="nm">conversation</span><span class="jp">連続発話はグルーピング（同送信者の中間バブルは tail を持たず角丸 16 のまま、アバターは末尾のみ）。長文は 72% で折り返し。</span></div>
+    </div>
+  </div>
+
+  <div class="spec">
+    <span class="k">me</span><span class="d">右寄せ・<span class="tok">--white</span> 地・<span class="tok">--bg</span> 暗インク・<b>glow 無し</b>。アクセント色不使用。アバター無し。tail＝<b>下右角 4</b></span>
+    <span class="k">peer</span><span class="d">左寄せ・<span class="tok">--surface-raised</span> 地・<span class="tok">--border-hairline</span> 1px・<span class="tok">--text-1</span> 文字。左にアバター 36。tail＝<b>下左角 4</b></span>
+    <span class="k">avatar</span><span class="d">正円 36・placeholder <span class="tok">--gray-800</span> ＋ icon_person・<span class="tok">--shadow-avatar</span>。<b>tap → Profile</b>。グループ末尾の行のみ表示</span>
+    <span class="k">bubble</span><span class="d">角丸 <span class="tok">--radius-lg 16</span>・max-width <b>72%</b>・padding <b>9 / 13</b>・本文 <span class="tok">jp 500 14 / 1.42</span></span>
+    <span class="k">layout</span><span class="d">縦 gap <b>3</b>（グループ内）・グループ間 <b>14</b>・横 margin <b>10</b>。下＝最新／上＝最古</span>
+    <span class="k">禁止</span><span class="d"><b>時刻・既読・日付セパレータ・画像バブルは描かない</b>（実装はテキストのみ）。青 <span class="tok">#1E88FF</span> 不可・アクセント色も使わない</span>
+  </div>
+
+<script>
+  const CONVO = [
+    { who:'peer', tx:'渋谷、今ちょうど着いたよ。どこにいる？' },
+    { who:'me',   tx:'ハチ公の前にいる！すぐ行く' },
+    { who:'me',   tx:'5分くらいで着くと思う' },
+    { who:'peer', tx:'りょうかい、のんびり待ってるね' },
+    { who:'peer', tx:'そういえばさっき撮った夕暮れの写真、めちゃくちゃ綺麗だったよ' },
+    { who:'peer', tx:'あとで送るね' },
+    { who:'me',   tx:'楽しみ！' },
+  ];
+  const feed = document.createElement('div'); feed.className = 'chat-feed';
+  CONVO.forEach((m, i) => {
+    const prev = CONVO[i-1], next = CONVO[i+1];
+    const sameAsPrev = prev && prev.who === m.who;
+    const sameAsNext = next && next.who === m.who;
+    const row = document.createElement('div');
+    row.className = 'chat-row ' + m.who + (sameAsPrev ? ' same' : '');
+    if (m.who === 'peer') {
+      const av = document.createElement('div'); av.className = 'chat-av' + (sameAsNext ? ' hold' : '');
+      if (!sameAsNext) { const im = document.createElement('img'); im.src = 'assets/icons/icon_person.png'; av.appendChild(im); }
+      row.appendChild(av);
+    }
+    const b = document.createElement('div');
+    b.className = 'bubble ' + m.who + (sameAsNext ? ' mid' : '');
+    b.textContent = m.tx;
+    row.appendChild(b);
+    if (sameAsPrev) row.style.marginTop = '3px'; else if (i) row.style.marginTop = '14px';
+    feed.appendChild(row);
+  });
+  document.getElementById('convo').appendChild(feed);
+</script>
+</body></html>

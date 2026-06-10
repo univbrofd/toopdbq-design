@@ -1,0 +1,226 @@
+<!-- @dsCard group="Components" name="ChatRoom — dark" subtitle="ChatRoomView。from=ChatList行 / feed=comp-chat-bubble / 入力=comp-composer最小。状態 default / empty / 入力中(KB) / 名前fade(操作後6.4s)" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="chat.css">
+<style>
+  body { background:#0d0d0f; padding:24px; gap:20px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:900px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; white-space:nowrap; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+  .note { font:500 11px/1.7 var(--font-jp); color:var(--text-2); max-width:900px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:13px 16px; }
+  .note b { color:#fff; font-weight:700; }
+  .note .tag { display:inline-block; font:800 9px/1 var(--font-latin); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--bg); background:#fff; border-radius:5px; padding:4px 7px; margin-right:8px; vertical-align:1px; }
+
+  .frames { display:flex; flex-wrap:wrap; gap:30px 24px; align-items:flex-start; }
+  .frame { display:flex; flex-direction:column; gap:11px; }
+
+  /* status bar (SafeArea top) */
+  .sb { height:44px; flex:none; display:flex; align-items:center; justify-content:space-between;
+    padding:0 22px 0 26px; font-family:var(--font-latin); }
+  .sb .clk { font-weight:700; font-size:15px; color:var(--text-1); letter-spacing:.02em; }
+  .sb .ind { display:flex; align-items:center; gap:6px; }
+  .sb .ind i { display:block; background:var(--text-1); border-radius:1px; }
+  .sb .ind .net { width:17px; height:11px; -webkit-mask:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity="0.4"/></svg>') no-repeat center/contain; }
+  .sb .ind .bat { width:24px; height:12px; border:1.4px solid var(--text-1); border-radius:3px; position:relative; opacity:.9; }
+  .sb .ind .bat::after { content:""; position:absolute; right:-3px; top:3px; width:2px; height:6px; background:var(--text-1); border-radius:0 1px 1px 0; }
+  .sb .ind .bat::before { content:""; position:absolute; left:1.5px; top:1.5px; bottom:1.5px; width:62%; background:var(--text-1); border-radius:1px; }
+
+  /* home indicator */
+  .home { height:0; }
+  .home-bar { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); width:134px; height:5px;
+    border-radius:99px; background:rgba(255,255,255,.3); z-index:6; }
+
+  /* feed scroll viewport, latest pinned to bottom */
+  .feed-vp { flex:1; min-height:0; display:flex; flex-direction:column; justify-content:flex-end; overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 100%);
+    mask-image:linear-gradient(180deg,transparent 0,#000 5%,#000 100%); }
+
+  /* keyboard (preview only) */
+  .kb { position:absolute; left:0; right:0; bottom:0; z-index:5; display:flex; flex-direction:column;
+    background:#1c1c1e; padding:8px 3px 0; }
+  .kb .cand { height:38px; flex:none; display:flex; align-items:center; }
+  .kb .cand div { flex:1; text-align:center; font:500 13px var(--font-jp); color:var(--text-1); }
+  .kb .cand div + div { border-left:1px solid rgba(255,255,255,.12); }
+  .kb .krow { flex:1; display:flex; gap:6px; justify-content:center; }
+  .kb .key { flex:1; display:flex; align-items:center; justify-content:center; border-radius:5px;
+    background:#3a3a3c; box-shadow:0 1px 0 rgba(0,0,0,.4); font:400 17px var(--font-jp); color:#fff; }
+  .kb .key.sp { background:rgba(120,120,128,.5); font-size:12px; }
+  .kb .home-bar { background:rgba(255,255,255,.4); }
+
+  .cap { display:flex; flex-direction:column; gap:5px; width:236px; }
+  .cap .st { display:flex; align-items:baseline; gap:8px; }
+  .cap .st .nm { font:700 14px var(--font-latin); color:#fff; }
+  .cap .st .frac { font:600 11px var(--font-latin); color:rgba(255,255,255,.6); }
+  .cap .jp { font:500 11px/1.5 var(--font-jp); color:var(--text-2); }
+  .cap .meta { font:500 10px/1.5 var(--font-latin); color:var(--text-3); }
+  .cap .meta b { color:rgba(255,255,255,.82); font-weight:700; }
+
+  .spec { display:grid; grid-template-columns:108px 1fr; gap:7px 16px; max-width:900px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:18px 20px; }
+  .spec .k { font:700 11px var(--font-latin); color:rgba(255,255,255,.9); padding-top:1px; }
+  .spec .d { font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .spec .d b { color:#fff; font-weight:700; }
+</style></head>
+<body>
+  <div class="eyebrow">ChatRoomView — メッセンジャー個別ルーム（ダーク · 実装が正）</div>
+  <div class="lede">ChatList（ダーク inbox）の行 tap から連続する到達先。面色は遷移元と一貫した<b>ダーク</b>（写真フルブリードは使わず <span class="tok">--surface-raised</span> のダークガラス）。<b>header</b>＝戻る（<span class="tok">WdIconButton + icon_back</span>・最小 44pt）＋ 名前（<span class="tok">--text-1 / 14 / w600</span>・省略）。<b>ヘッダーにアバターは出さない</b>。message list は<b>下＝最新／上＝最古</b>、上端ページング時は <b>18px スピナー</b>。下端は <b>comp-composer 最小 variant</b>（丸入力欄＋送信）。</div>
+
+  <div class="note"><span class="tag">直すべき逸脱</span>現状実装は<b>白 Scaffold＋Material AppBar＋青ベタバブル <span class="tok">#1E88FF</span>＋生 TextField</b>で世界観外。ダーク役割トークンへ寄せ、バブルは族の <b>ChatBubble</b>（me=白ソリッド/peer=ダークガラス）、入力は族の <b>composer 最小末端</b>に統一。<b>「カラフルすぎ」を避けるためアクセント色（colorful gradient）は使わず、#000・#fff＋クールグレーのモノクロ</b>でまとめる。empty は <span class="tok">--text-3</span>。名前は実装の <span class="tok">nameVisible</span> 挙動どおり<b>操作後 6.4s で fade</b>（戻りは戻るボタンのみ）。</div>
+
+  <div class="frames" id="frames"></div>
+
+  <div class="lede" style="margin-top:4px;">レイアウト数値（基準フレーム <span class="tok">393 × 852</span>・SafeArea・実装が正）。</div>
+  <div class="spec">
+    <span class="k">header</span><span class="d">高さ <b>52</b>・titleSpacing 16。戻る＝<span class="tok">WdIconButton</span>（44pt・icon_back 20）＋名前 <span class="tok">jp 600 14 --text-1</span>（ellipsis）。<b>アバター無し</b>。下端 hairline <span class="tok">--border-hairline</span></span>
+    <span class="k">name fade</span><span class="d">操作後 <b>6.4s</b> で名前 <span class="tok">opacity 1 → 0</span>（<span class="tok">--ease-standard</span> 600ms）。スクロール/タップで復帰</span>
+    <span class="k">feed</span><span class="d">下＝最新・上＝最古（<span class="tok">reverse</span>）。bubble は <b>ChatBubble</b>（me=白ソリッド / peer=glass+avatar36）。上端ページングに <b>18px スピナー</b></span>
+    <span class="k">empty</span><span class="d">中央に <span class="tok">jp 400 14 --text-3</span>「まだメッセージはありません」。composer は常時表示</span>
+    <span class="k">composer</span><span class="d">下端固定・<b>最小 variant</b>（field 42＋send 42）。入力中はキーボード上にドック（H − 300）。送信 active＝<b>白</b></span>
+    <span class="k">tone</span><span class="d"><b>モノクロ</b>で統一。アクセント色（colorful gradient）は使わず、#000・#fff＋クールグレーのみ。効果は最小限</span>
+  </div>
+
+<script>
+const SCREEN_W = 393, SCREEN_H = 852, SCALE = 0.6;
+const ICONS = 'assets/icons';
+const KB_H = 300;
+const NAME = '渋谷さん';
+const CONVO = [
+  { who:'peer', tx:'おつかれ！今日の渋谷の集まり来れそう？' },
+  { who:'me',   tx:'行けるよ。何時集合だっけ' },
+  { who:'peer', tx:'19時にハチ公前で' },
+  { who:'peer', tx:'人多いかもだから、着いたら連絡して' },
+  { who:'me',   tx:'りょうかい！' },
+  { who:'me',   tx:'今ちょうど着いた、すぐ行く' },
+  { who:'peer', tx:'のんびり待ってるね' },
+];
+
+function el(t,cls,css){ const n=document.createElement(t); if(cls)n.className=cls; if(css)n.style.cssText=css; return n; }
+function img(src,css){ const n=el('img',null,css); n.src=src; n.onerror=()=>{n.style.visibility='hidden';}; return n; }
+
+function buildStatus(){
+  const sb = el('div','sb');
+  const clk = el('div','clk'); clk.textContent = '9:41';
+  const ind = el('div','ind');
+  ind.appendChild(el('i','net'));
+  ind.appendChild(el('i','bat'));
+  sb.append(clk, ind);
+  return sb;
+}
+function buildHeader(faded){
+  const h = el('div','chat-header');
+  const back = el('div','chat-back'); back.appendChild(img(`${ICONS}/icon_back.png`));
+  const nm = el('div','chat-name' + (faded ? ' faded' : '')); nm.textContent = NAME;
+  h.append(back, nm);
+  return h;
+}
+function buildFeed(o){
+  const vp = el('div','feed-vp');
+  if(o.empty){
+    const e = el('div','chat-empty'); e.textContent = 'まだメッセージはありません';
+    vp.appendChild(e); return vp;
+  }
+  const feed = el('div','chat-feed');
+  if(o.paging){
+    feed.appendChild(el('div','chat-spinner'));
+  }
+  CONVO.forEach((m, i) => {
+    const prev = CONVO[i-1], next = CONVO[i+1];
+    const sameAsPrev = prev && prev.who === m.who;
+    const sameAsNext = next && next.who === m.who;
+    const row = el('div','chat-row ' + m.who + (sameAsPrev ? ' same' : ''));
+    row.style.marginTop = i ? (sameAsPrev ? '3px' : '12px') : '0';
+    if(m.who === 'peer'){
+      const av = el('div','chat-av' + (sameAsNext ? ' hold' : ''));
+      if(!sameAsNext) av.appendChild(img(`${ICONS}/icon_person.png`));
+      row.appendChild(av);
+    }
+    const b = el('div','bubble ' + m.who + (sameAsNext ? ' mid' : ''));
+    b.textContent = m.tx;
+    row.appendChild(b);
+    feed.appendChild(row);
+  });
+  vp.appendChild(feed);
+  return vp;
+}
+function buildComposer(o){
+  const c = el('div','composer');
+  const f = el('div','composer-field' + (o.typed ? ' typed' : ''));
+  if(o.typed){ const t=el('span'); t.textContent=o.typed; f.append(t); f.appendChild(el('span','composer-caret')); }
+  else if(o.active){ f.appendChild(el('span','composer-caret')); const p=el('span',null,'margin-left:1px;'); p.textContent='メッセージを入力…'; f.append(p); }
+  else { f.textContent = 'メッセージを入力…'; }
+  const s = el('div','composer-send' + (o.typed ? ' active' : ''));
+  s.appendChild(img(`${ICONS}/icon_next.png`));
+  c.append(f, s);
+  return c;
+}
+function buildKeyboard(){
+  const kb = el('div','kb',`height:${KB_H}px;`);
+  const cand = el('div','cand');
+  ['すぐ','ハチ公','向かう'].forEach(c=>{ const d=el('div'); d.textContent=c; cand.appendChild(d); });
+  kb.appendChild(cand);
+  const rows = [['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['⇧','z','x','c','v','b','n','m','⌫'],['123','あA','　　space　　','改行']];
+  rows.forEach((row,ri)=>{
+    const r = el('div','krow',`padding:5px ${ri===1?16:3}px;`);
+    row.forEach(k=>{
+      const sp = k.length>1 || ['⇧','⌫'].includes(k);
+      const key = el('div','key' + (sp?' sp':''), `flex:${k.includes('space')?'5':(sp?'1.5':'1')};`);
+      key.textContent = k.trim();
+      r.appendChild(key);
+    });
+    kb.appendChild(r);
+  });
+  kb.appendChild(el('div','home-bar'));
+  return kb;
+}
+
+function buildPhone(o){
+  const phone = el('div','phone');
+  phone.appendChild(buildStatus());
+  phone.appendChild(buildHeader(o.faded));
+  const composerH = 62;
+  if(o.keyboard){
+    // feed shrinks to sit above composer + keyboard
+    const vp = buildFeed(o);
+    vp.style.flex = 'none';
+    vp.style.height = (SCREEN_H - 44 - 52 - composerH - KB_H) + 'px';
+    phone.appendChild(vp);
+    phone.appendChild(buildComposer(o));
+    phone.appendChild(buildKeyboard());
+  } else {
+    phone.appendChild(buildFeed(o));
+    phone.appendChild(buildComposer(o));
+    phone.appendChild(el('div','home-bar'));
+  }
+  return phone;
+}
+function mount(host,o){
+  const box = el('div','phone-box',`width:${SCREEN_W*SCALE}px;height:${SCREEN_H*SCALE}px;`);
+  const phone = buildPhone(o);
+  phone.style.transform = `scale(${SCALE})`;
+  box.appendChild(phone); host.appendChild(box);
+}
+
+const frames = [
+  { title:'default', frac:'会話あり', jp:'ChatList 行 tap で開く既定。相手＝ガラス＋アバター36／自分＝白ソリッドが交互。下端 composer は非活性。', paging:true, meta:'status44 / header52 / feed / composer62 · 上端 spinner18' },
+  { title:'empty', frac:'未送信', jp:'メッセージ未送信。中央に空状態（--text-3）。composer は常時表示。', empty:true, meta:'header52 / empty / composer62' },
+  { title:'入力中（KB）', frac:'KB 300', jp:'入力欄 tap → キーボード起動。composer が KB 直上に固定、feed は上に退避。送信が白で活性。', keyboard:true, typed:'もうすぐ着くよ', meta:'feed H−(44+52+62+300) / composer62 / keyboard300' },
+  { title:'名前 fade', frac:'6.4s 後', jp:'操作後 6.4s で header の名前が opacity 0 へ（nameVisible=false）。戻りは戻るボタン。会話に集中させる挙動。', faded:true, meta:'name opacity 0 · ease 600ms' },
+];
+const host = document.getElementById('frames');
+frames.forEach(f=>{
+  const frame = el('div','frame');
+  mount(frame, f);
+  const cap = el('div','cap');
+  cap.innerHTML =
+    '<div class="st"><span class="nm">'+f.title+'</span><span class="frac">'+f.frac+'</span></div>'+
+    '<div class="jp">'+f.jp+'</div>'+
+    '<div class="meta"><b>'+f.meta+'</b></div>';
+  frame.appendChild(cap);
+  host.appendChild(frame);
+});
+</script>
+</body></html>

@@ -19,9 +19,9 @@
     background: var(--gradient-colorful); box-shadow: 0 0 12px rgba(255,62,136,.6); }
   .mono { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: var(--text-2);
     letter-spacing: .04em; font-variant-numeric: tabular-nums; }
-  /* summary screen vertical layout */
+  /* summary screen vertical layout (safe-top 62 + 56) */
   .sum-wrap { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column;
-    padding: 116px 28px calc(28px + 18px); }
+    padding: 118px 28px calc(34px + 30px); }
   .sum-head .ob-eyebrow { margin-bottom: 12px; }
   .sum-mid { flex: 1; display: flex; flex-direction: column; justify-content: center; }
   /* radius label near handle */
@@ -44,6 +44,7 @@
     </span>
   </div>
 
+  <div class="dynamic-island"></div>
   <button class="ob-skip" id="skip">スキップ</button>
 
   <div class="pager" id="pager">
@@ -59,20 +60,20 @@
           <div class="block plaza" style="left:700px;  top:240px; width:180px; height:180px;"></div>
           <div class="block park"  style="left:300px;  top:640px; width:160px; height:140px;"></div>
         </div>
-        <!-- markers -->
-        <div class="mk dim" style="left:18%; top:300px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_photo.png" alt=""></div></div>
-        <div class="mk" style="left:80%; top:268px;"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_3d.png" alt=""></div></div>
-        <div class="mk dim" style="left:30%; top:208px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
-        <div class="mk dim" style="left:66%; top:200px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <!-- markers (centered to Flutter alignments) -->
+        <div class="mk dim" style="left:35%; top:21.5%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:67%; top:21%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:19%; top:33%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_photo.png" alt=""></div></div>
+        <div class="mk" style="left:83%; top:29%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><div class="thumb"><img src="../assets/images/sample_3d.png" alt=""></div></div>
         <!-- hero floating stage -->
-        <div class="mk hero" style="left:50%; top:360px;">
+        <div class="mk hero" style="left:50%; top:41%; transform:translate(-50%,-50%);">
           <div class="stage-ring"><img src="../assets/images/sample_3d.png" alt=""></div>
           <span class="beam"></span>
           <span class="ground pulse-ground"></span>
           <span class="ping"></span>
         </div>
       </div>
-      <div class="wordmark anim-fade">Toopdbq<span class="sub">Top of People · Dream Believe Quest</span></div>
+      <div class="wordmark anim-fade" style="top:188px;">Toopdbq<span class="sub">Top of People · Dream Believe Quest</span></div>
       <div class="ob-scrim"></div>
       <div class="ob-foot">
         <div class="ob-eyebrow anim-up"><span class="idx">01</span><span class="bar"></span><span>世界</span></div>
@@ -96,17 +97,17 @@
           <div class="block water" style="left:760px; top:520px; width:340px; height:260px;"></div>
         </div>
         <!-- other people's circles already on the map (faint) -->
-        <div class="mk dim" style="left:20%; top:236px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
-        <div class="mk dim" style="left:83%; top:226px;"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:20%; top:25%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
+        <div class="mk dim" style="left:83%; top:24%; transform:translate(-50%,-50%);"><span class="stalk"></span><span class="anchor"></span><span class="dotmark"></span></div>
         <!-- tap a spot → YOUR new circle blooms there -->
-        <div class="circle-field" style="top:296px;">
-          <div class="circle-range bloom" style="width:250px; height:150px;">
+        <div class="circle-field" style="top:293px;">
+          <div class="circle-range bloom" style="width:270px; height:162px;">
             <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
           </div>
         </div>
-        <div class="newcircle-chip" style="left:50%; top:290px;"><span class="dot"></span>あたらしいサークル</div>
+        <div class="newcircle-chip" style="left:50%; top:251px;"><span class="dot"></span>あたらしいサークル</div>
         <!-- the finger that tapped the spot -->
-        <div class="gesture tap" style="left:50%; top:374px;">
+        <div class="gesture tap" style="left:50%; top:404px;">
           <span class="tap-ripple"></span>
           <span class="hand" style="position:absolute; left:22px; top:22px;"></span>
         </div>
@@ -132,14 +133,13 @@
           <div class="block park"  style="left:420px; top:420px; width:260px; height:200px;"></div>
           <div class="block water" style="left:120px; top:520px; width:280px; height:220px;"></div>
         </div>
-        <div class="circle-field" style="top:330px;">
+        <div class="circle-field" style="top:310px;">
           <div class="circle-range">
             <div class="center"><div class="pinhead"><img src="../assets/icons/icon_pin.png" alt=""></div></div>
             <div class="handle"></div>
           </div>
         </div>
-        <div class="range-tag" style="left:60%; top:300px;">範囲 · 300m</div>
-        <div class="gesture" style="left:50%; top:330px;"></div>
+        <div class="range-tag" style="left:62%; top:305px;">範囲 · 300m</div>
       </div>
       <div class="ob-scrim"></div>
       <div class="ob-foot">
@@ -158,16 +158,16 @@
       <div class="ob-bg map-stage">
         <div class="map-glow" style="opacity:.16; top:36%;"></div>
         <div class="rule-stage">
-          <div class="rule-circle" style="top:268px; width:262px; height:262px;">
+          <div class="rule-circle" style="top:355px; width:262px; height:262px;">
             <span class="ring-lab">サークルの範囲</span>
           </div>
           <!-- inside actor: can post -->
-          <div class="actor inside anim-up d1" style="left:50%; top:212px; transform:translateX(-50%);">
+          <div class="actor inside anim-up d1" style="left:50%; top:232px; transform:translateX(-50%);">
             <img class="av" src="../assets/images/sample_photo.png" alt="">
             <span class="chip"><img src="../assets/icons/icon_camera.png" alt="">投稿できる</span>
           </div>
           <!-- outside actor: view only -->
-          <div class="actor outside anim-up d2" style="left:50%; top:440px; transform:translateX(-50%);">
+          <div class="actor outside anim-up d2" style="left:50%; top:432px; transform:translateX(-50%);">
             <img class="av" src="../assets/images/sample_3d.png" alt="">
             <span class="chip"><img src="../assets/icons/icon_explore.png" alt="">閲覧だけ</span>
           </div>
@@ -218,10 +218,11 @@
     <!-- ============ 06 · START · LOCATION PERMISSION ============ -->
     <section class="ob-screen" data-i="5">
       <div class="ob-bg" style="background:#08080b;">
-        <img src="../assets/images/auth_background.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.62;">
-        <div style="position:absolute; inset:0; background:linear-gradient(0deg,#08080b 14%,rgba(8,8,11,.4) 52%,rgba(8,8,11,.55) 100%);"></div>
+        <img src="../assets/images/auth_background.png" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;">
+        <div style="position:absolute; inset:0; background:rgba(8,8,11,.38);"></div>
+        <div style="position:absolute; inset:0; background:linear-gradient(0deg,#08080b 14%,rgba(8,8,11,.40) 52%,rgba(8,8,11,.55) 100%);"></div>
       </div>
-      <div class="wordmark anim-fade" style="top:150px;">Toopdbq<span class="sub">夢中を、はじめよう</span></div>
+      <div class="wordmark anim-fade" style="top:162px;">Toopdbq<span class="sub">夢中を、はじめよう</span></div>
       <!-- permission sheet -->
       <div class="perm-sheet anim-up d1">
         <div class="map-mini">

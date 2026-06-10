@@ -24,37 +24,11 @@
   border: 1px solid rgba(255,255,255,.16); }
 
 /* ---- device frame -------------------------------------------------------- */
-.phone {
-  position: relative; width: 393px; height: 852px; flex: none;
-  border-radius: 52px; overflow: hidden; background: var(--bg);
-  box-shadow: 0 0 0 2px #2a2a31, 0 0 0 11px #0a0a0e, 0 0 0 12px #303039,
-              0 36px 90px rgba(0,0,0,.62);
-  isolation: isolate;
-  font-family: var(--font-jp);
-  -webkit-font-smoothing: antialiased;
-}
-.phone * { box-sizing: border-box; }
-
-/* iOS status bar (drawn, white) */
-.statusbar {
-  position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 60;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 32px 0; pointer-events: none;
-  font-family: var(--font-latin); color: #fff;
-}
-.statusbar .time { font-weight: 600; font-size: 15px; letter-spacing: .02em; }
-.statusbar .sys { display: flex; align-items: center; gap: 7px; }
-.statusbar .sys svg { display: block; }
+/* The iPhone 17 `.phone` frame + Dynamic Island + 9:41 status bar + home
+   indicator now live in card.css (DS-wide). Onboarding scenes fill it. */
 .statusbar .sys .bars { width: 18px; height: 12px; }
 .statusbar .sys .wifi { width: 17px; height: 12px; }
 .statusbar .sys .batt { width: 25px; height: 13px; }
-
-/* home indicator */
-.home-ind {
-  position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%);
-  width: 140px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.85);
-  z-index: 60; pointer-events: none;
-}
 
 /* ---- pager --------------------------------------------------------------- */
 .pager {
@@ -67,7 +41,7 @@
 
 /* ---- a single scene ------------------------------------------------------ */
 .ob-screen {
-  position: relative; flex: 0 0 100%; width: 393px; height: 852px;
+  position: relative; flex: 0 0 100%; width: 402px; height: 874px;
   scroll-snap-align: start; overflow: hidden; background: var(--bg);
 }
 /* standalone specimen (no pager) */
@@ -92,7 +66,7 @@
 /* ---- foot block: eyebrow / title / body / dots / cta --------------------- */
 .ob-foot {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
-  padding: 0 28px calc(28px + 18px); /* bottom safe area ≈34, breathe */
+  padding: 0 28px calc(34px + 30px); /* safe-bottom 34 + 30 breathe (matches impl) */
   display: flex; flex-direction: column; align-items: flex-start; gap: 0;
 }
 .ob-eyebrow {
@@ -151,7 +125,7 @@
 
 /* skip — top-right, ≥44 tap */
 .ob-skip {
-  position: absolute; top: 58px; right: 16px; z-index: 30;
+  position: absolute; top: 64px; right: 16px; z-index: 30;
   height: 44px; min-width: 44px; padding: 0 14px; border: none; background: none;
   display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
   font-family: var(--font-latin); font-weight: 600; font-size: 13px; color: var(--text-2);
@@ -360,7 +334,7 @@
    PERMISSION — start scene + location permission sheet
    ========================================================================== */
 .perm-sheet {
-  position: absolute; left: 12px; right: 12px; bottom: 20px; z-index: 40;
+  position: absolute; left: 12px; right: 12px; bottom: 46px; z-index: 40;
   border-radius: 22px; overflow: hidden; background: var(--surface-raised);
   box-shadow: 0 -8px 40px rgba(0,0,0,.6);
   border: 1px solid rgba(255,255,255,.08);

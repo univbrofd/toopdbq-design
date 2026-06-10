@@ -1,0 +1,137 @@
+/* ============================================================================
+   Toopdbq · CHAT family geometry  (ChatRoom / ChatBubble / Composer-min)
+   Shared so the three specimens are pixel-identical. Dark surface only.
+   Tokens come from colors_and_type.css — no new values invented here.
+   World-view: dark + one colorful radial accent + glass hairline.
+   ========================================================================== */
+
+/* ---- message feed -------------------------------------------------------- */
+.chat-feed {
+  display: flex; flex-direction: column;
+  gap: 3px;                       /* vertical gap between bubbles (handoff: 3) */
+  padding: 14px 10px;             /* horizontal margin 10                      */
+}
+.chat-row { display: flex; align-items: flex-end; gap: 8px; }
+.chat-row.me   { justify-content: flex-end; }
+.chat-row.peer { justify-content: flex-start; }
+/* tighten consecutive same-sender bubbles into a group */
+.chat-row + .chat-row.same { margin-top: -1px; }
+
+/* ---- peer avatar (36, tap → Profile) ------------------------------------- */
+.chat-av {
+  width: 36px; height: 36px; border-radius: 50%; flex: none;
+  background: var(--gray-800);    /* placeholder bg                           */
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-avatar);
+  align-self: flex-end;
+  cursor: pointer;                /* → Profile                                */
+  overflow: hidden;
+}
+.chat-av img { width: 54%; height: 54%; object-fit: contain; opacity: .85; }
+.chat-av.hold { visibility: hidden; }   /* keeps indent for grouped peer rows */
+
+/* ---- bubble -------------------------------------------------------------- */
+.bubble {
+  max-width: 72%;
+  padding: 9px 13px;
+  font-family: var(--font-jp);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1.42;
+  word-break: break-word;
+  text-wrap: pretty;
+}
+/* peer — dark glass, hairline, text-1. tail = bottom-LEFT (sender side) */
+.bubble.peer {
+  background: var(--surface-raised);
+  color: var(--text-1);
+  border: 1px solid var(--border-hairline);
+  border-radius: 16px 16px 16px 4px;
+}
+/* me — clean monochrome: light bubble, dark ink, no accent, no glow. tail = bottom-RIGHT */
+.bubble.me {
+  background: var(--white);
+  color: var(--bg);
+  border-radius: 16px 16px 4px 16px;
+}
+/* grouped (non-tail) bubbles keep full radius on the sender corner */
+.bubble.me.mid   { border-radius: 16px 16px 16px 16px; }
+.bubble.peer.mid { border-radius: 16px 16px 16px 16px; }
+
+/* ---- header -------------------------------------------------------------- */
+.chat-header {
+  height: 52px; flex: none;
+  display: flex; align-items: center;
+  padding: 0 16px;                /* titleSpacing 16                          */
+  gap: 4px;
+  border-bottom: 1px solid var(--border-hairline);
+  position: relative; z-index: 4;
+  background: var(--bg);
+}
+.chat-back {
+  width: 44px; height: 44px; flex: none; margin-left: -10px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; cursor: pointer;
+}
+.chat-back img { width: 20px; height: 20px; object-fit: contain; }
+.chat-name {
+  font-family: var(--font-jp); font-weight: 600; font-size: 14px;
+  color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: opacity .6s var(--ease-standard);
+}
+.chat-name.faded { opacity: 0; }   /* nameVisible → false after 6.4s          */
+
+/* ---- top paging spinner -------------------------------------------------- */
+.chat-spinner {
+  width: 18px; height: 18px; flex: none; margin: 12px auto 4px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.18);
+  border-top-color: rgba(255,255,255,.7);
+  animation: chat-spin .8s linear infinite;
+}
+@keyframes chat-spin { to { transform: rotate(360deg); } }
+
+/* ---- empty state --------------------------------------------------------- */
+.chat-empty {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-jp); font-weight: 400; font-size: 14px;
+  color: var(--text-3);
+}
+
+/* ---- composer (minimal variant — field + send only) ---------------------- */
+.composer {
+  flex: none;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-hairline);
+  background: var(--bg);
+}
+.composer-field {
+  flex: 1; min-width: 0; height: 42px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-input);
+  display: flex; align-items: center;
+  padding: 0 18px;
+  font-family: var(--font-jp); font-size: 14px;
+  white-space: nowrap; overflow: hidden;
+  color: var(--text-3);           /* hint                                     */
+}
+.composer-field.typed { color: var(--text-1); }
+.composer-caret {
+  display: inline-block; width: 2px; height: 18px; background: var(--text-1);
+  border-radius: 1px; vertical-align: -3px;
+  animation: chat-blink 1s steps(1) infinite;
+}
+@keyframes chat-blink { 50% { opacity: 0; } }
+.composer-send {
+  width: 42px; height: 42px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface-toggle-off);   /* inactive — neutral gray         */
+}
+.composer-send img { width: 42%; height: 42%; object-fit: contain;
+  filter: brightness(0) invert(1); opacity: .55; }
+.composer-send.active {
+  background: var(--white);                       /* active = solid white, no glow */
+}
+.composer-send.active img { filter: brightness(0); opacity: .9; }   /* dark icon on white */

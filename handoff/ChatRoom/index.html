@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChatRoom — Toopdbq DS specimens</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0d0d0f; color:#fff; font-family:var(--font-latin); -webkit-font-smoothing:antialiased;
+    padding:40px 32px 56px; }
+  .wrap { max-width:960px; margin:0 auto; }
+  .eyebrow { font:600 10px/1 var(--font-latin); letter-spacing:.16em; text-transform:uppercase; color:var(--fg-3); }
+  h1 { font:700 26px/1.2 var(--font-jp); margin:12px 0 10px; }
+  .lede { font:500 13px/1.8 var(--font-jp); color:var(--text-2); max-width:760px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { font:600 10px var(--font-latin); color:var(--text-2); background:rgba(255,255,255,.08); border-radius:5px; padding:1px 6px; }
+  .map { font:500 11px/1.7 var(--font-latin); color:var(--text-3); white-space:pre; margin:18px 0 4px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:16px 18px; overflow:auto; }
+  .map b { color:rgba(255,255,255,.92); font-weight:700; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; margin-top:24px; }
+  a.card { display:block; text-decoration:none; background:#16131f; border:1px solid rgba(255,255,255,.1);
+    border-radius:14px; padding:20px; transition:border-color .18s var(--ease-standard), transform .18s var(--ease-standard);
+    box-shadow:var(--shadow-card); }
+  a.card:hover { border-color:rgba(255,255,255,.26); transform:translateY(-2px); }
+  a.card .n { font:700 15px var(--font-latin); color:#fff; display:flex; align-items:center; gap:8px; }
+  a.card .n .badge { font:800 8px/1 var(--font-latin); letter-spacing:.08em; text-transform:uppercase; color:var(--bg);
+    background:#fff; border-radius:5px; padding:4px 6px; }
+  a.card .s { font:500 11px/1.6 var(--font-jp); color:var(--text-2); margin-top:8px; }
+  a.card .arrow { margin-top:14px; font:600 11px var(--font-latin); color:rgba(255,255,255,.6); }
+  .foot { margin-top:36px; font:500 11px/1.7 var(--font-jp); color:var(--text-3); max-width:760px; }
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="eyebrow">Toopdbq Design System · 逆ハンドオフ</div>
+    <h1>ChatRoom — メッセンジャー個別ルーム（ダーク）</h1>
+    <p class="lede">ChatList（ダーク inbox）の行 tap から連続する到達先 <b>ChatRoomView</b> を DS に取り込む 3 specimen。面＝<b>ダーク</b>（写真フルブリードは使わず <span class="tok">--surface-raised</span> のダークガラス）。<b>カラフルすぎを避け、アクセント色（colorful gradient）は使わず #000・#fff＋クールグレーのモノクロ</b>で統一。下端入力は <b>comp-composer 族</b>に統一。旧実装の青ベタバブル <span class="tok">#1E88FF</span> は世界観外につき不可。</p>
+
+    <div class="map"><b>ChatList</b>(inbox, dark) ──row tap──▶ <b>ChatRoom</b>(messenger, dark)   ← 今回
+                                          └ feed: <b>comp-chat-bubble</b>（me=白ソリッド / peer=glass+avatar36）← 新規
+                                          └ 下端: <b>comp-composer</b>【最小 variant】(field + send only)
+
+comp-composer 族（送信 active=白 ・ アクセント色は使わず）:
+  StoryCommentSheet  : chip + avatar34 + field + send   (light)
+  CircleTimelineSheet: chip + avatar34 + field + send   (dark)
+  ChatRoom           :              field + send        (dark) ← 最小末端（今回追加）</div>
+
+    <div class="grid">
+      <a class="card" href="comp-chat-room.html">
+        <div class="n">ChatRoom <span class="badge">screen</span></div>
+        <div class="s">ChatRoomView・ダーク。状態 default / empty / 入力中(KB) / 名前fade(操作後6.4s)。header＝戻る＋名前(アバター無し)、feed は下=最新、上端ページングに 18px スピナー。</div>
+        <div class="arrow">開く →</div>
+      </a>
+      <a class="card" href="comp-chat-bubble.html">
+        <div class="n">ChatBubble <span class="badge">new part</span></div>
+        <div class="s">会話の 2 者バブル。me=右/白ソリッド+暗インク/アバター無し。peer=左/ダークガラス+--text-1/アバター36(tap→Profile)。角丸16+tail4、max-width72%。テキスト専用・アクセント色なし。</div>
+        <div class="arrow">開く →</div>
+      </a>
+      <a class="card" href="comp-composer.html">
+        <div class="n">Composer <span class="badge">family · min</span></div>
+        <div class="s">comp-composer 族の最小末端。丸入力欄(--surface-input/pill)＋送信42 のみ。返信チップ・自分アバター無し。送信 active=白（アクセント色不使用）。timeline / comment と同一ジオメトリ。</div>
+        <div class="arrow">開く →</div>
+      </a>
+    </div>
+
+    <p class="foot">土台＝<span class="tok">USAGE_RULES.md → taste.md → colors_and_type.css</span>。新規発明せず既存トークン／Wd* を使用。世界観厳守（ダーク＋ガラス／Noto Sans JP・Inter／絵文字なし／効果は 1 コンポーネント 1〜2 個）。今回はユーザー要望により<b style="color:rgba(255,255,255,.85);">アクセント色を使わずモノクロ（#000・#fff＋クールグレー）に絞った</b>。各 specimen 先頭に <span class="tok">@dsCard</span> を付与し <span class="tok">_ds_manifest.json</span> に登録済み。取り込み側で superset マージ可能。</p>
+  </div>
+</body></html>

@@ -1,0 +1,123 @@
+<!-- @dsCard group="Components" name="Composer — ChatRoom minimal (dark)" subtitle="comp-composer 族の最小末端。StoryComment / CircleTimeline と同一ジオメトリ、返信チップ+自分アバターを外しただけ。丸入力欄+送信42 のみ。送信 active=白（アクセント色不使用）" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="chat.css">
+<style>
+  body { background:#0d0d0f; padding:24px; gap:20px; }
+  .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:880px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; white-space:nowrap; font:600 10px/1.3 var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.08); border-radius:5px; padding:1px 5px; }
+  .note { font:500 11px/1.7 var(--font-jp); color:var(--text-2); max-width:880px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:10px; padding:13px 16px; }
+  .note b { color:#fff; font-weight:700; }
+  .note .tag { display:inline-block; font:800 9px/1 var(--font-latin); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--bg); background:#fff; border-radius:5px; padding:4px 7px; margin-right:8px; vertical-align:1px; }
+
+  .stage { display:flex; flex-wrap:wrap; gap:26px 22px; align-items:flex-start; }
+  .frame { display:flex; flex-direction:column; gap:10px; width:373px; }
+  .barwrap { width:373px; background:var(--bg); border-radius:12px; overflow:hidden;
+    border:1px solid rgba(255,255,255,.08); }
+  .barwrap .composer { border-top:none; }
+  .cap { display:flex; flex-direction:column; gap:4px; }
+  .cap .nm { font:700 13px var(--font-latin); color:#fff; }
+  .cap .jp { font:500 11px/1.5 var(--font-jp); color:var(--text-2); }
+
+  /* family comparison: chip+avatar removed -> minimal */
+  .family { display:grid; grid-template-columns:1fr; gap:0; max-width:560px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:14px; overflow:hidden; }
+  .famrow { display:grid; grid-template-columns:150px 1fr; align-items:center; gap:16px; padding:14px 18px;
+    border-top:1px solid rgba(255,255,255,.06); }
+  .famrow:first-child { border-top:none; }
+  .famrow .who { display:flex; flex-direction:column; gap:3px; }
+  .famrow .who .t { font:700 12px var(--font-latin); color:#fff; }
+  .famrow .who .s { font:500 10px/1.4 var(--font-jp); color:var(--text-3); }
+  .mini { display:flex; align-items:center; gap:8px; }
+  .mini .chip { height:26px; border-radius:8px; padding:0 10px; display:flex; align-items:center; gap:6px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+    font:600 10px var(--font-jp); color:var(--text-2); white-space:nowrap; }
+  .mini .av { width:26px; height:26px; border-radius:50%; background:var(--gray-800); flex:none;
+    display:flex; align-items:center; justify-content:center; }
+  .mini .av img { width:54%; height:54%; opacity:.85; }
+  .mini .fld { flex:1; height:30px; border-radius:99px; background:var(--surface-input);
+    display:flex; align-items:center; padding:0 12px; font:400 11px var(--font-jp); color:var(--text-3); }
+  .mini .snd { width:30px; height:30px; border-radius:50%; background:var(--white); flex:none; }
+  .mini.off .snd { background:var(--surface-toggle-off); }
+  .strike { position:relative; }
+  .strike::after { content:""; position:absolute; inset:0; border-radius:8px;
+    background:repeating-linear-gradient(135deg, transparent 0 5px, rgba(255,255,255,.45) 5px 6px); }
+  .x { font:700 10px var(--font-latin); color:var(--text-2); margin-left:2px; }
+
+  .spec { display:grid; grid-template-columns:108px 1fr; gap:7px 16px; max-width:880px;
+    background:#141417; border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:18px 20px; }
+  .spec .k { font:700 11px var(--font-latin); color:rgba(255,255,255,.9); padding-top:1px; }
+  .spec .d { font:500 11px/1.6 var(--font-jp); color:var(--text-2); }
+  .spec .d b { color:#fff; font-weight:700; }
+</style></head>
+<body>
+  <div class="eyebrow">Composer — ChatRoom 用 最小 variant（族の背骨 · ダーク）</div>
+  <div class="lede"><b>comp-composer 族</b>（StoryComment / CircleTimeline と共有する送信入力）に、ChatRoom 用の<b>最小 variant</b> をダーク面で追加。構成は<b>丸入力欄</b>（<span class="tok">--surface-input #2b2b2b</span>・<span class="tok">--radius-pill</span>・hint＝<span class="tok">--text-3</span>）＋<b>送信 42</b> のみ。返信先チップ無し・自分アバター無し。送信は active＝<span class="tok">--white</span>（アクセント色・glow 不使用）、inactive＝面なグレー（<span class="tok">--surface-toggle-off</span>）。</div>
+
+  <div class="note"><span class="tag">族の最小末端</span>StoryComment / CircleTimeline の composer と<b>同一ジオメトリ</b>（field 42 / send 42）。<b>チップとアバターを外しただけ</b>で、新しい寸法は持ち込まない。1 対 1 の messenger なので返信先 identity（チップ）も自分 identity（アバター）も不要。<b>アクセント色（colorful gradient）は使わず</b>、送信 active は白で表す（族も同じモノクロ表現に揃える）。</div>
+
+  <div class="stage">
+    <div class="frame">
+      <div class="barwrap">
+        <div class="composer">
+          <div class="composer-field">メッセージを入力…</div>
+          <div class="composer-send"><img src="assets/icons/icon_next.png" alt=""></div>
+        </div>
+      </div>
+      <div class="cap"><span class="nm">inactive（空）</span><span class="jp">hint＝--text-3。送信は面なグレー（--surface-toggle-off）。</span></div>
+    </div>
+
+    <div class="frame">
+      <div class="barwrap">
+        <div class="composer">
+          <div class="composer-field typed">ハチ公の前にいる！すぐ行く<span class="composer-caret"></span></div>
+          <div class="composer-send active"><img src="assets/icons/icon_next.png" alt=""></div>
+        </div>
+      </div>
+      <div class="cap"><span class="nm">active（入力中）</span><span class="jp">文字＝--text-1＋caret。送信が白で活性化（アクセント色・glow なし）。</span></div>
+    </div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:6px;">族マップ — 同一ジオメトリ、チップ／アバターの有無だけが違う</div>
+  <div class="family">
+    <div class="famrow">
+      <div class="who"><span class="t">StoryComment</span><span class="s">light · chip + avatar34 + field + send</span></div>
+      <div class="mini off">
+        <div class="chip">返信先 ×</div>
+        <div class="av"><img src="assets/icons/icon_person.png" alt=""></div>
+        <div class="fld">コメントを入力…</div>
+        <div class="snd"></div>
+      </div>
+    </div>
+    <div class="famrow">
+      <div class="who"><span class="t">CircleTimeline</span><span class="s">dark · chip + avatar34 + field + send</span></div>
+      <div class="mini off">
+        <div class="chip">返信先 ×</div>
+        <div class="av"><img src="assets/icons/icon_person.png" alt=""></div>
+        <div class="fld">コメントを入力…</div>
+        <div class="snd"></div>
+      </div>
+    </div>
+    <div class="famrow">
+      <div class="who"><span class="t">ChatRoom</span><span class="s">dark · field + send <b style="color:rgba(255,255,255,.92);">（最小）</b></span></div>
+      <div class="mini">
+        <div class="chip strike">chip<span class="x">外す</span></div>
+        <div class="av strike" style="border-radius:50%;"></div>
+        <div class="fld">メッセージを入力…</div>
+        <div class="snd"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec">
+    <span class="k">field</span><span class="d">高さ <b>42</b>・<span class="tok">--radius-pill</span>・地 <span class="tok">--surface-input #2b2b2b</span>・hint <span class="tok">--text-3</span>／入力時 <span class="tok">--text-1</span>＋caret（--text-1）</span>
+    <span class="k">send</span><span class="d">正円 <b>42</b>。active＝<span class="tok">--white</span>（glow 無し・icon_next を暗反転）。inactive＝<span class="tok">--surface-toggle-off</span>＋icon_next（白 55%）</span>
+    <span class="k">bar</span><span class="d">下端固定・padding <b>10 / 12</b>・gap <b>10</b>・上辺 hairline <span class="tok">--border-hairline</span>・地 <span class="tok">--bg</span></span>
+    <span class="k">差分</span><span class="d">族の <b>chip / avatar を削除</b>し、送信 active をアクセント色から <b>白</b>に置換しただけ。field・send の寸法は <b>timeline / comment と同一</b></span>
+  </div>
+</body></html>
