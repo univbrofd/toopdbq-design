@@ -1,6 +1,11 @@
 /* Shared component cosmetics for specimen cards + UI-kit reuse.
    Pair with ../colors_and_type.css. Recreates the app's glass + gradient idioms. */
 
+/* Reset the UA <button> chrome (default 2px outset bevel renders a stray gray
+   ring on the top-left of every button-based control). All these are custom-styled. */
+button.wd-icon-btn, .wd-it-btn, .wd-post-btn, .wd-take-btn, .wd-text-btn,
+button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance: none; }
+
 /* Glass circle button (WdIconButton: simple/standart). */
 .wd-icon-btn {
   position: relative; display: inline-flex; align-items: center; justify-content: center;
@@ -161,8 +166,8 @@
 .wd-user-bar .av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
   background: #333; box-shadow: var(--shadow-avatar); }
 .wd-user-bar .col { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-.wd-user-bar .nm { font-family: var(--font-jp); font-weight: 700; font-size: 14px; line-height: 1.2; color: var(--text-1); }
-.wd-user-bar .sub { font-family: var(--font-latin); font-weight: 400; font-size: 11px; color: var(--text-2); }
+.wd-user-bar .nm { font-family: var(--font-jp); font-weight: 700; font-size: 14px; line-height: 1.2; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-user-bar .sub { font-family: var(--font-latin); font-weight: 400; font-size: 11px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ========================================================================
    BATCH A — buttons & icons (taste.md applied)
@@ -207,7 +212,8 @@
 .wd-post-btn { position: relative; width: 64px; height: 64px; border: none; background: none; cursor: pointer;
   transition: transform .12s var(--ease-standard), filter .12s; }
 .wd-post-btn .circle { position: absolute; left: 4px; top: 4px; width: 56px; height: 56px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; background: var(--gradient-colorful); }
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 50% 50%, rgba(0,0,0,.55) 0%, transparent 55%), var(--gradient-colorful); }
 .wd-post-btn .circle::after { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 1px;
   background: var(--gradient-border);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -314,7 +320,7 @@
 .wd-member .stack img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
   border: 2px solid var(--bg); margin-left: -8px; background: #333; }
 .wd-member .stack img:first-child { margin-left: 0; }
-.wd-member .ct { font-family: var(--font-latin); font-size: 11px; color: var(--text-2); }
+.wd-member .ct { font-family: var(--font-latin); font-size: 11px; color: var(--text-2); white-space: nowrap; }
 .wd-member .ct b { font-weight: 700; font-size: 12px; color: var(--text-1); }
 
 /* WdStatusBar — value 14 / unit 9 (was 15/7), no shadow (parent scrim) */

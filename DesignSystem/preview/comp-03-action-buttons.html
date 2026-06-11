@@ -1,0 +1,33 @@
+<!-- @dsCard group="Components" name="Action buttons" subtitle="WdIconTextButton · WdPostButton · WdSpesialIcon · WdTakeButton" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background: linear-gradient(150deg,#241d3a,#0f1019); gap:24px; }
+  .grp { display:flex; flex-direction:column; gap:13px; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-2); }
+  .stage { display:flex; align-items:center; gap:28px; flex-wrap:wrap; }
+  .u { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .u .n { font:500 10px var(--font-latin); color:var(--fg-3); }
+</style></head>
+<body>
+  <div class="eyebrow">アクション系ボタン — 1効果グループ＋ヘアライン / 影は引き算</div>
+
+  <div class="grp">
+    <div class="lbl">WdIconTextButton — special (colorful) / fat (glass)</div>
+    <div class="stage">
+      <button class="wd-it-btn"><img src="../../assets/icons/icon_near.png">近くの投稿を探す</button>
+      <button class="wd-it-btn fat"><img src="../../assets/icons/icon_search.png">サークルを検索</button>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdPostButton · WdSpesialIcon · WdTakeButton</div>
+    <div class="stage">
+      <div class="u"><button class="wd-post-btn"><span class="circle"><img src="../../assets/icons/icon_camera.png"></span><span class="badge"><img src="../../assets/icons/icon_add.png"></span></button><span class="n">post</span></div>
+      <div class="u"><div class="wd-spesial-icon"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"></div><span class="n">special icon</span></div>
+      <div class="u"><button class="wd-take-btn"><span class="core"></span></button><span class="n">take (shutter)</span></div>
+    </div>
+  </div>
+</body></html>

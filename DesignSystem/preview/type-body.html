@@ -1,16 +1,40 @@
-<!-- @dsCard group="Type" --><!DOCTYPE html>
+<!-- @dsCard group="Type" name="Body, caption & micro" subtitle="Inter for Latin, Noto Sans JP for copy" --><!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
-<style> .line { display:flex; align-items:baseline; gap:16px; } .tag { font-size:10px;color:var(--fg-3);font-family:var(--font-latin);min-width:128px; } </style>
-</head>
+<style>
+  body { gap:0; }
+  .eyebrow { margin-bottom:8px; }
+  .spec { display:flex; flex-direction:column; }
+  .spec .r { display:grid; grid-template-columns:150px 1fr; gap:28px; align-items:baseline;
+    padding:16px 0; border-top:1px solid var(--border-hairline); }
+  .spec .r:first-child { border-top:none; }
+  .meta .nm { font-family:var(--font-latin); font-weight:600; font-size:12px; color:#fff; letter-spacing:.03em; }
+  .meta .sp { display:block; margin-top:5px; font-family:var(--font-latin); font-weight:400; font-size:10px;
+    color:var(--fg-3); letter-spacing:.07em; text-transform:uppercase; }
+</style></head>
 <body>
   <div class="eyebrow">Body, caption &amp; micro — Inter for Latin, Noto Sans JP for copy</div>
-  <div class="col" style="gap:12px;">
-    <div class="line"><span class="tag">body · Inter 14 SB</span><span class="t-body" style="text-shadow:none;">Uploading… 47%</span></div>
-    <div class="line"><span class="tag">body-jp · NotoJP 14 M</span><span class="t-body-jp">いいね！素敵な写真ですね。</span></div>
-    <div class="line"><span class="tag">caption · Inter 12 M</span><span class="t-caption" style="text-shadow:none;">渋谷コミュニティ</span></div>
-    <div class="line"><span class="tag">label · Inter 11 SB</span><span class="t-label">＋3人が参加中</span></div>
-    <div class="line"><span class="tag">micro · Inter 8 L</span><span class="t-micro" style="font-size:11px;">渋谷駅周辺のコミュニティ</span></div>
+  <div class="spec">
+    <div class="r">
+      <div class="meta"><span class="nm">t-body</span><span class="sp">Inter · 600 · 14</span></div>
+      <div class="t-body" style="text-shadow:none;">Uploading… 47%</div>
+    </div>
+    <div class="r">
+      <div class="meta"><span class="nm">t-body-jp</span><span class="sp">Noto Sans JP · 500 · 14</span></div>
+      <div class="t-body-jp">いいね！素敵な写真ですね。</div>
+    </div>
+    <div class="r">
+      <div class="meta"><span class="nm">t-caption</span><span class="sp">Inter · 500 · 12</span></div>
+      <div class="t-caption" style="text-shadow:none;">渋谷コミュニティ</div>
+    </div>
+    <div class="r">
+      <div class="meta"><span class="nm">t-label</span><span class="sp">Inter · 600 · 11</span></div>
+      <div class="t-label">＋3人が参加中</div>
+    </div>
+    <div class="r">
+      <div class="meta"><span class="nm">t-micro</span><span class="sp">Inter · 400 · 11 (floor)</span></div>
+      <div class="t-micro">渋谷駅周辺のコミュニティ</div>
+    </div>
   </div>
 </body></html>

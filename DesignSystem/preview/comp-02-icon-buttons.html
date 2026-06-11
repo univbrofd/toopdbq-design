@@ -1,0 +1,31 @@
+<!-- @dsCard group="Components" name="WdIconButton" subtitle="Glass / color circle, post & search · default→focus state model" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background: linear-gradient(150deg,rgba(0,0,0,.3),rgba(0,0,0,.6)), radial-gradient(130% 130% at 78% 112%,#4a3a6a,#0f1019 72%); gap:22px; }
+  .u { display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .u .n { font-size:10px; color:var(--fg-2); }
+  .focusring { box-shadow:0 0 0 2px #0f1019, 0 0 0 4px rgba(255,255,255,.92) !important; }
+  .states { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+</style></head>
+<body>
+  <div class="eyebrow">WdIconButton — glass circle, color circle, post &amp; search</div>
+  <div class="row" style="justify-content:space-around;">
+    <div class="u"><div class="wd-icon-btn simple"><img src="../../assets/icons/icon_back.png"></div><span class="n">simple</span></div>
+    <div class="u"><div class="wd-icon-btn"><img src="../../assets/icons/icon_like.png"></div><span class="n">standart</span></div>
+    <div class="u"><div class="wd-icon-btn color" style="width:55px;height:55px;"><img src="../../assets/icons/icon_camera.png"></div><span class="n">standartColor</span></div>
+    <div class="u"><div class="wd-icon-btn color" style="width:56px;height:56px;"><img src="../../assets/icons/icon_camera.png"><span class="wd-badge color"><img src="../../assets/icons/icon_add.png"></span></div><span class="n">post</span></div>
+    <div class="u"><div class="wd-icon-btn" style="width:55px;height:55px;"><img src="../../assets/icons/icon_search.png"><span class="wd-badge"><img src="../../assets/icons/icon_camera.png"></span></div><span class="n">badge (search)</span></div>
+  </div>
+
+  <div class="eyebrow">State model — default / pressed / disabled / loading / focus-visible</div>
+  <div class="states">
+    <div class="u"><button class="wd-icon-btn"><img src="../../assets/icons/icon_like.png"></button><span class="n">default</span></div>
+    <div class="u"><button class="wd-icon-btn" style="transform:scale(.94);filter:brightness(.92)"><img src="../../assets/icons/icon_like.png"></button><span class="n">pressed</span></div>
+    <div class="u"><button class="wd-icon-btn is-disabled"><img src="../../assets/icons/icon_like.png"></button><span class="n">disabled .38</span></div>
+    <div class="u"><button class="wd-icon-btn"><span class="spinner"></span></button><span class="n">loading</span></div>
+    <div class="u"><button class="wd-icon-btn focusring"><img src="../../assets/icons/icon_like.png"></button><span class="n">focus ring</span></div>
+  </div>
+</body></html>

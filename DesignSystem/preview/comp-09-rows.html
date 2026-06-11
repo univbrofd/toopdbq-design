@@ -1,0 +1,43 @@
+<!-- @dsCard group="Components" name="Rows & lists" subtitle="WdUserBar · WdMenuItem · WdSettingRow · WdUserComment" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background: linear-gradient(160deg,#1a1628,#0d0d15); gap:24px; }
+  .grp { display:flex; flex-direction:column; gap:11px; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-2); }
+  .panel { background:rgba(255,255,255,.04); border-radius:12px; padding:4px 16px; max-width:360px; }
+  .panel.pad { padding:10px 16px; }
+  .wd-user-bar { max-width:340px; }
+  .wd-user-bar .col { flex:1; }
+</style></head>
+<body>
+  <div class="eyebrow">行・リスト — 名前/ラベルが主役、補足は脇役の階層へ</div>
+
+  <div class="grp">
+    <div class="lbl">WdUserBar — 8ptグリッド、名前=主役・時刻=脇役</div>
+    <div class="wd-user-bar"><img class="av" src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png">
+      <div class="col"><span class="nm">SunnyVi</span><span class="sub" style="color:var(--text-2)">2時間前 · 渋谷コミュニティ</span></div></div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdMenuItem — グラデ・ヘアライン区切り、icon24・高さ52</div>
+    <div class="panel">
+      <div class="wd-menu-item"><img class="ic" src="../../assets/icons/icon_person.png"><span class="lbl">プロフィール</span><img class="chev" src="../../assets/icons/icon_next.png"></div>
+      <div class="wd-menu-item"><img class="ic" src="../../assets/icons/icon_group.png"><span class="lbl">サークル</span><img class="chev" src="../../assets/icons/icon_next.png"></div>
+      <div class="wd-menu-item"><img class="ic" src="../../assets/icons/icon_report.png"><span class="lbl">通報</span><img class="chev" src="../../assets/icons/icon_next.png"></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdSettingRow — ラベル左・WdToggl 右の spaceBetween</div>
+    <div class="panel pad"><div class="wd-setting-row"><img class="ic" src="../../assets/icons/icon_pin_location.png"><span class="lbl">位置情報を共有</span><div class="wd-toggle on"><span class="lab on">ON</span><span class="pill"></span></div></div></div>
+    <div class="panel pad"><div class="wd-setting-row"><img class="ic" src="../../assets/icons/icon_near.png"><span class="lbl">近くの通知</span><div class="wd-toggle"><span class="lab off">OFF</span><span class="pill"></span></div></div></div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdUserComment — 名前=太字主役・本文=text-2・時刻=text-3</div>
+    <div class="wd-user-comment"><span class="av" style="background:#444"></span><div><div class="nm">SunnyVi</div><div class="tx">いいね！素敵な写真ですね。</div><div class="tm">2時間前</div></div></div>
+  </div>
+</body></html>

@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":3,"namespace":"ToopdbqDesignSystem_af3394","components":[],"sourceHashes":{"ui_kits/app/CircleTimelineSheet.jsx":"f49101667441","ui_kits/app/LoginScreen.jsx":"184a82b73556","ui_kits/app/Primitives.jsx":"4b8e68ea48a4","ui_kits/app/StoryViewerScreen.jsx":"9dbbc14fdac7","ui_kits/app/UniverseScreen.jsx":"0f93a858c42e","ui_kits/app/data.js":"cb49a90845c1"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":3,"namespace":"ToopdbqDesignSystem_af3394","components":[],"sourceHashes":{"ui_kits/app/CircleTimelineSheet.jsx":"f49101667441","ui_kits/app/LoginScreen.jsx":"184a82b73556","ui_kits/app/Primitives.jsx":"4b8e68ea48a4","ui_kits/app/StoryCommentSheet.jsx":"4d5bf6dc4d81","ui_kits/app/StoryViewerScreen.jsx":"d3de8c6445fa","ui_kits/app/UniverseScreen.jsx":"0f93a858c42e","ui_kits/app/data.js":"bfd400bd2f03"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
@@ -636,6 +636,259 @@ Object.assign(window, {
 });
 })(); } catch (e) { __ds_ns.__errors.push({ path: "ui_kits/app/Primitives.jsx", error: String((e && e.message) || e) }); }
 
+// ui_kits/app/StoryCommentSheet.jsx
+try { (() => {
+/* Story Comment Sheet — bottom sheet over the Story Viewer: comment list + composer.
+   Matches CircleTimelineSheet's dark-glass idiom; comments follow WdUserComment
+   (name = hero / --text-1, body = --text-2, time = --text-3). */
+const {
+  useState: useStateC,
+  useRef: useRefC
+} = React;
+function CommentRow({
+  c,
+  liked,
+  onLike
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      alignItems: 'flex-start'
+    }
+  }, /*#__PURE__*/React.createElement(Avatar, {
+    src: c.avatar,
+    size: 36
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'baseline',
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'var(--font-jp)',
+      fontWeight: 700,
+      fontSize: 13,
+      color: 'var(--text-1)'
+    }
+  }, c.user), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'var(--font-latin)',
+      fontWeight: 400,
+      fontSize: 10,
+      color: 'var(--text-3)'
+    }
+  }, c.time)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-jp)',
+      fontWeight: 400,
+      fontSize: 13,
+      lineHeight: 1.5,
+      color: 'var(--text-2)',
+      marginTop: 2,
+      wordBreak: 'break-word'
+    }
+  }, c.text)), /*#__PURE__*/React.createElement("button", {
+    onClick: onLike,
+    className: "noselect",
+    style: {
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 3,
+      padding: '2px 0',
+      flex: 'none',
+      minWidth: 28
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "like",
+    size: 16,
+    style: liked ? {
+      filter: 'brightness(0) saturate(100%) invert(36%) sepia(82%) saturate(3000%) hue-rotate(312deg)'
+    } : {
+      opacity: .65
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: 'var(--font-latin)',
+      fontWeight: 600,
+      fontSize: 10,
+      color: liked ? 'var(--like)' : 'var(--text-3)'
+    }
+  }, c.likes + (liked ? 1 : 0))));
+}
+function StoryCommentSheet({
+  story,
+  onClose,
+  onSend
+}) {
+  const base = window.COMMENTS[story.id] || window.COMMENTS.DEFAULT;
+  const [list, setList] = useStateC(base);
+  const [liked, setLiked] = useStateC({});
+  const [draft, setDraft] = useStateC('');
+  const scrollRef = useRefC(null);
+  const toggleLike = i => setLiked(m => ({
+    ...m,
+    [i]: !m[i]
+  }));
+  const submit = () => {
+    const t = draft.trim();
+    if (!t) return;
+    setList(l => [...l, {
+      user: 'あなた',
+      avatar: window.AV.sunny,
+      text: t,
+      time: 'たった今',
+      likes: 0
+    }]);
+    setDraft('');
+    requestAnimationFrame(() => {
+      const s = scrollRef.current;
+      if (s) s.scrollTop = s.scrollHeight;
+    });
+    onSend && onSend();
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    className: "layer",
+    style: {
+      zIndex: 80
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: onClose,
+    style: {
+      position: 'absolute',
+      inset: 0,
+      background: 'var(--scrim-strong)',
+      animation: 'fade .25s ease both'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: '74%',
+      background: 'linear-gradient(180deg,#1b1726,#0e0c16)',
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      boxShadow: '0 -20px 60px rgba(0,0,0,.6)',
+      animation: 'sheetUp .34s var(--ease-out) both',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 40,
+      height: 5,
+      borderRadius: 99,
+      background: 'rgba(255,255,255,.3)',
+      margin: '12px auto 0'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '18px 20px 14px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-jp)',
+      fontWeight: 700,
+      fontSize: 17,
+      color: '#fff'
+    }
+  }, "\u30B3\u30E1\u30F3\u30C8"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: 'var(--font-latin)',
+      fontWeight: 600,
+      fontSize: 13,
+      color: 'var(--text-3)'
+    }
+  }, list.length), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }), /*#__PURE__*/React.createElement(IconButton, {
+    name: "close",
+    variant: "standart",
+    size: 40,
+    onClick: onClose
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: 'linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.14) 50%, rgba(255,255,255,.04))'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    ref: scrollRef,
+    style: {
+      flex: 1,
+      overflowY: 'auto',
+      padding: '16px 20px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 18
+    }
+  }, list.map((c, i) => /*#__PURE__*/React.createElement(CommentRow, {
+    key: i,
+    c: c,
+    liked: !!liked[i],
+    onLike: () => toggleLike(i)
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '10px 16px',
+      paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      background: 'linear-gradient(0deg,#0e0c16 70%,transparent)',
+      borderTop: '1px solid rgba(255,255,255,.08)'
+    }
+  }, /*#__PURE__*/React.createElement(Avatar, {
+    src: window.AV.sunny,
+    size: 36
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      flex: 1,
+      height: 44,
+      paddingRight: 6
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: draft,
+    onChange: e => setDraft(e.target.value),
+    onKeyDown: e => {
+      if (e.key === 'Enter') submit();
+    },
+    placeholder: "\u30B3\u30E1\u30F3\u30C8\u3092\u8FFD\u52A0..."
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: submit,
+    disabled: !draft.trim(),
+    className: "ibtn color",
+    style: {
+      width: 34,
+      height: 34,
+      opacity: draft.trim() ? 1 : .4,
+      transition: 'opacity .15s var(--ease-standard)'
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    name: "next",
+    size: 16
+  }))))));
+}
+window.StoryCommentSheet = StoryCommentSheet;
+})(); } catch (e) { __ds_ns.__errors.push({ path: "ui_kits/app/StoryCommentSheet.jsx", error: String((e && e.message) || e) }); }
+
 // ui_kits/app/StoryViewerScreen.jsx
 try { (() => {
 /* Story Viewer — full-screen story browser with glass overlay UI. */
@@ -809,7 +1062,7 @@ function StoryViewerScreen({
   }), /*#__PURE__*/React.createElement(ActionButton, {
     name: "comment",
     count: cur.comments,
-    onClick: onOpenComments
+    onClick: () => onOpenComments(cur)
   }), /*#__PURE__*/React.createElement("div", {
     className: "ibtn-lab noselect"
   }, /*#__PURE__*/React.createElement("button", {
@@ -1144,9 +1397,9 @@ try { (() => {
 (function () {
   const IMG = {
     a: 'https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png',
-    b: '../../assets/images/sample_3d.png',
+    b: 'https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png',
     c: 'https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png',
-    d: '../../assets/images/sample_photo.png'
+    d: 'https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png'
   };
   const AV = {
     sunny: 'https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png',
@@ -1258,6 +1511,55 @@ try { (() => {
       segments: 1
     }]
   }];
+
+  // Comment threads per story id (falls back to DEFAULT for unlisted stories).
+  window.COMMENTS = {
+    s1: [{
+      user: 'Kawaii',
+      avatar: AV.pixel,
+      text: 'この景色すごく好き！どこで撮ったの？',
+      time: '1時間前',
+      likes: 4
+    }, {
+      user: 'Dreamy',
+      avatar: AV.star,
+      text: '渋谷の夜って最高だよね🌃',
+      time: '52分前',
+      likes: 1
+    }],
+    s2: [{
+      user: 'SunnyVi',
+      avatar: AV.sunny,
+      text: 'これは保存した。次行くとき教えて！',
+      time: '3時間前',
+      likes: 9
+    }, {
+      user: 'foodie',
+      avatar: AV.sunny,
+      text: '色味がきれい',
+      time: '2時間前',
+      likes: 2
+    }, {
+      user: 'Pixel',
+      avatar: AV.pixel,
+      text: 'いいね〜🔥',
+      time: '1時間前',
+      likes: 0
+    }],
+    DEFAULT: [{
+      user: 'Starry',
+      avatar: AV.star,
+      text: 'すてき！',
+      time: '40分前',
+      likes: 3
+    }, {
+      user: 'Kawaii',
+      avatar: AV.pixel,
+      text: 'また近くに来たら寄ってみる',
+      time: '20分前',
+      likes: 0
+    }]
+  };
 
   // extra floating pins (no story) to populate the globe
   window.EXTRA_PINS = [{

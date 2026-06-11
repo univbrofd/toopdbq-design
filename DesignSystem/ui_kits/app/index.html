@@ -35,6 +35,7 @@
 <script type="text/babel" src="UniverseScreen.jsx"></script>
 <script type="text/babel" src="StoryViewerScreen.jsx"></script>
 <script type="text/babel" src="CircleTimelineSheet.jsx"></script>
+<script type="text/babel" src="StoryCommentSheet.jsx"></script>
 
 <script type="text/babel">
 const { useState } = React;
@@ -49,6 +50,7 @@ function App() {
   const [screen, setScreen] = useState('login');     // login | universe
   const [story, setStory] = useState(null);          // { start } or null
   const [timeline, setTimeline] = useState(null);     // circle or null
+  const [comments, setComments] = useState(null);     // story or null
   const [toast, setToast] = useState(null);
 
   const flash = (msg) => { setToast(msg); clearTimeout(window.__t); window.__t = setTimeout(() => setToast(null), 1600); };
@@ -71,7 +73,7 @@ function App() {
               flat={FLAT} startIndex={story.start}
               onClose={() => setStory(null)}
               onOpenTimeline={(c) => setTimeline(c)}
-              onOpenComments={() => flash('コメント（準備中）')}
+              onOpenComments={(s) => setComments(s)}
               onPost={() => flash('投稿しました')}
             />
           </div>
@@ -82,6 +84,12 @@ function App() {
             onClose={() => setTimeline(null)}
             onOpenStory={openStoryById}
             onPost={() => { setTimeline(null); flash('投稿しました'); }} />
+        )}
+
+        {comments && (
+          <StoryCommentSheet story={comments}
+            onClose={() => setComments(null)}
+            onSend={() => flash('コメントしました')} />
         )}
 
         {toast && <div className="toast"><span style={{ color: 'var(--success)' }}>●</span>{toast}</div>}

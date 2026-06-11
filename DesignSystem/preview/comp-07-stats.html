@@ -1,0 +1,28 @@
+<!-- @dsCard group="Components" name="Status & slider" subtitle="WdMemberStatus · WdStatusBar · WdDistanceSlider" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background: linear-gradient(160deg,#1c172c,#0e0e16); gap:24px; }
+  .grp { display:flex; flex-direction:column; gap:11px; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-2); }
+</style></head>
+<body>
+  <div class="eyebrow">数値・進捗 — 主役は数字、アクセントは進捗だけ</div>
+
+  <div class="grp">
+    <div class="lbl">WdMemberStatus — 数字が主役、ラベルは脇役</div>
+    <div class="wd-member"><span class="stack"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"><img src="https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png"><img src="https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png"></span><span class="ct"><b>＋128</b> 人が参加中</span></div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdStatusBar — 値14 / 単位9、影は親スクリムに委譲</div>
+    <div class="wd-statusbar"><img src="../../assets/icons/icon_spot.png"><span class="v">10.0</span><span class="u">m</span></div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">WdDistanceSlider — 中立トラック、進捗だけカラフル</div>
+    <div class="wd-slider" style="width:280px;"><div class="track"><div class="fill" style="width:62%"></div><div class="thumb" style="left:62%"></div></div></div>
+  </div>
+</body></html>

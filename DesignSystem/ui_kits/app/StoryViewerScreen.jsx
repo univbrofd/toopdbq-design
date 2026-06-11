@@ -61,7 +61,7 @@ function StoryViewerScreen({ flat, startIndex, onClose, onOpenTimeline, onOpenCo
       <div style={{ position: 'absolute', right: 12, bottom: 210, zIndex: 40,
         display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
         <ActionButton name="like" count={cur.likes + (isLiked ? 1 : 0)} active={isLiked} onClick={toggleLike} />
-        <ActionButton name="comment" count={cur.comments} onClick={onOpenComments} />
+        <ActionButton name="comment" count={cur.comments} onClick={() => onOpenComments(cur)} />
         <div className="ibtn-lab noselect"><button className="ibtn"><Icon name="share" size={20} /></button><span className="lab">共有</span></div>
       </div>
 

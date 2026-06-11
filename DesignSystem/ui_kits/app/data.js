@@ -49,6 +49,23 @@
     },
   ];
 
+  // Comment threads per story id (falls back to DEFAULT for unlisted stories).
+  window.COMMENTS = {
+    s1: [
+      { user: 'Kawaii', avatar: AV.pixel, text: 'この景色すごく好き！どこで撮ったの？', time: '1時間前', likes: 4 },
+      { user: 'Dreamy', avatar: AV.star, text: '渋谷の夜って最高だよね🌃', time: '52分前', likes: 1 },
+    ],
+    s2: [
+      { user: 'SunnyVi', avatar: AV.sunny, text: 'これは保存した。次行くとき教えて！', time: '3時間前', likes: 9 },
+      { user: 'foodie', avatar: AV.sunny, text: '色味がきれい', time: '2時間前', likes: 2 },
+      { user: 'Pixel', avatar: AV.pixel, text: 'いいね〜🔥', time: '1時間前', likes: 0 },
+    ],
+    DEFAULT: [
+      { user: 'Starry', avatar: AV.star, text: 'すてき！', time: '40分前', likes: 3 },
+      { user: 'Kawaii', avatar: AV.pixel, text: 'また近くに来たら寄ってみる', time: '20分前', likes: 0 },
+    ],
+  };
+
   // extra floating pins (no story) to populate the globe
   window.EXTRA_PINS = [
     { x: 52, y: 22, avatar: AV.star }, { x: 73, y: 58, avatar: AV.pixel },
