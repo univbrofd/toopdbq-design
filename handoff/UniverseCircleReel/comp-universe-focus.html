@@ -1,0 +1,225 @@
+<!-- @dsCard group="Screens" name="UniverseView — 3D フォーカス" subtitle="メインの巨大 3D を再タップで入るフォーカス状態。従来の地図背景に代わり、その投稿のサークル画像（circle-NN）を全画面背景＋暗 scrim 0.55 でガラス化。前面中央に 3D（obj-NN 透過・短辺×0.86 の正方領域・枠なし）。360° ヒントは最小、閉じる× は控えめ。登場は地図ピン矩形→中央へ 320ms easeOutCubic の Hero 拡大。iPhone17 402×874。" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body{ background:radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%);
+    padding:34px 36px 48px; gap:24px; align-items:flex-start; }
+  .head{ display:flex; flex-direction:column; gap:9px; max-width:980px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:300 25px/1.15 var(--font-jp); color:#fff; letter-spacing:.01em; }
+  .h1 b{ font-weight:700; }
+  .en{ font:500 11px/1 var(--font-latin); letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+  .lede{ font:400 12.5px/1.85 var(--font-jp); color:var(--text-2); max-width:900px; }
+  .lede b{ color:#fff; font-weight:600; }
+  .mono{ font-family:var(--font-latin); font-weight:600; font-size:10px; color:var(--text-2); background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; }
+
+  .stage-row{ display:flex; gap:46px; align-items:flex-start; flex-wrap:wrap; }
+
+  /* faint underlying map (the "from" state, revealed on close) */
+  .map{ position:absolute; inset:0; overflow:hidden;
+    background:radial-gradient(150% 120% at 50% 120%, rgba(0,0,0,.05), rgba(0,0,0,0) 55%), #efeeec; filter:saturate(.96); }
+  .grid{ position:absolute; inset:0; opacity:.5;
+    background-image:
+      repeating-linear-gradient(96deg, transparent 0 33px, rgba(0,0,0,.045) 33px 34px),
+      repeating-linear-gradient(6deg, transparent 0 38px, rgba(0,0,0,.04) 38px 39px); }
+  .ghost-obj{ position:absolute; left:31%; top:300px; width:150px; }
+  .ghost-obj img{ width:100%; display:block; filter:drop-shadow(0 14px 20px rgba(0,0,0,.3)); }
+
+  /* ===== focus overlay ===== */
+  .focus{ position:absolute; inset:0; z-index:40; }
+  .fbg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+  .fscrim{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+  /* glassy edge vignette so the 3D reads against any circle photo */
+  .fvignette{ position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 46%, rgba(0,0,0,0) 38%, rgba(0,0,0,.4) 100%); }
+
+  .fclose{ position:absolute; top:60px; right:14px; width:40px; height:40px; border-radius:50%; z-index:6;
+    display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.4);
+    backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); border:none; cursor:pointer; }
+  .fclose img{ width:15px; height:15px; filter:brightness(0) invert(1); opacity:.85; }
+
+  /* 3D container = short-side × 0.86 square (402 → 346) */
+  .fobj{ position:absolute; left:50%; top:50%; width:346px; height:346px; transform:translate(-50%,-52%);
+    display:flex; align-items:center; justify-content:center; cursor:grab; touch-action:none; z-index:5; }
+  .fobj img{ width:100%; height:100%; object-fit:contain; will-change:transform;
+    filter:drop-shadow(0 26px 48px rgba(0,0,0,.55)); }
+  .fobj.hero img{ animation:hero .32s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes hero{
+    from{ transform:translate(-118px,128px) scale(.30); opacity:.35; }
+    to{ transform:translate(0,0) scale(1); opacity:1; } }
+  .fobj.grabbing{ cursor:grabbing; }
+
+  /* minimal 360° hint */
+  .fhint{ position:absolute; left:50%; bottom:120px; transform:translateX(-50%); z-index:6;
+    display:flex; align-items:center; gap:8px; font:500 12px var(--font-jp); color:var(--text-3);
+    letter-spacing:.04em; text-shadow:0 1px 5px rgba(0,0,0,.6); }
+  .fhint .ring{ width:15px; height:15px; border-radius:50%; border:1.5px solid var(--text-3); border-top-color:transparent;
+    animation:spin 3.4s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* circle attribution chip (top-left, minimal) */
+  .fcircle{ position:absolute; top:60px; left:14px; z-index:6; display:flex; align-items:center; gap:9px; }
+  .fcircle .ct{ width:34px; height:34px; border-radius:50%; overflow:hidden; flex:none;
+    border:1px solid rgba(255,255,255,.32); box-shadow:0 2px 8px rgba(0,0,0,.6); }
+  .fcircle .ct img{ width:100%; height:100%; object-fit:cover; }
+  .fcircle .nm{ font:600 13px var(--font-jp); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+
+  @media (prefers-reduced-motion: reduce){ .fobj.hero img,.fhint .ring{ animation:none; } }
+
+  /* ===== replay control + legend ===== */
+  .side{ display:flex; flex-direction:column; gap:18px; max-width:352px; padding-top:6px; }
+  .replay{ display:inline-flex; align-items:center; gap:9px; align-self:flex-start; cursor:pointer; border:none;
+    padding:10px 16px 10px 13px; border-radius:var(--radius-pill); color:#fff; font:600 12.5px var(--font-jp);
+    background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+  .replay:hover{ background:rgba(255,255,255,.12); }
+  .replay .tri{ width:0; height:0; border-left:9px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; }
+
+  .legend{ display:flex; flex-direction:column; gap:15px; }
+  .legend .lh{ font:600 11px/1 var(--font-latin); letter-spacing:.16em; text-transform:uppercase; color:var(--text-3); }
+  .layer{ display:flex; gap:13px; align-items:flex-start; }
+  .layer .z{ font:600 10px/1 var(--font-latin); color:#0c0c12; background:#fff; border-radius:5px; padding:4px 6px; flex:none; min-width:30px; text-align:center; letter-spacing:.04em; }
+  .layer .z.hot{ background:linear-gradient(135deg,#fff0a6,#ff3e88); }
+  .layer .z.dim{ color:#fff; background:rgba(255,255,255,.14); }
+  .layer .lx .nm{ font:700 13px/1.3 var(--font-jp); color:#fff; }
+  .layer .lx .nm em{ font:500 10px var(--font-latin); font-style:normal; color:var(--text-3); letter-spacing:.06em; margin-left:7px; }
+  .layer .lx .dc{ font:400 11px/1.65 var(--font-jp); color:var(--text-2); margin-top:3px; }
+  .layer .lx .dc b{ color:#fff; font-weight:600; }
+
+  /* hero motion strip */
+  .motion{ display:flex; flex-direction:column; gap:8px; }
+  .motion .lh{ font:600 11px/1 var(--font-latin); letter-spacing:.16em; text-transform:uppercase; color:var(--text-3); }
+  .track{ position:relative; height:38px; border-radius:10px; background:rgba(255,255,255,.05);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); overflow:hidden; }
+  .track .fill{ position:absolute; left:0; top:0; bottom:0; width:0; border-radius:10px;
+    background:linear-gradient(90deg, rgba(255,240,166,.25), rgba(255,62,136,.3)); }
+  .track .ease{ position:absolute; inset:0; display:flex; align-items:center; padding:0 12px; gap:10px;
+    font:600 10.5px var(--font-latin); color:var(--text-2); letter-spacing:.02em; }
+  .track .dot{ position:absolute; top:50%; width:10px; height:10px; border-radius:50%; background:#fff; transform:translate(-50%,-50%);
+    box-shadow:0 0 10px rgba(255,255,255,.6); }
+</style></head>
+<body>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">UniverseView — <b>3D フォーカス</b></span>
+      <span class="en">tap main 3D · circle-backed focus</span>
+    </div>
+    <div class="lede">
+      地図の<b>巨大な main 3D を再タップ</b>で入るフォーカス状態。<b>背景は地図ではなく、その投稿のサークル画像</b>（<span class="mono">circle-NN</span>）を全画面に敷き、<b>暗 scrim 0.55</b> でガラス化。前面中央に <b>3D</b>（<span class="mono">obj-NN</span> 透過・<b>短辺×0.86 の正方領域</b>・<b>枠なし</b>）。<b>360° ヒントは最小</b>、閉じる× は控えめ。登場は地図ピン矩形→中央へ <span class="mono">320ms easeOutCubic</span> の Hero 拡大。
+    </div>
+  </div>
+
+  <div class="stage-row">
+    <!-- ============ PHONE ============ -->
+    <div class="phone">
+      <div class="screen">
+
+        <!-- faint map underneath (the from-state) -->
+        <div class="map">
+          <div class="grid"></div>
+        </div>
+        <div class="ghost-obj"><img src="../../assets/images/uv/obj-01.png" alt=""></div>
+
+        <!-- focus overlay -->
+        <div class="focus" id="focus">
+          <div class="fbg" id="fbg" style="background-image:url(../../assets/images/uv/circle-01.png)"></div>
+          <div class="fscrim"></div>
+          <div class="fvignette"></div>
+
+          <div class="fcircle">
+            <span class="ct"><img src="../../assets/images/uv/circle-01.png" alt=""></span>
+            <span class="nm">渋谷コミュニティ</span>
+          </div>
+          <button class="fclose" id="fclose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+
+          <div class="fobj" id="fobj"><img id="fimg" src="../../assets/images/uv/obj-01.png" alt="3D オブジェクト"></div>
+
+          <div class="fhint"><span class="ring"></span>ドラッグで 360°</div>
+        </div>
+
+        <!-- status bar (white, over scrim) -->
+        <div class="dynamic-island"></div>
+        <div class="statusbar">
+          <span class="time">23:57</span>
+          <span class="sys">
+            <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"/></svg>
+            <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"/><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"/><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"/></svg>
+          </span>
+        </div>
+
+        <div class="home-ind"></div>
+      </div>
+    </div>
+
+    <!-- ============ SIDE: replay + legend ============ -->
+    <div class="side">
+      <button class="replay" id="replay"><span class="tri"></span>Hero 拡大を再生</button>
+
+      <div class="motion">
+        <div class="lh">entrance · hero</div>
+        <div class="track" id="track">
+          <div class="fill" id="fill"></div>
+          <div class="ease">320ms · easeOutCubic <span style="opacity:.6">cubic-bezier(.22,1,.36,1)</span></div>
+          <div class="dot" id="dot" style="left:0"></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="lh">anatomy · 奥 → 手前</div>
+        <div class="layer"><span class="z hot">背景</span><div class="lx">
+          <div class="nm">サークル画像<em>circle-NN · 新規</em></div>
+          <div class="dc">フォーカス中の投稿の <span class="mono">circleImageUrl</span> を<b>全画面 cover</b>。従来の地図背景に代えて<b>サークルの世界観</b>を敷く。可読性は<b>暗 scrim 0.55</b>＋縁ビネットで担保。</div>
+        </div></div>
+        <div class="layer"><span class="z">3D</span><div class="lx">
+          <div class="nm">3D オブジェクト<em>obj-NN · 透過</em></div>
+          <div class="dc">中央に<b>短辺×0.86 の正方領域</b>（402幅→ <span class="mono">346px</span>）。<b>枠なし</b>・透明背景。<b>横ドラッグで 360° 回転</b>（自動回転は停止）。</div>
+        </div></div>
+        <div class="layer"><span class="z dim">chrome</span><div class="lx">
+          <div class="nm">最小限<em>minimal</em></div>
+          <div class="dc">上部左に<b>サークル丸34＋名前</b>、右に<b>控えめな閉じる×</b>。下部に<b>360° ヒット</b>（<span class="mono">--text-3</span>）のみ。<b>背景タップ／×で 1 へ戻る</b>。</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const fobj = document.getElementById('fobj');
+    const fimg = document.getElementById('fimg');
+    const fill = document.getElementById('fill');
+    const dot  = document.getElementById('dot');
+
+    function playHero(){
+      fobj.classList.remove('hero'); void fobj.offsetWidth; fobj.classList.add('hero');
+      // sync the motion track
+      const dur = 320, t0 = performance.now();
+      const ease = (x)=> 1 - Math.pow(1 - x, 3); // easeOutCubic
+      function step(now){
+        const p = Math.min(1, (now - t0) / dur);
+        const e = ease(p);
+        fill.style.width = (e*100) + '%';
+        dot.style.left = (e*100) + '%';
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+    document.getElementById('replay').addEventListener('click', playHero);
+    // autoplay once after load
+    window.addEventListener('load', ()=> setTimeout(playHero, 350));
+
+    // drag to rotate 360°
+    let dragging=false, startX=0, rot=0;
+    fobj.addEventListener('pointerdown', e=>{ dragging=true; startX=e.clientX; rot = rot||0; fobj.setPointerCapture(e.pointerId); fobj.classList.add('grabbing'); fobj.classList.remove('hero'); });
+    fobj.addEventListener('pointermove', e=>{ if(!dragging) return; fimg.style.transform='rotateY('+(rot+(e.clientX-startX)*0.7)+'deg)'; });
+    fobj.addEventListener('pointerup', e=>{ if(!dragging) return; rot += (e.clientX-startX)*0.7; dragging=false; fobj.classList.remove('grabbing'); });
+
+    // close → fade the focus to reveal the underlying map (demo of return to 1)
+    const focus = document.getElementById('focus');
+    function closeFocus(){ focus.style.transition='opacity .3s var(--ease-out)'; focus.style.opacity='0';
+      setTimeout(()=>{ focus.style.opacity='1'; }, 1100); }
+    document.getElementById('fclose').addEventListener('click', closeFocus);
+    focus.addEventListener('click', e=>{ if(e.target.classList.contains('fbg')||e.target.classList.contains('fscrim')||e.target.classList.contains('fvignette')) closeFocus(); });
+  </script>
+</body></html>

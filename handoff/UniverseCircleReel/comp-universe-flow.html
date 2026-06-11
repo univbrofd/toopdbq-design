@@ -1,0 +1,282 @@
+<!-- @dsCard group="Screens" name="UniverseView — タップ動線" subtitle="下端プレイリスト→3D フォーカスの 4 コマ動線。①通常（地図＋プレイリスト・代表=白枠）②リストの投稿をタップ→地図のメイン代表（巨大3D）に置き換わり白枠が移動 ③メイン3D タップ→フォーカス開始（Hero 拡大 320ms easeOutCubic・サークル画像が背景にフェードイン）④フォーカス中＝サークル画像背景＋前面3D・ドラッグで360°、背景タップ/×で①へ。" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  body{ background:radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%);
+    padding:34px 36px 52px; gap:26px; align-items:flex-start; }
+  .head{ display:flex; flex-direction:column; gap:9px; max-width:1080px; }
+  .title-row{ display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .h1{ font:300 25px/1.15 var(--font-jp); color:#fff; letter-spacing:.01em; }
+  .h1 b{ font-weight:700; }
+  .en{ font:500 11px/1 var(--font-latin); letter-spacing:.22em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+  .lede{ font:400 12.5px/1.85 var(--font-jp); color:var(--text-2); max-width:1020px; }
+  .lede b{ color:#fff; font-weight:600; }
+  .mono{ font-family:var(--font-latin); font-weight:600; font-size:10px; color:var(--text-2); background:rgba(255,255,255,.06); border-radius:4px; padding:1px 5px; }
+
+  .toolbar{ display:flex; align-items:center; gap:14px; }
+  .play{ display:inline-flex; align-items:center; gap:9px; cursor:pointer; border:none;
+    padding:10px 17px 10px 14px; border-radius:var(--radius-pill); color:#fff; font:600 12.5px var(--font-jp);
+    background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+  .play:hover{ background:rgba(255,255,255,.12); }
+  .play .tri{ width:0; height:0; border-left:9px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; }
+  .play.busy{ opacity:.5; pointer-events:none; }
+
+  /* ===== 4-koma strip ===== */
+  .strip{ display:flex; gap:18px; align-items:flex-start; flex-wrap:wrap; }
+  .pane{ display:flex; align-items:flex-start; gap:18px; }
+  .frame{ display:flex; flex-direction:column; gap:13px; }
+  .stepno{ display:flex; align-items:center; gap:10px; }
+  .stepno .n{ font:700 12px var(--font-latin); color:#0c0c12; background:#fff; border-radius:6px; padding:3px 8px; letter-spacing:.04em; }
+  .stepno.s4 .n{ background:linear-gradient(135deg,#fff0a6,#ff3e88); }
+  .stepno .t{ font:700 13px var(--font-jp); color:#fff; }
+  .stepno .t em{ font:500 10px var(--font-latin); font-style:normal; color:var(--text-3); letter-spacing:.04em; margin-left:6px; }
+
+  .scaler{ width:201px; height:437px; position:relative; flex:none; }
+  .mini{ position:absolute; top:0; left:0; width:402px; height:874px; transform:scale(.5); transform-origin:top left;
+    border-radius:46px; overflow:hidden; background:var(--bg); box-shadow:0 0 0 2px #2a2a31, 0 18px 50px rgba(0,0,0,.55);
+    font-family:var(--font-jp); }
+  .mini.active{ box-shadow:0 0 0 2px rgba(255,255,255,.5), 0 0 0 6px rgba(255,62,136,.28), 0 18px 50px rgba(0,0,0,.55); }
+  .mini .screen{ position:absolute; inset:0; }
+
+  .cap{ font:400 11px/1.6 var(--font-jp); color:var(--text-2); max-width:201px; }
+  .cap b{ color:#fff; font-weight:600; }
+
+  /* connector arrow between panes */
+  .arrow{ align-self:center; margin-top:196px; display:flex; flex-direction:column; align-items:center; gap:7px; flex:none; }
+  .arrow .ln{ width:30px; height:2px; background:linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,.55)); position:relative; }
+  .arrow .ln::after{ content:""; position:absolute; right:-1px; top:50%; transform:translateY(-50%) rotate(45deg); width:7px; height:7px; border-top:2px solid rgba(255,255,255,.55); border-right:2px solid rgba(255,255,255,.55); }
+  .arrow .mt{ font:600 8.5px var(--font-latin); letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); white-space:nowrap; }
+
+  /* ---- mini screen internals ---- */
+  .m-map{ position:absolute; inset:0; overflow:hidden;
+    background:radial-gradient(150% 120% at 50% 120%, rgba(0,0,0,.05), rgba(0,0,0,0) 55%), #efeeec; }
+  .m-grid{ position:absolute; inset:0; opacity:.5;
+    background-image:
+      repeating-linear-gradient(96deg, transparent 0 33px, rgba(0,0,0,.05) 33px 34px),
+      repeating-linear-gradient(6deg, transparent 0 38px, rgba(0,0,0,.045) 38px 39px); }
+  .m-road{ position:absolute; inset:0; }
+  .m-lbl{ position:absolute; transform:translate(-50%,-50%); text-align:center; pointer-events:none; white-space:nowrap; }
+  .m-lbl .en{ display:block; font:italic 600 9px/1.05 var(--font-latin); color:rgba(60,60,58,.42); }
+  .m-lbl .jp{ display:block; font:500 8.5px/1.2 var(--font-jp); color:rgba(70,70,66,.5); }
+
+  .m-obj{ position:absolute; }
+  .m-obj img{ width:100%; display:block; filter:drop-shadow(0 8px 10px rgba(0,0,0,.28)); transition:all .3s var(--ease-out); }
+  .m-obj.main img{ filter:drop-shadow(0 16px 22px rgba(0,0,0,.34)); }
+
+  .m-topscrim{ position:absolute; top:0; left:0; right:0; height:120px;
+    background:linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 100%); }
+  .m-veil{ position:absolute; left:0; right:0; bottom:0; height:430px;
+    background:linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.5) 38%, rgba(0,0,0,0) 100%); }
+  .m-badge{ position:absolute; top:54px; left:14px; display:flex; align-items:center; gap:8px; }
+  .m-badge .av{ width:38px; height:38px; border-radius:50%; background:#2b2b2b; box-shadow:0 2px 8px rgba(0,0,0,.7); }
+  .m-badge .nm{ font:600 14px var(--font-jp); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+  .m-acts{ position:absolute; top:54px; right:14px; display:flex; gap:8px; }
+  .m-acts span{ width:42px; height:42px; border-radius:50%; background:rgba(120,120,120,.5); }
+
+  /* playlist */
+  .m-playlist{ position:absolute; left:0; right:0; bottom:0; height:430px; padding:30px 0 70px;
+    display:flex; flex-direction:column-reverse; gap:16px; justify-content:flex-start; overflow:hidden;
+    -webkit-mask:linear-gradient(to top, #000 74%, transparent 100%); mask:linear-gradient(to top, #000 74%, transparent 100%); }
+  .m-crow{ display:flex; flex-direction:column; gap:8px; flex:none; }
+  .m-chead{ display:flex; align-items:center; gap:9px; padding:0 16px; }
+  .m-chead .ct{ width:30px; height:30px; border-radius:50%; overflow:hidden; flex:none; border:1px solid rgba(255,255,255,.28); }
+  .m-chead .ct img{ width:100%; height:100%; object-fit:cover; }
+  .m-chead .nm{ font:600 13px var(--font-jp); color:var(--text-2); text-shadow:0 1px 3px rgba(0,0,0,.85); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px; }
+  .m-strip{ display:flex; gap:8px; padding:0 16px; }
+  .m-cell{ position:relative; width:100px; height:178px; flex:none; border-radius:14px; border:1px solid rgba(255,255,255,.2); overflow:hidden; background:#2a2a2a; }
+  .m-cell .clip{ position:absolute; inset:1px; border-radius:12px; overflow:hidden; }
+  .m-cell .clip img{ width:100%; height:100%; object-fit:cover; }
+  .m-cell.rep{ border:2.5px solid #fff; }
+  .m-cell.rep .clip{ inset:1.5px; }
+
+  .m-post{ position:absolute; right:14px; bottom:30px; width:55px; height:55px; border-radius:50%;
+    background:var(--gradient-colorful); padding:4px; box-shadow:0 3px 12px rgba(0,0,0,.4); }
+  .m-post .in{ width:100%; height:100%; border-radius:50%; background:rgba(24,24,26,.72); display:flex; align-items:center; justify-content:center; }
+  .m-post .in img{ width:24px; height:24px; filter:brightness(0) invert(1); }
+
+  /* tap ripple */
+  .tap{ position:absolute; width:54px; height:54px; border-radius:50%; border:2.5px solid #fff;
+    transform:translate(-50%,-50%) scale(.4); opacity:0; pointer-events:none;
+    box-shadow:0 0 18px rgba(255,255,255,.5); }
+  .tap.go{ animation:ripple 1s var(--ease-out) both; }
+  @keyframes ripple{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(.35);} 18%{ opacity:.95;} 100%{ opacity:0; transform:translate(-50%,-50%) scale(1.5);} }
+
+  /* focus layers (frames 3 & 4) */
+  .m-focus{ position:absolute; inset:0; }
+  .m-fbg{ position:absolute; inset:0; background-size:cover; background-position:center; }
+  .m-fscrim{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
+  .m-fobj{ position:absolute; left:50%; top:50%; width:346px; height:346px; transform:translate(-50%,-52%); display:flex; align-items:center; justify-content:center; }
+  .m-fobj img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 26px 48px rgba(0,0,0,.55)); }
+  .m-fclose{ position:absolute; top:56px; right:16px; width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; }
+  .m-fclose img{ width:15px; height:15px; filter:brightness(0) invert(1); opacity:.85; }
+  .m-fcircle{ position:absolute; top:56px; left:16px; display:flex; align-items:center; gap:9px; }
+  .m-fcircle .ct{ width:34px; height:34px; border-radius:50%; overflow:hidden; border:1px solid rgba(255,255,255,.32); }
+  .m-fcircle .ct img{ width:100%; height:100%; object-fit:cover; }
+  .m-fcircle .nm{ font:600 13px var(--font-jp); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
+  .m-fhint{ position:absolute; left:50%; bottom:118px; transform:translateX(-50%); display:flex; align-items:center; gap:8px;
+    font:500 12px var(--font-jp); color:var(--text-3); text-shadow:0 1px 5px rgba(0,0,0,.6); }
+  .m-fhint .ring{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--text-3); border-top-color:transparent; }
+
+  .m-statusbar{ position:absolute; top:0; left:0; right:0; height:54px; display:flex; align-items:center; justify-content:space-between; padding:0 34px; }
+  .m-statusbar .time{ font:600 16px var(--font-latin); }
+  .m-island{ position:absolute; top:11px; left:50%; transform:translateX(-50%); width:125px; height:36px; border-radius:20px; background:#000; }
+  .m-home{ position:absolute; left:50%; bottom:9px; transform:translateX(-50%); width:140px; height:5px; border-radius:99px; background:rgba(255,255,255,.9); }
+</style></head>
+<body>
+
+  <div class="head">
+    <div class="title-row">
+      <span class="h1">UniverseView — <b>タップ動線</b></span>
+      <span class="en">tap flow · playlist → 3D focus</span>
+    </div>
+    <div class="lede">
+      下端の<b>サークル別プレイリスト</b>から <b>3D フォーカス</b>までの 4 コマ動線。<b>①通常</b>（地図＋プレイリスト・代表＝白枠）→ <b>②リストの投稿をタップ</b>で地図の<b>メイン代表（巨大 3D）に置き換わり、白枠が移動</b> → <b>③メイン 3D をタップ</b>で<b>フォーカス開始</b>（<span class="mono">320ms easeOutCubic</span> の Hero 拡大・サークル画像が背景にフェードイン）→ <b>④フォーカス中</b>（サークル画像背景＋前面 3D・<b>ドラッグで 360°</b>、背景タップ／× で ① へ）。
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="play" id="play"><span class="tri"></span>動線を再生</button>
+    <span style="font:500 11px var(--font-jp); color:var(--text-3);">各コマをハイライトしながら通します</span>
+  </div>
+
+  <div class="strip" id="strip"></div>
+
+  <script>
+    const A = '../../assets/images/uv/';
+    const I = '../../assets/icons/';
+
+    // shared map markup (pale positron, sparse labels)
+    function mapHTML(){
+      return `
+        <div class="m-map">
+          <div class="m-grid"></div>
+          <svg class="m-road" viewBox="0 0 402 874" preserveAspectRatio="none" fill="none">
+            <g stroke="#d7d6d2" stroke-width="2.4" stroke-linecap="round">
+              <path d="M-10 300 C 90 290, 220 320, 412 285"/>
+              <path d="M-10 470 C 120 450, 250 495, 412 470"/>
+              <path d="M250 -10 C 235 240, 270 520, 245 884"/>
+            </g>
+            <g stroke="#e0dfdb" stroke-width="1.3" stroke-linecap="round">
+              <path d="M-10 200 C 120 185, 260 215, 412 195"/>
+              <path d="M90 -10 C 80 260, 110 540, 95 884"/>
+            </g>
+          </svg>
+          <div class="m-lbl" style="left:24%; top:18%;"><span class="en">KITA-SHINJUKU</span><span class="jp">北新宿</span></div>
+          <div class="m-lbl" style="left:64%; top:24%;"><span class="en">ŌKUBO</span><span class="jp">大久保</span></div>
+          <div class="m-lbl" style="left:20%; top:38%;"><span class="en">NISHI-SHINJUKU</span><span class="jp">西新宿</span></div>
+          <div class="m-lbl" style="left:54%; top:33%;"><span class="en">Shinjuku</span><span class="jp">新宿区</span></div>
+          <div class="m-lbl" style="left:30%; top:52%;"><span class="en">YOYOGI</span><span class="jp">代々木</span></div>
+          <div class="m-lbl" style="left:74%; top:47%;"><span class="en">SENDAGAYA</span><span class="jp">千駄ヶ谷</span></div>
+        </div>`;
+    }
+    // objects on map. mainImg lets us swap which obj is the giant main.
+    function objsHTML(mainImg){
+      return `
+        <div class="m-obj sub" style="left:64%; top:160px; width:58px;"><img src="${A}obj-04.png"></div>
+        <div class="m-obj sub" style="left:7%;  top:250px; width:74px;"><img src="${A}obj-03.png"></div>
+        <div class="m-obj sub" style="left:74%; top:210px; width:78px;"><img src="${A}obj-02.png"></div>
+        <div class="m-obj main" style="left:31%; top:196px; width:142px;"><img src="${A}${mainImg}"></div>`;
+    }
+    // playlist with a given representative (circleIdx 1-based, cellIdx within row)
+    function playlistHTML(repCircle, repCell){
+      const rows = [
+        { c:'circle-01', nm:'渋谷コミュニティ',     posts:['story-01','story-02','story-03'] },
+        { c:'circle-02', nm:'神宮前コミュニティ',   posts:['story-04','story-05','story-06'] },
+        { c:'circle-03', nm:'代々木サークル',       posts:['story-07','story-08'] },
+      ];
+      return `<div class="m-playlist">` + rows.map((r, ri)=>{
+        const cells = r.posts.map((p, ci)=>{
+          const rep = (ri+1===repCircle && ci===repCell) ? ' rep' : '';
+          return `<div class="m-cell${rep}"><div class="clip"><img src="${A}${p}.png"></div></div>`;
+        }).join('');
+        return `<div class="m-crow">
+          <div class="m-chead"><span class="ct"><img src="${A}${r.c}.png"></span><span class="nm">${r.nm}</span></div>
+          <div class="m-strip">${cells}</div>
+        </div>`;
+      }).join('') + `</div>`;
+    }
+    function chromeHTML(){
+      return `
+        <div class="m-topscrim"></div>
+        <div class="m-veil"></div>
+        <div class="m-island"></div>
+        <div class="m-statusbar"><span class="time" style="color:#1a1a1a">23:57</span><span style="font:600 12px var(--font-latin); color:#1a1a1a">●●● ▮</span></div>
+        <div class="m-badge"><span class="av"></span><span class="nm">デバッグ太郎</span></div>
+        <div class="m-acts"><span></span><span></span></div>
+        <div class="m-post"><span class="in"><img src="${I}icon_camera.png"></span></div>
+        <div class="m-home"></div>`;
+    }
+    // focus overlay at progress p (0..1): scrim+bg fade, obj scale from .3→1
+    function focusHTML(circle, obj, p){
+      const sc = 0.30 + 0.70*p;
+      const op = p;
+      const tx = -118*(1-p), ty = 128*(1-p);
+      return `
+        <div class="m-focus" style="opacity:${Math.min(1,p*1.4)}">
+          <div class="m-fbg" style="background-image:url(${A}${circle}.png); opacity:${op}"></div>
+          <div class="m-fscrim" style="opacity:${op}"></div>
+          <div class="m-fobj"><img src="${A}${obj}.png" style="transform:translate(${tx}px,${ty}px) scale(${sc})"></div>
+          ${ p>=1 ? `
+            <div class="m-fcircle"><span class="ct"><img src="${A}${circle}.png"></span><span class="nm">渋谷コミュニティ</span></div>
+            <div class="m-fclose"><img src="${I}icon_close.png"></div>
+            <div class="m-fhint"><span class="ring"></span>ドラッグで 360°</div>` : '' }
+        </div>`;
+    }
+
+    const frames = [
+      { n:'01', t:'通常', en:'idle', active:false,
+        cap:'地図に 3D ピン群＋下端に<b>サークル別プレイリスト</b>。代表＝<b>白枠</b>（渋谷の先頭）。',
+        build:()=> mapHTML()+objsHTML('obj-01.png')+chromeHTML().replace('<div class="m-post">', playlistHTML(1,0)+'<div class="m-post">') },
+      { n:'02', t:'投稿をタップ → 代表置換', en:'select', active:false,
+        cap:'リストの<b>別の投稿をタップ</b>すると、地図の<b>メイン代表（巨大 3D）が置き換わり</b>、<b>白枠が移動</b>。',
+        build:()=> mapHTML()+objsHTML('obj-03.png')+chromeHTML().replace('<div class="m-post">', playlistHTML(1,2)+'<div class="m-post">')
+              + `<div class="tap" id="tap2" style="left:70%; top:715px;"></div>` },
+      { n:'03', t:'main 3D タップ → Hero 拡大', en:'320ms easeOutCubic', active:false,
+        cap:'<b>メイン 3D をタップ</b>で<b>フォーカス開始</b>。<span class="mono">320ms easeOutCubic</span> で中央へ拡大、<b>サークル画像が背景にフェードイン</b>。',
+        build:()=> mapHTML()+objsHTML('obj-03.png')+chromeHTML().replace('<div class="m-post">', playlistHTML(1,2)+'<div class="m-post">')
+              + focusHTML('circle-01','obj-03',0.5)
+              + `<div class="tap" id="tap3" style="left:49%; top:267px;"></div>` },
+      { n:'04', t:'フォーカス · 360°', en:'focus', active:false,
+        cap:'<b>サークル画像背景＋前面 3D</b>。<b>ドラッグで 360°</b> 回転。<b>背景タップ／×</b> で ① へ戻る。',
+        build:()=> mapHTML()+focusHTML('circle-01','obj-03',1) },
+    ];
+
+    const strip = document.getElementById('strip');
+    frames.forEach((f, i)=>{
+      const pane = document.createElement('div'); pane.className='pane';
+      const frame = document.createElement('div'); frame.className='frame';
+      frame.innerHTML = `
+        <div class="stepno ${i===3?'s4':''}"><span class="n">${f.n}</span><span class="t">${f.t}<em>${f.en}</em></span></div>
+        <div class="scaler"><div class="mini" id="mini${i}"><div class="screen">${f.build()}</div></div></div>
+        <div class="cap">${f.cap}</div>`;
+      pane.appendChild(frame);
+      if (i < frames.length-1){
+        const ar = document.createElement('div'); ar.className='arrow';
+        const labels = ['TAP','TAP','HERO'];
+        ar.innerHTML = `<div class="mt">${labels[i]}</div><div class="ln"></div>`;
+        pane.appendChild(ar);
+      }
+      strip.appendChild(pane);
+    });
+
+    // playback: highlight each frame in turn, fire tap ripples
+    const play = document.getElementById('play');
+    function highlight(i){ for(let k=0;k<4;k++){ document.getElementById('mini'+k).classList.toggle('active', k===i); } }
+    function fireTap(id){ const el=document.getElementById(id); if(!el) return; el.classList.remove('go'); void el.offsetWidth; el.classList.add('go'); }
+    function run(){
+      play.classList.add('busy');
+      const seq = [0,1,2,3];
+      let t = 0;
+      seq.forEach((i, idx)=>{
+        setTimeout(()=>{ highlight(i); if(i===1) fireTap('tap2'); if(i===2) fireTap('tap3'); }, t);
+        t += 1100;
+      });
+      setTimeout(()=>{ highlight(-1); play.classList.remove('busy'); }, t+200);
+    }
+    play.addEventListener('click', run);
+    window.addEventListener('load', ()=> setTimeout(run, 400));
+  </script>
+</body></html>
