@@ -24,7 +24,7 @@ Open `index.html`. The prototype boots on the **Login** screen — tap a sign-in
 | `CircleTimelineSheet.jsx` | Circle timeline sheet (`CircleTimelineSheetView`). |
 
 ## Component → source map
-`IconButton` → `WdIconButton` (simple / standart / standartColor / post / badge) · `CircleBar` → `WdCircleBar` + `WdSpesialIcon` · `Toggle` → `WdToggl` · login buttons → `WdLoginButton` · `cta` → `WdTextButton` · field → `WdTextField` · header → `WdNavigationHeader` + `WdStoryHeader` · footer → `WdCircleFooter` · member row → `WdMemberStatus` · distance chip → `WdStatusBar`.
+`IconButton` → `WdIconButton` (simple / standart / standartColor / badgeColor / badge) · `CircleBar` → `WdCircleBar` + `WdSpesialIcon` · `Toggle` → `WdToggl` · login buttons → `WdLoginButton` · `cta` → `WdTextButton` · field → `WdTextField` · header → `WdNavigationHeader` + `WdStoryHeader` · footer → `WdCircleFooter` · member row → `WdMemberStatus` · distance chip → `WdStatusBar`.
 
 ## Faithfulness & gaps
 - Icons are the **real app PNGs** (`assets/icons/`); logos are the real `logo_google/apple.png`.

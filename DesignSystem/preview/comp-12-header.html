@@ -1,19 +1,37 @@
-<!-- @dsCard group="Components" --><!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<!-- @dsCard group="Components" name="WdNavigationHeader" subtitle="上部ヘッダー · 既定=decay グラデ（面なし） · glass: yes（glass プレート variant = StoryPost 等の単発 chrome） · WdStoryHeader progress 同居" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/components.css">
 <style>
-  body { background: linear-gradient(120deg,#26203a,#0f1019); padding:0; gap:0; }
+  body { background: linear-gradient(120deg,#26203a,#0f1019); padding:0 0 18px; gap:0; }
   .frame { position:relative; padding:18px 14px 26px; background:
     linear-gradient(180deg, rgba(0,0,0,.5) 4%, rgba(0,0,0,0) 100%); }
   .prog { display:flex; gap:4px; margin-bottom:14px; }
-  .prog span { flex:1; height:4px; border-radius:99px; background:rgba(255,255,255,.30); }
+  .prog span { flex:1; height:4px; border-radius:var(--radius-pill); background:rgba(255,255,255,.30); }
   .prog span.on { background:rgba(255,255,255,.56); }
   .hdr { display:flex; align-items:center; justify-content:space-between; }
   .cap { position:absolute; bottom:6px; left:14px; font-size:10px; color:var(--fg-3); }
+  .tags { display:flex; gap:8px; padding:14px 14px 10px; }
+  .lbl { font:700 10px var(--font-latin); letter-spacing:.13em; text-transform:uppercase; color:var(--fg-3); padding:14px 14px 6px; }
+
+  /* glass plate variant — StoryPost / camera flows where header sits over the image */
+  .photo { position:relative; height:150px; overflow:hidden;
+    background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover; }
+  .glass-hd { position:absolute; top:12px; left:12px; right:12px; height:56px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 6px;
+    border-radius:var(--radius-pill); background:var(--lg-tint);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .glass-hd::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
 </style></head>
 <body>
+  <div class="tags"><span class="glass-tag yes">glass: yes — glass プレート variant（単発 chrome）</span><span class="glass-tag no">no — 既定 decay グラデは面なし</span></div>
+
+  <div class="lbl">既定 — decay グラデのみ（面なし・StoryViewer ヘッダー）</div>
   <div class="frame">
     <div class="prog"><span class="on"></span><span class="on"></span><span></span><span></span></div>
     <div class="hdr">
@@ -22,5 +40,14 @@
       <div class="wd-icon-btn simple"><img src="../../assets/icons/icon_close.png"></div>
     </div>
     <span class="cap">WdNavigationHeader + WdStoryHeader progress (segmented by post count)</span>
+  </div>
+
+  <div class="lbl">glass プレート variant — StoryPost / 画像の上に立つ chrome（liquid glass 1枚）</div>
+  <div class="photo">
+    <div class="glass-hd">
+      <div class="wd-icon-btn simple" style="width:44px;height:44px;"><img src="../../assets/icons/icon_back.png"></div>
+      <span class="t-nav-title" style="font-size:17px; text-shadow:none;">新規投稿</span>
+      <div class="wd-icon-btn simple" style="width:44px;height:44px;"><img src="../../assets/icons/icon_check.png"></div>
+    </div>
   </div>
 </body></html>

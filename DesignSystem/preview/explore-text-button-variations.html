@@ -1,0 +1,168 @@
+<!-- @dsCard group="Explorations" name="WdTextButton — CTA バリエーション探求" subtitle="決定済: 01 Flat bake 採用 · 02–09 は探求の記録として保存" viewport="1000x1500" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  body { background:#0d0d0f; gap:16px; }
+  .lede { font:500 12px/1.7 var(--font-jp); color:var(--text-2); max-width:780px; }
+  .lede b { color:#fff; font-weight:700; }
+  .vgrid { display:grid; grid-template-columns:repeat(auto-fit, minmax(330px, 1fr)); gap:16px; max-width:1100px; }
+  .unit { display:flex; flex-direction:column; gap:8px; }
+  .unit .hd { display:flex; align-items:baseline; gap:8px; }
+  .unit .no { font:700 10px var(--font-latin); letter-spacing:.1em; color:var(--grad-pink); }
+  .unit .nm { font:700 12.5px var(--font-jp); color:#fff; }
+  .unit .tag { margin-left:auto; font:700 9px var(--font-latin); letter-spacing:.1em; text-transform:uppercase;
+    padding:2px 8px; border-radius:var(--radius-pill); }
+  .tag.safe { color:#8be08e; background:rgba(76,175,80,.14); }
+  .tag.bold { color:#ffb46e; background:rgba(255,150,60,.14); }
+  .tag.wild { color:#ff8fb3; background:rgba(255,62,136,.16); }
+  .unit .ds { font:400 10.5px/1.55 var(--font-jp); color:var(--text-3); min-height:32px; }
+  .stage { position:relative; border-radius:var(--radius-md); overflow:hidden; height:150px;
+    display:flex; align-items:center; justify-content:center;
+    background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover; }
+  .stage.alt { background-image:url('https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png'); }
+  .stage .veil { position:absolute; inset:0; background:rgba(0,0,0,.30); }
+  .stage > * { position:relative; }
+
+  /* ---- shared button base ---- */
+  .vbtn { position:relative; min-width:218px; height:56px; border-radius:var(--radius-xs); padding:0 24px;
+    border:none; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    color:#fff; font-family:var(--font-jp); font-weight:700; font-size:16px; letter-spacing:.01em;
+    transition:transform .12s var(--ease-standard); }
+  .vbtn:active { transform:scale(.985); }
+  .glassy { background:radial-gradient(85% 150% at 50% 50%, rgba(0,0,0,.18), rgba(0,0,0,0) 72%);
+    -webkit-backdrop-filter:blur(8px) saturate(var(--lg-saturate));
+    backdrop-filter:blur(8px) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot); }
+
+  /* 02 — colorful hairline: ガラス素体＋カラフルは縁の1.5pxだけ */
+  .v-hairline::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1.5px;
+    background:var(--gradient-colorful-linear);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+
+  /* 03 — bottom aurora: 下縁からカラフルが立ちのぼる */
+  .v-aurora::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:var(--gradient-colorful);
+    -webkit-mask:linear-gradient(0deg, #000 0%, rgba(0,0,0,.55) 28%, rgba(0,0,0,0) 62%);
+    mask:linear-gradient(0deg, #000 0%, rgba(0,0,0,.55) 28%, rgba(0,0,0,0) 62%); }
+  .v-aurora::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+
+  /* 04 — light streak: ガラスを横切る斜めの屈折光 */
+  .v-streak { overflow:hidden; }
+  .v-streak::before { content:""; position:absolute; inset:0; pointer-events:none;
+    background:var(--gradient-colorful);
+    -webkit-mask:linear-gradient(115deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.85) 47%, rgba(0,0,0,.85) 53%, rgba(0,0,0,0) 70%);
+    mask:linear-gradient(115deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.85) 47%, rgba(0,0,0,.85) 53%, rgba(0,0,0,0) 70%); }
+  .v-streak::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+
+  /* 05 — liquid pill */
+  .v-pill { border-radius:var(--radius-pill); }
+  .v-pill::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:var(--gradient-colorful);
+    -webkit-mask:radial-gradient(farthest-side at 50% 50%, rgba(0,0,0,0) 26%, rgba(0,0,0,.38) 58%, rgba(0,0,0,.92) 86%, #000 100%);
+    mask:radial-gradient(farthest-side at 50% 50%, rgba(0,0,0,0) 26%, rgba(0,0,0,.38) 58%, rgba(0,0,0,.92) 86%, #000 100%); }
+
+  /* 06 — split capsule: ガラスのラベル＋カラフルの go ディスク */
+  .v-split { padding:0 8px 0 24px; gap:14px; }
+  .v-split .disc { width:40px; height:40px; border-radius:50%; flex:none;
+    background:var(--gradient-colorful); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.35); }
+  .v-split .disc img { width:16px; height:16px; }
+  .v-split::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+
+  /* 07 — under beam: ガラス＋ラベル下のカラフルビーム */
+  .v-beam { flex-direction:column; gap:5px; padding-top:6px; }
+  .v-beam .bm { width:64%; height:3px; border-radius:var(--radius-pill);
+    background:var(--gradient-colorful-linear); }
+
+  /* 08 — orbit ring（挑戦的・回転コニック縁）
+     コニックは静的なリングマスク内でだけ回る → 中心は純ガラスのまま */
+  .v-orbit { overflow:hidden; }
+  .v-orbit .ring { position:absolute; inset:0; border-radius:inherit; padding:2px; pointer-events:none;
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; }
+  .v-orbit .ring .spin { position:absolute; inset:-120%;
+    background:conic-gradient(#fff0a6, #40837f, #005f67, #804e78, #ff3e88, #d0a052, #fff0a6); }
+  @media (prefers-reduced-motion: no-preference) {
+    .v-orbit .ring .spin { animation:orbitSpin 6s linear infinite; }
+  }
+  @keyframes orbitSpin { to { transform:rotate(360deg); } }
+
+  /* 09 — ghost beacon（挑戦的・面なし） */
+  .v-ghost { background:none; }
+  .v-ghost .lab { display:flex; flex-direction:column; align-items:center; gap:6px;
+    text-shadow:0 1px 6px rgba(0,0,0,.6); }
+  .v-ghost .dot { width:42px; height:3px; border-radius:var(--radius-pill);
+    background:var(--gradient-colorful-linear); box-shadow:0 0 12px rgba(255,62,136,.55); }
+</style></head>
+<body>
+  <div class="eyebrow">WdTextButton — CTA バリエーション探求（同一ステージ比較）</div>
+  <div class="lede"><b>決定: 01 Flat bake を採用（現行 canonical のまま確定）。</b>以下は探求の記録として保存 — 全案とも世界観内（<b>ガラス＋カラフル放射のみ・効果≤2・タップ域 56pt</b>）。将来別の文脈（例: 没入画面の終端 CTA）で再検討する際は番号で指定。</div>
+
+  <div class="vgrid">
+    <div class="unit">
+      <div class="hd"><span class="no">01</span><span class="nm">Flat bake（現行・採用）</span><span class="tag safe">canonical</span></div>
+      <div class="ds">ベタ塗りカラフル＋中央スクリム。探求の結果これを正式採用。</div>
+      <div class="stage"><div class="veil"></div><button class="wd-text-btn">このサークルを選択</button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">02</span><span class="nm">Colorful hairline</span><span class="tag safe">控えめ</span></div>
+      <div class="ds">素体は純ガラス。ブランド色は 1.5px の縁だけ — 最も引き算の効いた案。</div>
+      <div class="stage alt"><div class="veil"></div><button class="vbtn glassy v-hairline">このサークルを選択</button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">03</span><span class="nm">Bottom aurora</span><span class="tag safe">控えめ</span></div>
+      <div class="ds">下縁からカラフルが立ちのぼる。地平線の光のような片側ブルーム。</div>
+      <div class="stage"><div class="veil"></div><button class="vbtn glassy v-aurora">このサークルを選択</button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">04</span><span class="nm">Light streak</span><span class="tag bold">中庸</span></div>
+      <div class="ds">ガラスを斜めに横切る屈折光の帯。Liquid Glass の「光が通る」を最も直接に表現。</div>
+      <div class="stage alt"><div class="veil"></div><button class="vbtn glassy v-streak">このサークルを選択</button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">05</span><span class="nm">Liquid pill</span><span class="tag bold">形状変更</span></div>
+      <div class="ds">完全ピル化＋rim bloom。circle bar / composer と同じ丸物 chrome 語彙に揃う。</div>
+      <div class="stage"><div class="veil"></div><button class="vbtn glassy v-pill">このサークルを選択</button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">06</span><span class="nm">Split capsule</span><span class="tag bold">構造変更</span></div>
+      <div class="ds">ラベルはガラス、行き先は右のカラフル円が示す。小型インジケータはベタの原則を流用。</div>
+      <div class="stage alt"><div class="veil"></div><button class="vbtn glassy v-split">このサークルを選択<span class="disc"><img src="../../assets/icons/icon_next.png" alt=""></span></button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">07</span><span class="nm">Under beam</span><span class="tag bold">中庸</span></div>
+      <div class="ds">ガラス面＋ラベル下のカラフルビーム。進捗バー（StoryHeader）と血縁の語彙。</div>
+      <div class="stage"><div class="veil"></div><button class="vbtn glassy v-beam">このサークルを選択<span class="bm"></span></button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">08</span><span class="nm">Orbit ring</span><span class="tag wild">挑戦枠</span></div>
+      <div class="ds">コニックのカラフルが縁を周回（6s・reduced-motion で停止）。注意: 毎フレーム描画なので Impeller 予算的には「画面に1つだけ」。</div>
+      <div class="stage alt"><div class="veil"></div><button class="vbtn glassy v-orbit">このサークルを選択<span class="ring"><span class="spin"></span></span></button></div>
+    </div>
+
+    <div class="unit">
+      <div class="hd"><span class="no">09</span><span class="nm">Ghost beacon</span><span class="tag wild">挑戦枠</span></div>
+      <div class="ds">面を捨てラベル＋発光ビーコンだけ。写真を最大限見せる没入画面（StoryViewer 終端等）専用。暗所限定。</div>
+      <div class="stage"><div class="veil"></div><button class="vbtn v-ghost"><span class="lab">このサークルを選択<span class="dot"></span></span></button></div>
+    </div>
+  </div>
+</body></html>

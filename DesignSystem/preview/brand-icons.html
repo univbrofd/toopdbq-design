@@ -1,44 +1,171 @@
-<!-- @dsCard group="Brand" --><!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<!-- @dsCard group="Brand" name="Icons — IconImage set" subtitle="29 glyphs · liquid glass タイル表示 · クリックで個別 PNG 書き出し（glyph / glass / colorful × 64–256px）· 純白に正規化" viewport="900x1180" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
 <style>
-  body { background:#121214; }
-  .iconwrap { display:grid; grid-template-columns: repeat(15, 1fr); gap:14px 10px; }
-  .iconwrap div { display:flex; align-items:center; justify-content:center; height:26px; }
-  .iconwrap img { max-width:24px; max-height:24px; object-fit:contain; }
+  body { background: radial-gradient(130% 100% at 50% -10%, #17141f 0%, #0d0c12 55%, #0a0a0d 100%); gap:18px; }
+  .lede { font:500 12px/1.7 var(--font-jp); color:var(--text-2); max-width:760px; }
+  .lede b { color:#fff; font-weight:700; }
+
+  /* ---- export controls ---- */
+  .ctl { display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .ctl .grp { display:flex; align-items:center; gap:8px; }
+  .ctl .lb { font:600 10px var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-3); }
+  .seg { display:flex; gap:4px; padding:3px; border-radius:var(--radius-pill); background:rgba(255,255,255,.05); }
+  .seg button { border:none; cursor:pointer; padding:6px 14px; border-radius:var(--radius-pill);
+    font:700 11.5px var(--font-jp); color:var(--text-2); background:transparent; }
+  .seg button.on { background:var(--gradient-colorful); color:#fff; }
+  .seg.mono button.on { background:rgba(255,255,255,.16); }
+
+  /* ---- icon grid: liquid-glass tiles ---- */
+  .grid-ic { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:12px; }
+  .tile { position:relative; display:flex; flex-direction:column; align-items:center; gap:8px;
+    padding:16px 6px 12px; border-radius:var(--radius-md); cursor:pointer;
+    background:linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.025) 60%);
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot);
+    transition:transform .12s var(--ease-standard), background .12s var(--ease-standard); }
+  .tile::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .tile:hover { transform:translateY(-2px); background:linear-gradient(160deg, rgba(255,255,255,.11), rgba(255,255,255,.04) 60%); }
+  .tile:active { transform:scale(.96); }
+  .tile .prev { width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .tile canvas { width:52px; height:52px; display:block; }
+  .tile .nm { font:600 9.5px var(--font-latin); color:var(--text-3); letter-spacing:.02em;
+    width:100%; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tile .dl { position:absolute; top:7px; right:7px; width:18px; height:18px; opacity:0;
+    transition:opacity .12s; display:flex; align-items:center; justify-content:center;
+    font:700 12px var(--font-latin); color:var(--text-2); }
+  .tile:hover .dl { opacity:1; }
+  .hint { font:500 10.5px var(--font-latin); color:var(--text-3); }
 </style></head>
 <body>
-  <div class="eyebrow">Custom monochrome PNG icon set — 29 white glyphs (no font, no SVG, no emoji)</div>
-  <div class="iconwrap">
-    <div><img src="../../assets/icons/icon_add.png"></div>
-    <div><img src="../../assets/icons/icon_back.png"></div>
-    <div><img src="../../assets/icons/icon_camera.png"></div>
-    <div><img src="../../assets/icons/icon_check.png"></div>
-    <div><img src="../../assets/icons/icon_close.png"></div>
-    <div><img src="../../assets/icons/icon_comment.png"></div>
-    <div><img src="../../assets/icons/icon_dashboard.png"></div>
-    <div><img src="../../assets/icons/icon_delete.png"></div>
-    <div><img src="../../assets/icons/icon_edit.png"></div>
-    <div><img src="../../assets/icons/icon_expand.png"></div>
-    <div><img src="../../assets/icons/icon_explore.png"></div>
-    <div><img src="../../assets/icons/icon_group.png"></div>
-    <div><img src="../../assets/icons/icon_image.png"></div>
-    <div><img src="../../assets/icons/icon_leave.png"></div>
-    <div><img src="../../assets/icons/icon_like.png"></div>
-    <div><img src="../../assets/icons/icon_map.png"></div>
-    <div><img src="../../assets/icons/icon_menu.png"></div>
-    <div><img src="../../assets/icons/icon_mic.png"></div>
-    <div><img src="../../assets/icons/icon_near.png"></div>
-    <div><img src="../../assets/icons/icon_next.png"></div>
-    <div><img src="../../assets/icons/icon_person.png"></div>
-    <div><img src="../../assets/icons/icon_pin.png"></div>
-    <div><img src="../../assets/icons/icon_pin_location.png"></div>
-    <div><img src="../../assets/icons/icon_report.png"></div>
-    <div><img src="../../assets/icons/icon_search.png"></div>
-    <div><img src="../../assets/icons/icon_share.png"></div>
-    <div><img src="../../assets/icons/icon_spot.png"></div>
-    <div><img src="../../assets/icons/icon_swap.png"></div>
-    <div><img src="../../assets/icons/icon_text.png"></div>
+  <div class="eyebrow">IconImage — 29 glyphs · クリックで個別 PNG ダウンロード</div>
+  <div class="lede">白モノラインの実 PNG を<b>世界観のタイル</b>（liquid glass 面＋屈折エッジ）に載せ、各アイコンを<b>そのまま個別 PNG として書き出せる</b>ようにした。書き出しは canvas 合成: <b>glyph</b>＝純白に正規化した透過 PNG（off-white だった share 等も #FFF に統一）／<b>glass</b>・<b>colorful</b> 円＝<b>中心からの透過グラデーション</b>付き — 中心は抜けて背景が透け、色は rim に向かって立ち上がる。SVG・絵文字は不使用。</div>
+
+  <div class="ctl">
+    <div class="grp"><span class="lb">Style</span>
+      <div class="seg" id="segStyle">
+        <button data-v="glyph" class="on">glyph</button>
+        <button data-v="glass">glass 円</button>
+        <button data-v="colorful">colorful 円</button>
+      </div>
+    </div>
+    <div class="grp"><span class="lb">Size</span>
+      <div class="seg mono" id="segSize">
+        <button data-v="64">64</button>
+        <button data-v="128" class="on">128</button>
+        <button data-v="256">256</button>
+      </div>
+    </div>
+    <span class="hint">タイルをクリック → icon_name_style_size.png を保存</span>
   </div>
+
+  <div class="grid-ic" id="grid"></div>
+
+<script>
+(function () {
+  var NAMES = ['add','back','camera','check','close','comment','dashboard','delete','edit','expand',
+    'explore','group','image','leave','like','map','menu','mic','near','next','person','pin',
+    'pin_location','report','search','share','spot','swap','text'];
+  var COLORFUL = [[0.05,'#fff0a6'],[0.15,'#bfcc96'],[0.25,'#80a787'],[0.35,'#40837f'],[0.45,'#005f67'],
+    [0.54,'#60566f'],[0.62,'#804e78'],[0.71,'#bf4680'],[0.80,'#ff3e88'],[0.90,'#e86f6d'],[1.0,'#d0a052']];
+  var style = 'glyph', size = 128, imgs = {};
+
+  function whiten(img, px) {            /* normalize glyph to pure white, keep alpha */
+    var c = document.createElement('canvas'); c.width = c.height = px;
+    var x = c.getContext('2d');
+    var r = Math.min(px / img.width, px / img.height);
+    var w = img.width * r, h = img.height * r;
+    x.drawImage(img, (px - w) / 2, (px - h) / 2, w, h);
+    x.globalCompositeOperation = 'source-in';
+    x.fillStyle = '#ffffff'; x.fillRect(0, 0, px, px);
+    return c;
+  }
+  function paintColorful(x, px) {
+    var g = x.createRadialGradient(px * 1.12, px * 1.08, 0, px * 1.12, px * 1.08, px * 1.35);
+    COLORFUL.forEach(function (s) { g.addColorStop(s[0], s[1]); });
+    x.fillStyle = g; x.fillRect(0, 0, px, px);
+  }
+  function compose(name, st, px) {
+    var c = document.createElement('canvas'); c.width = c.height = px;
+    var x = c.getContext('2d');
+    var glyph = whiten(imgs[name], Math.round(px * 0.44));
+    if (st === 'glyph') {
+      x.drawImage(whiten(imgs[name], px), 0, 0);
+      return c;
+    }
+    x.save();
+    x.beginPath(); x.arc(px / 2, px / 2, px / 2 - 1, 0, Math.PI * 2); x.clip();
+    if (st === 'colorful') { paintColorful(x, px); }
+    else {                                       /* glass: baked dark body + speculars */
+      var g = x.createRadialGradient(px * .38, px * .26, px * .1, px * .5, px * .55, px * .8);
+      g.addColorStop(0, '#332c4a'); g.addColorStop(.55, '#171423'); g.addColorStop(1, '#0c0a13');
+      x.fillStyle = g; x.fillRect(0, 0, px, px);
+      x.fillStyle = 'rgba(255,255,255,.20)'; x.fillRect(0, 0, px, Math.max(1, px * .012)); /* top specular */
+      x.fillStyle = 'rgba(255,255,255,.07)'; x.fillRect(0, px - Math.max(1, px * .012), px, px);
+    }
+    x.restore();
+    /* 中心からの透過グラデーション — 円の中心を alpha でくり抜き、
+       置かれた背景が透ける PNG にする（rim に向かって色が立ち上がる） */
+    var er = x.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+    er.addColorStop(0, 'rgba(0,0,0,.86)');
+    er.addColorStop(.45, 'rgba(0,0,0,.52)');
+    er.addColorStop(.8, 'rgba(0,0,0,.10)');
+    er.addColorStop(1, 'rgba(0,0,0,0)');
+    x.globalCompositeOperation = 'destination-out';
+    x.fillStyle = er; x.fillRect(0, 0, px, px);
+    x.globalCompositeOperation = 'source-over';
+    /* 1px refractive edge (135deg light) */
+    var eg = x.createLinearGradient(0, 0, px, px);
+    eg.addColorStop(0, 'rgba(255,255,255,.12)'); eg.addColorStop(1, 'rgba(255,255,255,.45)');
+    x.strokeStyle = eg; x.lineWidth = Math.max(1, px / 64);
+    x.beginPath(); x.arc(px / 2, px / 2, px / 2 - x.lineWidth, 0, Math.PI * 2); x.stroke();
+    var o = (px - glyph.width) / 2;
+    x.drawImage(glyph, o, o);
+    return c;
+  }
+  function refresh() {
+    NAMES.forEach(function (n) {
+      var pc = document.getElementById('pv_' + n), px = 104;
+      var x = pc.getContext('2d'); x.clearRect(0, 0, px, px);
+      x.drawImage(compose(n, style, px), 0, 0);
+    });
+  }
+  function dl(name) {
+    var c = compose(name, style, size);
+    var a = document.createElement('a');
+    a.download = 'icon_' + name + '_' + style + '_' + size + '.png';
+    a.href = c.toDataURL('image/png');
+    a.click();
+  }
+  function seg(id, fn) {
+    var el = document.getElementById(id);
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      el.querySelectorAll('button').forEach(function (q) { q.classList.remove('on'); });
+      b.classList.add('on'); fn(b.dataset.v);
+    });
+  }
+  seg('segStyle', function (v) { style = v; refresh(); });
+  seg('segSize', function (v) { size = parseInt(v, 10); });
+
+  var grid = document.getElementById('grid');
+  NAMES.forEach(function (n) {
+    var t = document.createElement('div');
+    t.className = 'tile';
+    t.innerHTML = '<span class="dl">↓</span><span class="prev"><canvas id="pv_' + n + '" width="104" height="104"></canvas></span><span class="nm">' + n + '</span>';
+    t.addEventListener('click', function () { dl(n); });
+    grid.appendChild(t);
+  });
+  var left = NAMES.length;
+  NAMES.forEach(function (n) {
+    var im = new Image();
+    im.onload = im.onerror = function () { imgs[n] = im; if (--left === 0) refresh(); };
+    im.src = '../../assets/icons/icon_' + n + '.png';
+  });
+})();
+</script>
 </body></html>

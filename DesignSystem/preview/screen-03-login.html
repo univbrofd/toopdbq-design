@@ -1,0 +1,53 @@
+<!-- @dsCard group="Screens" name="Login (Auth)" subtitle="写真 full-bleed ＋ ワードマーク ＋ WdLoginButton×2 · glass: yes — ログインボタン2（ベイク面→liquid glass 面＋グラデ縁）" viewport="470x1020" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  .auth-bg { position: absolute; inset: 0; background: url('../../assets/images/auth_background.png') center/cover; }
+  /* ONE protection gradient (taste: WdAuthCard ★ — 影2枚→保護グラデ1枚) */
+  .auth-veil { position: absolute; inset: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,.74) 0%, rgba(0,0,0,.30) 38%, rgba(0,0,0,.06) 62%, rgba(0,0,0,.28) 100%); }
+  .auth-copy { position: absolute; left: 28px; right: 28px; top: 132px; display: flex; flex-direction: column; gap: 10px; }
+  .auth-copy .t-logo { font-size: 40px; line-height: 1.25; }
+  .auth-copy .t-display { max-width: 300px; }
+  .auth-actions { position: absolute; left: 0; right: 0; bottom: 56px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .auth-actions .wd-login { width: 284px; }
+  .terms { margin-top: 18px; max-width: 300px; text-align: center;
+    font: 400 11px/1.8 var(--font-jp); color: var(--text-3); }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 03</span>
+    <div class="h1"><b>Login</b> — Auth</div>
+  </div>
+  <div class="budget"><span class="glass-tag yes">glass: yes — ログインボタン×2（計2形状 ≤6）</span><span class="n">HANDOFF: 現 gradient 枠＋ベイク面 → liquid glass 面＋グラデ縁へ。284×54・r8（--radius-xs）。タップ域 54pt ≥44。</span></div>
+  <div class="lede"><span class="tok">WdAuthCard</span> の実配置。写真 full-bleed の上に<b>保護グラデ1枚</b>（taste ★: 文字影の二重盛りを廃止）、コピーは<b>左揃え</b>。ボタンは <span class="tok">WdLoginButton</span> — 縁は signature グラデ（google=<span class="tok">--gradient-auth</span> / apple=mono）のまま、<b>中身がベイク面から liquid glass へ</b>。背景写真がボタン内で屈折する。</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="auth-bg"></div>
+      <div class="auth-veil"></div>
+      <div class="auth-copy">
+        <span class="t-logo">Toopdbq</span>
+        <span class="t-display">いまいる場所が、<br>コミュニティになる。</span>
+      </div>
+      <div class="auth-actions">
+        <div class="wd-login google"><div class="inner"><img src="../../assets/images/logo_google.png" alt="">Googleアカウントで始める</div></div>
+        <div class="wd-login apple"><div class="inner"><img src="../../assets/images/logo_apple.png" alt="">Appleアカウントで始める</div></div>
+        <div class="terms">続行すると利用規約とプライバシーポリシーに<br>同意したことになります</div>
+      </div>
+      <div class="dynamic-island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sys">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"></rect></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"></rect></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

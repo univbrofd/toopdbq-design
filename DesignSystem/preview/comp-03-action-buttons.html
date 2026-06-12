@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" name="Action buttons" subtitle="WdIconTextButton · WdPostButton · WdSpesialIcon · WdTakeButton" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="Action buttons" subtitle="WdIconTextButton · WdPostButton · WdSpesialIcon · WdTakeButton · glass: fat=yes / post・take・spesial=no" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
@@ -13,6 +13,7 @@
 </style></head>
 <body>
   <div class="eyebrow">アクション系ボタン — 1効果グループ＋ヘアライン / 影は引き算</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — fat（glass pill）</span><span class="glass-tag no">no — post / take / spesial</span></div>
 
   <div class="grp">
     <div class="lbl">WdIconTextButton — special (colorful) / fat (glass)</div>
@@ -26,7 +27,7 @@
     <div class="lbl">WdPostButton · WdSpesialIcon · WdTakeButton</div>
     <div class="stage">
       <div class="u"><button class="wd-post-btn"><span class="circle"><img src="../../assets/icons/icon_camera.png"></span><span class="badge"><img src="../../assets/icons/icon_add.png"></span></button><span class="n">post</span></div>
-      <div class="u"><div class="wd-spesial-icon"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png"></div><span class="n">special icon</span></div>
+      <div class="u"><button class="wd-spesial-icon" aria-label="サークル"><img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png" alt=""></button><span class="n">special icon — カラフルリング＝特別印</span></div>
       <div class="u"><button class="wd-take-btn"><span class="core"></span></button><span class="n">take (shutter)</span></div>
     </div>
   </div>

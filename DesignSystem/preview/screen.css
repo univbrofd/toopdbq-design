@@ -1,0 +1,42 @@
+/* Shared scaffolding for full-bleed screen specimens (group="Screens").
+   Pair with ../colors_and_type.css + card.css + components.css.
+   Every screen renders inside card.css `.phone` (iPhone 17 402×874,
+   SafeArea 62/34, Dynamic Island) as a REAL full-bleed layout. */
+
+body.screen-card { padding: 30px 34px 44px; gap: 18px; align-items: flex-start;
+  background: radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%); }
+
+.scr-head { display: flex; flex-direction: column; gap: 9px; max-width: 960px; }
+.scr-head .h1 { font: 300 24px/1.15 var(--font-jp); color: #fff; letter-spacing: .01em; }
+.scr-head .h1 b { font-weight: 700; }
+.scr-head .en { font: 500 11px/1 var(--font-latin); letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.5); }
+.lede { font: 400 12.5px/1.85 var(--font-jp); color: var(--text-2); max-width: 900px; }
+.lede b { color: #fff; font-weight: 600; }
+.tok { display: inline-block; font: 600 10px var(--font-latin); color: var(--text-2);
+  background: rgba(255,255,255,.06); border-radius: 5px; padding: 2px 6px; margin: 0 1px; }
+
+/* phones side by side (Before / After) */
+.phones { display: flex; gap: 44px; align-items: flex-start; flex-wrap: wrap; }
+.phones .unit { display: flex; flex-direction: column; gap: 10px; }
+.phones .unit > .ch { font: 700 10px/1 var(--font-latin); letter-spacing: .13em; text-transform: uppercase; }
+.ch.b { color: #ff8a8a; } .ch.a { color: #7ee0a0; }
+.phones .phone { margin: 0; }
+
+/* per-screen glass budget chip row */
+.budget { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.budget .n { font: 600 10.5px var(--font-latin); color: var(--text-3); letter-spacing: .03em; }
+
+/* generic full-bleed photo layer inside .phone .screen */
+.ph-photo { position: absolute; inset: 0; background-size: cover; background-position: center; }
+
+/* top decay veil (nav header default — no surface) */
+.veil-top { position: absolute; top: 0; left: 0; right: 0; height: 150px; pointer-events: none; z-index: 30;
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 4%, rgba(0,0,0,0) 100%); }
+.veil-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; pointer-events: none; z-index: 30;
+  background: linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 100%); }
+
+/* annotation callouts floating beside phone content (specimen layer) */
+.callout { position: absolute; z-index: 80; font: 600 9.5px/1.45 var(--font-latin); color: #8be08e;
+  background: rgba(10,14,10,.85); border: 1px solid rgba(139,224,142,.35); border-radius: 6px;
+  padding: 4px 7px; pointer-events: none; letter-spacing: .02em; }
+.callout.no { color: #ff9b9b; border-color: rgba(255,155,155,.35); background: rgba(20,10,10,.85); }

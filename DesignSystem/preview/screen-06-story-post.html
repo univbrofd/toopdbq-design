@@ -1,0 +1,95 @@
+<!-- @dsCard group="Screens" name="StoryPostView" subtitle="撮影/編集画像＋glass ナビヘッダー＋右サイドツール＋確認フッター · glass: yes — header 1＋rail(1本のピルに統合) 1＋footer 1＝3形状（≤6）" viewport="470x1020" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  .shot { position: absolute; inset: 0; background: url('https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png') center/cover; }
+
+  /* glass nav header plate (comp-12 variant) — 1 shape */
+  .glass-hd { position: absolute; top: 62px; left: 12px; right: 12px; height: 56px; z-index: 45;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 6px;
+    border-radius: var(--radius-pill); background: var(--lg-tint);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .glass-hd::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .glass-hd .ttl { font: 600 17px var(--font-jp); color: var(--text-1); }
+  .glass-hd .wd-icon-btn.simple { width: 44px; height: 44px; }
+
+  /* right side tool — ONE glass pill containing 3 tools (1 shape, not 3) */
+  .tool-rail { position: absolute; right: 12px; top: 240px; z-index: 45;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 5px;
+    border-radius: var(--radius-pill); background: var(--lg-tint);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .tool-rail::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .tool-rail .t { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .tool-rail .t img { width: 20px; height: 20px; }
+  .tool-rail .t:active { background: rgba(255,255,255,.1); }
+
+  /* confirm footer — ONE glass bar: retake (simple) + colorful post CTA */
+  .confirm { position: absolute; left: 12px; right: 12px; bottom: 46px; z-index: 45;
+    display: flex; align-items: center; gap: 12px; padding: 10px;
+    border-radius: var(--radius-pill); background: var(--lg-tint);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .confirm::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .confirm .retake { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px;
+    border-radius: var(--radius-pill); font: 700 13px var(--font-jp); color: var(--text-2); cursor: pointer; }
+  .confirm .retake img { width: 18px; height: 18px; opacity: .8; }
+  .confirm .wd-text-btn { flex: 1; min-width: 0; height: 48px; font-size: 16px; }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 06</span>
+    <div class="h1"><b>StoryPostView</b> — 撮影確認・投稿</div>
+  </div>
+  <div class="budget"><span class="glass-tag yes">glass: yes — ナビヘッダー1＋サイドツール1＋確認フッター1（計3形状 ≤6）</span><span class="n">サイドツールは円3個でなく<b>ピル1本</b>に統合 — 予算3形状の節約。投稿 CTA はカラフル（glass 外）。</span></div>
+  <div class="lede">撮影直後の確認状態。chrome は3つとも liquid glass: 上の<b>ナビプレート</b>（comp-12 の glass variant）・右の<b>編集ツールピル</b>（text / mic / image — 各タップ域 44pt）・下の<b>確認フッター</b>（撮り直し＋<span class="tok">WdTextButton</span> 投稿）。撮影画像そのものは静止なので glass の背後で安全。カメラのライブプレビュー時は同じ chrome のまま、glass の背景更新は Impeller 予算内（HANDOFF: カメラフッター=glass 候補）。</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="shot"></div>
+      <div class="glass-hd">
+        <span class="wd-icon-btn simple"><img src="../../assets/icons/icon_back.png" alt="back"></span>
+        <span class="ttl">新規投稿</span>
+        <span class="wd-icon-btn simple"><img src="../../assets/icons/icon_check.png" alt="ok"></span>
+      </div>
+
+      <div class="tool-rail">
+        <span class="t"><img src="../../assets/icons/icon_text.png" alt="text"></span>
+        <span class="t"><img src="../../assets/icons/icon_mic.png" alt="mic"></span>
+        <span class="t"><img src="../../assets/icons/icon_image.png" alt="image"></span>
+      </div>
+
+      <div class="confirm">
+        <span class="retake"><img src="../../assets/icons/icon_swap.png" alt="">撮り直す</span>
+        <button class="wd-text-btn">この写真で投稿</button>
+      </div>
+
+      <div class="dynamic-island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sys">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"></rect></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"></rect></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

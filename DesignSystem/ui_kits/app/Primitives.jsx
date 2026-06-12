@@ -7,13 +7,14 @@ const Icon = ({ name, size = 24, style }) => (
 );
 
 // Glass / colorful circular icon button. variant: simple | standart | color
-function IconButton({ name, variant = 'standart', size = 47, badge, badgeColor, onClick, style }) {
-  const cls = 'ibtn' + (variant === 'simple' ? ' simple' : '') + (variant === 'color' ? ' color' : '');
+// badge ⇒ バッジは常に glass（カラーなし）。color + badge = badgeColor variant.
+function IconButton({ name, variant = 'standart', size = 47, badge, onClick, style }) {
+  const cls = 'ibtn' + (variant === 'simple' ? ' simple' : '') + (variant === 'color' ? ' color' : '') + (badge ? ' has-badge' : '');
   return (
     <button className={cls} style={{ width: size, height: size, ...style }} onClick={onClick}>
       <Icon name={name} size={Math.round(size * 0.44)} />
       {badge && (
-        <span className={'badge' + (badgeColor ? ' color' : '')}>
+        <span className="badge">
           <Icon name={badge} size={11} />
         </span>
       )}

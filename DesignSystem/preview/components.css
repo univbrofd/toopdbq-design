@@ -4,7 +4,7 @@
 /* Reset the UA <button> chrome (default 2px outset bevel renders a stray gray
    ring on the top-left of every button-based control). All these are custom-styled. */
 button.wd-icon-btn, .wd-it-btn, .wd-post-btn, .wd-take-btn, .wd-text-btn,
-button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance: none; }
+button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appearance: none; appearance: none; }
 
 /* Glass circle button (WdIconButton: simple/standart). */
 .wd-icon-btn {
@@ -25,17 +25,25 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 .wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
 .wd-icon-btn:active { transform: scale(0.94); }
 
-/* Colorful gradient circle (standartColor / post). */
-.wd-icon-btn.color { background: var(--gradient-colorful); }
-.wd-icon-btn.color img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+/* Colorful gradient circle (standartColor / badgeColor) — the gradient is a
+   rim that fades to TRANSPARENT toward the centre (中心から透過), so the
+   backdrop shows through behind the icon. */
+.wd-icon-btn.color { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.wd-icon-btn.color::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--gradient-colorful);
+  -webkit-mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+}
+.wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 
-/* Badge dot on a button (camera/add). */
+/* Badge dot on a button (camera/add). Badges are ALWAYS glass — never the
+   colorful gradient (the colour lives on the host circle, variant badgeColor). */
 .wd-badge {
   position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
   border-radius: 50%; background: var(--glass-fill); backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center;
 }
-.wd-badge.color { background: var(--gradient-colorful); }
 .wd-badge::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
   background: var(--gradient-border);
@@ -48,7 +56,7 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 .wd-text-btn {
   /* PRO: one effect group = colorful gradient + a centred legibility scrim
      (darker where the label sits, colourful at the rim). No text-shadow. */
-  position: relative; min-width: 200px; height: 56px; border-radius: 8px; padding: 0 24px;
+  position: relative; min-width: 200px; height: 56px; border-radius: var(--radius-xs); padding: 0 24px;
   border: none; cursor: pointer;
   background:
     radial-gradient(78% 130% at 50% 52%, rgba(0,0,0,.55), rgba(0,0,0,0) 72%),
@@ -58,7 +66,7 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
   transition: transform .12s var(--ease-standard), filter .12s var(--ease-standard);
 }
 .wd-text-btn::after {
-  content: ""; position: absolute; inset: 0; border-radius: 8px; padding: 1px;
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-xs); padding: 1px;
   background: var(--gradient-border);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
@@ -67,11 +75,11 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 
 /* Login buttons (gradient border + dark/light interior). */
 .wd-login {
-  position: relative; width: 284px; max-width: 100%; border-radius: 8px; padding: 1px;
+  position: relative; width: 284px; max-width: 100%; border-radius: var(--radius-xs); padding: 1px;
   cursor: pointer;
 }
 .wd-login .inner {
-  border-radius: 7px; padding: 15px; display: flex; align-items: center; justify-content: center; gap: 12px;
+  border-radius: var(--radius-xs); padding: 15px; display: flex; align-items: center; justify-content: center; gap: 12px;
   font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: #fff;
 }
 .wd-login.google { background: var(--gradient-auth); }
@@ -85,7 +93,7 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 /* Rounded text field (WdTextField). */
 .wd-field {
   display: flex; align-items: center; gap: 8px; height: 48px; width: 360px; max-width: 100%;
-  background: var(--surface-input); border-radius: 100px; padding: 0 16px;
+  background: var(--surface-input); border-radius: var(--radius-pill); padding: 0 16px;
   font-family: var(--font-latin); font-weight: 600; font-size: 14px; color: #fff;
   transition: background .15s var(--ease-standard), box-shadow .15s var(--ease-standard);
 }
@@ -97,31 +105,36 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 }
 .wd-field input::placeholder { color: rgba(255,255,255,.7); }
 
-/* Toggle (WdToggl). */
+/* Toggle (WdToggl) — wide white pill KNOB carries its own label (ラベルは
+   常にノブの上＝トラック文字と重ならない). ON = colorful gradient track. */
 .wd-toggle {
-  position: relative; width: 80px; height: 28px; border-radius: 1000px; cursor: pointer;
-  background: var(--surface-toggle-off); display: flex; align-items: center;
-  font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: #fff;
+  position: relative; width: 72px; height: 30px; border-radius: var(--radius-pill); cursor: pointer;
+  background: var(--surface-toggle-off); box-shadow: inset 0 1px 3px rgba(0,0,0,.35); flex: none;
+  font-family: var(--font-latin); font-weight: 700; font-size: 10px; letter-spacing: .1em;
   transition: background .2s var(--ease-standard);
 }
 .wd-toggle.on { background: var(--gradient-colorful); }
 .wd-toggle .pill {
-  position: absolute; top: 2.8px; left: 2px; width: 42.6px; height: 22.4px; border-radius: 9999px;
-  background: #fff; box-shadow: inset 0 -3px 6px rgba(0,0,0,.25);
-  transition: left .2s var(--ease-standard);
+  position: absolute; top: 3px; left: 3px; width: 38px; height: 24px; border-radius: var(--radius-pill);
+  background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4);
+  transition: left .25s cubic-bezier(.3,1.3,.5,1);
 }
-.wd-toggle.on .pill { left: calc(100% - 44.6px); }
-.wd-toggle .lab { position: absolute; }
-.wd-toggle .lab.off { right: 10px; } .wd-toggle .lab.on { left: 12px; }
+.wd-toggle.on .pill { left: calc(100% - 41px); }
+.wd-toggle .lab {                       /* rides the knob — same geometry + easing */
+  position: absolute; top: 3px; left: 3px; width: 38px; height: 24px; z-index: 1;
+  display: flex; align-items: center; justify-content: center; pointer-events: none;
+  color: #8a8a90; transition: left .25s cubic-bezier(.3,1.3,.5,1);
+}
+.wd-toggle.on .lab { left: calc(100% - 41px); color: #16161c; }
 
 /* Circle bar (WdCircleBar — story footer identity chip). */
 .wd-circle-bar {
   position: relative; display: flex; align-items: center; gap: 8px; padding: 7px 16px 7px 7px;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(90deg, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.62) 55%);
 }
 .wd-circle-bar::after {
-  content: ""; position: absolute; inset: 0; border-radius: 99px; padding: 1px;
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-pill); padding: 1px;
   background: var(--gradient-border);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
@@ -131,20 +144,22 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 .wd-circle-bar .nm { font-family: var(--font-latin); font-weight: 500; font-size: 12px; color: #fff; text-shadow: 0 0 8px #000; }
 .wd-circle-bar .ds { font-family: var(--font-latin); font-weight: 400; font-size: 11px; color: var(--text-2); }
 
-/* Avatar with relation badge. */
+/* Avatar with relation badge — badge is small (14px on 40px avatar) and its
+   centre sits ON the avatar's edge (45°), so it barely covers the photo. */
 .wd-avatar { position: relative; width: 40px; height: 40px; flex: none; }
 .wd-avatar img, .wd-avatar .ph { width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   box-shadow: 0 2px 8px rgba(0,0,0,.7); }
 .wd-avatar .ph { background: #333; display: flex; align-items: center; justify-content: center; }
 .wd-avatar .b {
-  position: absolute; right: -1px; bottom: -1px; width: 18px; height: 18px; border-radius: 50%;
+  position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%;
   background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,.6);
 }
-.wd-avatar .b img { width: 11px; height: 11px; box-shadow: none; border-radius: 0; }
+.wd-avatar .b img { width: 8px; height: 8px; box-shadow: none; border-radius: 0;
+  filter: brightness(0); }  /* icons ship white — tint #000 inside the light chip */
 
 /* === PRO REDESIGN: WdCircleCard (photo card, single scrim, one hero) ===== */
 .wd-circle-card {
-  position: relative; width: 300px; aspect-ratio: 1 / 1; border-radius: 16px;
+  position: relative; width: 300px; aspect-ratio: 1 / 1; border-radius: var(--radius-md);
   overflow: hidden; cursor: pointer;
 }
 .wd-circle-card > img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #333; }
@@ -189,17 +204,17 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 /* WdIconTextButton — special(colorful) & fat(glass). 1 effect group + hairline. */
 .wd-it-btn {
   position: relative; display: inline-flex; align-items: center; gap: 6px; height: 40px;
-  padding: 0 16px; border: none; border-radius: 16px; cursor: pointer; color: #fff;
+  padding: 0 16px; border: none; border-radius: var(--radius-md); cursor: pointer; color: #fff;
   font-family: var(--font-jp); font-weight: 700; font-size: 12px;
   background: radial-gradient(95% 200% at 50% 50%, rgba(0,0,0,.5), rgba(0,0,0,0) 75%), var(--gradient-colorful);
   transition: transform .12s var(--ease-standard), filter .12s var(--ease-standard);
 }
-.wd-it-btn::after { content: ""; position: absolute; inset: 0; border-radius: 16px; padding: 1px;
+.wd-it-btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
   background: var(--gradient-border);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 .wd-it-btn img { width: 20px; height: 20px; }           /* icon size normalized, no shadow */
-.wd-it-btn.fat { height: 48px; border-radius: 9999px; background: var(--surface);
+.wd-it-btn.fat { height: 48px; border-radius: var(--radius-pill); background: var(--surface);
   backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
 .wd-it-btn:active { transform: scale(.97); filter: brightness(.93); }
 
@@ -219,6 +234,11 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; }
 .wd-post-btn .circle img { width: 24px; height: 24px; }
+/* notch: cut the circle (fill + hairline) out from behind the badge */
+.wd-post-btn .circle {
+  -webkit-mask: radial-gradient(circle at calc(100% - 7px) 7px, rgba(0,0,0,0) 13px, #000 13.6px);
+  mask: radial-gradient(circle at calc(100% - 7px) 7px, rgba(0,0,0,0) 13px, #000 13.6px);
+}
 .wd-post-btn .badge { position: absolute; right: 0; top: 0; width: 22px; height: 22px; border-radius: 50%;
   background: var(--surface); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
   display: flex; align-items: center; justify-content: center; }
@@ -233,16 +253,20 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
   transition: transform .12s var(--ease-standard); }
 .wd-take-btn:active .core { transform: scale(.86); }
 
-/* WdSpesialIcon — profile + ONE ring (outer glow dropped). */
-.wd-spesial-icon { position: relative; width: 64px; height: 64px; border-radius: 50%; flex: none; cursor: pointer; }
+/* WdSpesialIcon — the "special" mark IS the colorful gradient ring (the DS's
+   single accent), separated from the photo by a dark gap. Tap = press shrink. */
+.wd-spesial-icon { position: relative; width: 64px; height: 64px; border-radius: 50%; flex: none; cursor: pointer;
+  padding: 3px; background: var(--gradient-colorful);
+  transition: transform .12s var(--ease-standard), filter .12s var(--ease-standard); }
 .wd-spesial-icon img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #333;
-  box-shadow: 0 0 0 2px rgba(255,255,255,.85); display: block; }
+  box-shadow: 0 0 0 2.5px rgba(0,0,0,.55); display: block; }
+.wd-spesial-icon:active { transform: scale(.92); filter: brightness(.9); }
 
 /* ========================================================================
    BATCH B — cards (taste.md applied)
    ======================================================================== */
 /* WdCircleMiniCard — single radius, one scrim, 1-line desc (dropped white border) */
-.wd-mini-card { position: relative; width: 180px; aspect-ratio: 180 / 150; border-radius: 12px;
+.wd-mini-card { position: relative; width: 180px; aspect-ratio: 180 / 150; border-radius: var(--radius-sm);
   overflow: hidden; cursor: pointer; }
 .wd-mini-card > img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #333; }
 .wd-mini-card .scrim { position: absolute; inset: 0;
@@ -256,7 +280,7 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
   font-family: var(--font-latin); font-weight: 600; font-size: 10px; color: var(--text-2); }
 
 /* WdCircleBarBig — hero card, on-grid 16, demoted description */
-.wd-bar-big { position: relative; width: 300px; aspect-ratio: 1 / 1; border-radius: 16px; overflow: hidden; cursor: pointer; }
+.wd-bar-big { position: relative; width: 300px; aspect-ratio: 1 / 1; border-radius: var(--radius-md); overflow: hidden; cursor: pointer; }
 .wd-bar-big > img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #333; }
 .wd-bar-big .scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
   background: linear-gradient(0deg, rgba(0,0,0,.82), rgba(0,0,0,0)); }
@@ -268,7 +292,7 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
 /* WdStoryComment — light sheet: opaque enough for AA, on-grid, name=hero */
-.wd-comment-sheet { width: 100%; border-radius: 16px 16px 0 0; background: rgba(255,255,255,.94);
+.wd-comment-sheet { width: 100%; border-radius: var(--radius-md) 16px 0 0; background: rgba(255,255,255,.94);
   padding: 16px 20px 20px; }
 .wd-comment-sheet .list { display: flex; flex-direction: column; gap: 14px; }
 .wd-comment-sheet .cmt { display: flex; gap: 10px; align-items: flex-start; }
@@ -304,8 +328,8 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 
 /* WdStoryHeader — segmented progress (white 56% track, 90% fill), 3px pills */
 .wd-progress { display: flex; gap: 4px; }
-.wd-progress > span { flex: 1; height: 3px; border-radius: 99px; background: rgba(255,255,255,.3); overflow: hidden; }
-.wd-progress > span > i { display: block; height: 100%; border-radius: 99px; background: rgba(255,255,255,.9); }
+.wd-progress > span { flex: 1; height: 3px; border-radius: var(--radius-pill); background: rgba(255,255,255,.3); overflow: hidden; }
+.wd-progress > span > i { display: block; height: 100%; border-radius: var(--radius-pill); background: rgba(255,255,255,.9); }
 
 /* WdCircleFooter — circle-bar fills, ONE hero action (post). Gap on 8-grid. */
 .wd-footer { display: flex; align-items: center; gap: 8px; }
@@ -332,8 +356,8 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 /* WdDistanceSlider — neutral track, colorful only on the FILLED portion */
 .wd-slider { width: 240px; }
 .wd-slider .val { font-family: var(--font-latin); font-weight: 600; font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
-.wd-slider .track { position: relative; height: 6px; border-radius: 99px; background: rgba(0,0,0,.45); }
-.wd-slider .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: var(--gradient-colorful); }
+.wd-slider .track { position: relative; height: 6px; border-radius: var(--radius-pill); background: rgba(0,0,0,.45); }
+.wd-slider .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--radius-pill); background: var(--gradient-colorful); }
 .wd-slider .thumb { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; background: #fff;
   transform: translate(-50%, -50%); box-shadow: 0 1px 4px rgba(0,0,0,.5); }
 
@@ -451,3 +475,219 @@ button.wd-login, .wd-toggle { border: none; -webkit-appearance: none; appearance
 .chat-empty .glyph img { width: 28px; height: 28px; opacity: .5; }
 .chat-empty .ttl { font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: var(--text-2); }
 .chat-empty .sub { font-family: var(--font-jp); font-weight: 400; font-size: 13px; color: var(--text-3); max-width: 220px; line-height: 1.5; }
+
+/* ========================================================================
+   LIQUID GLASS — canonical surface (LiquidGlassRefresh)
+   iOS 26 refractive glass = the DS standard for translucent CHROME.
+   ONE recipe, referenced everywhere. Driven entirely by --lg-* tokens
+   (colors_and_type.css). Apply to chrome only: nav headers, footer bars,
+   side rails, sheet faces, single buttons, composer pills. NEVER on
+   list/grid cells or per-frame-animated layers. Budget ≤6 glass shapes/screen.
+   ======================================================================== */
+.lg {
+  position: relative;
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow:
+    inset 0 1px 0 var(--lg-specular-top),    /* top-edge specular highlight */
+    inset 0 -1px 0 var(--lg-specular-bot),   /* bottom-edge weak reflection */
+    var(--lg-shadow);                         /* cast shadow                 */
+}
+/* 1px refractive edge — successor to the diagonal --gradient-border hairline */
+.lg::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+/* Web fallback (no backdrop-filter / no Impeller) → old opaque-ish glass fill */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .lg, .wd-icon-btn:not(.simple):not(.color), .wd-it-btn.fat,
+  .wd-circle-bar, .wd-comment-sheet, .wd-sheet { background: var(--lg-fallback); }
+}
+
+/* dark glassColor variant — chrome standing on LIGHT content (maps, bright
+   photos). Same recipe, dark tint, so white text stays AA. */
+.lg.dark, .lg-dark { background: var(--lg-tint-dark); }
+
+/* canonical chrome shells (all = .lg + a role radius) */
+.lg-bar   { border-radius: var(--radius-pill); }              /* footer / header pill bar */
+.lg-rail  { border-radius: var(--radius-pill); }              /* vertical side rail        */
+.lg-btn   { border-radius: var(--radius-pill); }              /* single round/pill button  */
+.lg-sheet { border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--lg-tint-strong); } /* bottom sheet face */
+
+/* ---- legacy glass surfaces re-pointed to the canonical recipe ----------
+   These previously used rgba(0,0,0,.51)+blur2+--gradient-border. Now they
+   inherit the liquid-glass body, specular edges and refractive --lg-edge,
+   so every glass control reads as ONE material (no per-card reinvention). */
+.wd-icon-btn:not(.simple):not(.color),
+.wd-it-btn.fat,
+.wd-post-btn .badge,
+.wd-badge:not(.color) {
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.wd-icon-btn:not(.simple):not(.color)::after,
+.wd-it-btn.fat::after,
+.wd-post-btn .badge::after,
+.wd-badge:not(.color)::after { background: var(--lg-edge); }
+
+/* WdCircleBar — footer identity chip is glass chrome. Keep the L→R darkening
+   for text contrast, layered over the liquid-glass body. */
+.wd-circle-bar {
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%),
+    var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.wd-circle-bar::after { background: var(--lg-edge); }
+
+/* WdStoryComment sheet — DEVIATION #3 RESOLVED: was the lone LIGHT sheet
+   (#f6f7f9 + ink text). Unified to the DS dark liquid-glass sheet. */
+.wd-comment-sheet {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--lg-tint-strong);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), 0 -8px 24px rgba(0,0,0,.45);
+  position: relative;
+}
+.wd-comment-sheet .cmt .av { background: var(--gray-800); }
+.wd-comment-sheet .cmt .nm { color: var(--text-1); }       /* was #141414 */
+.wd-comment-sheet .cmt .tx { color: var(--text-2); }       /* was #3a3a3a */
+
+/* Generic bottom-sheet face for screen specimens (CircleTimeline / Comment /
+   Menu). One glass shape covering the whole sheet; rows inside stay opaque. */
+.wd-sheet {
+  position: relative;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--lg-tint-strong);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), 0 -8px 24px rgba(0,0,0,.5);
+}
+.wd-sheet::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px 1px 0;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-sheet .grabber {
+  width: 40px; height: 5px; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.32); margin: 10px auto 0;
+}
+/* composer pill — single glass input bar at sheet/footer bottom */
+.wd-composer {
+  position: relative; display: flex; align-items: center; gap: 8px;
+  height: 48px; padding: 0 6px 0 16px; border-radius: var(--radius-pill);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot);
+}
+.wd-composer::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-composer input {
+  flex: 1; min-width: 0; background: none; border: none; outline: none; color: #fff;
+  font-family: var(--font-jp); font-weight: 500; font-size: 14px;
+}
+.wd-composer input::placeholder { color: rgba(255,255,255,.6); }
+.wd-composer .send {
+  flex: none; width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--gradient-colorful); display: flex; align-items: center; justify-content: center;
+}
+.wd-composer .send img { width: 18px; height: 18px; }
+
+/* WdLoginButton — HANDOFF: baked gradient interior → liquid-glass face.
+   Keeps the signature gradient EDGE (google: --gradient-auth / apple: mono),
+   interior becomes refractive glass over the auth photo. 2 effects total.
+   NOTE: the old padding-box border would shine THROUGH the translucent glass,
+   so the edge moves to a masked ::after overlay (same 1px look). */
+.wd-login, .wd-login.google, .wd-login.apple { background: none; padding: 0; }
+.wd-login::after {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-xs); padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-login.google::after { background: var(--gradient-auth); }
+.wd-login.apple::after { background: linear-gradient(0deg, rgba(0,0,0,.51), rgba(255,255,255,.54)); }
+.wd-login .inner,
+.wd-login.google .inner,
+.wd-login.apple .inner {
+  border-radius: var(--radius-xs);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot);
+}
+
+/* (LiquidGlassRefresh v2 の「colorful over glass」案は探求の結果ベタ塗りを
+   採用して撤回 — 比較は preview/explore-text-button-variations.html 参照) */
+
+/* glass annotation chip for cards (eyebrow companion) */
+.glass-tag {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px;
+  border-radius: var(--radius-pill); font-family: var(--font-latin); font-weight: 700;
+  font-size: 10px; letter-spacing: .04em; text-transform: uppercase;
+}
+.glass-tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; }
+.glass-tag.yes { background: rgba(76,175,80,.16); color: #8be08e; }
+.glass-tag.yes::before { background: #4caf50; }
+.glass-tag.no  { background: rgba(255,107,107,.14); color: #ff9b9b; }
+.glass-tag.no::before { background: #ff6b6b; }
+
+/* ========================================================================
+   Badge notch — WdIconButton variants badge / badgeColor.
+   The host circle (fill + rim) is CUT OUT behind the badge (2px clear gap),
+   so the host's hairline never shows through the translucent badge.
+   Badge geometry: 20px at top:-2/right:-2 → centre (100%-8px, 8px), r10+2gap.
+   ======================================================================== */
+.wd-icon-btn.has-badge:not(.simple):not(.color) {
+  background: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none;
+}
+.wd-icon-btn.has-badge:not(.simple):not(.color)::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  -webkit-mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+  mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+}
+/* badgeColor: combine the centre-transparent rim with the badge notch */
+.wd-icon-btn.color.has-badge::before {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask-composite: intersect;
+}
+/* notch the 1px gradient rim too (ring = content-box XOR full, ∩ notch) */
+.wd-icon-btn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude;
+}

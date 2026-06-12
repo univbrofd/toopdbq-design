@@ -1,0 +1,53 @@
+<!-- @dsCard group="Screens" name="Splash" subtitle="写真 full-bleed（blur32＋teal overlay）＋アプリアイコン＋アプリ名 · glass: no — ロゴプレートは置かない決定（glass 0 形状）" viewport="470x1020" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  .splash-bg { position: absolute; inset: -24px; background: url('../../assets/images/auth_background.png') center/cover;
+    filter: blur(32px); transform: scale(1.12); }
+  .splash-tint { position: absolute; inset: 0; background: rgba(25,134,121,.20); }
+  .splash-scrim { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 50%, rgba(0,0,0,.18), rgba(0,0,0,.52)); }
+  .wordmark { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; }
+  /* app icon — iOS squircle · colorful gradient · Pacifico initial */
+  .app-icon { position: relative; width: 96px; height: 96px; border-radius: 22px;
+    background: var(--gradient-colorful);
+    box-shadow: 0 10px 30px rgba(0,0,0,.45);
+    display: flex; align-items: center; justify-content: center; }
+  .app-icon::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), inset 0 -1px 0 rgba(0,0,0,.25); }
+  .app-icon .g { font-family: var(--font-display); font-weight: 400; font-size: 52px; color: #fff;
+    line-height: 1; transform: translateY(-4px); text-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .wordmark .t-logo { font-size: 36px; line-height: 1.2; text-shadow: 0 2px 16px rgba(0,0,0,.45); }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 01</span>
+    <div class="h1"><b>Splash</b> — 起動</div>
+  </div>
+  <div class="budget"><span class="glass-tag no">glass: no — 0 形状</span><span class="n">決定: ロゴプレートに glass は置かない。blur 済み写真の上に直置きで足りる（効果＝blur＋teal の1群）。</span></div>
+  <div class="lede">写真 full-bleed を <b>blur 32</b>＋<b>teal <span class="tok">rgba(25,134,121,.2)</span></b> overlay で抽象化し、<b>アプリアイコン（squircle 22px · colorful gradient）＋アプリ名</b>だけを置く。中央の弱い放射 scrim（黒18→52%）が白の可読性を構造で保証。glass は使わない＝最初の1画面から予算を空けておく。※アイコンは仮（DS素材のみで描画）— 実アセット支給で差替え。</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="splash-bg"></div>
+      <div class="splash-tint"></div>
+      <div class="splash-scrim"></div>
+      <div class="wordmark">
+        <div class="app-icon"><span class="g">T</span></div>
+        <span class="t-logo">Toopdbq</span>
+      </div>
+      <div class="dynamic-island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sys">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"></rect></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"></rect></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

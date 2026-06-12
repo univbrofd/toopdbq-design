@@ -1,0 +1,151 @@
+<!-- @dsCard group="Screens" name="Onboarding" subtitle="地図ステージ＋下部シーン解説パネル · Before=scrim グラデのみ / After=liquid glass パネル＋CTA＋スキップ chip · glass: yes — panel+skip=2（マーカー群は除外）" viewport="1020x1120" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  /* ---- light map stage (positron-style, simplified) ---- */
+  .map { position: absolute; inset: 0; background:
+    radial-gradient(150% 120% at 50% 120%, rgba(0,0,0,.06), rgba(0,0,0,0) 55%), #efeeec; }
+  .map .park { position: absolute; left: 8%; top: 30%; width: 58%; height: 16%; border-radius: 48% 42% 50% 46%; background: #e3e8dc; }
+  .map .blocks { position: absolute; inset: 0; opacity: .55; background-image:
+    repeating-linear-gradient(96deg, transparent 0 33px, rgba(0,0,0,.05) 33px 34px),
+    repeating-linear-gradient(6deg, transparent 0 38px, rgba(0,0,0,.045) 38px 39px); }
+  .map .road { position: absolute; background: #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.05); }
+  .map .road.h { left: -4%; right: -4%; top: 52%; height: 10px; transform: rotate(-7deg); }
+  .map .road.v { top: -4%; bottom: -4%; left: 38%; width: 8px; transform: rotate(8deg); }
+  .map .lbl { position: absolute; transform: translate(-50%,-50%); font: italic 600 10px var(--font-latin); color: rgba(60,60,58,.45); white-space: nowrap; }
+
+  /* pulsing community marker — ANIMATED layer → glass 禁止対象 */
+  .marker { position: absolute; left: 50%; top: 44%; transform: translate(-50%,-50%); width: 64px; height: 64px; }
+  .marker .pulse { position: absolute; inset: 0; border-radius: 50%; background: var(--gradient-colorful); opacity: .28;
+    animation: obPulse 2.4s var(--ease-standard) infinite; }
+  .marker .core { position: absolute; inset: 18px; border-radius: 50%; background: var(--gradient-colorful);
+    box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+  @keyframes obPulse { 0% { transform: scale(.5); opacity: .38; } 70% { transform: scale(1.25); opacity: 0; } 100% { opacity: 0; } }
+
+  /* ---- bottom scene panel ---- */
+  .panel-zone { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 16px 52px; z-index: 40; }
+  .ob-title { font: 700 21px/1.4 var(--font-jp); color: var(--text-1); }
+  .ob-body { margin-top: 8px; font: 400 13px/1.7 var(--font-jp); color: var(--text-2); }
+  .ob-dots { display: flex; gap: 6px; margin-bottom: 14px; }
+  .ob-dots span { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.3); }
+  .ob-dots span.on { background: #fff; }
+  .ob-cta { margin-top: 18px; width: 100%; }
+
+  /* BEFORE — scrim gradient only, text floats on the map */
+  .before-veil { position: absolute; left: 0; right: 0; bottom: 0; height: 320px; z-index: 39;
+    background: linear-gradient(0deg, rgba(0,0,0,.78) 30%, rgba(0,0,0,0) 100%); }
+
+  /* AFTER — liquid glass panel (1 shape) */
+  .glass-panel { position: relative; border-radius: var(--radius-lg); padding: 20px 20px 22px;
+    background: var(--lg-tint-dark);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .glass-panel::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+
+  /* skip chip — single glass button, 44pt hit */
+  .skip { position: absolute; top: 74px; right: 16px; z-index: 45; height: 44px; padding: 0 18px;
+    display: inline-flex; align-items: center; border-radius: var(--radius-pill);
+    font: 700 13px var(--font-jp); color: var(--text-1);
+    background: var(--lg-tint-dark);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
+  .skip::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .skip.old { background: rgba(0,0,0,.40); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+  .skip.old::after { background: var(--gradient-border); }
+
+  /* dark text variants for the light map (status bar) */
+  .statusbar.dark { color: #1a1a1a; }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 02 · Before / After</span>
+    <div class="h1"><b>Onboarding</b> — 地図ステージ＋シーン解説</div>
+  </div>
+  <div class="budget"><span class="glass-tag yes">glass: yes — 解説パネル1＋スキップ chip 1（計2形状 ≤6）</span><span class="glass-tag no">no — pulse マーカー（毎フレーム動く層）</span></div>
+  <div class="lede">Before は<b>scrim グラデのみ</b>で文章が地図に浮き、明るい地図の上では端が読みにくい。After は下部パネルを <b>liquid glass 1枚</b>に確定 — 明るいコンテンツの上なので <b>ダーク glassColor</b>（<span class="tok">--lg-tint-dark</span>）を使い、地図が透けて屈折しつつ白文字は AA で構造的に可読。CTA は <span class="tok">WdTextButton</span>（カラフル＝glass ではない）、スキップは <b>glass chip（44pt）</b>。bloom/pulse のマーカー群は動く層なので glass 適用外。</div>
+
+  <div class="phones">
+    <!-- ================= BEFORE ================= -->
+    <div class="unit">
+      <span class="ch b">Before — scrim グラデのみ・チップは旧ガラス</span>
+      <div class="phone">
+        <div class="screen">
+          <div class="map">
+            <div class="park"></div>
+            <div class="blocks"></div>
+            <div class="road h"></div>
+            <div class="road v"></div>
+            <span class="lbl" style="left:30%; top:24%;">Shibuya</span>
+            <span class="lbl" style="left:72%; top:64%;">Daikanyama</span>
+            <div class="marker"><span class="pulse"></span><span class="core"></span></div>
+          </div>
+          <span class="skip old">スキップ</span>
+          <div class="before-veil"></div>
+          <div class="panel-zone">
+            <div class="ob-dots"><span class="on"></span><span></span><span></span><span></span></div>
+            <div class="ob-title">いま近くにいる人と、<br>サークルでつながる</div>
+            <div class="ob-body">Toopdbq は位置情報でつながる地理的コミュニティ。半径を決めて、その場のサークルに参加しよう。</div>
+            <button class="wd-text-btn ob-cta">はじめる</button>
+          </div>
+          <div class="dynamic-island"></div>
+          <div class="statusbar dark">
+            <span class="time">9:41</span>
+            <span class="sys">
+              <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#1a1a1a"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#1a1a1a"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#1a1a1a"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#1a1a1a"></rect></svg>
+              <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#1a1a1a" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#1a1a1a"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#1a1a1a" opacity=".5"></rect></svg>
+            </span>
+          </div>
+          <div class="home-ind" style="background:rgba(0,0,0,.75);"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= AFTER ================= -->
+    <div class="unit">
+      <span class="ch a">After — liquid glass パネル＋glass スキップ chip</span>
+      <div class="phone">
+        <div class="screen">
+          <div class="map">
+            <div class="park"></div>
+            <div class="blocks"></div>
+            <div class="road h"></div>
+            <div class="road v"></div>
+            <span class="lbl" style="left:30%; top:24%;">Shibuya</span>
+            <span class="lbl" style="left:72%; top:64%;">Daikanyama</span>
+            <div class="marker"><span class="pulse"></span><span class="core"></span></div>
+          </div>
+          <span class="skip">スキップ</span>
+          <div class="panel-zone">
+            <div class="glass-panel">
+              <div class="ob-dots"><span class="on"></span><span></span><span></span><span></span></div>
+              <div class="ob-title">いま近くにいる人と、<br>サークルでつながる</div>
+              <div class="ob-body">Toopdbq は位置情報でつながる地理的コミュニティ。半径を決めて、その場のサークルに参加しよう。</div>
+              <button class="wd-text-btn ob-cta">はじめる</button>
+            </div>
+          </div>
+          <div class="dynamic-island"></div>
+          <div class="statusbar dark">
+            <span class="time">9:41</span>
+            <span class="sys">
+              <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#1a1a1a"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#1a1a1a"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#1a1a1a"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#1a1a1a"></rect></svg>
+              <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#1a1a1a" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#1a1a1a"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#1a1a1a" opacity=".5"></rect></svg>
+            </span>
+          </div>
+          <div class="home-ind" style="background:rgba(0,0,0,.75);"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,120 @@
+<!-- @dsCard group="Screens" name="CircleTimelineSheet" subtitle="下から 74%・r24 のシート · glass: yes — シート面1枚＋composer pill＝2形状（≤6） · フィード行・画像セルは従来面" viewport="470x1020" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  /* behind the sheet: the universe screen, dimmed */
+  .space { position: absolute; inset: 0; background:
+    radial-gradient(2px 2px at 18% 14%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.5px 1.5px at 70% 9%, rgba(255,255,255,.35), transparent),
+    radial-gradient(120% 80% at 50% -16%, #221d38 0%, #0c0a14 55%, var(--bg) 100%); }
+  .globe { position: absolute; left: 50%; top: 92px; width: 180px; height: 180px; transform: translateX(-50%);
+    border-radius: 50%; background: radial-gradient(62% 62% at 36% 30%, #2c6f7a, #14263b 68%, #06080e);
+    box-shadow: 0 0 60px rgba(0,95,103,.4), inset -16px -12px 32px rgba(0,0,0,.72); }
+  .dim { position: absolute; inset: 0; background: rgba(0,0,0,.30); }
+
+  /* ---- the sheet: ONE liquid-glass shape, 74% height, r24 ---- */
+  .tl-sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 74%; z-index: 40;
+    display: flex; flex-direction: column; overflow: hidden;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: var(--lg-tint-strong);
+    -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow: inset 0 1px 0 var(--lg-specular-top), 0 -8px 24px rgba(0,0,0,.5); }
+  .tl-sheet::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px 1px 0;
+    background: var(--lg-edge);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+  .tl-sheet .grab { width: 40px; height: 5px; border-radius: var(--radius-pill); background: rgba(255,255,255,.32); margin: 10px auto 0; flex: none; }
+  .tl-hd { display: flex; align-items: center; gap: 10px; padding: 14px 20px 12px; flex: none; }
+  .tl-hd img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+  .tl-hd .ti { font: 700 16px var(--font-jp); color: var(--text-1); }
+  .tl-hd .ct { font: 600 12px var(--font-latin); color: var(--text-3); white-space: nowrap; }
+  .tl-div { height: 1px; flex: none; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.14) 50%, rgba(255,255,255,.04)); }
+
+  /* feed rows — NON-glass cells (--surface-raised photo cells + plain rows) */
+  .feed { flex: 1; overflow: hidden; padding: 14px 20px; display: flex; flex-direction: column; gap: 18px; }
+  .post { display: flex; gap: 12px; align-items: flex-start; }
+  .post .av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: none; background: var(--gray-800); box-shadow: var(--shadow-avatar); }
+  .post .bd { flex: 1; min-width: 0; }
+  .post .top { display: flex; align-items: baseline; gap: 8px; }
+  .post .nm { font: 700 13px var(--font-jp); color: var(--text-1); }
+  .post .tm { font: 400 10px var(--font-latin); color: var(--text-3); }
+  .post .tx { font: 400 13px/1.55 var(--font-jp); color: var(--text-2); margin-top: 2px; }
+  .post .pic { margin-top: 8px; width: 100%; max-width: 250px; aspect-ratio: 4 / 3; border-radius: var(--radius-sm);
+    object-fit: cover; display: block; background: var(--surface-raised); }
+
+  /* composer pill — the 2nd glass shape, pinned above home indicator */
+  .tl-composer { flex: none; padding: 10px 16px 18px; display: flex; align-items: center; gap: 10px; }
+  .tl-composer .av { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex: none; }
+  .tl-composer .wd-composer { flex: 1; height: 44px; }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 07</span>
+    <div class="h1"><b>CircleTimelineSheet</b> — サークルのタイムライン</div>
+  </div>
+  <div class="budget"><span class="glass-tag yes">glass: yes — シート面1＋composer pill 1（計2形状 ≤6）</span><span class="glass-tag no">no(perf) — フィードの行・画像セル（従来面 --surface-raised / scrim）</span></div>
+  <div class="lede">Universe の上に下から立ち上がる <b>74%・上端 <span class="tok">--radius-lg</span></b> のシート。<b>シート面そのものが glass 1枚</b> — 背後の宇宙と地球が屈折して透ける。中のフィードは<b>スクロールするセル群</b>なので glass 禁止: 行はシートの上に直置き、画像セルは <span class="tok">--surface-raised</span>。下端 composer は <span class="tok">.wd-composer</span>（glass pill 44h）＋カラフル送信。コメントシート（screen-08）と同一イディオム。</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="space"></div>
+      <div class="globe"></div>
+      <div class="dim"></div>
+
+      <div class="tl-sheet">
+        <div class="grab"></div>
+        <div class="tl-hd">
+          <img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png" alt="">
+          <span class="ti">渋谷コミュニティ</span><span class="ct">128人</span>
+        </div>
+        <div class="tl-div"></div>
+        <div class="feed">
+          <div class="post">
+            <img class="av" src="https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png" alt="">
+            <div class="bd">
+              <div class="top"><span class="nm">Dreamy</span><span class="tm">52分前</span></div>
+              <div class="tx">夜の交差点、ネオンがすごかった</div>
+              <img class="pic" src="https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png" alt="">
+            </div>
+          </div>
+          <div class="post">
+            <img class="av" src="https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png" alt="">
+            <div class="bd">
+              <div class="top"><span class="nm">o_cean</span><span class="tm">2時間前</span></div>
+              <div class="tx">今週末、宮下パークあたりで集まりませんか？</div>
+            </div>
+          </div>
+          <div class="post">
+            <img class="av" src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png" alt="">
+            <div class="bd">
+              <div class="top"><span class="nm">SunnyVi</span><span class="tm">昨日</span></div>
+              <div class="tx">新しいカフェ見つけた。次のもくもく会ここにしよう</div>
+            </div>
+          </div>
+        </div>
+        <div class="tl-composer">
+          <img class="av" src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png" alt="">
+          <div class="wd-composer">
+            <input type="text" placeholder="タイムラインに投稿..." aria-label="タイムラインに投稿">
+            <button class="send" aria-label="送信"><img src="../../assets/icons/icon_next.png" alt=""></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="dynamic-island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sys">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"></rect></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"></rect></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

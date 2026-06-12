@@ -68,7 +68,7 @@ function StoryViewerScreen({ flat, startIndex, onClose, onOpenTimeline, onOpenCo
       {/* footer */}
       <div style={{ position: 'absolute', bottom: 32, left: 8, right: 8, zIndex: 40 }}>
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 14, paddingRight: 1 }}>
-          <IconButton name="camera" variant="color" size={56} badge="add" badgeColor onClick={onPost} />
+          <IconButton name="camera" variant="color" size={56} badge="add" onClick={onPost} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <CircleBar circle={circle} onClick={() => onOpenTimeline(circle)} />

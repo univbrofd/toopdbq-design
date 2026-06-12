@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" name="ChatListView (inbox)" subtitle="WdNavigationHeader(back+チャット)+行リスト · default/empty · 面=--bg 区切り=--border-hairline · 行tap→ChatRoomView(messenger·入力=comp-composer族)" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="ChatListView (inbox)" subtitle="WdNavigationHeader(back+チャット)+行リスト · glass: no(perf) — 行セルは非glass（面=--bg） · 行tap→ChatRoomView" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
@@ -7,6 +7,7 @@
 <style>
   body { background: linear-gradient(160deg,#15131d,#0b0b10); padding: 24px; gap: 14px;
          flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+  .gtags { width: 100%; display: flex; gap: 8px; }
   .stack { display: flex; flex-direction: column; gap: 10px; }
   .cap { font: 500 10px/1.4 var(--font-latin); letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); }
   .cap b { color: var(--text-2); font-weight: 600; }
@@ -52,6 +53,7 @@
   .chat-list { min-height: 100%; }
 </style></head>
 <body>
+  <div class="gtags"><span class="glass-tag no">glass: no(perf) — 行は非glass（従来面）</span><span class="glass-tag yes">glass候補 — 入力バー pill のみ（ChatRoom）</span></div>
 
   <!-- DEFAULT -->
   <div class="stack">

@@ -49,7 +49,13 @@ body {
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
 .ibtn.simple { background: transparent; backdrop-filter: none; }
 .ibtn.simple::after { display: none; }
-.ibtn.color { background: var(--gradient-colorful); }
+/* colorful rim — fades transparent toward the centre (standartColor / badgeColor) */
+.ibtn.color { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.ibtn.color::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: var(--gradient-colorful);
+  -webkit-mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%); }
+.ibtn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 .ibtn img { width: 44%; height: 44%; object-fit: contain; pointer-events: none; }
 .ibtn:active { transform: scale(.92); }
 .ibtn .badge {
@@ -57,12 +63,38 @@ body {
   display: flex; align-items: center; justify-content: center;
   background: var(--glass-fill); backdrop-filter: blur(2px);
 }
-.ibtn .badge.color { background: var(--gradient-colorful); }
+/* badge is ALWAYS glass — never colorful (colour lives on the host circle) */
 .ibtn .badge::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
   background: var(--gradient-border);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; }
 .ibtn .badge img { width: 11px; height: 11px; }
+/* notch — cut the host fill + rim out from behind the badge (2px clear gap) */
+.ibtn.has-badge:not(.simple):not(.color) { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.ibtn.has-badge:not(.simple):not(.color)::before { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: var(--glass-fill); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  -webkit-mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+  mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px); }
+.ibtn.color.has-badge::before {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask-composite: intersect; }
+.ibtn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude; }
 
 /* labelled icon button (more/smart) */
 .ibtn-lab { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; }
@@ -96,20 +128,23 @@ body {
 .avatar > img, .avatar > .ph { width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
   box-shadow: 0 2px 8px rgba(0,0,0,.7); display: block; }
 .avatar > .ph { background: #333; display: flex; align-items: center; justify-content: center; }
-.avatar .b { position: absolute; right: -1px; bottom: -1px; width: 18px; height: 18px; border-radius: 50%;
+.avatar .b { position: absolute; right: -3px; bottom: -3px; width: 14px; height: 14px; border-radius: 50%;
   background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,.6); }
-.avatar .b img { width: 11px; height: 11px; }
+.avatar .b img { width: 8px; height: 8px; filter: brightness(0); } /* white glyph → #000 on light chip */
 
-/* ---- Toggle ------------------------------------------------------------- */
-.toggle { position: relative; width: 80px; height: 28px; border-radius: 1000px; cursor: pointer;
-  background: var(--surface-toggle-off); transition: background .2s var(--ease-standard); flex: none; }
+/* ---- Toggle — label rides the white pill knob (no track-text overlap) ---- */
+.toggle { position: relative; width: 72px; height: 30px; border-radius: 1000px; cursor: pointer;
+  background: var(--surface-toggle-off); box-shadow: inset 0 1px 3px rgba(0,0,0,.35);
+  transition: background .2s var(--ease-standard); flex: none; }
 .toggle.on { background: var(--gradient-colorful); }
-.toggle .pill { position: absolute; top: 2.8px; left: 2px; width: 42.6px; height: 22.4px; border-radius: 9999px;
-  background: #fff; box-shadow: inset 0 -3px 6px rgba(0,0,0,.25); transition: left .2s var(--ease-standard); }
-.toggle.on .pill { left: calc(100% - 44.6px); }
-.toggle .lab { position: absolute; top: 50%; transform: translateY(-50%);
-  font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: #fff; }
-.toggle .lab.off { right: 11px; } .toggle .lab.on { left: 13px; }
+.toggle .pill { position: absolute; top: 3px; left: 3px; width: 38px; height: 24px; border-radius: 9999px;
+  background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); transition: left .25s cubic-bezier(.3,1.3,.5,1); }
+.toggle.on .pill { left: calc(100% - 41px); }
+.toggle .lab { position: absolute; top: 3px; left: 3px; width: 38px; height: 24px; z-index: 1;
+  display: flex; align-items: center; justify-content: center; pointer-events: none;
+  font-family: var(--font-latin); font-weight: 700; font-size: 10px; letter-spacing: .1em;
+  color: #8a8a90; transition: left .25s cubic-bezier(.3,1.3,.5,1); }
+.toggle.on .lab { left: calc(100% - 41px); color: #16161c; }
 
 /* ---- Login buttons ------------------------------------------------------ */
 .login-btn { position: relative; width: 100%; border-radius: 8px; padding: 1px; cursor: pointer;

@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
 <style>
   body{ background:radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%);
     padding:34px 36px 48px; gap:24px; align-items:flex-start; }
@@ -119,14 +119,32 @@
   .cell.rep .clip{ inset:1.5px; border-radius:11px; }
   .cell:active{ transform:scale(.97); }
 
-  /* camera post button — WdIconButton(camera, badgeColor) 55×55 */
+  /* camera post button — WdIconButton(camera, badgeColor) 55×55
+     colorful rim fades transparent at centre; badge = glass (no color);
+     host circle is notched behind the badge (2px gap, no rim show-through) */
   .post-btn{ position:absolute; right:12px; bottom:28px; z-index:55; width:55px; height:55px; border-radius:50%;
-    background:var(--gradient-colorful); padding:4px; cursor:pointer; border:none; box-shadow:0 3px 12px rgba(0,0,0,.4); }
-  .post-btn .inner{ width:100%; height:100%; border-radius:50%; background:rgba(24,24,26,.72);
+    background:none; padding:0; cursor:pointer; border:none; }
+  .post-btn::before{ content:""; position:absolute; inset:0; border-radius:50%; pointer-events:none;
+    background:var(--gradient-colorful); box-shadow:0 3px 12px rgba(0,0,0,.4);
+    -webkit-mask:
+      radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(0,0,0,0) 13px, #000 13.6px),
+      radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+    -webkit-mask-composite:source-in;
+    mask:
+      radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(0,0,0,0) 13px, #000 13.6px),
+      radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+    mask-composite:intersect; }
+  .post-btn .inner{ position:absolute; inset:0; border-radius:50%;
     display:flex; align-items:center; justify-content:center; }
-  .post-btn .inner img{ width:25px; height:25px; filter:brightness(0) invert(1); }
+  .post-btn .inner img{ width:25px; height:25px; filter:brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.65)); }
   .post-btn .badge{ position:absolute; right:-2px; bottom:-2px; width:22px; height:22px; border-radius:50%;
-    background:var(--gradient-colorful); display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.45); }
+    background:var(--lg-tint); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    display:flex; align-items:center; justify-content:center; }
+  .post-btn .badge::after{ content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
   .post-btn .badge img{ width:12px; height:12px; filter:brightness(0) invert(1); }
 
   /* ===== in-screen 3D focus overlay (tap main 3D) ===== */

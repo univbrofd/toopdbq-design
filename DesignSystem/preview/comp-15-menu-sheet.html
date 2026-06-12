@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" name="UniverseMenuSheet" subtitle="Self-profile menu bottomSheet · logout / delete · confirm dialogs" viewport="900x1180" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="UniverseMenuSheet" subtitle="Self-profile menu bottomSheet · LIQUID GLASS sheet face · glass: yes (sheet=1枚) · logout / delete + confirm dialogs" viewport="900x1180" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
@@ -26,9 +26,16 @@
     border-radius:50%; background:radial-gradient(60% 60% at 38% 32%, #2c6f7a, #123 70%, #06080e);
     box-shadow:0 0 60px rgba(0,95,103,.45), inset -14px -10px 30px rgba(0,0,0,.7); opacity:.92; }
 
-  .sheet { background:var(--surface-raised); border-radius:16px 16px 0 0;
-    box-shadow:0 -8px 24px rgba(0,0,0,.45); padding:0 20px; }
-  .grab { width:36px; height:4px; border-radius:99px; background:var(--gray-mid);
+  /* sheet face = ONE liquid-glass shape over the universe stage */
+  .sheet { position:relative; background:var(--lg-tint-strong);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), 0 -8px 24px rgba(0,0,0,.45); padding:0 20px; }
+  .sheet::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px 1px 0;
+    background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .grab { width:36px; height:4px; border-radius:var(--radius-pill); background:rgba(255,255,255,.32);
     margin:10px auto 4px; }
   .sheet .items { padding:4px 0; }
 
@@ -82,6 +89,7 @@
 </style></head>
 <body>
   <div class="eyebrow">UniverseMenuSheet — 自分のプロフィール時に右上 menu から開く bottomSheet</div>
+  <div style="display:flex;gap:8px;"><span class="glass-tag yes">glass: yes — sheet face 1枚</span><span class="glass-tag no">no — confirm dialog（不透明 --surface-raised）</span></div>
   <div class="lede">破壊的アクション専用のサイドメニュー。<b>ログアウト</b>と<b>アカウント削除</b>の2項目のみ。上部のみ <b>r16</b>、上端に <b>36×4</b> のグラブハンドル、下端は <b>SafeArea</b> 余白。各項目は確認ダイアログを開く。実装の逸脱（Material アイコン直書き・場当たりグレー）を役割トークンと <span class="tok">WdMenuItem</span> へ是正。</div>
 
   <!-- ============ HERO: the corrected sheet ============ -->
@@ -139,7 +147,7 @@
         <span class="chipx" style="background:var(--state-error)"></span><span class="hx">--state-error</span>
       </div>
     </div>
-    <div class="note">場当たりのグレーを役割トークンへ: シート地 <span class="tok">--surface-raised #16131f</span>・グラブ <span class="tok">--gray-mid #808080</span>・破壊項目 <span class="tok">--state-error #FF6B6B</span>・モーダル背景 <span class="tok">--scrim-strong .80</span>。</div>
+    <div class="note">場当たりのグレーを役割トークンへ: シート面は <b>liquid glass</b>（<span class="tok">--lg-tint-strong</span>＋<span class="tok">--lg-blur</span>＋<span class="tok">--lg-edge</span>）・グラブ 白32%・破壊項目 <span class="tok">--state-error #FF6B6B</span>・モーダル背景 <span class="tok">--scrim-strong .80</span>。ダイアログは不透明 <span class="tok">--surface-raised</span> のまま（読みやすさ優先・glass 予算外）。</div>
   </div>
 
   <!-- ============ CONFIRM DIALOGS ============ -->

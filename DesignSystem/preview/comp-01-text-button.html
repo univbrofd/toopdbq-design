@@ -1,12 +1,37 @@
-<!-- @dsCard group="Components" --><!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<!-- @dsCard group="Components" name="WdTextButton" subtitle="Primary CTA · ベタ塗りカラフル＋中央スクリム（探求の結果ベタ塗りを正式採用） · glass: no — カラフルアクセント面" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/components.css">
 <style>
-  body { background: linear-gradient(150deg,rgba(0,0,0,.32),rgba(0,0,0,.6)), radial-gradient(130% 130% at 78% 112%,#3a2e58,#0f1019 72%); align-items:center; }
+  body { background:#0d0d0f; gap:16px; }
+  .lede { font:500 12px/1.7 var(--font-jp); color:var(--text-2); max-width:740px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; font:600 10px var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:5px; padding:2px 6px; margin:0 1px; }
+  .ch { font:700 10px/1 var(--font-latin); letter-spacing:.13em; text-transform:uppercase; color:#7ee0a0; }
+  .stage { position:relative; border-radius:var(--radius-md); overflow:hidden; padding:34px 28px;
+    display:flex; flex-direction:row; align-items:center; justify-content:center; gap:26px; max-width:740px;
+    background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover; }
+  .stage .veil { position:absolute; inset:0; background:rgba(0,0,0,.34); }
+  .stage > * { position:relative; }
 </style></head>
 <body>
-  <div class="eyebrow" style="align-self:flex-start;">Primary CTA — WdTextButton (colorful radial + glass hairline)</div>
-  <button class="wd-text-btn">このサークルを選択</button>
+  <div class="eyebrow">Primary CTA — WdTextButton（カラフル放射＋中央スクリム）</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag no">glass: no — カラフルアクセント面（ベタ塗り採用）</span></div>
+  <div class="lede"><b>決定: ベタ塗りを正式採用。</b><span class="tok">--gradient-colorful</span> のフル面＋中央の可読性スクリム 1 群＋<span class="tok">--gradient-border</span> ヘアライン。中心透過（rim bloom）等の代替案は <span class="tok">explore-text-button-variations</span> に比較を保存済み — アクセントは面で堂々と塗るのが Toopdbq の答え。</div>
+
+  <div class="ch">canonical — 主要 CTA</div>
+  <div class="stage" style="flex-direction:column; gap:12px;">
+    <div class="veil"></div>
+    <button class="wd-text-btn">このサークルを選択</button>
+  </div>
+
+  <div class="ch">同語彙の colorful ファミリー</div>
+  <div class="stage" style="padding:30px 22px;">
+    <div class="veil"></div>
+    <span class="wd-icon-btn color" style="width:55px;height:55px;"><img src="../../assets/icons/icon_camera.png" alt="camera"></span>
+    <button class="wd-post-btn"><span class="circle"><img src="../../assets/icons/icon_camera.png" alt=""></span><span class="badge"><img src="../../assets/icons/icon_add.png" alt=""></span></button>
+    <button class="wd-it-btn"><img src="../../assets/icons/icon_pin.png" alt="">ここに投稿</button>
+  </div>
 </body></html>

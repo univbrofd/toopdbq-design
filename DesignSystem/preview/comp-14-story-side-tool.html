@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" name="WdStorySideTool" subtitle="StoryViewer right-edge action rail · like / comment / share" viewport="900x1320" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="WdStorySideTool" subtitle="決定済: After 採用 · like / comment / map(外部地図起動) · liked＝縁が --like に変色・数字は白 · glass: yes (rail 円×3)" viewport="900x1320" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
@@ -10,12 +10,15 @@
   .tok { display:inline-block; font:600 10px var(--font-latin); color:var(--text-2);
     background:rgba(255,255,255,.06); border-radius:5px; padding:2px 6px; margin:0 1px; }
 
-  /* ===== canonical rail vocabulary (lifted from ui_kits/app/app.css) ===== */
+  /* ===== canonical rail vocabulary — LIQUID GLASS (components.css .lg) ===== */
   .ibtn { position:relative; display:inline-flex; align-items:center; justify-content:center;
     width:47px; height:47px; border-radius:50%; flex:none;
-    background:var(--glass-fill); backdrop-filter:blur(2px); -webkit-backdrop-filter:blur(2px); }
+    background:var(--lg-tint);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); }
   .ibtn::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
-    background:var(--gradient-border);
+    background:var(--lg-edge);
     -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
   .ibtn img { object-fit:contain; }
@@ -26,6 +29,8 @@
   .like-pink { filter:brightness(0) saturate(100%) invert(36%) sepia(82%) saturate(3000%) hue-rotate(312deg); }
   .like-red  { filter:brightness(0) saturate(100%) invert(13%) sepia(96%) saturate(7460%) hue-rotate(2deg) brightness(101%) contrast(118%); }
   .ic-white  { filter:brightness(0) invert(1); }  /* normalize off-white asset (icon_share ships green) */
+  /* liked 状態 — 縁（屈折エッジ）が --like に変色。カウントは白のまま */
+  .ibtn.liked::after { background:linear-gradient(135deg, rgba(255,62,136,.45) 0%, #ff3e88 100%); }
 
   /* legacy `more` circle: blur only + black drop shadow, no fill / no border */
   .ibtn-old { position:relative; display:inline-flex; align-items:center; justify-content:center;
@@ -46,7 +51,7 @@
   .rl small { display:block; font:500 10px var(--font-latin); color:var(--fg-3); margin-top:3px; letter-spacing:.04em; }
   .note { grid-column:2 / 4; font:500 11px/1.5 var(--font-jp); color:var(--text-2); margin:2px 0 6px; }
   .note b { color:#fff; font-weight:700; }
-  .demo { background:url('../../assets/images/sample_photo.png') center/cover;
+  .demo { background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover;
     border-radius:12px; padding:18px; display:flex; align-items:center; justify-content:center; min-height:118px; position:relative; }
   .demo .veil { position:absolute; inset:0; background:rgba(0,0,0,.28); border-radius:12px; }
   .demo > * { position:relative; }
@@ -55,7 +60,8 @@
 </style></head>
 <body>
   <div class="eyebrow">WdStorySideTool — StoryViewer 右端の縦アクションレール</div>
-  <div class="lede">フルブリードのストーリー写真の上に浮く縦並びツール。<b>like → comment</b>、位置情報付き投稿のみ <b>share</b> が加わる。投稿者の identity は header の進捗バーが担うため、<b>レール先頭の avatar は置かない</b>。円は header/footer の <span class="tok">WdIconButton</span> と同じ<b>ガラス面＋ヘアライン枠</b>の1語彙に統一し、数値ラベルは Inter。</div>
+  <div style="display:flex;gap:8px;"><span class="glass-tag yes">glass: yes — rail 円×3（再描画の少ない chrome）</span></div>
+  <div class="lede">フルブリードのストーリー写真の上に浮く縦並びツール。<b>like → comment</b>、位置情報付き投稿のみ <b>マップ</b>（その地点を外部地図アプリで開く導線）が加わる。投稿者の identity は header の進捗バーが担うため、<b>レール先頭の avatar は置かない</b>。円は header/footer の <span class="tok">WdIconButton</span> と同じ <b>liquid glass（<span class="tok">--lg-*</span>）＋屈折エッジ</b> の1語彙に統一し、数値ラベルは Inter。liked は<b>縁の変色</b>で示し、数字は白のまま。Ken Burns で動く写真層には glass を置かず、レールのみが glass。</div>
 
   <!-- ============ 完成形 : canonical rail over a story photo ============ -->
   <div class="cmp" style="grid-template-columns:120px 1fr;">
@@ -66,16 +72,16 @@
         <div class="veil"></div>
         <div class="rail" style="position:absolute; right:16px; bottom:22px;">
           <div class="ibtn-lab">
-            <span class="ibtn"><img class="like-pink" src="../../assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
-            <span class="lab" style="color:var(--like);">248</span>
+            <span class="ibtn liked"><img class="like-pink" src="../../assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
+            <span class="lab">248</span>
           </div>
           <div class="ibtn-lab">
             <span class="ibtn"><img src="../../assets/icons/icon_comment.png" style="width:20px;height:20px;"></span>
             <span class="lab">32</span>
           </div>
           <div class="ibtn-lab">
-            <span class="ibtn"><img class="ic-white" src="../../assets/icons/icon_share.png" style="width:20px;height:20px;"></span>
-            <span class="lab">共有</span>
+            <span class="ibtn"><img src="../../assets/icons/icon_map.png" style="width:20px;height:20px;"></span>
+            <span class="lab">マップ</span>
           </div>
         </div>
       </div>
@@ -85,7 +91,7 @@
   <!-- ============ ★ 円の語彙を1つに ============ -->
   <div class="eyebrow" style="margin-top:4px;">★ 円の語彙を1つに統一 — 写真上の可読性は scrim/面で担保し、ドロップシャドウは引き算</div>
   <div class="cmp">
-    <div></div><div class="ch b">Before — <span class="tok">more</span>: blur のみ＋黒ドロップシャドウ</div><div class="ch a">After — <span class="tok">.ibtn</span>: ガラス面＋ヘアライン枠</div>
+    <div></div><div class="ch b">Before — <span class="tok">more</span>: blur のみ＋黒ドロップシャドウ</div><div class="ch a">After — <span class="tok">.ibtn</span>: liquid glass＋屈折エッジ</div>
     <div class="rl">like 円</div>
     <div class="demo">
       <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
@@ -95,11 +101,11 @@
     </div>
     <div class="demo">
       <div class="ibtn-lab">
-        <span class="ibtn"><img class="like-pink" src="../../assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
-        <span class="lab" style="color:var(--like);">248</span>
+        <span class="ibtn liked"><img class="like-pink" src="../../assets/icons/icon_like.png" style="width:19px;height:19px;"></span>
+        <span class="lab">248</span>
       </div>
     </div>
-    <div class="note">枠・面なしの blur 円は写真によって輪郭が消える。<b>ガラス面 <span class="tok">--glass-fill 0x82</span> ＋ 1px ヘアライン <span class="tok">--gradient-border</span></b> に寄せ、header/footer の <span class="tok">WdIconButton</span> と同一語彙へ。黒ドロップシャドウは廃止（効果は blur ＋ 枠の2つに収束）。</div>
+    <div class="note">枠・面なしの blur 円は写真によって輪郭が消える。<b>liquid glass（<span class="tok">--lg-tint</span>＋<span class="tok">blur --lg-blur</span>＋上縁スペキュラ）＋ 1px 屈折エッジ <span class="tok">--lg-edge</span></b> に寄せ、header/footer の <span class="tok">WdIconButton</span> と同一語彙へ。黒ドロップシャドウは廃止（liquid glass は1効果と数え、効果は glass ＋ エッジの範囲に収束）。liked はこのエッジが <span class="tok">--like</span> に変色する。</div>
   </div>
 
   <!-- ============ 論点 resolution table ============ -->
@@ -114,7 +120,7 @@
     <div class="row" style="gap:8px;padding-top:4px;">
       <span class="chipx" style="background:var(--like);"></span><span class="hx">--like #ff3e88</span>
     </div>
-    <div class="note">liked 時の <span class="tok">0xFFFF0000</span>（純赤）を、semantic と一致する <b>--like #ff3e88</b>（ピンク）へ。アイコン tint・カウント文字色の両方に適用。</div>
+    <div class="note">liked 時の <span class="tok">0xFFFF0000</span>（純赤）を semantic の <b>--like #ff3e88</b> へ。適用先は<b>アイコン tint と縁（屈折エッジ）の変色</b>のみ — <b>カウントの数字は白のまま</b>（数値の可読性とラベル方針を維持）。</div>
 
     <div class="rl">アイコン寸法</div>
     <div class="row" style="gap:14px;padding-top:2px;align-items:flex-end;">
@@ -142,21 +148,22 @@
     </div>
     <div class="note">数値は規約どおり <b>Inter（--font-latin）</b>。円↔ラベルの間隔は <b>8pt</b> に固定（<span class="tok">.ibtn-lab gap:8</span>）、tabular-nums で桁ブレ防止。</div>
 
-    <div class="rl">share の扱い</div>
+    <div class="rl">第3ボタンの役割</div>
     <div class="cell" style="padding-top:2px;">
-      <div style="display:flex;flex-direction:column;align-items:center;width:56px;">
-        <span class="ibtn-old" style="box-shadow:none;border:1px dashed rgba(255,255,255,.2);"><img src="../../assets/icons/icon_near.png" style="width:24px;height:24px;"></span>
+      <div class="ibtn-lab" style="width:56px;">
+        <span class="ibtn-old" style="box-shadow:none;border:1px dashed rgba(255,255,255,.2);"><img class="ic-white" src="../../assets/icons/icon_share.png" style="width:20px;height:20px;"></span>
+        <span class="lab-old" style="font-size:11px;">共有</span>
       </div>
-      <span class="hx" style="display:block;margin-top:4px;">near ・ ラベルなし空円</span>
+      <span class="hx" style="display:block;margin-top:4px;">share・「共有」— 役割誤認</span>
     </div>
     <div class="cell" style="padding-top:2px;">
       <div class="ibtn-lab" style="width:56px;">
-        <span class="ibtn"><img class="ic-white" src="../../assets/icons/icon_share.png" style="width:20px;height:20px;"></span>
-        <span class="lab">共有</span>
+        <span class="ibtn"><img src="../../assets/icons/icon_map.png" style="width:20px;height:20px;"></span>
+        <span class="lab">マップ</span>
       </div>
-      <span class="hx" style="display:block;margin-top:4px;">share ・ テキストラベル</span>
+      <span class="hx" style="display:block;margin-top:4px;">map・「マップ」＝外部地図起動</span>
     </div>
-    <div class="note">アイコンを <span class="tok">near</span> → <b>share</b> に確定。like/comment が<b>数値ラベル</b>なのに対し share は<b>テキストラベル「共有」</b>でラベル方針を統一（カウントを持たない）。</div>
+    <div class="note">このボタンは共有ではなく、<b>その位置へ行くために外部の地図アプリを開く導線</b>。文言・アイコンを役割に合わせて修正: アイコン <span class="tok">map</span>・テキストラベル<b>「マップ」</b>（カウントを持たない項目はテキストラベルの方針は維持）。位置情報付き投稿のみ表示。</div>
 
     <div class="rl">先頭 avatar</div>
     <div class="note" style="grid-column:2 / 4; margin-top:0;">header（進捗バー）側に投稿者 avatar があるため、サイドツール最上部の avatar は<b>二重</b>になる。→ <b>レールから avatar を外し</b>、identity は header に一本化。レールは純粋なアクション列にする。</div>

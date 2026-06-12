@@ -67,11 +67,11 @@ This system was reconstructed from materials the user supplied. You may not have
 
 **Backgrounds.** Full-bleed photography (AI-generated, Midjourney-style) is the backdrop for nearly every screen — warm-meets-cool, soft grain. The auth screen uses `auth_background.png`, a grainy blue→orange gradient figure. Behind the globe: deep space / star field (`assets/celestial/stars`). No flat color screens except loaders/dialogs (which flip to a light scrim).
 
-**Glass & blur.** The defining material: `backdrop-filter: blur(2px)` + `rgba(0,0,0,0.51)` fill + a 1px **diagonal gradient hairline** (`#211C1C → rgba(255,255,255,0.64)`, dark corner to bright corner). Used on every icon button, the circle bar, chips, snackbars. Modal scrims dim the screen to 64–80% black.
+**Glass & blur.** The defining material is now **Liquid Glass** (LiquidGlassRefresh, iOS-26-style refractive glass; Flutter `liquid_glass_renderer`, Impeller-only): body tint `--lg-tint` (white 6% / `--lg-tint-strong` 10% sheets / `--lg-tint-dark` over light content) + `backdrop-filter: blur(14px) saturate(160%)` + top/bottom **specular insets** + a 1px **refractive edge** `--lg-edge` (successor of the old diagonal hairline). Canonical CSS recipe: `.lg` in `preview/components.css`; tokens `--lg-*` in `colors_and_type.css`. **Chrome only** (headers / footer bars / side rails / sheet faces / single buttons), never on list/grid cells or per-frame-animated layers, ≤6 shapes per screen; Web falls back to the legacy `rgba(0,0,0,0.51)` + blur 2px fill. Modal scrims still dim the screen to 64–80% black.
 
 **Gradients used three ways.** (1) the colorful radial accent; (2) **protection gradients** — top/bottom black-to-transparent veils behind headers (`rgba(0,0,0,0.5) → transparent`) so white UI stays legible over any photo; (3) the diagonal glass-edge border. Note the codebase interpolates the colorful gradient in **OkLAB** to match Figma — color transitions are perceptually smooth, not muddy.
 
-**Corner radii.** `8px` buttons & cards; `16px` the auth card and pill icon-text button; `~99–100px` fully-rounded text fields, toggles and the circle bar; perfect circles for icon buttons & avatars. Nothing is sharp-cornered.
+**Corner radii.** Finalized 5-step scale (`--radius-*`): `8px` buttons (xs) · `12px` mini cards (sm) · `16px` cards & auth (md) · `24px` bottom sheets (lg) · `9999px` pills; perfect circles for icon buttons & avatars. Nothing is sharp-cornered, nothing off-scale.
 
 **Borders.** Almost always the 1px diagonal gradient hairline (never a flat gray line). The Google sign-in button gets a brighter 4-color gradient border (pink→lime→mint→violet).
 

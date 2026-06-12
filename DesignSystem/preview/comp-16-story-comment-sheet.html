@@ -1,4 +1,4 @@
-<!-- @dsCard group="Components" name="StoryCommentSheet" subtitle="StoryViewer comments bottomSheet · dark glass · list + composer" viewport="900x1160" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="StoryCommentSheet" subtitle="StoryViewer comments bottomSheet · LIQUID GLASS sheet face · glass: yes (sheet+composer+close = 3 shapes) · rows non-glass" viewport="900x1160" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
@@ -18,19 +18,29 @@
   /* ---- the sheet over a story photo ---- */
   .stage { position:relative; height:760px; border-radius:18px; overflow:hidden;
     background:url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png') center/cover; }
-  .stage .scrim { position:absolute; inset:0; background:var(--scrim-strong); }
+  .stage .scrim { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.30) 0%, rgba(0,0,0,.10) 30%, rgba(0,0,0,.42) 100%); }
+  /* sheet face = ONE liquid-glass shape (refracts the photo behind) */
   .sheet { position:absolute; left:0; right:0; bottom:0; height:78%;
-    background:linear-gradient(180deg,#1b1726,#0e0c16);
-    border-radius:24px 24px 0 0; box-shadow:0 -20px 60px rgba(0,0,0,.6);
+    background:var(--lg-tint-strong);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), 0 -20px 60px rgba(0,0,0,.55);
     display:flex; flex-direction:column; overflow:hidden; }
-  .grab { width:40px; height:5px; border-radius:99px; background:rgba(255,255,255,.3); margin:12px auto 0; }
+  .sheet::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px 1px 0;
+    background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
+  .grab { width:40px; height:5px; border-radius:var(--radius-pill); background:rgba(255,255,255,.32); margin:12px auto 0; }
   .hd { display:flex; align-items:center; gap:10px; padding:18px 20px 14px; }
   .hd .ti { font:700 17px var(--font-jp); color:#fff; }
   .hd .ct { font:600 13px var(--font-latin); color:var(--text-3); }
   .hd .x { margin-left:auto; width:40px; height:40px; border-radius:50%; position:relative;
-    background:var(--glass-fill); display:flex; align-items:center; justify-content:center; }
+    background:var(--lg-tint); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot);
+    display:flex; align-items:center; justify-content:center; }
   .hd .x::after { content:""; position:absolute; inset:0; border-radius:50%; padding:1px;
-    background:var(--gradient-border); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
     -webkit-mask-composite:xor; mask-composite:exclude; }
   .hd .x img { width:17px; height:17px; }
   .div { height:1px; background:linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.14) 50%, rgba(255,255,255,.04)); }
@@ -49,10 +59,17 @@
   .cmt.on .lk img { opacity:1; filter:brightness(0) saturate(100%) invert(36%) sepia(82%) saturate(3000%) hue-rotate(312deg); }
   .cmt.on .lk span { color:var(--like); }
   .cps { display:flex; align-items:center; gap:10px; padding:10px 16px 20px;
-    background:linear-gradient(0deg,#0e0c16 70%,transparent); border-top:1px solid rgba(255,255,255,.08); }
-  .cps .av { width:36px; height:36px; border-radius:50%; object-fit:cover; flex:none; background:#333; }
+    background:linear-gradient(0deg,rgba(0,0,0,.18) 60%,transparent); }
+  .cps .av { width:36px; height:36px; border-radius:50%; object-fit:cover; flex:none; background:var(--gray-800); }
+  /* composer = liquid-glass pill (single input chrome) */
   .fld { flex:1; height:44px; display:flex; align-items:center; gap:8px; padding:0 6px 0 16px;
-    background:var(--surface-input); border-radius:100px; }
+    position:relative; background:var(--lg-tint); border-radius:var(--radius-pill);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot); }
+  .fld::after { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+    background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; }
   .fld span.ph { flex:1; font:600 14px var(--font-latin); color:rgba(255,255,255,.7); }
   .fld .send { width:34px; height:34px; border-radius:50%; position:relative; flex:none;
     background:var(--gradient-colorful); display:flex; align-items:center; justify-content:center; }
@@ -68,6 +85,7 @@
 </style></head>
 <body>
   <div class="eyebrow">StoryCommentSheet — StoryViewer の comment から開く bottomSheet</div>
+  <div style="display:flex;gap:8px;"><span class="glass-tag yes">glass: yes — sheet face</span><span class="glass-tag no">no(perf) — comment rows</span></div>
   <div class="lede"><span class="tok">WdStorySideTool</span> の <b>comment</b> タップで立ち上がる。世界観は <span class="tok">CircleTimelineSheet</span> と同一の<b>ダークガラスシート</b>（上端 r24・グラブ 40×5・<span class="tok">--scrim-strong</span> 背景）。中身は <span class="tok">WdUserComment</span> 準拠で<b>名前＝主役 <span class="tok">--text-1</span>／本文 <span class="tok">--text-2</span>／時刻 <span class="tok">--text-3</span></b>、いいねは <span class="tok">--like</span>。下端の composer は <span class="tok">WdTextField</span>（地 <span class="tok">--surface-input</span>）＋ <b>カラフル送信ボタン</b>1つ。</div>
 
   <div class="cmp">
@@ -93,7 +111,7 @@
             <div class="cmt">
               <img class="av" src="https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png" alt="">
               <div class="bd"><div class="top"><span class="nm">Dreamy</span><span class="tm">52分前</span></div>
-                <div class="tx">渋谷の夜って最高だよね🌃</div></div>
+                <div class="tx">渋谷の夜って最高だよね</div></div>
               <div class="lk"><img src="../../assets/icons/icon_like.png" alt=""><span>1</span></div>
             </div>
             <div class="cmt">
@@ -115,9 +133,9 @@
 
   <div class="eyebrow" style="margin-top:4px;">仕様 — トークン / 寸法</div>
   <div class="spec">
-    <div class="k">シェル</div><div class="v">高さ <b>74%</b>・上端 <span class="tok">r24</span>・グラブ <b>40×5</b>・背景 <span class="tok">--scrim-strong</span>・面 <span class="tok">linear #1b1726→#0e0c16</span>。アニメは <span class="tok">sheetUp .34s --ease-out</span>（CircleTimelineSheet と共有）。</div>
+    <div class="k">シェル</div><div class="v">高さ <b>74%</b>・上端 <span class="tok">--radius-lg</span>・グラブ <b>40×5</b>。面 ＝ <b>liquid glass</b>: <span class="tok">--lg-tint-strong</span>＋<span class="tok">blur --lg-blur</span>／<span class="tok">saturate --lg-saturate</span>＋上縁スペキュラ＋<span class="tok">--lg-edge</span> 1px。背後の写真を屈折。アニメは <span class="tok">sheetUp .34s --ease-out</span>（CircleTimelineSheet と共有）。</div>
     <div class="k">コメント行</div><div class="v">avatar <b>36</b>・gap <b>12</b>・行間 gap <b>18</b>。名前 <span class="tok">JP 700 / --text-1</span>、本文 <span class="tok">JP 400 / --text-2</span>、時刻 <span class="tok">Inter 10 / --text-3</span>。</div>
     <div class="k">いいね</div><div class="v">右端に縦積み。アイコン <b>16</b>＋カウント <span class="tok">Inter 10</span>。active で <span class="tok">--like #ff3e88</span> tint＋同色カウント（side rail と一致）。</div>
-    <div class="k">Composer</div><div class="v">下端固定・<span class="tok">--surface-input</span> ピル <b>44h</b>＋送信 <span class="tok">--gradient-colorful</span> 円 <b>34</b>。空時は opacity <b>.4</b>・disabled。<span class="tok">env(safe-area-inset-bottom)</span> 余白。</div>
+    <div class="k">Composer</div><div class="v">下端固定・<b>liquid glass ピル</b>（<span class="tok">--lg-tint</span>＋blur＋<span class="tok">--lg-edge</span>）<b>44h</b>＋送信 <span class="tok">--gradient-colorful</span> 円 <b>34</b>。空時は opacity <b>.4</b>・disabled。<span class="tok">env(safe-area-inset-bottom)</span> 余白。</div>
   </div>
 </body></html>

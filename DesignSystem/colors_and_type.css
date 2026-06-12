@@ -139,12 +139,16 @@
   --success: #4caf50;
   --error:   #ff6b6b;
 
-  /* === RADII ============================================================ */
-  --radius-sm: 7px;     /* inner login button                              */
-  --radius-md: 8px;     /* buttons, cards, snackbars                       */
-  --radius-lg: 16px;    /* auth card, icon-text button                     */
-  --radius-pill: 100px; /* text fields, toggles, circle bar (99px)         */
-  --radius-full: 9999px;
+  /* === RADII (FINALIZED SCALE — LiquidGlassRefresh) =====================
+     Audit found 7/8 buttons, 8/12/14/16/18/22 cards, 99/100/1000/9999 pills.
+     Collapsed to ONE 5-step scale. Off-scale values (7→8, 14/18/22→16/24,
+     99/100/1000→pill) are remapped in components.css. Use these tokens. */
+  --radius-xs:   8px;   /* buttons, login, snackbars (was 7 & 8)           */
+  --radius-sm:   12px;  /* mini cards, chips                                */
+  --radius-md:   16px;  /* circle cards, auth card, icon-text button        */
+  --radius-lg:   24px;  /* bottom sheets (r24), large glass surfaces        */
+  --radius-pill: 9999px;/* fields, toggles, circle bar, rails (was 99/100)  */
+  --radius-full: 9999px;/* legacy alias → --radius-pill                     */
 
   /* === SPACING (4 / 8 base; app reference frame 393×852) =============== */
   --space-1: 4px;
@@ -160,6 +164,27 @@
   --shadow-text-lg: 0 4px 16px rgba(0,0,0,1);     /* button labels            */
   --shadow-avatar: 0 2px 8px rgba(0,0,0,0.70);    /* avatars over photos      */
   --shadow-card:   0 8px 24px rgba(0,0,0,0.45);
+
+  /* === LIQUID GLASS (iOS 26 refractive glass — the DS standard surface) ===
+     Successor to the old "rgba(0,0,0,.51) fill + blur 2px + diagonal border"
+     glass. Implemented in Flutter via liquid_glass_renderer (Impeller-only);
+     Web/this CSS is the canonical APPROXIMATION + the auto-fallback target.
+     CHROME ONLY (headers / footers / side rails / sheet faces / single
+     buttons). NEVER on list/grid cells or per-frame layers. ≤6 shapes/screen.
+     Canonical recipe lives in preview/components.css `.lg`; tune via these. */
+  --lg-tint:        rgba(255,255,255,0.06);  /* glass body tint (over photo) */
+  --lg-tint-strong: rgba(255,255,255,0.10);  /* sheet faces / opaque-ish chrome */
+  --lg-tint-dim:    rgba(255,255,255,0.04);  /* faint rails over bright photo  */
+  --lg-tint-dark:   rgba(8,8,12,0.44);       /* dark glassColor — chrome over LIGHT content (maps, bright photos) */
+  --lg-blur:        14px;                     /* backdrop blur (refraction)    */
+  --lg-saturate:    160%;                     /* backdrop saturation lift      */
+  --lg-specular-top: rgba(255,255,255,0.28);  /* top-edge specular highlight   */
+  --lg-specular-bot: rgba(255,255,255,0.08);  /* bottom-edge weak reflection   */
+  --lg-shadow:      0 8px 24px rgba(0,0,0,0.45); /* cast shadow (= --shadow-card) */
+  /* 1px refractive edge — successor to --gradient-border (dark→bright diag) */
+  --lg-edge:        linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.42) 100%); /* @kind color */
+  /* Web fallback fill when backdrop-filter is unavailable (= old glass) */
+  --lg-fallback:    rgba(0,0,0,0.51);
 
   /* === MOTION =========================================================== */
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1); /* @kind other */

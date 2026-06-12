@@ -1,4 +1,4 @@
-/* @ds-bundle: {"format":3,"namespace":"ToopdbqDesignSystem_af3394","components":[],"sourceHashes":{"ui_kits/app/CircleTimelineSheet.jsx":"f49101667441","ui_kits/app/LoginScreen.jsx":"184a82b73556","ui_kits/app/Primitives.jsx":"4b8e68ea48a4","ui_kits/app/StoryCommentSheet.jsx":"4d5bf6dc4d81","ui_kits/app/StoryViewerScreen.jsx":"d3de8c6445fa","ui_kits/app/UniverseScreen.jsx":"0f93a858c42e","ui_kits/app/data.js":"bfd400bd2f03"},"inlinedExternals":[],"unexposedExports":[]} */
+/* @ds-bundle: {"format":3,"namespace":"ToopdbqDesignSystem_af3394","components":[],"sourceHashes":{"ui_kits/app/CircleTimelineSheet.jsx":"f49101667441","ui_kits/app/LoginScreen.jsx":"9bf3bfe3ed94","ui_kits/app/Primitives.jsx":"d9fd2cd95e62","ui_kits/app/StoryCommentSheet.jsx":"4d5bf6dc4d81","ui_kits/app/StoryViewerScreen.jsx":"f0505230016c","ui_kits/app/UniverseScreen.jsx":"0f93a858c42e","ui_kits/app/data.js":"d9bf056f27f7"},"inlinedExternals":[],"unexposedExports":[]} */
 
 (() => {
 
@@ -257,7 +257,7 @@ function LoginScreen({
       background: '#000'
     }
   }, /*#__PURE__*/React.createElement("img", {
-    src: "../../assets/images/auth_background.png",
+    src: "../../../assets/images/auth_background.png",
     alt: "",
     "aria-hidden": "true",
     style: {
@@ -287,7 +287,7 @@ function LoginScreen({
       boxShadow: '0 30px 70px rgba(0,0,0,.6)'
     }
   }, /*#__PURE__*/React.createElement("img", {
-    src: "../../assets/images/auth_background.png",
+    src: "../../../assets/images/auth_background.png",
     alt: "",
     style: {
       position: 'absolute',
@@ -343,7 +343,7 @@ function LoginScreen({
   }, /*#__PURE__*/React.createElement("div", {
     className: "inner"
   }, /*#__PURE__*/React.createElement("img", {
-    src: "../../assets/images/logo_google.png",
+    src: "../../../assets/images/logo_google.png",
     alt: ""
   }), "Google\u30A2\u30AB\u30A6\u30F3\u30C8\u3067\u59CB\u3081\u308B")), /*#__PURE__*/React.createElement("div", {
     className: "login-btn apple",
@@ -354,7 +354,7 @@ function LoginScreen({
       color: '#141414'
     }
   }, /*#__PURE__*/React.createElement("img", {
-    src: "../../assets/images/logo_apple.png",
+    src: "../../../assets/images/logo_apple.png",
     alt: ""
   }), "Apple\u30A2\u30AB\u30A6\u30F3\u30C8\u3067\u59CB\u3081\u308B"))))), /*#__PURE__*/React.createElement("div", {
     className: "home-indicator"
@@ -387,16 +387,16 @@ const Icon = ({
 });
 
 // Glass / colorful circular icon button. variant: simple | standart | color
+// badge ⇒ バッジは常に glass（カラーなし）。color + badge = badgeColor variant.
 function IconButton({
   name,
   variant = 'standart',
   size = 47,
   badge,
-  badgeColor,
   onClick,
   style
 }) {
-  const cls = 'ibtn' + (variant === 'simple' ? ' simple' : '') + (variant === 'color' ? ' color' : '');
+  const cls = 'ibtn' + (variant === 'simple' ? ' simple' : '') + (variant === 'color' ? ' color' : '') + (badge ? ' has-badge' : '');
   return /*#__PURE__*/React.createElement("button", {
     className: cls,
     style: {
@@ -409,7 +409,7 @@ function IconButton({
     name: name,
     size: Math.round(size * 0.44)
   }), badge && /*#__PURE__*/React.createElement("span", {
-    className: 'badge' + (badgeColor ? ' color' : '')
+    className: "badge"
   }, /*#__PURE__*/React.createElement(Icon, {
     name: badge,
     size: 11
@@ -1092,7 +1092,6 @@ function StoryViewerScreen({
     variant: "color",
     size: 56,
     badge: "add",
-    badgeColor: true,
     onClick: onPost
   })), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1397,9 +1396,9 @@ try { (() => {
 (function () {
   const IMG = {
     a: 'https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png',
-    b: 'https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png',
+    b: '../../assets/images/sample_3d.png',
     c: 'https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png',
-    d: 'https://cdn.midjourney.com/cc8aa655-091b-4d97-842b-17e494347cbd/0_0.png'
+    d: '../../assets/images/sample_photo.png'
   };
   const AV = {
     sunny: 'https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png',

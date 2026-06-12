@@ -1,0 +1,121 @@
+<!-- @dsCard group="Screens" name="UniverseView" subtitle="3D 地球＋下端 circle footer · glass: yes — 上部ボタン2＋circle bar＋edit＝4形状（≤6） · プレイリストのセルと 3D 連動ピンは glass 禁止" viewport="470x1020" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/screen.css">
+<style>
+  /* ---- universe stage: starfield + 3D globe (WebView placeholder) ---- */
+  .space { position: absolute; inset: 0; background:
+    radial-gradient(2px 2px at 18% 22%, rgba(255,255,255,.5), transparent),
+    radial-gradient(1.5px 1.5px at 70% 14%, rgba(255,255,255,.35), transparent),
+    radial-gradient(1.5px 1.5px at 42% 34%, rgba(255,255,255,.3), transparent),
+    radial-gradient(2px 2px at 86% 40%, rgba(255,255,255,.25), transparent),
+    radial-gradient(1.5px 1.5px at 12% 52%, rgba(255,255,255,.2), transparent),
+    radial-gradient(120% 80% at 50% -16%, #221d38 0%, #0c0a14 55%, var(--bg) 100%); }
+  .globe { position: absolute; left: 50%; top: 200px; width: 270px; height: 270px; transform: translateX(-50%);
+    border-radius: 50%; background: radial-gradient(62% 62% at 36% 30%, #2c6f7a, #14263b 68%, #06080e);
+    box-shadow: 0 0 80px rgba(0,95,103,.4), inset -22px -16px 44px rgba(0,0,0,.72); }
+  /* 3D-linked pins — move with the globe every frame → NO glass */
+  .pin3d { position: absolute; width: 34px; height: 34px; border-radius: 50%; overflow: hidden;
+    box-shadow: 0 0 0 1.5px rgba(255,255,255,.8), 0 4px 10px rgba(0,0,0,.5); }
+  .pin3d img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* account badge (top-left, on veil) */
+  .acct { position: absolute; top: 66px; left: 16px; z-index: 40; display: flex; align-items: center; gap: 8px; }
+  .acct img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; box-shadow: var(--shadow-avatar); }
+  .acct .nm { font: 600 14px var(--font-jp); color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.8); }
+  /* top-right actions — single glass buttons (44pt) */
+  .top-actions { position: absolute; top: 64px; right: 16px; z-index: 40; display: flex; gap: 8px; }
+  .top-actions .wd-icon-btn { width: 44px; height: 44px; }
+
+  /* ---- circle playlist (NON-glass cells: --surface-raised + scrim) ---- */
+  .playlist { position: absolute; left: 0; right: 0; bottom: 132px; z-index: 35; padding: 0 16px;
+    display: flex; flex-direction: column; gap: 10px; }
+  .pl-head { display: flex; align-items: center; gap: 10px; }
+  .pl-head img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 1.5px rgba(255,255,255,.4); }
+  .pl-head .nm { font: 700 13px var(--font-jp); color: var(--text-1); text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .pl-head .ct { font: 600 11px var(--font-latin); color: var(--text-3); white-space: nowrap; }
+  .pl-row { display: flex; gap: 8px; }
+  .cell { position: relative; width: 74px; aspect-ratio: 9 / 16; border-radius: var(--radius-sm); overflow: hidden;
+    background: var(--surface-raised); flex: none; }
+  .cell img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cell .sc { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(0,0,0,.55), transparent 55%); }
+  .cell .tm { position: absolute; left: 6px; bottom: 5px; font: 600 9px var(--font-latin); color: var(--text-2); }
+  .cell.lead { box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+
+  /* ---- circle footer (glass bar + colorful camera + glass edit) ---- */
+  .footer-zone { position: absolute; left: 12px; right: 12px; bottom: 46px; z-index: 45;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+  .footer-zone .wd-footer { width: 100%; }
+  .footer-zone .wd-icon-btn { width: 55px; height: 55px; }
+</style></head>
+<body class="screen-card">
+  <div class="scr-head">
+    <span class="en">Screens / 04</span>
+    <div class="h1"><b>UniverseView</b> — 3D 地球＋サークル別プレイリスト</div>
+  </div>
+  <div class="budget"><span class="glass-tag yes">glass: yes — 上部ボタン2＋circle bar＋edit（計4形状 ≤6）</span><span class="glass-tag no">no(perf) — リールのセル / 3D 連動ピン</span></div>
+  <div class="lede">glass は<b>再描画の少ない chrome だけ</b>: 右上アイコンボタン・下端の <span class="tok">WdCircleFooter</span>（circle bar＋edit）。カメラは <span class="tok">--gradient-colorful</span>（アクセント＝glass 外）。3D 地球に連動して毎フレーム動く<b>ピン群</b>と、横スクロールする<b>プレイリストのセル</b>は glass 禁止 — セルは <span class="tok">--surface-raised</span>＋scrim の従来面。menu sheet 面は comp-15 参照（開いた時 glass 1枚追加で計5 ≤6）。</div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="space"></div>
+      <div class="globe"></div>
+      <div class="pin3d" style="left: 34%; top: 250px;"><img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png" alt=""></div>
+      <div class="pin3d" style="left: 56%; top: 318px; width: 44px; height: 44px;"><img src="https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png" alt=""></div>
+      <div class="pin3d" style="left: 62%; top: 236px; width: 28px; height: 28px;"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""></div>
+
+      <div class="veil-top"></div>
+      <div class="veil-bottom" style="height: 320px;"></div>
+
+      <div class="acct">
+        <img src="https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png" alt="">
+        <span class="nm">デバッグ太郎</span>
+      </div>
+      <div class="top-actions">
+        <span class="wd-icon-btn"><img src="../../assets/icons/icon_menu.png" alt="menu"></span>
+        <span class="wd-icon-btn"><img src="../../assets/icons/icon_comment.png" alt="message"></span>
+      </div>
+
+      <div class="playlist">
+        <div class="pl-head">
+          <img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png" alt="">
+          <span class="nm">渋谷コミュニティ</span><span class="ct">12 posts</span>
+        </div>
+        <div class="pl-row">
+          <div class="cell lead"><img src="https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png" alt=""><span class="sc"></span><span class="tm">2分前</span></div>
+          <div class="cell"><img src="https://cdn.midjourney.com/4190832c-cc71-472f-b1af-00cf3a2ccbf7/0_1.png" alt=""><span class="sc"></span><span class="tm">1時間前</span></div>
+          <div class="cell"><img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png" alt=""><span class="sc"></span><span class="tm">3時間前</span></div>
+          <div class="cell"><img src="https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png" alt=""><span class="sc"></span><span class="tm">昨日</span></div>
+          <div class="cell" style="display:flex;align-items:center;justify-content:center;"><img src="../../assets/icons/icon_expand.png" style="position:static;width:18px;height:18px;object-fit:contain;opacity:.6;" alt=""></div>
+        </div>
+      </div>
+
+      <div class="footer-zone">
+        <span class="wd-icon-btn"><img src="../../assets/icons/icon_edit.png" alt="edit"></span>
+        <div class="wd-footer">
+          <div class="wd-circle-bar" style="flex:1; min-width:0;">
+            <img class="cover" src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png" alt="">
+            <div class="col" style="gap:2px; min-width:0;">
+              <span class="nm">渋谷コミュニティ</span>
+              <span class="ds">渋谷駅周辺のコミュニティ</span>
+            </div>
+          </div>
+          <span class="wd-icon-btn color" style="flex:none;"><img src="../../assets/icons/icon_camera.png" alt="camera"></span>
+        </div>
+      </div>
+
+      <div class="dynamic-island"></div>
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sys">
+          <svg width="18" height="11" viewBox="0 0 18 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="#fff"></rect><rect x="4.5" y="5" width="3" height="6" rx="1" fill="#fff"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="#fff"></rect><rect x="13.5" y="0" width="3" height="11" rx="1" fill="#fff"></rect></svg>
+          <svg width="22" height="11" viewBox="0 0 22 11"><rect x="0.5" y="0.5" width="18" height="10" rx="2.5" stroke="#fff" opacity=".5" fill="none"></rect><rect x="2" y="2" width="14" height="7" rx="1.3" fill="#fff"></rect><rect x="19.5" y="3.5" width="1.5" height="4" rx=".7" fill="#fff" opacity=".5"></rect></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

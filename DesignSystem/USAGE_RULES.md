@@ -43,6 +43,21 @@
 
 全トークンの CSS 変数は `colors_and_type.css` を参照・import すること。
 
+### Liquid Glass（DS の標準表面 — LiquidGlassRefresh で確定）
+
+iOS 26 系の屈折リキッドガラスが「半透明黒＋blur2＋グラデ枠」の後継。実装は Flutter `liquid_glass_renderer`（**Impeller 専用** — Web は従来ガラス `rgba(0,0,0,.51)`+blur2 へ自動フォールバック。両状態で破綻しないこと）。
+
+- **CSS 正本**: トークン `--lg-*`（`colors_and_type.css`）＋canonical レシピ `.lg`（`preview/components.css`）。**カード毎の再発明禁止** — 必ずこの2箇所を参照。
+  `--lg-tint`(白6%) / `--lg-tint-strong`(シート面 白10%) / `--lg-blur`(14px) / `--lg-saturate`(160%) / `--lg-specular-top|bot`(上下縁スペキュラ) / `--lg-edge`(1px 屈折エッジ — `--gradient-border` の後継) / `--lg-shadow` / `--lg-fallback`。
+- **適用可（chrome 限定）**: ナビヘッダー／フッターバー／サイドレール／シート面（全面で1枚）／単発ボタン／composer ピル。**明るいコンテンツ（地図・明写真）の上の chrome は `--lg-tint-dark`**（ダーク glassColor）で白文字 AA を確保。
+- **適用禁止（性能予算）**: リスト・グリッドの**セル単位**（チャット行・コメント行・フィード・グリッド・リールのセル）、**毎フレーム動く層**（Ken Burns ズーム層・PageView ページ内部・3D 連動ピン群）。セルは従来の面（`--surface-raised` / scrim）で設計。
+- **1 画面のガラス形状 ≤ 6**（ブレンド上限 16）。シートのような大面積も1枚と数える。
+- **効果予算**: liquid glass は **1 効果**と数える（taste.md の「1コンポーネント 1〜2 効果」を維持）。glass＋エッジで 1 群、足して良いのはあと1つまで。
+- **各 specimen カードに `glass: yes / no(perf)` を明記**（eyebrow 脇の `.glass-tag` chip）。例: comp-09 rows = no(perf)、comp-13 circle-footer = yes。
+- 調整パラメータ（Flutter 側）: thickness / blur / glassColor / refractiveIndex / lightIntensity / saturation — CSS の `--lg-*` と鏡写し。
+
+---
+
 ### 役割(role)トークン & コントラスト（監査で追加）
 説明的トークンの上に**役割の一段**を新設。コンポーネントは原則こちらを使う:
 `--bg` / `--surface`(ガラス) / `--surface-raised`(シート・ダイアログ) / `--surface-input`(#2B2B2B) / `--surface-toggle-off`(#555) / `--border` / `--primary`(カラフルグラデ) / `--on-primary` / `--text-1`(白100%) / `--text-2`(白78%) / `--text-3`(白60%・確実に暗い面のみ) / `--text-disabled`(白40%・**無効時のみ**) / `--scrim-min`(黒45%) / `--state-success|error|like|focus`。
@@ -83,7 +98,7 @@
 | 名前 | 役割（要点） |
 |---|---|
 | `WdText` | 全テキストの基底。既定 Noto Sans JP 14 |
-| `WdIconButton` | 円形アイコンボタン 9 variant（simple / standart / standartColor / more / smart / badge / badgeText / badgeColor / post）。ガラス or カラフル円 |
+| `WdIconButton` | 円形アイコンボタン 8 variant（simple / standart / standartColor / more / smart / badge / badgeText / badgeColor）。旧 post は badgeColor に改名。ガラス or カラフル円（standartColor=中心から透過グラデ）。バッジは常にガラス＋ホスト円をノッチでくり抜く |
 | `WdIconTextButton` | アイコン+テキスト 3 variant（fat / specialFat / specialNormal）。楕円グラデ+行列変換 |
 | `WdTextButton` | カラフルグラデ背景の主要 CTA（280×64, r8）。既定「このサークルを選択」 |
 | `WdPostButton` | 投稿ボタン 64px。カラフル円(中心透過)+add バッジ。`out` は距離表示 |

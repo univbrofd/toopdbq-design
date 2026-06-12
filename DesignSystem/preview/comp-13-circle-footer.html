@@ -1,10 +1,10 @@
-<!-- @dsCard group="Components" name="WdCircleFooter" subtitle="circle-bar が幅を取り、主役の hero action は1つ。Universe / StoryViewer 共通フッタ" --><!DOCTYPE html>
+<!-- @dsCard group="Components" name="WdCircleFooter" subtitle="circle-bar が幅を取り、主役の hero action は1つ。Universe / StoryViewer 共通フッタ · glass: yes（bar＋glass円 — 下端 chrome）" --><!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
 <link rel="stylesheet" href="../../DesignSystem/preview/components.css">
 <style>
-  body { background: linear-gradient(120deg,rgba(0,0,0,.2),rgba(0,0,0,.55)), url('../../assets/images/sample_photo.png');
+  body { background: linear-gradient(120deg,rgba(0,0,0,.55),rgba(0,0,0,.68)), url('https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png');
     background-size:cover; background-position:center; gap:18px; padding:24px; }
   .lede { font:500 12px/1.9 var(--font-jp); color:var(--text-2); max-width:760px; text-shadow:0 1px 3px #000; }
   .lede b { color:#fff; font-weight:700; }
@@ -25,6 +25,7 @@
 </style></head>
 <body>
   <div class="eyebrow" style="text-shadow:0 1px 4px #000;">WdCircleFooter — サークル identity ＋ hero action（下端 chrome）</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — 下端 chrome（bar ＋ edit 円）</span></div>
   <div class="lede"><b>WdCircleBar</b> が幅いっぱいに伸び、右に <b>hero action を1つ</b>だけ置く（taste 原則3: 主役は1つ）。Universe / StoryViewer 共通の下端フッタ。<span class="tok">onTimelinePostTap != null</span> のときだけ上段に投稿(edit)ボタンを右寄せで積む。要素間 gap は <b>8</b>（クラスタ内）/ <b>16</b>（縦積み・バー↔ボタン）。</div>
 
   <!-- standart: 上段 edit(任意) + [circle-bar + camera(badgeColor)] -->
@@ -33,13 +34,13 @@
       <div class="wd-icon-btn" style="width:55px;height:55px;"><img src="../../assets/icons/icon_edit.png"></div>
       <div class="wd-footer" style="width:100%;">
         <div class="wd-circle-bar" style="flex:1; min-width:0;">
-          <img class="cover" src="../../assets/images/sample_3d.png">
+          <img class="cover" src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png">
           <div class="col" style="gap:2px; min-width:0;">
             <span class="nm">渋谷コミュニティ</span>
             <span class="ds">渋谷駅周辺のコミュニティ</span>
           </div>
         </div>
-        <div class="wd-icon-btn color" style="width:55px;height:55px;flex:none;"><img src="../../assets/icons/icon_camera.png"><span class="wd-badge"><img src="../../assets/icons/icon_camera.png"></span></div>
+        <div class="wd-icon-btn color has-badge" style="width:55px;height:55px;flex:none;"><img src="../../assets/icons/icon_camera.png"><span class="wd-badge"><img src="../../assets/icons/icon_camera.png"></span></div>
       </div>
     </div>
   </div>
