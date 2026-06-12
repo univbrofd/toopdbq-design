@@ -29,7 +29,7 @@
 - 3D オブジェクトは **DS の中立な角丸プレースホルダカード**（人物シルエット＋小さな 3D キューブ glyph、
   CSS/SVG のみ・外部素材なし）で表し、**role でサイズだけ変える**（main 巨大／sub 小）。地表に直接置き、
   リング/棒/三角は出さない。実機が写真由来の人物 GLB であることは legend / lede の注記で伝える。
-- リールは「画像＋枠だけ」。サンプル画像は DS 同梱（`assets/images/sample_*` / `assets/images/uv/reel*`）で可。
+- リールは「画像＋枠だけ」。サンプル画像は DS 同梱（`assets/images/reel/reel00001..12.jpg` の共有プール）で可。
 - canonical: `DesignSystem/preview/comp-universe-screen.html`（この方針で実装済み）。
   3D オーバーレイの「3D 本体」はロード演出と同じ **materialize クリスタル**の語彙で可（`comp-universe-3d-overlay.html`）。
 

@@ -48,6 +48,7 @@
 - 投稿セル（9:16）・リール・ピン thumb・story full-bleed・circle カバー → `assets/images/reel/`
 - アバター・チャット行・コメント行・メンバーリスト → `assets/images/user/`
 - `auth_background.png`（ログイン/スプラッシュ背景）・`sample_3d.png`（3D オブジェクトのレンダ。写真ではない）は従来どおり固定
+- `assets/images/uv/` は Universe specimen 専用の**派生セット**: `story-01..10.png`・`circle-01..10.png` は reel プールからの再エクスポート（story-NN = reel000NN / circle-NN = reel000(13−NN)）、`obj-01..04.png` は 3D 透過 PNG で独立。新規デザインでは uv/ でなく reel/user プールを直接使う
 - `sample_photo.png` は legacy。新規デザインでは reel プールを使う
 - **外部 CDN（midjourney / unsplash 等）の画像参照は禁止**。必ず repo 内 `assets/images/` から相対参照する（`DesignSystem/preview/*.html` → `../../assets/...`）
 
