@@ -4,17 +4,58 @@
 <link rel="stylesheet" href="../../DesignSystem/preview/card.css">
 <style>
   body { background:#0d0d0f; }
-  .imgs { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-  .imgs figure { position:relative; height:120px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,.1); }
+  .sec { margin:14px 0 6px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-3); }
+  .imgs { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
+  .imgs figure { position:relative; aspect-ratio:9/16; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,.1); margin:0; }
   .imgs img { width:100%; height:100%; object-fit:cover; display:block; }
   .imgs figcaption { position:absolute; left:0; right:0; bottom:0; padding:6px 8px; font-size:9.5px; color:#fff;
     background:linear-gradient(0deg,rgba(0,0,0,.7),transparent); }
+  .avs { display:flex; flex-wrap:wrap; gap:14px; }
+  .avs figure { width:96px; margin:0; text-align:center; }
+  .avs .ring { width:96px; height:96px; border-radius:50%; overflow:hidden; border:2px solid rgba(255,255,255,.18); box-shadow:var(--shadow-avatar); }
+  .avs img { width:100%; height:100%; object-fit:cover; display:block; }
+  .avs figcaption { margin-top:6px; font-size:9.5px; color:var(--text-2); }
+  .wide { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+  .wide figure { position:relative; height:120px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,.1); margin:0; }
+  .wide img { width:100%; height:100%; object-fit:cover; display:block; }
+  .wide figcaption { position:absolute; left:0; right:0; bottom:0; padding:6px 8px; font-size:9.5px; color:#fff;
+    background:linear-gradient(0deg,rgba(0,0,0,.7),transparent); }
 </style></head>
 <body>
-  <div class="eyebrow">Imagery — full-bleed AI photography, warm-meets-cool, soft grain</div>
+  <div class="eyebrow">Imagery — sample pool · candid smartphone photography, soft grain · use these (no external CDN)</div>
+
+  <div class="sec">Reel / post samples — assets/images/reel/ (12) · story cells 9:16, pin thumbs, full-bleed</div>
   <div class="imgs">
+    <figure><img src="../../assets/images/reel/reel00001.jpg"><figcaption>reel00001 · matcha latte overhead</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00002.jpg"><figcaption>reel00002 · shiba nap</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00003.jpg"><figcaption>reel00003 · cherry blossoms</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00004.jpg"><figcaption>reel00004 · riverside fireworks</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00005.jpg"><figcaption>reel00005 · festival stage lights</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00006.jpg"><figcaption>reel00006 · festival crowd</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00007.jpg"><figcaption>reel00007 · beach group selfie</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00008.jpg"><figcaption>reel00008 · summer fes selfie</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00009.jpg"><figcaption>reel00009 · night food stall flash</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00010.jpg"><figcaption>reel00010 · izakaya friends flash</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00011.jpg"><figcaption>reel00011 · live penlights</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel00012.jpg"><figcaption>reel00012 · sunset beach walk</figcaption></figure>
+  </div>
+
+  <div class="sec">User / avatar samples — assets/images/user/ (8) · WdAvatar, chat rows, comment rows</div>
+  <div class="avs">
+    <figure><div class="ring"><img src="../../assets/images/user/user00001.jpg"></div><figcaption>user00001</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00002.jpg"></div><figcaption>user00002</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00003.jpg"></div><figcaption>user00003</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00004.jpg"></div><figcaption>user00004</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00005.jpg"></div><figcaption>user00005</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00006.jpg"></div><figcaption>user00006</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00007.jpg"></div><figcaption>user00007</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user00008.jpg"></div><figcaption>user00008</figcaption></figure>
+  </div>
+
+  <div class="sec">Fixed assets — keep as-is</div>
+  <div class="wide">
     <figure><img src="../../assets/images/auth_background.png"><figcaption>auth_background · grainy gradient figure</figcaption></figure>
-    <figure><img src="https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png"><figcaption>circle cover</figcaption></figure>
-    <figure><img src="https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png"><figcaption>story content</figcaption></figure>
+    <figure><img src="../../assets/images/sample_3d.png"><figcaption>sample_3d · 3D object render (not a photo)</figcaption></figure>
+    <figure><img src="../../assets/images/sample_photo.png"><figcaption>sample_photo · legacy — prefer reel pool</figcaption></figure>
   </div>
 </body></html>

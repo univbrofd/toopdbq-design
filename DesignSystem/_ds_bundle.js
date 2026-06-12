@@ -1395,17 +1395,17 @@ try { (() => {
    sits on a gradient fallback so the kit never shows a broken image. */
 (function () {
   const IMG = {
-    a: 'https://cdn.midjourney.com/e5eb9ca5-2c88-4568-81ba-3503bac726f2/0_2.png',
-    b: '../../assets/images/sample_3d.png',
-    c: 'https://cdn.midjourney.com/97b2133d-6ad1-4461-9ff9-e9a6c2542874/0_0.png',
-    d: '../../assets/images/sample_photo.png'
+    a: '../../../assets/images/reel/reel00012.jpg',
+    b: '../../../assets/images/sample_3d.png',
+    c: '../../../assets/images/reel/reel00006.jpg',
+    d: '../../../assets/images/sample_photo.png'
   };
   const AV = {
-    sunny: 'https://cdn.midjourney.com/c790de85-4c22-4123-8f20-38af0775144e/0_3.png',
-    pixel: 'https://cdn.midjourney.com/285b42f6-dce1-4315-92de-5c3e1be3c58c/0_1.png',
-    star: 'https://cdn.midjourney.com/81a14691-fa66-4bb1-be24-a087cf1fcad4/0_2.png'
+    sunny: '../../../assets/images/user/user00003.jpg',
+    pixel: '../../../assets/images/user/user00002.jpg',
+    star: '../../../assets/images/user/user00007.jpg'
   };
-  window.ICONS = '../../assets/icons/';
+  window.ICONS = '../../../assets/icons/';
   window.IMG = IMG;
   window.AV = AV;
 
