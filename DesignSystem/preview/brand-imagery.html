@@ -16,46 +16,85 @@
   .avs img { width:100%; height:100%; object-fit:cover; display:block; }
   .avs figcaption { margin-top:6px; font-size:9.5px; color:var(--text-2); }
   .wide { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
-  .wide figure { position:relative; height:120px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,.1); margin:0; }
-  .wide img { width:100%; height:100%; object-fit:cover; display:block; }
+  .wide figure { position:relative; height:120px; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,.1); margin:0;
+    display:flex; align-items:center; justify-content:center; background:#1a1a20; }
+  .wide img { max-width:100%; max-height:100%; object-fit:contain; display:block; }
+  .wide .cover img, .wide figure.cover img { width:100%; height:100%; object-fit:cover; }
   .wide figcaption { position:absolute; left:0; right:0; bottom:0; padding:6px 8px; font-size:9.5px; color:#fff;
     background:linear-gradient(0deg,rgba(0,0,0,.7),transparent); }
 </style></head>
 <body>
-  <div class="eyebrow">Imagery — sample pool · candid smartphone photography, soft grain · use these (no external CDN)</div>
+  <div class="eyebrow">Imagery — sample pool · candid smartphone photography, soft grain · use these only (no external CDN)</div>
 
-  <div class="sec">Reel / post samples — assets/images/reel/ (12) · story cells 9:16, pin thumbs, full-bleed</div>
+  <div class="sec">Background samples — assets/images/background/ (16) · 816×1456 · full-bleed screen backgrounds, splash, hero</div>
   <div class="imgs">
-    <figure><img src="../../assets/images/reel/reel00001.jpg"><figcaption>reel00001 · matcha latte overhead</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00002.jpg"><figcaption>reel00002 · shiba nap</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00003.jpg"><figcaption>reel00003 · cherry blossoms</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00004.jpg"><figcaption>reel00004 · riverside fireworks</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00005.jpg"><figcaption>reel00005 · festival stage lights</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00006.jpg"><figcaption>reel00006 · festival crowd</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00007.jpg"><figcaption>reel00007 · beach group selfie</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00008.jpg"><figcaption>reel00008 · summer fes selfie</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00009.jpg"><figcaption>reel00009 · night food stall flash</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00010.jpg"><figcaption>reel00010 · izakaya friends flash</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00011.jpg"><figcaption>reel00011 · live penlights</figcaption></figure>
-    <figure><img src="../../assets/images/reel/reel00012.jpg"><figcaption>reel00012 · sunset beach walk</figcaption></figure>
+    <figure><img src="../../assets/images/background/background001.jpg"><figcaption>background001 · breakfast spread overhead</figcaption></figure>
+    <figure><img src="../../assets/images/background/background002.jpg"><figcaption>background002 · matcha latte &amp; croissant</figcaption></figure>
+    <figure><img src="../../assets/images/background/background003.jpg"><figcaption>background003 · strawberry pancakes overhead</figcaption></figure>
+    <figure><img src="../../assets/images/background/background004.jpg"><figcaption>background004 · cat interrupting laptop</figcaption></figure>
+    <figure><img src="../../assets/images/background/background005.jpg"><figcaption>background005 · golden retriever, palm park</figcaption></figure>
+    <figure><img src="../../assets/images/background/background006.jpg"><figcaption>background006 · shiba inu napping</figcaption></figure>
+    <figure><img src="../../assets/images/background/background007.jpg"><figcaption>background007 · cherry blossoms over path</figcaption></figure>
+    <figure><img src="../../assets/images/background/background008.jpg"><figcaption>background008 · first snow, residential street</figcaption></figure>
+    <figure><img src="../../assets/images/background/background009.jpg"><figcaption>background009 · concert crowd, colorful lights</figcaption></figure>
+    <figure><img src="../../assets/images/background/background010.jpg"><figcaption>background010 · outdoor fes stage at dusk</figcaption></figure>
+    <figure><img src="../../assets/images/background/background011.jpg"><figcaption>background011 · summer fes trio selfie</figcaption></figure>
+    <figure><img src="../../assets/images/background/background012.jpg"><figcaption>background012 · vending machine, night flash</figcaption></figure>
+    <figure><img src="../../assets/images/background/background013.jpg"><figcaption>background013 · cafe window, woman &amp; drink</figcaption></figure>
+    <figure><img src="../../assets/images/background/background014.jpg"><figcaption>background014 · penlights at live show</figcaption></figure>
+    <figure><img src="../../assets/images/background/background015.jpg"><figcaption>background015 · morning yoga stretch</figcaption></figure>
+    <figure><img src="../../assets/images/background/background016.jpg"><figcaption>background016 · sunset seaside walk</figcaption></figure>
   </div>
 
-  <div class="sec">User / avatar samples — assets/images/user/ (8) · WdAvatar, chat rows, comment rows</div>
+  <div class="sec">Reel / post samples — assets/images/reel/ (15) · 816×1456 · story cells 9:16, reels, pin thumbs, covers</div>
+  <div class="imgs">
+    <figure><img src="../../assets/images/reel/reel001.jpg"><figcaption>reel001 · strawberry pancakes overhead</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel002.jpg"><figcaption>reel002 · cat interrupting laptop</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel003.jpg"><figcaption>reel003 · golden retriever, palm park</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel004.jpg"><figcaption>reel004 · shiba inu napping</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel005.jpg"><figcaption>reel005 · fireworks over river</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel006.jpg"><figcaption>reel006 · beach trio selfie, dusk</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel007.jpg"><figcaption>reel007 · izakaya alley friends, night</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel008.jpg"><figcaption>reel008 · night flash selfie, friends</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel009.jpg"><figcaption>reel009 · travel, old town street</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel010.jpg"><figcaption>reel010 · sunset alley portrait</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel011.jpg"><figcaption>reel011 · autumn portrait, beanie</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel012.jpg"><figcaption>reel012 · railway walk, moody</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel013.jpg"><figcaption>reel013 · countryside from train window</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel014.jpg"><figcaption>reel014 · latte in hand by window</figcaption></figure>
+    <figure><img src="../../assets/images/reel/reel015.jpg"><figcaption>reel015 · bouldering gym climb</figcaption></figure>
+  </div>
+
+  <div class="sec">User / avatar samples — assets/images/user/ (16) · 480×480 · WdAvatar, chat rows, comment rows (small circular, face-centered)</div>
   <div class="avs">
-    <figure><div class="ring"><img src="../../assets/images/user/user00001.jpg"></div><figcaption>user00001</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00002.jpg"></div><figcaption>user00002</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00003.jpg"></div><figcaption>user00003</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00004.jpg"></div><figcaption>user00004</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00005.jpg"></div><figcaption>user00005</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00006.jpg"></div><figcaption>user00006</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00007.jpg"></div><figcaption>user00007</figcaption></figure>
-    <figure><div class="ring"><img src="../../assets/images/user/user00008.jpg"></div><figcaption>user00008</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user001.jpg"></div><figcaption>user001 · shadow silhouette</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user002.jpg"></div><figcaption>user002 · cafe smile, knit</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user003.jpg"></div><figcaption>user003 · k-pop edgy</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user004.jpg"></div><figcaption>user004 · crescent moon sky</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user005.jpg"></div><figcaption>user005 · dark curly, sheer</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user006.jpg"></div><figcaption>user006 · monochrome man</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user007.jpg"></div><figcaption>user007 · terrace, standing</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user008.jpg"></div><figcaption>user008 · sky selfie, pink tee</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user009.jpg"></div><figcaption>user009 · red beret, braids</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user010.jpg"></div><figcaption>user010 · long dark hair</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user011.jpg"></div><figcaption>user011 · mirror selfie, coast</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user012.jpg"></div><figcaption>user012 · canyon overlook</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user013.jpg"></div><figcaption>user013 · pink sweat, seaside</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user014.jpg"></div><figcaption>user014 · ferris wheel dusk</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user015.jpg"></div><figcaption>user015 · black top, backlit</figcaption></figure>
+    <figure><div class="ring"><img src="../../assets/images/user/user016.jpg"></div><figcaption>user016 · mountain cabin cafe</figcaption></figure>
+  </div>
+
+  <div class="sec">Logos — assets/images/ · PNG with transparency · do not recreate, use as-is</div>
+  <div class="wide">
+    <figure><img src="../../assets/images/logo_toopdbq.png"><figcaption>logo_toopdbq · app logo</figcaption></figure>
+    <figure><img src="../../assets/images/logo_apple.png"><figcaption>logo_apple · auth button</figcaption></figure>
+    <figure><img src="../../assets/images/logo_google.png"><figcaption>logo_google · auth button</figcaption></figure>
   </div>
 
   <div class="sec">Fixed assets — keep as-is</div>
   <div class="wide">
-    <figure><img src="../../assets/images/auth_background.png"><figcaption>auth_background · grainy gradient figure</figcaption></figure>
-    <figure><img src="../../assets/images/sample_3d.png"><figcaption>sample_3d · 3D object render (not a photo)</figcaption></figure>
-    <figure><img src="../../assets/images/sample_photo.png"><figcaption>sample_photo · legacy — prefer reel pool</figcaption></figure>
+    <figure class="cover"><img src="../../assets/images/auth_background.png"><figcaption>auth_background · grainy gradient figure</figcaption></figure>
+    <figure><img src="../../assets/images/uv/obj-01.png"><figcaption>uv/obj-01..04 · 3D object renders (Universe)</figcaption></figure>
   </div>
 </body></html>

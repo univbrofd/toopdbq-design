@@ -1,64 +1,81 @@
-# HANDOFF — SampleImagery（サンプル画像プールの全面リフレッシュ）
+# HANDOFF — SampleImagery（サンプル画像プール v2: background / reel / user / logo）
 
 - repo: `univbrofd/toopdbq-design`（branch `main`）
 - raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
 - DS 索引: `DesignSystem/_ds_manifest.json`
-- カタログ specimen: `DesignSystem/preview/brand-imagery.html`（リフレッシュ済み・全プールを一覧表示）
+- カタログ specimen: `DesignSystem/preview/brand-imagery.html`（全プールをラベル付きで一覧表示）
 
 ## 背景 / 何が変わったか
 
-- 旧状態: specimen 群が `cdn.midjourney.com` への外部リンク 7 種・102 箇所に依存。**全てリンク切れ**で壊れ画像表示だった。ほかに `sample_photo.png` 1 枚の使い回し。
-- 新状態: repo 内サンプルプールに全面移行。旧 CDN 参照 102 箇所は repo 内アセットへ**機械置換済み**（URL→1 枚の固定マップ。文脈ごとの最適化は未実施 → 下の「要求」参照）。
-- 枚数は「1 画面に同時に見える数（リールセル 6–8・アバター 4–6）＋ローテーションに足る最小」で選定: reel 12 / user 8。Midjourney 生成 64 枚から多様性基準で厳選し、長辺 800/480 の JPEG に最適化（repo 重量 124MB→1.3MB）。
+- プールを 3 フォルダ構成に再編: **background（フルスクリーン背景用 16）/ reel（投稿・リール用 15）/ user（アバター用 16）**。命名は `background001.jpg` 形式の 3 桁連番。
+- 旧プール（`reel00001..12.jpg` / `user00001..08.jpg`・5 桁）と legacy の `sample_photo.png` / `sample_3d.png` は**廃止**。specimen 内の旧参照 163 箇所はテーマが近い新画像へ機械置換済み（文脈ごとの最適化は未実施 → 下の「要求」参照）。
+- アプリロゴ `logo_toopdbq.png` を追加（透過 PNG）。`logo_apple.png` / `logo_google.png` と同列。
 
 ## プール一覧
 
-`assets/images/reel/`（投稿/リール写真 12 枚・縦長・長辺 800px）:
+`assets/images/background/`（フルスクリーン背景 16 枚・816×1456・9:16）:
 
-| file | 内容 |
-|---|---|
-| reel00001.jpg | 抹茶ラテ俯瞰 |
-| reel00002.jpg | 柴犬の昼寝 |
-| reel00003.jpg | 桜 |
-| reel00004.jpg | 川辺の花火 |
-| reel00005.jpg | フェスのステージ照明 |
-| reel00006.jpg | フェスの群衆 |
-| reel00007.jpg | ビーチ3人セルフィー |
-| reel00008.jpg | 夏フェスセルフィー |
-| reel00009.jpg | 夜の屋台（フラッシュ） |
-| reel00010.jpg | 居酒屋の友人（フラッシュ） |
-| reel00011.jpg | ライブのペンライト |
-| reel00012.jpg | 夕暮れの海辺を歩く人 |
+| file | 内容 | file | 内容 |
+|---|---|---|---|
+| background001 | 朝食スプレッド俯瞰 | background009 | ライブ群衆・カラフル照明 |
+| background002 | 抹茶ラテ＋クロワッサン | background010 | 野外フェスステージ（夕暮れ） |
+| background003 | 苺パンケーキ俯瞰 | background011 | 夏フェス3人セルフィー |
+| background004 | PCに乱入する猫 | background012 | 夜の自販機（フラッシュ） |
+| background005 | ゴールデンレトリバー | background013 | カフェ窓辺の女性 |
+| background006 | 柴犬の昼寝 | background014 | ペンライトの海 |
+| background007 | 桜と遊歩道 | background015 | 朝のヨガ |
+| background008 | 初雪の住宅街 | background016 | 夕暮れの海辺を歩く人 |
 
-`assets/images/user/`（アバター用 8 枚・長辺 480px）:
+`assets/images/reel/`（投稿/リール写真 15 枚・816×1456・9:16）:
 
-| file | 内容 |
-|---|---|
-| user00001.jpg | 金髪・フェス会場セルフィー |
-| user00002.jpg | 赤ベレー帽 |
-| user00003.jpg | 黒髪ウェーブ・室内 |
-| user00004.jpg | 窓辺・緑ジャケット |
-| user00005.jpg | 犬を抱く |
-| user00006.jpg | 白パーカー |
-| user00007.jpg | カーリーヘア・笑顔 |
-| user00008.jpg | 夜の居酒屋セルフィー |
+| file | 内容 | file | 内容 |
+|---|---|---|---|
+| reel001 | 苺パンケーキ俯瞰 | reel009 | 旧市街を歩く（旅行） |
+| reel002 | PCに乱入する猫 | reel010 | 夕焼けの路地ポートレート |
+| reel003 | ゴールデンレトリバー | reel011 | 黄葉とニット帽 |
+| reel004 | 柴犬の昼寝 | reel012 | 線路を歩く（モノトーン） |
+| reel005 | 川辺の花火 | reel013 | 車窓からの田園 |
+| reel006 | ビーチ3人セルフィー | reel014 | 窓辺のラテ（手元） |
+| reel007 | 路地裏居酒屋の友人達 | reel015 | ボルダリング |
+| reel008 | 夜のフラッシュセルフィー | | |
+
+※ reel001–004 は background003–006 と同一画像（両プールで使えるよう双方に配置）。
+
+`assets/images/user/`（アバター用 16 枚・480×480 正方形）:
+
+| file | 内容 | file | 内容 |
+|---|---|---|---|
+| user001 | 壁の人影（匿名） | user009 | 赤ベレー帽・三つ編み |
+| user002 | カフェの笑顔・ニット | user010 | 黒髪ロング |
+| user003 | k-pop 系エッジ | user011 | ミラーセルフィー・海岸 |
+| user004 | 三日月の夜空と | user012 | 渓谷を見下ろす後ろ姿 |
+| user005 | 黒巻き髪・シアー | user013 | ピンクスウェット・海辺 |
+| user006 | モノクロ・座る男性 | user014 | 観覧車と夕暮れシルエット |
+| user007 | テラスに立つ | user015 | 黒トップ・逆光 |
+| user008 | 空背景の自撮り | user016 | 山小屋カフェ |
+
+ロゴ（`assets/images/` 直下・透過 PNG・再作成禁止）:
+
+- `logo_toopdbq.png` — アプリロゴ（820×865）
+- `logo_apple.png` / `logo_google.png` — 認証ボタン用
 
 ## 使い分けルール
 
-- 投稿セル（9:16）・リール・ピン thumb・story full-bleed・circle カバー → `assets/images/reel/`
-- アバター・チャット行・コメント行・メンバーリスト → `assets/images/user/`
-- `auth_background.png`（ログイン/スプラッシュ背景）・`sample_3d.png`（3D オブジェクトのレンダ。写真ではない）は従来どおり固定
-- `assets/images/uv/` は Universe specimen 専用の**派生セット**: `story-01..10.png`・`circle-01..10.png` は reel プールからの再エクスポート（story-NN = reel000NN / circle-NN = reel000(13−NN)）、`obj-01..04.png` は 3D 透過 PNG で独立。新規デザインでは uv/ でなく reel/user プールを直接使う
-- `sample_photo.png` は legacy。新規デザインでは reel プールを使う
-- **外部 CDN（midjourney / unsplash 等）の画像参照は禁止**。必ず repo 内 `assets/images/` から相対参照する（`DesignSystem/preview/*.html` → `../../assets/...`）
+- **フルスクリーン背景**（splash・ログイン裏・story full-bleed・hero）→ `background/`。816×1456 で 393×852 のフル表示に十分な解像度
+- **投稿セル（9:16）・リール・ピン thumb・circle カバー** → `reel/`
+- **アバター・チャット行・コメント行・メンバーリスト** → `user/`（円形 44–96px、顔が中心に来るよう `object-position` 調整）
+- `auth_background.png`（ログイン背景のグラデ人物）は従来どおり固定
+- `assets/images/uv/` は Universe specimen 専用の**派生セット**: `story-01..10.png` = reel001..010、`circle-01..10.png` = reel015..006 の正方 crop、`obj-01..04.png` は 3D 透過 PNG で独立。新規デザインでは uv/ でなく background/reel/user プールを直接使う
+- **外部 CDN（midjourney / unsplash 等）の画像参照・プレースホルダ生成は禁止**。必ず repo 内 `assets/images/` から相対参照する（`DesignSystem/preview/*.html` → `../../assets/...`）
 
 ## スマホ配置文脈
 
-Toopdbq はスマホアプリ（393×852 + SafeArea）。reel は 9:16 セル・full-bleed 背景で `object-fit: cover`、user は円形 44–96px で顔が中心に来るよう `object-position` を調整して使う。
+Toopdbq はスマホアプリ（393×852 + SafeArea）。background / reel は 9:16 で `object-fit: cover`、user は円形 44–96px。full-bleed・Ken Burns・カバー用途は被写体に合わせ `object-position` を調整して使う。
 
 ## Claude Design への要求
 
-1. 機械置換のため、同一画面に同じ画像・同じアバターが隣接する specimen がある。各 specimen（特に screen-04 universe / screen-05 story-viewer / comp-chat-list / comp-09-rows / comp-16 comment sheet）で、プールから文脈に合う画像へ振り直す（隣接重複をなくす）。
-2. full-bleed / Ken Burns / カバー用途は被写体に合わせ `object-position` を調整する。
-3. 今後の新規デザイン・Remix でもこのプールだけを使う（プレースホルダや外部 URL を生成しない）。
-4. `brand-imagery.html` をプールの単一カタログとして維持する（画像の追加・差し替え時はここも更新）。
+1. 旧→新の機械置換のため、同一画面に同じ画像・同じアバターが並ぶ specimen がある。各 specimen（特に screen-04 universe / screen-05 story-viewer / comp-chat-list / comp-09-rows / comp-16 comment sheet / onboarding）で、プールから文脈に合う画像へ振り直す（隣接重複をなくす）。
+2. フルスクリーン背景用途は `background/`、投稿セルは `reel/`、アバターは `user/` と**用途どおりのプールから**選ぶ（今回追加された background プールを活用する）。
+3. `logo_toopdbq.png` をログイン／スプラッシュ系 specimen のロゴ表示に取り込む（ロゴの再描画・再生成は禁止、PNG をそのまま使う）。
+4. full-bleed / Ken Burns / カバー用途は被写体に合わせ `object-position` を調整する。
+5. `brand-imagery.html` をプールの単一カタログとして維持する（画像の追加・差し替え時はここも更新）。
