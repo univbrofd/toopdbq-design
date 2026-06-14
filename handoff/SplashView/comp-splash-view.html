@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toopdbq — SplashView</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body);
+    background: #08080b radial-gradient(120% 90% at 50% -10%, #161226, #07070a 70%);
+    color: #fff; -webkit-font-smoothing: antialiased;
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 26px; padding: 40px 24px;
+  }
+
+  /* ---- Phone frame (matches the UI-kit bezel) --------------------------- */
+  .phone {
+    position: relative; width: 393px; height: 852px; border-radius: 46px;
+    background: #000; box-shadow: 0 40px 120px rgba(0,0,0,.7), 0 0 0 11px #1b1b20, 0 0 0 12px #2c2c33;
+    overflow: hidden; flex: none;
+  }
+  .screen { position: absolute; inset: 0; overflow: hidden; background: #000; }
+
+  /* status bar / home indicator */
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 60;
+    display: flex; align-items: flex-end; justify-content: space-between; padding: 0 28px 8px;
+    font-family: var(--font-latin); font-weight: 600; font-size: 15px; color: #fff;
+    pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,.6);
+  }
+  .statusbar .right { display: flex; align-items: center; gap: 6px; }
+  .home-indicator {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    width: 134px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.85); z-index: 60;
+  }
+
+  .layer { position: absolute; inset: 0; }
+
+  /* ====================================================================== */
+  /* SPLASH                                                                  */
+  /* ====================================================================== */
+  .splash { background: #000; z-index: 30; }
+
+  /* heavily-blurred full-bleed auth backdrop (Flutter: ImageFilter.blur 32) */
+  .splash .bg {
+    position: absolute; inset: -16%; width: 132%; height: 132%;
+    object-fit: cover; filter: blur(34px) saturate(108%); transform: scale(1.04);
+  }
+  /* teal "secondary" tint @20% (Color(0xFF198679).withOpacity(.2)) */
+  .splash .tint { position: absolute; inset: 0; background: rgba(25, 134, 121, .20); }
+  /* gentle center vignette so the wordmark anchors the eye */
+  .splash .vignette { position: absolute; inset: 0;
+    background: radial-gradient(72% 56% at 50% 47%, transparent 38%, rgba(0,0,0,.34) 100%); }
+
+  /* ---- White logo group ------------------------------------------------- */
+  .mark {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 80%; height: 200px; display: flex; align-items: center; justify-content: center;
+    animation: markIn 1200ms cubic-bezier(.16,1,.3,1) both;
+  }
+  @keyframes markIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(.965); filter: blur(6px); }
+    to   { opacity: 1; transform: translate(-50%, -50%) scale(1);     filter: blur(0); }
+  }
+  .mark .logo {
+    width: 42px; height: auto; object-fit: contain;
+    filter: drop-shadow(0 6px 22px rgba(0,0,0,.45));
+    animation: breathe 3.6s var(--ease-standard) infinite;
+  }
+  @keyframes breathe {
+    0%, 100% { opacity: .92; transform: scale(1); }
+    50%      { opacity: 1;  transform: scale(1.035); }
+  }
+
+  /* tagline + boot pulse — faithful: app shows none, so kept whisper-quiet */
+  .boot {
+    position: absolute; left: 0; right: 0; bottom: 84px; display: flex;
+    flex-direction: column; align-items: center; gap: 16px;
+    opacity: 0; animation: bootIn .8s ease 700ms both;
+  }
+  @keyframes bootIn { to { opacity: 1; } }
+  .boot .dots { display: flex; gap: 7px; }
+  .boot .dots i {
+    width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.85);
+    animation: dot 1.2s var(--ease-standard) infinite;
+  }
+  .boot .dots i:nth-child(2) { animation-delay: .16s; }
+  .boot .dots i:nth-child(3) { animation-delay: .32s; }
+  @keyframes dot { 0%,100% { opacity: .28; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+  .boot .status {
+    font-family: var(--font-latin); font-weight: 500; font-size: 11px; letter-spacing: .04em;
+    color: rgba(255,255,255,.6); text-shadow: 0 0 8px rgba(0,0,0,.9);
+  }
+
+  /* splash exit — fades + lifts away to reveal the app behind */
+  .splash.exit { animation: splashOut .7s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes splashOut {
+    to { opacity: 0; transform: scale(1.06); filter: blur(4px); }
+  }
+
+  /* ====================================================================== */
+  /* Black screen revealed once the splash lifts away                        */
+  /* ====================================================================== */
+  .black-screen { z-index: 10; background: #000; }
+
+  /* ---- Replay control (outside the device) ----------------------------- */
+  .replay {
+    display: inline-flex; align-items: center; gap: 9px; cursor: pointer; border: none;
+    padding: 11px 20px; border-radius: 9999px; color: rgba(255,255,255,.92);
+    font-family: var(--font-latin); font-weight: 600; font-size: 13px; letter-spacing: .02em;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(8px); transition: background .15s, transform .12s;
+  }
+  .replay:hover { background: rgba(255,255,255,.12); }
+  .replay:active { transform: scale(.97); }
+  .replay svg { display: block; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark, .mark .logo, .boot .dots i, .splash.exit { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+
+      <!-- After splash lifts away: just plain black -->
+      <div class="layer black-screen"></div>
+
+      <!-- SPLASH -->
+      <div class="layer splash" id="splash">
+        <img class="bg" src="../../assets/images/auth_background.png" alt="" aria-hidden="true">
+        <div class="tint"></div>
+        <div class="vignette"></div>
+
+        <div class="mark">
+          <img class="logo" src="../../assets/images/logo_toopdbq.png" alt="Toopdbq">
+        </div>
+
+        <div class="boot">
+          <div class="dots"><i></i><i></i><i></i></div>
+          <div class="status" id="status">Starting up…</div>
+        </div>
+
+        <div class="statusbar">
+          <span>9:41</span>
+          <div class="right">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.5c2.1 0 4 .8 5.4 2.1l1.3-1.4A10 10 0 0 0 8.5.5 10 10 0 0 0 1.8 3.2l1.3 1.4A8 8 0 0 1 8.5 2.5Z"/><path d="M8.5 6c1 0 2 .4 2.7 1.1l1.3-1.4A6 6 0 0 0 8.5 4 6 6 0 0 0 4 5.7l1.3 1.4A4 4 0 0 1 8.5 6Z"/><circle cx="8.5" cy="9.8" r="1.8"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="2.5" stroke="#fff" stroke-opacity="0.5"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.5" fill="#fff"/><rect x="23" y="4" width="2" height="4" rx="1" fill="#fff" fill-opacity="0.5"/></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="replay" id="replay">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    Replay boot sequence
+  </button>
+
+<script>
+  // Mirrors SplashController._runInitTasks(): serial native-touching tasks,
+  // then AppStateController.ready=true lifts the Splash overlay off MainView.
+  const splash = document.getElementById('splash');
+  const status = document.getElementById('status');
+  const PHASES = [
+    [600,  'Loading preferences…'],
+    [1150, 'Authenticating…'],
+    [1750, 'Fetching nearby circles…'],
+    [2450, 'Syncing stories…'],
+    [3000, 'Ready'],
+  ];
+  let timers = [];
+  function run() {
+    timers.forEach(clearTimeout); timers = [];
+    splash.classList.remove('exit');
+    splash.querySelectorAll('.mark, .boot').forEach(el => { el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; });
+    status.textContent = 'Starting up…';
+    PHASES.forEach(([t, label]) => timers.push(setTimeout(() => { status.textContent = label; }, t)));
+    timers.push(setTimeout(() => splash.classList.add('exit'), 3200));
+  }
+  document.getElementById('replay').addEventListener('click', run);
+  run();
+</script>
+</body>
+</html>
