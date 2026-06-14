@@ -119,7 +119,8 @@ Two variants (`grid`, `shuffle`) fall back to **Material rounded** icons (`grid_
 | `SKILL.md` | Agent-Skill manifest for using this system in Claude Code. |
 | `fonts/` | `Pacifico-Regular.ttf` (wordmark). Inter + Noto Sans JP load from Google Fonts. |
 | `assets/icons/` | The 29 custom white PNG UI icons. |
-| `assets/images/` | `auth_background.png`, `logo_google.png`, `logo_apple.png`. |
+| `assets/images/` | Real brand assets: `auth_background.png`, `logo_toopdbq.png`, `logo_google.png`, `logo_apple.png`. |
+| `assets/sample/` | Sample imagery pool (placeholder photos): `background/` (16), `reel/` (15), `user/` (16), `uv/` (24 — Universe-only derived set). Specimens reference these for any photo content. |
 | `preview/` | Design-system specimen cards (colors, type, components) shown in the Design System tab. |
 | `ui_kits/app/` | High-fidelity, interactive recreation of the Toopdbq mobile app — components + a click-through `index.html`. |
 

@@ -13,7 +13,7 @@
 
 ## プール一覧
 
-`assets/images/background/`（フルスクリーン背景 16 枚・816×1456・9:16）:
+`assets/sample/background/`（フルスクリーン背景 16 枚・816×1456・9:16）:
 
 | file | 内容 | file | 内容 |
 |---|---|---|---|
@@ -26,7 +26,7 @@
 | background007 | 桜と遊歩道 | background015 | 朝のヨガ |
 | background008 | 初雪の住宅街 | background016 | 夕暮れの海辺を歩く人 |
 
-`assets/images/reel/`（投稿/リール写真 15 枚・816×1456・9:16）:
+`assets/sample/reel/`（投稿/リール写真 15 枚・816×1456・9:16）:
 
 | file | 内容 | file | 内容 |
 |---|---|---|---|
@@ -41,7 +41,7 @@
 
 ※ reel001–004 は background003–006 と同一画像（両プールで使えるよう双方に配置）。
 
-`assets/images/user/`（アバター用 16 枚・480×480 正方形）:
+`assets/sample/user/`（アバター用 16 枚・480×480 正方形）:
 
 | file | 内容 | file | 内容 |
 |---|---|---|---|
@@ -65,8 +65,8 @@
 - **投稿セル（9:16）・リール・ピン thumb・circle カバー** → `reel/`
 - **アバター・チャット行・コメント行・メンバーリスト** → `user/`（円形 44–96px、顔が中心に来るよう `object-position` 調整）
 - `auth_background.png`（ログイン背景のグラデ人物）は従来どおり固定
-- `assets/images/uv/` は Universe specimen 専用の**派生セット**: `story-01..10.png` = reel001..010、`circle-01..10.png` = reel015..006 の正方 crop、`obj-01..04.png` は 3D 透過 PNG で独立。新規デザインでは uv/ でなく background/reel/user プールを直接使う
-- **外部 CDN（midjourney / unsplash 等）の画像参照・プレースホルダ生成は禁止**。必ず repo 内 `assets/images/` から相対参照する（`DesignSystem/preview/*.html` → `../../assets/...`）
+- `assets/sample/uv/` は Universe specimen 専用の**派生セット**: `story-01..10.png` = reel001..010、`circle-01..10.png` = reel015..006 の正方 crop、`obj-01..04.png` は 3D 透過 PNG で独立。新規デザインでは uv/ でなく background/reel/user プールを直接使う
+- **外部 CDN（midjourney / unsplash 等）の画像参照・プレースホルダ生成は禁止**。必ず repo 内 `assets/sample/`（サンプル）・`assets/images/`（logo 等）から相対参照する（`DesignSystem/preview/*.html` → `../../assets/...`）
 
 ## スマホ配置文脈
 

@@ -3,7 +3,7 @@
 - repo: `univbrofd/toopdbq-design`（main）/ raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
 - DS 索引: `DesignSystem/_ds_manifest.json`（cards / tokens / fonts。ここから全 specimen を辿れる）
 - foundation: `DesignSystem/USAGE_RULES.md` / `taste.md` / `colors_and_type.css` / `preview/card.css` / `preview/components.css`
-- 共有アセット: `assets/icons/` `assets/images/`（per-View 複製禁止・相対参照）
+- 共有アセット: `assets/icons/` `assets/sample/` `assets/images/`（per-View 複製禁止・相対参照）
 
 ## 目的
 

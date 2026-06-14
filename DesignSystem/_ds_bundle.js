@@ -1395,15 +1395,15 @@ try { (() => {
    sits on a gradient fallback so the kit never shows a broken image. */
 (function () {
   const IMG = {
-    a: '../../../assets/images/reel/reel015.jpg',
-    b: '../../../assets/images/reel/reel002.jpg',
-    c: '../../../assets/images/reel/reel007.jpg',
-    d: '../../../assets/images/reel/reel010.jpg'
+    a: '../../../assets/sample/reel/reel015.jpg',
+    b: '../../../assets/sample/reel/reel002.jpg',
+    c: '../../../assets/sample/reel/reel007.jpg',
+    d: '../../../assets/sample/reel/reel010.jpg'
   };
   const AV = {
-    sunny: '../../../assets/images/user/user010.jpg',
-    pixel: '../../../assets/images/user/user009.jpg',
-    star: '../../../assets/images/user/user005.jpg'
+    sunny: '../../../assets/sample/user/user010.jpg',
+    pixel: '../../../assets/sample/user/user009.jpg',
+    star: '../../../assets/sample/user/user005.jpg'
   };
   window.ICONS = '../../../assets/icons/';
   window.IMG = IMG;
