@@ -1,0 +1,187 @@
+<!-- @dsCard group="Screens" name="PlanetView — Earth globe (live)" subtitle="UniverseView の地球儀そのもの。本体 assets/web/earth.html + earth/*.js をそのまま読み、Flutter bridge 不在でも単体起動する live specimen。MapLibre positron + globe projection、大気リング(#strato-shadow)、球縁白線(#globe-frame)、中心マーカー青ドット。pitch 0–55 / zoom -6..16(BASE 6.4)。ドラッグで回し、ホイールで寄り引き、プリセットで Globe/Region/Street+3D を切替。サムネ/クラスタピンは Flutter overlay 側(別 specimen=comp-universe-screen)で web には出ない。3D GLB(three.js custom layer)は web 描画。" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>PlanetView — Earth globe (live specimen)</title>
+  <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
+  <style>
+    /* 本体 earth.html と同一のレイヤ構成・装飾。specimen では背景を宇宙の暗色にする。 */
+    html, body {
+      height: 100%; margin: 0; padding: 0;
+      background: #05060a;
+      overflow: hidden;
+      touch-action: none;
+      -webkit-user-select: none; user-select: none;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+    /* レイヤ重ね順 (奥 → 手前): bg(宇宙) / strato(大気リング) / map(球) / center(青ドット) / frame(球縁白線) */
+    #bg-white {
+      position: absolute; inset: 0;
+      background: radial-gradient(120% 100% at 50% 38%, #0d1020 0%, #07080f 55%, #04040a 100%);
+      z-index: 0;
+    }
+    #strato-shadow {
+      position: absolute; inset: 0;
+      pointer-events: none; z-index: 1; display: none;
+      --cx: 0; --cy: 0; --r: 0; --w: 0;
+      background:
+        radial-gradient(circle at calc(var(--cx) * 1px) calc(var(--cy) * 1px),
+          rgba(0, 0, 0, 0)         calc(var(--r) * 1px),
+          rgba(164, 188, 250, 1.0) calc((var(--r) + 1) * 1px),
+          rgba(104, 118, 155, 0.5) calc((var(--r) + var(--w) * 0.5) * 1px),
+          rgba(0, 0, 0, 0.0)       calc((var(--r) + var(--w)) * 1px)
+        );
+      filter: blur(6px);
+    }
+    #map {
+      position: absolute; inset: 0;
+      background: transparent; z-index: 2;
+    }
+    #center-overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 3; overflow: visible;
+    }
+    #center-marker-glow { filter: blur(4px); }
+    .maplibregl-canvas-container, .maplibregl-canvas { background: transparent !important; }
+    #globe-frame {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 4; display: none; overflow: visible;
+      filter: blur(3px);
+    }
+    .maplibregl-ctrl-attrib { display: none !important; }
+
+    /* === specimen-only chrome (実機には無い・globe を触って確認するための補助) === */
+    .stage-hint {
+      position: absolute; left: 0; right: 0; top: 14px; z-index: 9;
+      text-align: center; pointer-events: none;
+      font: 500 11px/1.4 'Inter', system-ui, sans-serif;
+      letter-spacing: .04em; color: rgba(255,255,255,.5);
+      text-shadow: 0 1px 4px rgba(0,0,0,.8);
+    }
+    .stage-hint b { color: rgba(255,255,255,.82); font-weight: 600; }
+    .preset-bar {
+      position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+      z-index: 9; display: flex; gap: 8px; padding: 6px;
+      background: rgba(10,12,20,.52); border-radius: 999px;
+      backdrop-filter: blur(8px) saturate(150%); -webkit-backdrop-filter: blur(8px) saturate(150%);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.12), 0 6px 20px rgba(0,0,0,.5);
+    }
+    .preset-bar button {
+      appearance: none; border: none; cursor: pointer;
+      font: 600 11.5px/1 'Inter', system-ui, sans-serif; letter-spacing: .02em;
+      color: rgba(255,255,255,.78); background: rgba(255,255,255,.06);
+      padding: 9px 14px; border-radius: 999px; transition: background .18s, color .18s;
+    }
+    .preset-bar button:hover { background: rgba(255,255,255,.14); color: #fff; }
+    .preset-bar button.on {
+      color: #0c0c12;
+      background: linear-gradient(135deg, #fff0a6 0%, #80a787 35%, #005f67 60%, #ff3e88 100%);
+    }
+  </style>
+</head>
+<body>
+  <div id="bg-white"></div>
+  <div id="strato-shadow"></div>
+  <div id="map"></div>
+  <svg id="center-overlay" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <ellipse id="center-marker-glow" cx="0" cy="0" rx="0" ry="0" fill="rgba(66, 133, 244, 0.33)" />
+    <ellipse id="center-marker" cx="0" cy="0" rx="10" ry="10"
+             fill="rgba(66, 133, 244, 0.80)" stroke="#FFFFFF" stroke-width="1.2" />
+  </svg>
+  <svg id="globe-frame" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <circle id="globe-frame-circle" cx="0" cy="0" r="0" fill="none"
+            stroke="#ffffff" stroke-width="8" vector-effect="non-scaling-stroke" />
+  </svg>
+
+  <div class="stage-hint">PlanetView の地球儀（本体エンジンそのまま）・<b>ドラッグで回す / ホイールで寄り引き</b></div>
+  <div class="preset-bar">
+    <button data-preset="globe" class="on">🌍 Globe</button>
+    <button data-preset="region">🗾 Region</button>
+    <button data-preset="street">🏙 Street + 3D</button>
+  </div>
+
+  <!-- 本体と同じ順序・同じファイルを読む。bridge.js は FlutterChannel 不在で _sendToHost が no-op になり単体起動する。 -->
+  <script src="./earth/bridge.js"></script>
+  <script src="./earth/map-core.js"></script>
+  <script src="./earth/pins.js"></script>
+  <script src="./earth/overlay.js"></script>
+  <script src="./earth/models.js"></script>
+
+  <!-- ===== specimen-only bootstrap（実機は Flutter が camera/pins/models を駆動する。ここはそれを代替する最小デモ） ===== -->
+  <script>
+    (function () {
+      const MODELS = '../../assets/sample/models/';
+      // 本体は interactive:false で Flutter ジェスチャ駆動。specimen は触れるよう pan/zoom を解放する。
+      function enableInteraction() {
+        try {
+          map.dragPan.enable();
+          map.scrollZoom.enable();
+          map.touchZoomRotate.enable();
+          map.touchZoomRotate.disableRotation();
+        } catch (_) {}
+      }
+
+      const PRESETS = {
+        // 宇宙に浮かぶ球（大気リング + 球縁白線が出る引き）。
+        globe:  { zoom: 2.3,  lat: 22,      lng: 140,      pitch: 0 },
+        // 日本広域（街区手前・positron の街と緑）。
+        region: { zoom: 8.2,  lat: 35.66,   lng: 139.70,   pitch: 35 },
+        // 街区 + 地表に乗る 3D GLB（pitch 55 = 本体既定）。
+        street: { zoom: 14.0, lat: 35.6595, lng: 139.7005, pitch: 55 },
+      };
+
+      let spinTimer = null;
+      function stopSpin() { if (spinTimer) { clearInterval(spinTimer); spinTimer = null; } }
+      function startSpin() {
+        stopSpin();
+        // 球をゆっくり自転させる（lng を少しずつ回す）。本体の "Universe に浮かぶ地球" の語彙。
+        spinTimer = setInterval(() => {
+          try { const c = map.getCenter(); window.setCenter(c.lat, c.lng + 0.18); } catch (_) {}
+        }, 33);
+      }
+
+      function applyPreset(name) {
+        const p = PRESETS[name]; if (!p) return;
+        window.setCamera({ zoom: p.zoom, lat: p.lat, lng: p.lng, pitch: p.pitch });
+        document.querySelectorAll('.preset-bar button').forEach((b) =>
+          b.classList.toggle('on', b.dataset.preset === name));
+        if (name === 'globe') startSpin(); else stopSpin();
+      }
+
+      // 街区プリセットで地表に乗るサンプル 3D（実機は写真由来の人物 GLB。ここは DS 同梱サンプル）。
+      function loadSampleModels() {
+        try {
+          window.setModels({ models: [
+            { id: 'm1', lat: 35.6595, lng: 139.7005, url: MODELS + 'model-01.glb', scale: 220 },
+            { id: 'm2', lat: 35.6618, lng: 139.6995, url: MODELS + 'model-02.glb', scale: 180 },
+            { id: 'm3', lat: 35.6585, lng: 139.7028, url: MODELS + 'model-03.glb', scale: 180 },
+          ] });
+        } catch (_) {}
+      }
+
+      function boot() {
+        enableInteraction();
+        loadSampleModels();
+        // ?preset=globe|region|street で初期視点を直リンクできる（既定 globe）。
+        const wanted = new URLSearchParams(location.search).get('preset');
+        applyPreset(PRESETS[wanted] ? wanted : 'globe');
+        document.querySelectorAll('.preset-bar button').forEach((b) =>
+          b.addEventListener('click', () => applyPreset(b.dataset.preset)));
+        // 手で触ったら自転を止める（邪魔しない）。
+        ['mousedown', 'touchstart', 'wheel'].forEach((ev) =>
+          map.getCanvas().addEventListener(ev, stopSpin, { passive: true }));
+      }
+
+      // style 読み込み後に駆動を開始（projection / 初期 camera は overlay.js が style.load で確定済み）。
+      if (map.isStyleLoaded && map.isStyleLoaded()) boot();
+      else map.once('style.load', () => setTimeout(boot, 60));
+    })();
+  </script>
+</body>
+</html>
