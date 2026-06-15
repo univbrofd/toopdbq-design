@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UniverseView — Earth Globe (live specimen)</title>
+
+<!-- Toopdbq DS tokens (colors / type / fonts) -->
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css" />
+<!-- MapLibre GL JS — the real rendering engine (positron + globe projection) -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" />
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<!-- three.js — 地図上に乗る実 3D (real-NN.glb / EXT_meshopt_compression) を描く custom layer 用 -->
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
+
+<style>
+/* ============================================================================
+   STUDIO  — neutral backdrop so the globe specimen reads as a placed surface
+   ========================================================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; min-height: 100%;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0d0d0f 55%, #08080b 100%);
+  color: var(--text-1);
+  font-family: var(--font-latin);
+  -webkit-font-smoothing: antialiased;
+}
+.studio {
+  min-height: 100vh;
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: 40px; padding: 40px 36px 64px;
+  flex-wrap: wrap;
+}
+.stage { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+.specimen-cap { text-align: center; max-width: 402px; }
+.specimen-cap .eyebrow {
+  font-weight: 600; font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--fg-3);
+}
+.specimen-cap h1 {
+  font-family: var(--font-jp); font-weight: 700; font-size: 17px; margin-top: 6px;
+  color: var(--text-1);
+}
+.specimen-cap p { font-size: 11.5px; line-height: 1.55; color: var(--fg-2); margin-top: 7px; }
+
+/* ============================================================================
+   iPhone 17 frame  (402×874 · r55 · Dynamic Island)  — DS card.css canonical
+   ========================================================================== */
+.phone {
+  position: relative; width: 402px; height: 874px; flex: none;
+  border-radius: 55px; overflow: hidden; background: var(--bg);
+  box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
+              0 36px 90px rgba(0,0,0,.62);
+  isolation: isolate;
+}
+.phone .screen { position: absolute; inset: 0; overflow: hidden; }
+
+/* ---- L0  space backdrop  (#bg-white = the engine's space gradient) -------- */
+#bg-white {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(125% 120% at 50% 38%,
+      var(--space-core)  0%,
+      var(--space-mid)   46%,
+      var(--space-edge)  100%);
+  transition: opacity .6s var(--ease-out);
+}
+
+/* ---- L0  the MapLibre canvas (positron sphere) ---------------------------- */
+#map { position: absolute; inset: 0; z-index: 1; background: transparent;
+  filter: saturate(1.08); }
+#map .maplibregl-canvas { outline: none; }
+.maplibregl-ctrl-attrib { font-family: var(--font-latin); }
+.maplibregl-ctrl-bottom-right { bottom: 36px; }            /* clear home indicator */
+.maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(0,0,0,.35); }
+.maplibregl-ctrl-attrib a { color: rgba(255,255,255,.6); }
+
+/* ---- L0.5  atmosphere ring  (#strato-shadow) ------------------------------ */
+/* A soft stratospheric halo hugging the limb of the sphere. Sized & faded by
+   zoom from JS (only meaningful at globe scale). */
+#strato-shadow {
+  position: absolute; left: 50%; top: 50%; z-index: 2;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+      transparent calc(100% - var(--atmo-thickness) - var(--atmo-blur)),
+      var(--atmo-color) calc(100% - var(--atmo-thickness)),
+      transparent 100%);
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* ---- L0.6  globe edge  (#globe-frame = the crisp white silhouette line) ---- */
+#globe-frame {
+  position: absolute; left: 50%; top: 50%; z-index: 3;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  border: var(--frame-width) solid rgba(255,255,255,var(--frame-opacity));
+  filter: blur(var(--frame-blur));
+  box-shadow: 0 0 calc(var(--frame-blur) * 4) rgba(255,255,255,calc(var(--frame-opacity) * .5));
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* ---- center marker  (青ドット + グロー) — a MapLibre Marker DOM node -------- */
+.center-marker { position: relative; width: 0; height: 0; pointer-events: none; }
+.center-marker .glow {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: calc(var(--marker-size) * 3.6); height: calc(var(--marker-size) * 3.6);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--marker-color) 0%, transparent 72%);
+  opacity: var(--marker-glow);
+  filter: blur(1px);
+}
+.center-marker .ping {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--marker-size); height: var(--marker-size); border-radius: 50%;
+  border: 1.5px solid var(--marker-color);
+  animation: ping 2.6s var(--ease-out) infinite;
+}
+.center-marker .dot {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--marker-size); height: var(--marker-size); border-radius: 50%;
+  background: var(--marker-color);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.7);
+}
+@keyframes ping {
+  0%   { transform: translate(-50%,-50%) scale(1);   opacity: .9; }
+  70%  { transform: translate(-50%,-50%) scale(3.2);  opacity: 0; }
+  100% { transform: translate(-50%,-50%) scale(3.2);  opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .center-marker .ping { animation: none; } }
+
+/* ---- protection scrims (top/bottom) so SafeArea chrome stays legible ------ */
+.scrim-top {
+  position: absolute; top: 0; left: 0; right: 0; height: 150px; z-index: 40;
+  background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.28) 42%, transparent 100%);
+  pointer-events: none;
+}
+.scrim-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 130px; z-index: 40;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ---- SafeArea chrome (status bar / island / home indicator only) ---------- */
+.dynamic-island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 125px; height: 36px; border-radius: 20px; background: #000; z-index: 70;
+  pointer-events: none;
+}
+.statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 62px; z-index: 60;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; pointer-events: none; color: #fff;
+}
+.statusbar .time { font-weight: 600; font-size: 16px; letter-spacing: .02em; }
+.statusbar .sys { display: flex; align-items: center; gap: 7px; }
+.statusbar .sys svg { display: block; }
+.home-ind {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 140px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.9);
+  z-index: 60; pointer-events: none;
+}
+
+/* ============================================================================
+   BOTTOM CHROME — circle playlist + post button (portable universe-list parts)
+   Tokens come from the DS colors_and_type.css already loaded above.
+   ========================================================================== */
+button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
+.wd-icon-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--glass-fill); cursor: pointer;
+  transition: transform .12s var(--ease-out), opacity .12s var(--ease-out);
+}
+.wd-icon-btn::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
+.wd-icon-btn:active { transform: scale(.94); filter: brightness(.92); }
+.wd-icon-btn.color {
+  background: var(--lg-tint-dark);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+}
+.wd-icon-btn.color::before { display: none; }
+.wd-icon-btn.color::after { background: var(--gradient-colorful-linear); padding: 1.5px; }
+.wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wd-icon-btn.color { background: rgba(8,8,12,.72); }
+}
+.wd-badge {
+  position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  display: flex; align-items: center; justify-content: center;
+}
+.wd-badge::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.wd-badge img { width: 11px; height: 11px; }
+.wd-icon-btn.color.has-badge::before {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask-composite: intersect;
+}
+.wd-icon-btn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude;
+}
+.playlist-veil {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 368px; z-index: 31; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.54) 40%, rgba(0,0,0,.14) 76%, rgba(0,0,0,0) 100%);
+}
+.playlist {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 240px; z-index: 46;
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 16px;
+  overflow-y: auto; padding: 18px 0 74px; scrollbar-width: none;
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%);
+  mask: linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%);
+}
+.playlist::-webkit-scrollbar { display: none; }
+.crow { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.chead { display: flex; align-items: center; gap: 9px; padding: 0 16px; }
+.chead .cthumb { width: 30px; height: 30px; border-radius: 50%; flex: none; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.28); box-shadow: 0 1px 5px rgba(0,0,0,.5); }
+.chead .cthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chead .cname { font: 600 12.5px var(--font-jp); color: var(--text-2); letter-spacing: .01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+.cstrip { display: flex; gap: 8px; overflow-x: auto; padding: 0 76px 0 16px; scrollbar-width: none; }
+.cstrip::-webkit-scrollbar { display: none; }
+.cell { position: relative; width: 75px; height: 134px; flex: none; border-radius: 11px;
+  border: 1px solid rgba(255,255,255,.2); overflow: hidden; background: #2a2a2a; cursor: pointer;
+  transition: transform .22s var(--ease-out); }
+.cell .clip { position: absolute; inset: 1px; border-radius: 9px; overflow: hidden; }
+.cell .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cell.rep { border: 2.5px solid #fff; }
+.cell.rep .clip { inset: 1.5px; border-radius: 8px; }
+.cell:active { transform: scale(.97); }
+.post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 55; width: 56px; height: 56px; }
+.post-btn.wd-icon-btn.color > img { width: 25px; height: 25px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.specimen-tag {
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 55; pointer-events: none;
+  font-family: var(--font-latin); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+
+/* ============================================================================
+   PRESET RAIL  (specimen control — 🌍 Globe · 🗾 Region · 🏙 Street+3D)
+   Placed BELOW the phone (not over the globe) so no app-chrome is added.
+   ========================================================================== */
+.preset-rail {
+  display: flex; gap: 8px; padding: 6px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+.preset-rail button {
+  appearance: none; border: 0; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius-pill);
+  font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: var(--text-2);
+  background: transparent; transition: all .2s var(--ease-standard);
+}
+.preset-rail button .ico { font-size: 16px; line-height: 1; }
+.preset-rail button:hover { color: var(--text-1); }
+.preset-rail button.active {
+  color: #fff;
+  background:
+    linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+    var(--gradient-colorful);
+  box-shadow: 0 2px 12px rgba(255,62,136,.28);
+}
+.hint { font-size: 11px; color: var(--fg-3); letter-spacing: .02em; }
+
+/* ============================================================================
+   TUNING PANEL  (the "詰める" surface — refine the globe LOOK live)
+   ========================================================================== */
+.panel {
+  width: 312px; flex: none; align-self: stretch;
+  background: rgba(20,20,26,.72);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 18px 50px rgba(0,0,0,.5);
+  overflow: hidden;
+  position: sticky; top: 40px;
+}
+.panel header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 16px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.panel header .t { font-family: var(--font-jp); font-weight: 700; font-size: 14px; }
+.panel header .s { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--fg-3); }
+.panel .body { padding: 6px 18px 18px; max-height: 78vh; overflow-y: auto; }
+.panel .body::-webkit-scrollbar { width: 8px; }
+.panel .body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 8px; }
+
+.group { padding: 14px 0 6px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.group:last-child { border-bottom: 0; }
+.group > .gt {
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text-2); font-weight: 700; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 7px;
+}
+.group > .gt .id { color: var(--fg-3); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: 10px; }
+
+.ctrl { margin-bottom: 13px; }
+.ctrl .lab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.ctrl .lab span { font-size: 11.5px; color: var(--text-2); }
+.ctrl .lab b { font-size: 11px; color: var(--text-1); font-variant-numeric: tabular-nums; font-weight: 600; }
+.ctrl input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 3px; border-radius: 3px;
+  background: rgba(255,255,255,.18); outline: none;
+}
+.ctrl input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.ctrl input[type=range]::-moz-range-thumb {
+  width: 15px; height: 15px; border-radius: 50%; background: #fff; cursor: pointer; border: 0;
+}
+.swatches { display: flex; gap: 7px; flex-wrap: wrap; }
+.swatches button {
+  width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+  border: 2px solid transparent; background-clip: padding-box;
+  position: relative; transition: transform .12s var(--ease-standard);
+}
+.swatches button:hover { transform: scale(1.08); }
+.swatches button.sel { border-color: #fff; }
+.swatches button .none { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--fg-2); }
+
+.reset {
+  width: 100%; margin-top: 14px; padding: 11px; cursor: pointer;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; color: var(--text-2); font-family: var(--font-jp);
+  font-weight: 600; font-size: 12px; transition: all .18s;
+}
+.reset:hover { background: rgba(255,255,255,.1); color: var(--text-1); }
+
+.note { font-size: 10.5px; line-height: 1.6; color: var(--fg-3); margin-top: 12px; }
+.note code { font-family: var(--font-latin); color: var(--text-2); background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; font-size: 10px; }
+
+/* loading veil */
+#veil {
+  position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); transition: opacity .8s var(--ease-out);
+  font-family: var(--font-display); font-size: 26px; color: rgba(255,255,255,.85);
+}
+#veil.gone { opacity: 0; pointer-events: none; }
+#veil .spin {
+  width: 42px; height: 42px; border-radius: 50%; margin-left: 14px;
+  border: 2px solid rgba(255,255,255,.18); border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="studio">
+
+  <!-- ====================== STAGE: phone + presets ====================== -->
+  <div class="stage">
+    <div class="specimen-cap">
+      <div class="eyebrow">Live specimen · MapLibre + globe projection</div>
+      <h1>UniverseView — 地球儀（背景）</h1>
+      <p>実装エンジンそのまま：positron 淡色球 + 大気リング + 球縁白線 + 中心マーカー。ドラッグで回転 / ホイールで寄り引き。右の調整パネルで「見た目」を詰める。</p>
+    </div>
+
+    <div class="phone" data-screen-label="UniverseView · Earth globe">
+      <div class="screen">
+        <div id="bg-white"></div>
+        <div id="map"></div>
+        <div id="strato-shadow"></div>
+        <div id="globe-frame"></div>
+
+        <div class="scrim-top"></div>
+
+        <!-- ===== bottom chrome: circle playlist + post button (universe-list) ===== -->
+        <div class="playlist-veil"></div>
+        <div class="playlist" id="playlist">
+          <div class="crow">
+            <div class="chead">
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-01.png" alt=""></span>
+              <span class="cname">渋谷コミュニティ</span>
+            </div>
+            <div class="cstrip">
+              <div class="cell rep" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-01.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-02.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-03.png" alt=""></div></div>
+            </div>
+          </div>
+          <div class="crow">
+            <div class="chead">
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-02.png" alt=""></span>
+              <span class="cname">神宮前コミュニティ</span>
+            </div>
+            <div class="cstrip">
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-04.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-05.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-06.png" alt=""></div></div>
+            </div>
+          </div>
+          <div class="crow">
+            <div class="chead">
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-03.png" alt=""></span>
+              <span class="cname">代々木サークル</span>
+            </div>
+            <div class="cstrip">
+              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-07.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-08.png" alt=""></div></div>
+            </div>
+          </div>
+          <div class="crow">
+            <div class="chead">
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-04.png" alt=""></span>
+              <span class="cname">新宿グループ</span>
+            </div>
+            <div class="cstrip">
+              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-09.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-10.png" alt=""></div></div>
+            </div>
+          </div>
+        </div>
+        <button class="post-btn wd-icon-btn color has-badge" aria-label="投稿">
+          <img src="../../assets/icons/icon_camera.png" alt="post">
+          <span class="wd-badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
+        </button>
+
+        <!-- SafeArea chrome only (no app UI) -->
+        <div class="statusbar">
+          <div class="time">9:41</div>
+          <div class="sys">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.4c2.1 0 4 .8 5.5 2.1l1.4-1.5C13.6 1.3 11.1.3 8.5.3 5.9.3 3.4 1.3 1.6 3l1.4 1.5C4.5 3.2 6.4 2.4 8.5 2.4z" opacity=".9"/><path d="M8.5 6c1.1 0 2.2.4 3 1.2l1.4-1.5C11.7 4.6 10.2 4 8.5 4S5.3 4.6 4.1 5.7L5.5 7.2C6.3 6.4 7.4 6 8.5 6z"/><circle cx="8.5" cy="10" r="1.7"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-opacity=".5"/><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="#fff"/><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" fill-opacity=".6"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+
+      <div id="veil">Toopdbq<div class="spin"></div></div>
+    </div>
+
+    <div class="preset-rail" id="presetRail">
+      <button data-preset="globe"><span class="ico">🌍</span>Globe</button>
+      <button data-preset="region"><span class="ico">🗾</span>Region</button>
+      <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
+    </div>
+    <div class="hint">ドラッグ＝回転 · ホイール＝ズーム · 右ドラッグ＝傾き</div>
+  </div>
+
+  <!-- ====================== TUNING PANEL ====================== -->
+  <aside class="panel">
+    <header>
+      <div class="t">Globe の見た目</div>
+      <div class="s">Tune</div>
+    </header>
+    <div class="body" id="panelBody"><!-- built by JS --></div>
+  </aside>
+
+</div>
+
+<!-- thumbnail for the offline bundler -->
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#08080b"/>
+    <circle cx="50" cy="50" r="26" fill="#e9ebee"/>
+    <circle cx="50" cy="50" r="26" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="50" cy="50" r="31" fill="none" stroke="#005f67" stroke-width="2" opacity=".5"/>
+    <circle cx="50" cy="50" r="3.4" fill="#2f7bff"/>
+  </svg>
+</template>
+
+<script src="earth/look.js"></script>
+<script src="earth/map-core.js"></script>
+<script src="earth/overlay.js"></script>
+<script src="earth/bridge.js"></script>
+<!-- 3D layer: 実機の 3D 投稿 (real-NN.glb) を story の実 lat/lng に geo-anchor して地図に乗せる -->
+<script src="earth/models.js"></script>
+<script>
+  /* circle playlist: tap a cell → promote to representative (white frame) + fire uv:select.
+     post button → fire uv:post. (Host wires these to 3D swap / composer in the app.) */
+  (function () {
+    const playlist = document.getElementById('playlist');
+    if (playlist) {
+      playlist.addEventListener('click', (e) => {
+        const cell = e.target.closest('.cell');
+        if (!cell) return;
+        playlist.querySelectorAll('.cell.rep').forEach(c => c.classList.remove('rep'));
+        cell.classList.add('rep');
+        cell.dispatchEvent(new CustomEvent('uv:select', { bubbles: true, detail: { circle: cell.getAttribute('data-circle') } }));
+      });
+    }
+    const postBtn = document.querySelector('.post-btn');
+    if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
+  })();
+</script>
+
+<!-- ============================================================================
+  3D ON MAP — アプリと同じ位置に実 3D 投稿 (real-NN.glb) を乗せる
+  各投稿の実 lat/lng (RTDB /story) に geo-anchor。models.js (three.js custom layer) が
+  globe projection 追従で地表に描く。GLB は EXT_meshopt_compression のため
+  MeshoptDecoder.ready を待ってから setModels する。SCALE_M は実寸(m)・調整可。
+  ============================================================================ -->
+<script>
+  (async function () {
+    const SCALE_M = 18;   // 地表に乗る 3D の実寸(m)。大きく見せたいなら上げる。
+    // GLB は本番 Firebase Storage の公開 URL を直接参照する（CORS: * なので Claude Design の
+    // ブラウザからも取得可）。design repo にユーザー投稿コンテンツを複製しない。
+    // url = RTDB /story の modelUrl。real-10 = ハチ公像 (CENTER と同位置)。
+    const POSTS = [
+      { id: 'real-01', lat: 35.66553394124979, lng: 139.70113334739187, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F143a6501-ecdd-4308-a15c-fe001a9e87e5%2F143a6501-ecdd-4308-a15c-fe001a9e87e5.glb?alt=media&token=acbff054-09fd-42df-a230-61df164c53d9' },
+      { id: 'real-02', lat: 35.67409735583507, lng: 139.68111601742362, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F1e12abf7-44fc-4079-84d6-2deb5febb45b%2F1e12abf7-44fc-4079-84d6-2deb5febb45b.glb?alt=media&token=00110597-b631-442c-a2d8-87618f43600c' },
+      { id: 'real-03', lat: 35.67536946903334, lng: 139.70509975719222, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F25eb1144-1387-4351-9365-bfa51378156b%2F25eb1144-1387-4351-9365-bfa51378156b.glb?alt=media&token=9ac6ec33-1333-4713-9bc0-fb93f9073177' },
+      { id: 'real-04', lat: 35.66527163126798, lng: 139.70095538623644, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F353711cd-ac35-4de2-9955-6456270e6e3d%2F353711cd-ac35-4de2-9955-6456270e6e3d.glb?alt=media&token=835211dc-c26a-4cf8-8f65-13b4d0c34ced' },
+      { id: 'real-05', lat: 35.675310344094484, lng: 139.69697935141744, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F7339918b-267f-4539-bd69-0f6e92453764%2F7339918b-267f-4539-bd69-0f6e92453764.glb?alt=media&token=054a4173-c80a-42c4-b052-f94a9513e4e4' },
+      { id: 'real-06', lat: 35.695838793359414, lng: 139.7662216045701, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F7fa30005-fed9-45d8-8aed-780aee8b5a2c%2F7fa30005-fed9-45d8-8aed-780aee8b5a2c.glb?alt=media&token=1db6cf4c-763a-4c84-9e69-83c3a596a600' },
+      { id: 'real-07', lat: 35.662117107192344, lng: 139.71270880388738, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F97ef6494-a592-4b91-9b17-6763573ee93f%2F97ef6494-a592-4b91-9b17-6763573ee93f.glb?alt=media&token=63fd3cf6-990e-416b-8ebd-773f7e30a502' },
+      { id: 'real-08', lat: 35.66773639634803, lng: 139.69330244061905, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fbf56f848-04f8-41e6-b6f4-5471a7fc151c%2Fbf56f848-04f8-41e6-b6f4-5471a7fc151c.glb?alt=media&token=a81d7e33-6526-4837-8d65-2ebf042f2d10' },
+      { id: 'real-09', lat: 35.66573411618798, lng: 139.69614734172274, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fd91a62e2-b0e9-4eef-b431-177d8b7d0c27%2Fd91a62e2-b0e9-4eef-b431-177d8b7d0c27.glb?alt=media&token=faf2b753-ce43-4c1d-a46b-3b5d2bb616af' },
+      { id: 'real-10', lat: 35.65923593831696, lng: 139.7006143495087, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fe40ad36b-647d-4bcd-bb2b-16eccef94fa8%2Fe40ad36b-647d-4bcd-bb2b-16eccef94fa8.glb?alt=media&token=db6e1b18-7d7a-4708-bafa-f1d0a8e5377e' },
+      { id: 'real-11', lat: 35.66566109829807, lng: 139.70101954247983, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fe42972fe-8884-4863-9fd9-0d1642c738e6%2Fe42972fe-8884-4863-9fd9-0d1642c738e6.glb?alt=media&token=6d048a08-4750-4c21-ac79-295e29e329a7' },
+    ];
+    if (window.MeshoptDecoder && MeshoptDecoder.ready) await MeshoptDecoder.ready;
+    window.setModels({
+      models: POSTS.map(p => ({ id: p.id, lat: p.lat, lng: p.lng, url: p.url, scale: SCALE_M })),
+    });
+  })();
+</script>
+</body>
+</html>
