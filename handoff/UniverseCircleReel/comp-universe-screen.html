@@ -1,9 +1,14 @@
-<!-- @dsCard group="Screens" name="UniverseView — サークル別プレイリスト" subtitle="home 画面の下端リールを再設計。allPins を circleId でグループ化し、サークルごとに1行（左に circle サムネ丸+名前、右に投稿を横スクロール）。行は縦スクロールで 2〜3 行が見える。cell は現状維持（9:16・外枠14/内画像12・代表=白2.5px）。地図に obj-NN の 3D が棒/リング/三角ナシで直接乗り、main タップで 3D フォーカスへ。iPhone17 402×874 + SafeArea。" -->
+<!-- @dsCard group="Screens" name="UniverseView — サークル別プレイリスト" subtitle="home 画面の下端リールを再設計。allPins を circleId でグループ化し、サークルごとに1行（左に circle サムネ丸+名前、右に投稿を横スクロール）。全行展開のまま縦スクロール。初期位置は一番上、ビューの高さは 1 行フル＋次のサークルのタイトルが覗く分。cell は現状維持（9:16・外枠14/内画像12・代表=白2.5px）。地図に実 GLB の 3D（Three.js）が棒/リング/三角ナシで直接乗り、main タップで 3D フォーカスへ。iPhone17 402×874 + SafeArea。" -->
 <!DOCTYPE html>
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="../colors_and_type.css">
-<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<script src="../../DesignSystem/preview/vendor/three.min.js"></script>
+<script src="../../DesignSystem/preview/vendor/GLTFLoader.js"></script>
+<script src="../../DesignSystem/preview/vendor/OrbitControls.js"></script>
+<script src="../../DesignSystem/preview/uv3d.js"></script>
 <style>
   body{ background:radial-gradient(130% 100% at 50% -10%, #14151c 0%, #0b0b0f 55%, #070709 100%);
     padding:34px 36px 48px; gap:24px; align-items:flex-start; }
@@ -37,15 +42,17 @@
   .lbl.ward .jp{ font-size:10px; }
   .lbl.road .en{ font-style:italic; font-weight:500; color:rgba(70,70,66,.4); font-size:8.5px; }
 
-  /* ===== L1 — 3D objects straight on the map (obj-NN, role-sized) ===== */
+  /* ===== L1 — 3D objects straight on the map (real GLB, role-sized) ===== */
   .pins{ position:absolute; inset:0; z-index:10; }
-  .obj3d{ position:absolute; cursor:default; }
-  .obj3d img{ width:100%; height:auto; display:block;
-    filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));
-    transition:transform .3s var(--ease-out), filter .3s var(--ease-out); }
-  .obj3d.main{ cursor:pointer; }
-  .obj3d.main img{ filter:drop-shadow(0 16px 22px rgba(0,0,0,.34)); }
-  .obj3d.main:active img{ transform:scale(.97); }
+  .obj3d{ position:absolute; cursor:default;
+    filter:drop-shadow(0 10px 12px rgba(0,0,0,.30));
+    transition:transform .3s var(--ease-out); }
+  .obj3d canvas{ display:block; }
+  .obj3d.main{ cursor:pointer; filter:drop-shadow(0 18px 24px rgba(0,0,0,.36)); }
+  .obj3d.main:active{ transform:scale(.97); }
+  /* soft clay ground-glow so the object reads as sitting on the map */
+  .obj3d::after{ content:""; position:absolute; left:50%; bottom:6%; transform:translateX(-50%);
+    width:62%; height:14%; border-radius:50%; background:radial-gradient(50% 50% at 50% 50%, rgba(0,0,0,.34), rgba(0,0,0,0)); z-index:-1; }
 
   /* ===== L2 — scrims ===== */
   .top-scrim{ position:absolute; top:0; left:0; right:0; height:158px; z-index:30; pointer-events:none;
@@ -53,8 +60,8 @@
   .bottom-scrim{ position:absolute; bottom:0; left:0; right:0; height:180px; z-index:30; pointer-events:none;
     background:linear-gradient(0deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,0) 100%); }
   /* protection veil behind the taller playlist (keeps circle names AA over photos) */
-  .playlist-veil{ position:absolute; left:0; right:0; bottom:0; height:566px; z-index:31; pointer-events:none;
-    background:linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.54) 36%, rgba(0,0,0,.16) 72%, rgba(0,0,0,0) 100%); }
+  .playlist-veil{ position:absolute; left:0; right:0; bottom:0; height:368px; z-index:31; pointer-events:none;
+    background:linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.54) 40%, rgba(0,0,0,.14) 76%, rgba(0,0,0,0) 100%); }
 
   /* account badge — ClipOval 40 + name (no pill) */
   .acct-badge{ position:absolute; top:60px; left:12px; z-index:40; display:flex; align-items:center; gap:8px; }
@@ -63,15 +70,9 @@
   .acct-badge .av svg{ width:30px; height:30px; }
   .acct-badge .nm{ font:600 14px var(--font-jp); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8); }
 
-  /* menu + message (top right) — translucent gray glass circles 44px */
-  .top-actions{ position:absolute; top:60px; right:12px; z-index:40; display:flex; gap:8px; }
-  .gbtn{ width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:rgba(120,120,120,.5); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-    box-shadow:inset 0 1px 1px rgba(255,255,255,.18), 0 1px 3px rgba(0,0,0,.3); }
-  .gbtn img{ width:21px; height:21px; filter:brightness(0) invert(1); }
 
   /* side tool rail — media bubble on top, then like / comment / location */
-  .side-tool{ position:absolute; right:12px; top:206px; z-index:47; display:flex; flex-direction:column; align-items:center; gap:13px; }
+  .side-tool{ position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:47; display:flex; flex-direction:column; align-items:center; gap:20px; }
   .media-bubble{ position:relative; width:50px; height:50px; }
   .media-bubble .disc{ width:50px; height:50px; border-radius:50%; overflow:hidden; background:#2b2b2b;
     border:1.5px solid rgba(255,255,255,.85); box-shadow:0 2px 8px rgba(0,0,0,.5);
@@ -83,18 +84,19 @@
   .media-bubble .plus::before{ width:10px; height:2px; }
   .media-bubble .plus::after{ width:2px; height:10px; }
   .stool{ display:flex; flex-direction:column; align-items:center; gap:3px; }
-  .stool .cir{ width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:rgba(120,120,120,.5); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
-    box-shadow:inset 0 1px 1px rgba(255,255,255,.16), 0 1px 4px rgba(0,0,0,.3); }
-  .stool .cir img{ width:23px; height:23px; filter:brightness(0) invert(1); }
+  /* like / comment / location = DS WdIconButton (.wd-icon-btn) in liquid glass.
+     Dark glassColor tint (.lg-dark) keeps the white glyphs AA over the LIGHT map. */
+  .side-tool .wd-icon-btn{ width:50px; height:50px; }
+  .side-tool .wd-icon-btn.lg-dark{ background:var(--lg-tint-dark); }
+  .side-tool .wd-icon-btn img{ width:23px; height:23px; filter:brightness(0) invert(1); }
   .stool .ct{ font:600 11px var(--font-latin); color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.7); }
 
   /* ===== L3 — cluster playlist (circle-grouped rows) ===== */
-  .playlist{ position:absolute; left:0; right:0; bottom:0; height:544px; z-index:46;
-    display:flex; flex-direction:column-reverse; justify-content:flex-start; gap:16px;
-    overflow-y:auto; padding:54px 0 74px; scrollbar-width:none;
-    -webkit-mask:linear-gradient(to top, #000 76%, transparent 100%);
-    mask:linear-gradient(to top, #000 76%, transparent 100%); }
+  .playlist{ position:absolute; left:0; right:0; bottom:0; height:240px; z-index:46;
+    display:flex; flex-direction:column; justify-content:flex-start; gap:16px;
+    overflow-y:auto; padding:18px 0 74px; scrollbar-width:none;
+    -webkit-mask:linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%);
+    mask:linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%); }
   .playlist::-webkit-scrollbar{ display:none; }
 
   .crow{ display:flex; flex-direction:column; gap:8px; flex:none; }
@@ -103,55 +105,56 @@
     border:1px solid rgba(255,255,255,.28); box-shadow:0 1px 5px rgba(0,0,0,.5); }
   .chead .cthumb img{ width:100%; height:100%; object-fit:cover; display:block; }
   .chead .cname{ font:600 12.5px var(--font-jp); color:var(--text-2); letter-spacing:.01em;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:210px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:240px;
     text-shadow:0 1px 3px rgba(0,0,0,.85); }
-  .chead .cdot{ width:3px; height:3px; border-radius:50%; background:rgba(255,255,255,.35); flex:none; }
-  .chead .ccount{ font:600 10px var(--font-latin); color:var(--text-3); letter-spacing:.02em; flex:none; }
 
   .cstrip{ display:flex; gap:8px; overflow-x:auto; padding:0 76px 0 16px; scrollbar-width:none; }
   .cstrip::-webkit-scrollbar{ display:none; }
-  .cell{ position:relative; width:100px; height:178px; flex:none; border-radius:14px;
+  .cell{ position:relative; width:75px; height:134px; flex:none; border-radius:11px;
     border:1px solid rgba(255,255,255,.2); overflow:hidden; background:#2a2a2a; cursor:pointer;
     transition:transform .22s var(--ease-out); }
-  .cell .clip{ position:absolute; inset:1px; border-radius:12px; overflow:hidden; }
+  .cell .clip{ position:absolute; inset:1px; border-radius:9px; overflow:hidden; }
   .cell .clip img{ width:100%; height:100%; object-fit:cover; display:block; }
   .cell.rep{ border:2.5px solid #fff; }
-  .cell.rep .clip{ inset:1.5px; border-radius:11px; }
+  .cell.rep .clip{ inset:1.5px; border-radius:8px; }
   .cell:active{ transform:scale(.97); }
 
-  /* camera post button — WdIconButton(camera, badgeColor) 55×55 */
-  .post-btn{ position:absolute; right:12px; bottom:28px; z-index:55; width:55px; height:55px; border-radius:50%;
-    background:var(--gradient-colorful); padding:4px; cursor:pointer; border:none; box-shadow:0 3px 12px rgba(0,0,0,.4); }
-  .post-btn .inner{ width:100%; height:100%; border-radius:50%; background:rgba(24,24,26,.72);
-    display:flex; align-items:center; justify-content:center; }
-  .post-btn .inner img{ width:25px; height:25px; filter:brightness(0) invert(1); }
-  .post-btn .badge{ position:absolute; right:-2px; bottom:-2px; width:22px; height:22px; border-radius:50%;
-    background:var(--gradient-colorful); display:flex; align-items:center; justify-content:center; box-shadow:0 1px 4px rgba(0,0,0,.45); }
-  .post-btn .badge img{ width:12px; height:12px; filter:brightness(0) invert(1); }
+  /* camera post button — DS WdIconButton, badgeColor variant (.wd-icon-btn.color.has-badge).
+     Colorful rim = the screen's single accent, reserved for the highest-intent action;
+     glass add-badge notched out of the host. Replaces the one-off .wd-post-btn kit. */
+  .post-btn{ position:absolute; right:12px; bottom:24px; z-index:55; width:58px; height:58px; }
+  .post-btn.wd-icon-btn.color > img{ width:25px; height:25px; filter:brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+  .post-btn .wd-badge .plus{ position:relative; width:11px; height:11px; }
+  .post-btn .wd-badge .plus::before,
+  .post-btn .wd-badge .plus::after{ content:""; position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%); background:#fff; border-radius:1px; }
+  .post-btn .wd-badge .plus::before{ width:11px; height:2px; }
+  .post-btn .wd-badge .plus::after{ width:2px; height:11px; }
 
-  /* ===== in-screen 3D focus overlay (tap main 3D) ===== */
-  .focus{ position:absolute; inset:0; z-index:80; opacity:0; pointer-events:none;
+  /* ===== in-screen 3D focus overlay (tap main 3D) =====
+     sits BEHIND the playlist (z46) and side tool rail (z47): both stay visible & usable */
+  .focus{ position:absolute; inset:0; z-index:38; opacity:0; pointer-events:none;
     transition:opacity .32s var(--ease-out); }
   .focus.on{ opacity:1; pointer-events:auto; }
   .focus .fbg{ position:absolute; inset:0; background-size:cover; background-position:center; transform:scale(1.06); }
   .focus .fscrim{ position:absolute; inset:0; background:rgba(0,0,0,.55); }
-  .focus .fclose{ position:absolute; top:60px; right:14px; width:40px; height:40px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.4);
-    backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); border:none; cursor:pointer; }
+  .focus .fclose{ position:absolute; top:112px; right:14px; width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; }
   .focus .fclose img{ width:16px; height:16px; filter:brightness(0) invert(1); opacity:.85; }
-  .focus .fobj{ position:absolute; left:50%; top:50%; width:346px; height:346px; transform:translate(-50%,-50%);
+  .focus .fobj{ position:absolute; left:50%; top:44%; width:346px; height:346px; transform:translate(-50%,-50%);
     display:flex; align-items:center; justify-content:center; cursor:grab; touch-action:none; }
-  .focus .fobj img{ width:88%; height:88%; object-fit:contain;
-    filter:drop-shadow(0 22px 40px rgba(0,0,0,.5)); will-change:transform; }
-  .focus.on .fobj img{ animation:rise .42s var(--ease-out) both; }
-  @keyframes rise{ from{ transform:translateY(34px) scale(.62); opacity:.2; } to{ transform:none; opacity:1; } }
-  .focus .fhint{ position:absolute; left:50%; bottom:128px; transform:translateX(-50%);
+  .focus .fobj canvas{ width:100%; height:100%; display:block; }
+  .focus.on .fobj{ animation:rise .42s var(--ease-out) both; }
+  @keyframes rise{ from{ transform:translate(-50%,-50%) translateY(34px) scale(.62); opacity:.2; } to{ transform:translate(-50%,-50%); opacity:1; } }
+  .focus .fhint{ position:absolute; left:50%; bottom:330px; transform:translateX(-50%);
     font:500 11.5px var(--font-jp); color:var(--text-3); letter-spacing:.04em; text-shadow:0 1px 4px rgba(0,0,0,.7);
     display:flex; align-items:center; gap:7px; }
   .focus .fhint .ring{ width:14px; height:14px; border-radius:50%; border:1.5px solid var(--text-3); border-top-color:transparent;
     animation:spin 3.4s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
   @media (prefers-reduced-motion: reduce){ .focus.on .fobj img,.focus .fhint .ring{ animation:none; } }
+  /* dark focus bg → status glyphs flip to white */
+  .screen.focus-open .statusbar{ filter:brightness(0) invert(1); }
 
   /* ===== legend ===== */
   .legend{ display:flex; flex-direction:column; gap:15px; max-width:344px; padding-top:6px; }
@@ -184,7 +187,7 @@
       <span class="en">home · cluster reel redesign</span>
     </div>
     <div class="lede">
-      下端の <b>1 本横リール</b>（main クラスタの全 <span class="mono">allPins</span>）を、各投稿が持つ <span class="mono">circleId</span> でグループ化した<b>「サークル別プレイリスト」</b>へ再設計。<b>サークルごとに 1 行</b>（左に circle サムネ丸＋名前、右にその投稿を横スクロール）を<b>縦に積み</b>、下端 scrim 内に 2〜3 行が見える。cell の見た目は<b>現状維持</b>（9:16・外枠 14／内画像 12・<b>代表＝白 2.5px</b>）。地図には obj の <b>3D</b> が棒/リング/三角ナシで直接乗り、<b>main をタップ</b>で 3D フォーカスへ。
+      下端の <b>1 本横リール</b>（main クラスタの全 <span class="mono">allPins</span>）を、各投稿が持つ <span class="mono">circleId</span> でグループ化した<b>「サークル別プレイリスト」</b>へ再設計。<b>サークルごとに 1 行</b>（左に circle サムネ丸＋名前、右にその投稿を横スクロール）を<b>縦に積み縦スクロール</b>（全行展開・折りたたみなし）。初期位置は<b>一番上</b>、リストの高さは <b>1 行フル＋次のサークルのタイトルが覗く</b>分。cell の見た目は<b>現状維持</b>（9:16・外枠 14／内画像 12・<b>代表＝白 2.5px</b>）。地図には obj の <b>3D</b> が棒/リング/三角ナシで直接乗り、<b>main をタップ</b>で 3D フォーカスへ。
     </div>
   </div>
 
@@ -237,12 +240,12 @@
           <div class="lbl road" style="left:62%; top:66%; transform:translate(-50%,-50%) rotate(80deg);"><span class="en">Meiji Street 明治通り</span></div>
         </div>
 
-        <!-- L1 3D objects (obj-NN) directly on map -->
+        <!-- L1 3D objects (real GLB) directly on map -->
         <div class="pins">
-          <div class="obj3d sub" style="left:62%; top:124px; width:58px;"><img src="../../assets/sample/uv/obj-04.png" alt=""></div>
-          <div class="obj3d sub" style="left:6%;  top:236px; width:74px;"><img src="../../assets/sample/uv/obj-03.png" alt=""></div>
-          <div class="obj3d sub" style="left:74%; top:170px; width:78px;"><img src="../../assets/sample/uv/obj-02.png" alt=""></div>
-          <div class="obj3d main" id="mainObj" style="left:31%; top:182px; width:142px;"><img src="../../assets/sample/uv/obj-01.png" alt="main 3D"></div>
+          <div class="obj3d sub" data-src="../../assets/sample/models/model-04.glb" style="left:60%; top:120px; width:66px; height:84px;"></div>
+          <div class="obj3d sub" data-src="../../assets/sample/models/model-03.glb" style="left:4%;  top:228px; width:88px; height:96px;"></div>
+          <div class="obj3d sub" data-src="../../assets/sample/models/model-02.glb" style="left:72%; top:160px; width:84px; height:120px;"></div>
+          <div class="obj3d main" id="mainObj" data-src="../../assets/sample/models/model-01.glb" data-circle="circle-01" style="left:9%; top:150px; width:300px; height:376px;"></div>
         </div>
 
         <!-- L2 scrims -->
@@ -266,21 +269,15 @@
           <span class="nm">デバッグ太郎</span>
         </div>
 
-        <!-- menu + message -->
-        <div class="top-actions">
-          <span class="gbtn"><img src="../../assets/icons/icon_menu.png" alt="menu"></span>
-          <span class="gbtn"><img src="../../assets/icons/icon_comment.png" alt="message"></span>
-        </div>
-
         <!-- side tool rail -->
         <div class="side-tool">
           <div class="media-bubble">
             <div class="disc"><svg><use href="#person"></use></svg></div>
             <span class="plus"></span>
           </div>
-          <div class="stool"><span class="cir"><img src="../../assets/icons/icon_like.png" alt="like"></span><span class="ct">0</span></div>
-          <div class="stool"><span class="cir"><img src="../../assets/icons/icon_comment.png" alt="comment"></span><span class="ct">0</span></div>
-          <div class="stool"><span class="cir"><img src="../../assets/icons/icon_pin.png" alt="location"></span></div>
+          <div class="stool"><button class="wd-icon-btn lg-dark" aria-label="いいね"><img src="../../assets/icons/icon_like.png" alt="like"></button><span class="ct">0</span></div>
+          <div class="stool"><button class="wd-icon-btn lg-dark" aria-label="コメント"><img src="../../assets/icons/icon_comment.png" alt="comment"></button><span class="ct">0</span></div>
+          <div class="stool"><button class="wd-icon-btn lg-dark" aria-label="位置"><img src="../../assets/icons/icon_pin.png" alt="location"></button></div>
         </div>
 
         <!-- L3 cluster playlist (circle-grouped) -->
@@ -290,62 +287,58 @@
             <div class="chead">
               <span class="cthumb"><img src="../../assets/sample/uv/circle-01.png" alt=""></span>
               <span class="cname">渋谷コミュニティ</span>
-              <span class="cdot"></span><span class="ccount">3</span>
             </div>
             <div class="cstrip">
-              <div class="cell rep" data-obj="obj-01" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-01.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-01" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-02.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-01" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-03.png" alt=""></div></div>
+              <div class="cell rep" data-model="model-01.glb" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-01.png" alt=""></div></div>
+              <div class="cell" data-model="model-01.glb" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-02.png" alt=""></div></div>
+              <div class="cell" data-model="model-01.glb" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-03.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
               <span class="cthumb"><img src="../../assets/sample/uv/circle-02.png" alt=""></span>
               <span class="cname">神宮前コミュニティ</span>
-              <span class="cdot"></span><span class="ccount">3</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-obj="obj-02" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-04.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-02" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-05.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-02" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-06.png" alt=""></div></div>
+              <div class="cell" data-model="model-02.glb" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-04.png" alt=""></div></div>
+              <div class="cell" data-model="model-02.glb" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-05.png" alt=""></div></div>
+              <div class="cell" data-model="model-02.glb" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-06.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
               <span class="cthumb"><img src="../../assets/sample/uv/circle-03.png" alt=""></span>
               <span class="cname">代々木サークル</span>
-              <span class="cdot"></span><span class="ccount">2</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-obj="obj-03" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-07.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-03" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-08.png" alt=""></div></div>
+              <div class="cell" data-model="model-03.glb" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-07.png" alt=""></div></div>
+              <div class="cell" data-model="model-03.glb" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-08.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
               <span class="cthumb"><img src="../../assets/sample/uv/circle-04.png" alt=""></span>
               <span class="cname">新宿グループ</span>
-              <span class="cdot"></span><span class="ccount">2</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-obj="obj-04" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-09.png" alt=""></div></div>
-              <div class="cell" data-obj="obj-04" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-10.png" alt=""></div></div>
+              <div class="cell" data-model="model-04.glb" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-09.png" alt=""></div></div>
+              <div class="cell" data-model="model-04.glb" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-10.png" alt=""></div></div>
             </div>
           </div>
         </div>
 
-        <!-- camera post button -->
-        <button class="post-btn" aria-label="投稿">
-          <span class="inner"><img src="../../assets/icons/icon_camera.png" alt="post"></span>
-          <span class="badge"><img src="../../assets/icons/icon_camera.png" alt=""></span>
+        <!-- camera post button — DS WdIconButton (badgeColor variant) -->
+        <button class="post-btn wd-icon-btn color has-badge" aria-label="投稿">
+          <img src="../../assets/icons/icon_camera.png" alt="post">
+          <span class="wd-badge"><span class="plus"></span></span>
         </button>
 
         <!-- in-screen 3D focus overlay -->
         <div class="focus" id="focus">
           <div class="fbg" id="focusBg"></div>
           <div class="fscrim"></div>
-          <button class="fclose" id="focusClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
-          <div class="fobj" id="focusObj"><img id="focusImg" src="../../assets/sample/uv/obj-01.png" alt="3D"></div>
+          <button class="fclose lg" id="focusClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="fobj" id="focusObj"></div>
           <div class="fhint"><span class="ring"></span>ドラッグで 360°</div>
         </div>
 
@@ -358,7 +351,7 @@
       <div class="lh">redesign · 下端リール → プレイリスト</div>
       <div class="layer"><span class="z hot">新</span><div class="lx">
         <div class="nm">サークル別プレイリスト<em>circleId グループ化</em></div>
-        <div class="dc"><span class="mono">allPins</span> を投稿の <span class="mono">circleId</span> でまとめ、<b>サークル 1 行</b>を<b>縦スクロール</b>。各行＝左に circle 丸サムネ <span class="mono">30px</span>＋名前（<span class="mono">--text-2 · 12.5px</span> 1行省略）／右に投稿を<b>横スクロール</b>。下端 scrim に <b>2〜3 行</b>。</div>
+        <div class="dc"><span class="mono">allPins</span> を投稿の <span class="mono">circleId</span> でまとめ、<b>サークル 1 行</b>（全行展開）を<b>縦スクロール</b>。各行＝左に circle 丸サムネ <span class="mono">30px</span>＋名前（<span class="mono">--text-2 · 12.5px</span> 1行省略）／右に投稿を<b>横スクロール</b>。ビューの高さ＝<b>1 行フル＋次行のタイトルが覗く</b>分（初期位置は一番上）。</div>
       </div></div>
       <div class="layer"><span class="z">cell</span><div class="lx">
         <div class="nm">投稿セル<em>現状維持</em></div>
@@ -366,61 +359,74 @@
         <div class="hint-tag"><span class="k">TAP</span> セルをタップ → 代表（白枠）が移動＋main 3D 差し替え</div>
       </div></div>
       <div class="layer"><span class="z dim">L1</span><div class="lx">
-        <div class="nm">3D オブジェクト<em>obj-NN</em></div>
-        <div class="dc">地表に<b>棒/リング/三角ナシで直接</b>乗る。<b>role でサイズ激変</b>（main 巨大／sub 小）。実機は写真由来の人物 GLB。</div>
-        <div class="hint-tag"><span class="k">TAP</span> 中央の main 3D → 3D フォーカスへ（背景=サークル画像）</div>
+        <div class="nm">3D オブジェクト<em>実 GLB レンダリング</em></div>
+        <div class="dc">地表に<b>棒/リング/三角ナシで直接</b>乗る。<b>role でサイズ激変</b>（main 巨大／sub 小）。温かいスタジオ光でゆっくり<b>ターンテーブル</b>。実機は写真由来の人物 GLB。</div>
+        <div class="hint-tag"><span class="k">TAP</span> 中央の main 3D → 3D フォーカス（背景=サークル画像・リストとサイドツールの背後に重なる）</div>
       </div></div>
       <div class="layer"><span class="z">L2</span><div class="lx">
         <div class="nm">chrome<em>維持</em></div>
-        <div class="dc">top scrim <span class="mono">h158</span> / バッジ＝丸40＋名前のみ / menu+message <span class="mono">44px</span> / サイドツール / 投稿 <span class="mono">camera 55×55</span>。プレイリスト用に<b>保護グラデを増設</b>（名前の AA 担保）。</div>
+        <div class="dc">top scrim <span class="mono">h158</span> / バッジ＝丸40＋名前のみ / サイドツール / 投稿 <span class="mono">camera 55×55</span>。プレイリスト用に<b>保護グラデを増設</b>（名前の AA 担保）。</div>
       </div></div>
     </div>
   </div>
 
   <script>
-    // tap a post cell → it becomes the representative (white border) + swap main 3D object
-    const playlist = document.getElementById('playlist');
+    const MODELS = '../../assets/sample/models/';
+    const circleToModel = { 'circle-01':'model-01.glb', 'circle-02':'model-02.glb', 'circle-03':'model-03.glb', 'circle-04':'model-04.glb' };
+
+    // mount every map object as a live GLB (turntable, no drag — tap is reserved)
     const mainObj = document.getElementById('mainObj');
-    const mainImg = mainObj.querySelector('img');
+    let mainHandle = null, currentModel = 'model-01.glb';
+    document.querySelectorAll('.obj3d').forEach((host) => {
+      const isMain = host.classList.contains('main');
+      const h = UV3D.mount(host, { src: MODELS + host.dataset.src.split('/').pop(), rotate: true, drag: false, rotateSpeed: isMain ? 1.4 : 2.2 });
+      if (isMain) mainHandle = h;
+    });
+
+    // remount the main object with a new model (used on rep-swap)
+    function setMainModel(model) {
+      currentModel = model;
+      mainObj.querySelectorAll('canvas').forEach(c => c.remove());
+      mainObj.style.transition = 'opacity .18s ease'; mainObj.style.opacity = '0';
+      setTimeout(() => {
+        mainHandle = UV3D.mount(mainObj, { src: MODELS + model, rotate: true, drag: false, rotateSpeed: 1.4 });
+        mainObj.style.opacity = '1';
+      }, 180);
+    }
+
+    // tap a post cell → becomes representative (white border) + swaps the main 3D model.
+    // the playlist stays interactive DURING focus — swapping a cell updates the focus bg + model too
+    const playlist = document.getElementById('playlist');
     playlist.addEventListener('click', (e) => {
       const cell = e.target.closest('.cell');
       if (!cell) return;
       document.querySelectorAll('.cell.rep').forEach(c => c.classList.remove('rep'));
       cell.classList.add('rep');
-      const obj = cell.getAttribute('data-obj');
-      // cross-fade the main 3D object to this circle's object
-      mainImg.style.transition = 'opacity .2s ease';
-      mainImg.style.opacity = '0';
-      setTimeout(() => {
-        mainImg.src = '../../assets/sample/uv/' + obj + '.png';
-        mainObj.dataset.circle = cell.getAttribute('data-circle');
-        mainImg.style.opacity = '1';
-      }, 200);
+      mainObj.dataset.circle = cell.getAttribute('data-circle');
+      setMainModel(cell.getAttribute('data-model'));
+      if (focus.classList.contains('on')) refreshFocus();
     });
 
-    // tap main 3D → open in-screen focus (background = that circle's image)
+    // tap main 3D → open focus BEHIND the playlist + side tools (both stay visible).
+    // background = the circle image of the focused object's circle; 3D draggable 360°
     const focus = document.getElementById('focus');
     const focusBg = document.getElementById('focusBg');
-    const focusImg = document.getElementById('focusImg');
+    const focusObjEl = document.getElementById('focusObj');
+    const screenEl = document.querySelector('.screen');
+    let focusHandle = null;
     function currentCircle(){ return document.querySelector('.cell.rep')?.getAttribute('data-circle') || 'circle-01'; }
-    function currentObj(){ return mainImg.getAttribute('src'); }
-    mainObj.addEventListener('click', () => {
+    function refreshFocus(){
       focusBg.style.backgroundImage = 'url(../../assets/sample/uv/' + currentCircle() + '.png)';
-      focusImg.src = currentObj();
+      focusObjEl.querySelectorAll('canvas').forEach(c => c.remove());
+      focusHandle = UV3D.mount(focusObjEl, { src: MODELS + currentModel, rotate: true, drag: true, rotateSpeed: 1.1, distance: 1.85 });
+    }
+    mainObj.addEventListener('click', () => {
+      refreshFocus();
       focus.classList.add('on');
+      screenEl.classList.add('focus-open');
     });
-    document.getElementById('focusClose').addEventListener('click', () => focus.classList.remove('on'));
-    focus.addEventListener('click', (e) => { if (e.target === focus || e.target.classList.contains('fscrim') || e.target.classList.contains('fbg')) focus.classList.remove('on'); });
-
-    // drag the focus object to rotate (skew/rotateY feel)
-    const fobj = document.getElementById('focusObj');
-    let dragging = false, startX = 0, rot = 0;
-    fobj.addEventListener('pointerdown', (e) => { dragging = true; startX = e.clientX; fobj.setPointerCapture(e.pointerId); fobj.style.cursor='grabbing'; });
-    fobj.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const d = (e.clientX - startX);
-      focusImg.style.transform = 'rotateY(' + (rot + d * 0.7) + 'deg)';
-    });
-    fobj.addEventListener('pointerup', (e) => { if(!dragging) return; rot += (e.clientX - startX) * 0.7; dragging = false; fobj.style.cursor='grab'; });
+    function closeFocus(){ focus.classList.remove('on'); screenEl.classList.remove('focus-open'); }
+    document.getElementById('focusClose').addEventListener('click', closeFocus);
+    focus.addEventListener('click', (e) => { if (e.target === focus || e.target.classList.contains('fscrim') || e.target.classList.contains('fbg')) closeFocus(); });
   </script>
 </body></html>
