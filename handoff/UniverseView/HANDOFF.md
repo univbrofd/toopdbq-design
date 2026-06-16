@@ -1,86 +1,121 @@
-# HANDOFF — UniverseView（Earth Globe・live specimen / 画面全体）
+# HANDOFF — UniverseView：クラスタ ⇄ リール ⇄ メイン ⇄ フォーカス の連携リファクタ
 
-アプリ中核 home 画面 `UniverseView` の **live specimen**。MapLibre positron globe ＋ **画面空間 3D オーバーレイ**
-＋ 下部サークルプレイリスト ＋ 右サイドツール ＋ 投稿ボタン を 1 ファイルに組み上げ、Flutter 無しで
-ブラウザでそのまま動く。`Earth Globe.html` を開けば globe が回り、3D をタップでフォーカス回覧できる。
+`UniverseView` の live specimen（`Earth Globe.html` ＋ `earth/*.js`）を、**実機（Flutter）の連携モデルに合わせて
+リファクタ**する逆ハンドオフ。現 specimen は 3D・下部リール・メイン選定・フォーカスが**バラバラのデータ**で動いて
+おり、実機のように「1 つのクラスタを中心に全部が連動する」形になっていない。それを直す。
 
 > repo: `univbrofd/toopdbq-design` / branch `main` / raw base:
 > `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
 > DS 索引: `DesignSystem/_ds_manifest.json`（色トークンの canonical は `DesignSystem/colors_and_type.css`）
-> 旧 `handoff/PlanetView/`（globe 背景のみの先代 specimen）は本 handoff に統合・廃止。
+> 実装の対応箇所は「別 repo `univbrofd/toopdbq`・参考」（Claude Design は読めない。値は本書に固定）。
 
-## 成果物（このフォルダ内で完結）
+## 現 specimen のズレ（直す対象）
 
-- **`Earth Globe.html`** — live specimen 本体。head で DS `colors_and_type.css` ＋ MapLibre v5 ＋
-  three.js 0.128（GLTFLoader / meshopt）を読む。アセットは共有単一ソースを参照（`../../assets/...` /
-  `../../DesignSystem/...`、per-View の `assets/` は持たない）。
-- **`earth/`** — エンジン:
-  - `look.js` — 見た目モデル ＋ 右の調整パネル（globe/marker/atmosphere/frame ＋「周辺オブジェクト指標」）
-  - `map-core.js` — MapLibre positron（`basemaps.cartocdn.com/.../positron`）＋ globe projection ＋ 3 プリセット
-  - `overlay.js` — 大気リング（`#strato-shadow`）/ 球縁白線（`#globe-frame`）/ 中心マーカー
-  - `objects3d.js` — **画面空間 3D オーバーレイ**（本 specimen の主役。下記）
-  - `models.js` — 旧・地図密着方式（実寸 m の three.js custom layer）。**現行は未使用**だが参照のため残置
-  - `bridge.js` — プリセット / パネル / init 配線
-- **`shots/`** — 実機スクショ（`real-home.jpg` 他）。**世界観・配置の正**。CSS の作りやすさで近似せずこれに寄せる。
+| 箇所 | 現 specimen（誤り） | 実機（正・本書で固定） |
+|---|---|---|
+| **下部リール** | 固定 4 行（渋谷コミュニティ等）の**無関係なサンプル画像**列。3D とは別データ | **メインクラスタのメンバー列**。中心クラスタの `allPins` を circle でグルーピングして出す |
+| **3D とサムネの同一性** | 3D = `real-NN.glb`（Firebase）、リール = `story-NN.png`。**別物で対応が無い** | **同一 story の二表現**。1 投稿 = `{id,lat,lng,circleId,glbUrl,thumbUrl}`。サンプルは `real-NN.glb`↔`real-NN.jpg`（**生成元の写真がサムネ**） |
+| **クラスタリング** | 11 件を独立配置。クラスタ概念が無い | **タイル cell で bin** し、画面中心に最も近い cell を**メインクラスタ**にする |
+| **メイン選定** | 画面中心最寄り 1 個を 2× にするだけ（孤立した値） | メイン = **メインクラスタの代表**。リールの白枠・地図の main・フォーカス対象と**同一 id で連動** |
+| **リール↔地図↔フォーカス** | 一方通行（タップで地図 glide のみ）。リールと代表が無関係 | **双方向ループ**。リール cell タップ→代表ロック→地図再選定→リール白枠移動→（main かつ 3D なら）フォーカス |
 
-## アーキテクチャの要点（地図密着 → 画面空間オーバーレイ）
+## 目標の連携モデル（実機の値で固定）
 
-旧方式（`models.js`）は 3D を地図 WebGL 内に実寸 m で描いたため zoom で大きさが変わり、ヒットテスト/
-フォーカスが難しかった。現行 `objects3d.js` は **地図の上に独立した three.js キャンバスを重ね**、毎フレーム
-各投稿の lat/lng を `map.project()` で画面ピクセルに射影し、その位置に **一定ピクセルサイズ** で描く。
+### データモデル（最重要）
+- **1 投稿 = 1 エンティティ**。`{ id, lat, lng, circleId, glbUrl, thumbUrl }`。**3D とサムネは同じ id**。
+- サンプルの対応表（GLB＝現 POSTS の Firebase URL を継続使用、サムネ＝design repo 内のローカル写真）:
 
-- **ズーム非依存の一定サイズ** — 縮小/拡大しても 3D の大きさは一定（位置だけ追従）。`cfg.MARKER_PX` 既定 96px。
-- **メインオブジェクト 2×** — 毎フレ画面中心に最も近い 1 個を main に選定し `cfg.MAIN_SCALE`(=2) で拡大。
-  pan に応じ滑らかに grow/shrink（ポップしない）。フォーカス中は選定停止。`cfg.MAIN_*` で調整。
-- **タップ挙動の出し分け** — **main をタップ→フォーカス**（中央へ Hero 拡大・320ms easeOutCubic・背景の地図のみ
-  scrim で暗転）。**main 以外をタップ→地図がその位置へ glide**（= その対象が新しい main になる。フォーカスしない）。
-- **360°回覧** — フォーカス中はドラッグで全方向回転（横=ヤウ / 縦=ピッチ / 離すと慣性）。`cfg.IDLE_SPIN` 自動回転。
-  閉じるは ✕ ボタン（**フォーカス中オブジェクトの左上角**に追従配置・画面端から余白）または背景タップ。
-- **向き** — GLB 既定は右(+X)向きなので `cfg.FACE_DEG=-90`（カメラ＝画面手前向き）＋投稿ごと ±`JITTER_DEG` ジッタ。
-- **ヒットプロキシ** — 各マーカーに不可視の余裕ボックスを当て、細身/複雑なシルエットでもマーカー全面が確実にタップ可能。
-- **縁インジケーター（周辺オブジェクト指標）** — 画面中央が孤立しがちな Street ビュー向けの施策。画面外の近隣
-  オブジェクトを **画面の淵ギリギリ**（外縁が端を ~8px はみ出す）にクランプしたガラスチップで提示。各チップは
-  対象 3D の **ライブポートレート** ＋ 方向シェブロン（実ベアリング）＋ 距離（haversine）。レイヤは 3D マーカー /
-  chrome の **下**（端で重なると後ろへ潜る）。スタイル（サムネ/矢印/ドット/オフ）・出現条件（1個/2個まで/常に・
-  既定=2個まで）・サイズ・距離ラベル・パルス・最大数をパネルで切替（「施策」比較用）。
+| post | story id | lat, lng | thumbUrl（生成元写真） | 見た目 |
+|---|---|---|---|---|
+| real-01 | 143a6501… | 35.6655, 139.7011 | `../../assets/sample/models/real-01.jpg` | しゃがむ人物 |
+| real-02 | 1e12abf7… | 35.6741, 139.6811 | `…/real-02.jpg` | しゃがむ男性 |
+| real-03 | 25eb1144… | 35.6754, 139.7051 | `…/real-03.jpg` | 飲み物を持つ男性 |
+| real-04 | 353711cd… | 35.6653, 139.7010 | `…/real-04.jpg` | 犬のぬいぐるみ |
+| real-05 | 7339918b… | 35.6753, 139.6970 | `…/real-05.jpg` | 男性バスト |
+| real-06 | 7fa30005… | 35.6958, 139.7662 | `…/real-06.jpg` | 立つ人物（横向き） |
+| real-07 | 97ef6494… | 35.6621, 139.7127 | `…/real-07.jpg` | 鉢／香炉状の器 |
+| real-08 | bf56f848… | 35.6677, 139.6933 | `…/real-08.jpg` | 立つ女性 |
+| real-09 | d91a62e2… | 35.6657, 139.6961 | `…/real-09.jpg` | 青髪の人物 |
+| **real-10** | e40ad36b… | **35.6592, 139.7006** | `…/real-10.jpg` | **ハチ公像（map CENTER）** |
+| real-11 | e42972fe… | 35.6657, 139.7010 | `…/real-11.jpg` | 顔／頭部 |
 
-GLB ソース = 本番 Firebase Storage の公開 URL を直接参照（`firebasestorage.googleapis.com/.../story/{id}/{id}.glb`、
-CORS `*`）。**design repo にユーザー投稿コンテンツ（GLB/写真）を複製しない**。bootstrap に渋谷の実投稿 11 件を
-各実 lat/lng で配置（`real-10`=ハチ公像＝map CENTER）。meshopt 圧縮のため `MeshoptDecoder.ready` 待ち。
+- GLB は現 specimen `POSTS[].url`（`firebasestorage.googleapis.com/.../story/{id}/{id}.glb`、CORS `*`）をそのまま使う。
+  **ユーザー投稿の GLB/写真は design repo に複製しない**（GLB は公開 URL 参照、サムネは上記サンプル写真で代用）。
+- circleId は全件 `seed_shibuya`（実機の渋谷シード）。デモ用に **2〜3 サークルに分けて**リールの複数行を見せてよい。
 
-## globe 装飾レイヤ（z 昇順・`overlay.js` / `look.js` の値）
+### クラスタリングと代表（実機の挙動）
+1. **bucketing**: 全ピンを zoom/canvas 依存のタイル cell（`z/x/y`）で bin。各 cell の**既定代表＝id 最小**のピン。
+2. **メインクラスタ**: cell のうち**画面中心に最も近い**ものを `role=main` にする。これが `mainTerrestrial`（リールの供給元）。
+3. **代表選定（hysteresis）**: 毎フレ各クラスタの中心度 `repActiveT`(0–1, 中心=1) を見て、最大のピンを代表化。
+   ただし**現代表より厳密に上回る時だけ**入れ替え（タイ無効＝ちらつき防止）。
+4. **ユーザーロック**: リール cell タップで選んだ代表は **1500ms ロック**（自動選定より優先）。
+5. メインクラスタの「巨大 main＋小さい sub」は role でサイズ激変。current specimen の「中心最寄りを 2×」はこの一部。
 
-- `#bg-white` — 宇宙背景グラデ（pale positron 球と馴染む soft な light blue-gray。`white`/`cool`/`deep` をプリセット化）。
-- `#strato-shadow` — 球縁の **大気リング**。teal 系 radial。低 zoom（球の縁が見える引き）でのみ表示。
-- `#map` — MapLibre canvas（球の中だけ描画、外は透明）。
-- `#center-overlay` — **中心マーカー**（青ドット `rgba(66,133,244)` ＋白縁 ＋ glow ＋ ping。pitch で楕円化）。
-- `#globe-frame` — 球の見かけ縁の **白線**。低 zoom でのみ表示。
+### リール（= メインクラスタのメンバー列）
+- 供給元 = `mainTerrestrial.allPins`（メインクラスタの**全メンバー**。branches だけでなく隠れメンバーも含む）。
+- circleId でグルーピング → **1 サークル 1 行**（代表のサークルを先頭）。各行 = サークル名＋カバー＋メンバー横スクロール。
+- **cell の中身は画像（thumbUrl）のみ**。代表 = 白枠 **2.5px** / 他 = `rgba(255,255,255,0.2)` 1px。アバター/名前/出典は描かない。
+- cell タップ → **代表化**（`selectRepresentative`）。long press → story を開く。
 
-3 プリセット: **🌍 Globe**（引き・宇宙に浮かぶ球・自動自転）/ **🗾 Region**（日本広域）/
-**🏙 Street+3D**（街区 zoom~16・pitch55・**初期表示**。ハチ公像が中央 main に出る）。specimen は pan+zoom を解放。
+### タップ挙動の出し分け（地図上の 3D）
+- **メイン（代表）3D タップ → フォーカス**（全画面 Hero 拡大・**320ms easeOutCubic**・背景の地図のみ scrim 暗転・360°回覧）。
+- **非メイン タップ → 地図がその位置へ glide**（約 800ms）して**その投稿が新しいメイン**になる（フォーカスしない）。
+- リール cell タップでフォーカス中に別 3D 投稿を選ぶと、**フォーカス対象を差し替え**（拡大は維持）。3D 無し投稿を選んだらフォーカスを閉じる。
+- フォーカス中の ✕ ボタンは**対象の左上角**に追従、scrim は地図だけを暗転、リール/サイドツール/投稿ボタンは前面で操作可（押してもフォーカス維持）。
 
-## 下部 chrome（specimen に composite 済み・実機の領分）
-
-- **サークルプレイリスト**（`#playlist`） — 4 行（渋谷コミュニティ等）の縦並び、各行 story サムネを横スクロール。
-  cell タップで白枠（代表）が移動し `uv:select` 発火。背後に読みやすさ用の保護ベール。
-- **WdSideTool**（右端中央） — アバター（フォローバッジ）→ like → comment → pin の縦レール（DS `components.css`）。
-  like はタップでトグル（pink fill ＋ カウント増減・`uv:like`）。
-- **投稿ボタン**（右下） — カラフル放射グラデのリング ＋ カメラ ＋ add バッジ。タップで `uv:post`。
-- フォーカス中もプレイリスト / サイドツール / 投稿ボタンは **3D の上に持ち上げて** タップ可能（押してもフォーカス維持）。
+### 連携の状態（同一 id で貫通）
+`代表 id` が、(a) リールの白枠 (b) 地図上の巨大 main (c) フォーカス対象 を**1 つの id**で結ぶ。現 specimen の
+`_mainId`（中心最寄り）を**この代表 id に統一**し、リール選択・地図 glide・フォーカスがすべて同じ id を更新するようにする。
 
 ## スマホ配置文脈
 
-画面 **402×874 + SafeArea**（iPhone 17 / iOS 最新・`card.css` `.phone`）。globe は full-bleed 背景。
-chrome は SafeArea を避けて重ねる。タップ範囲 ≥44pt（投稿ボタン 55×55）。
+画面 **402×874 + SafeArea**（iPhone 17 / iOS 最新・`DesignSystem/preview/card.css` `.phone`）。globe は full-bleed 背景。
+リール `left:0 right:0` 下端、投稿ボタン右下 55×55、WdSideTool 右端中央。タップ範囲 ≥44pt。
 
-## 実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。この HANDOFF / 実機が正）
+## 直すべき逸脱
 
-- lib/feature/Universe/UniverseView.dart・UniverseController（home 画面）
-- lib/component/ui/view/Earth/（globe WebView ＋ ピン ＋ 3D オーバーレイ）/ ThreeDTerrestrialView.dart
-- lib/feature/Main/StoryOverlayView.dart（リール・投稿ボタン・サイドツール・scrim）
-- 部品ハンドオフ（再定義しない）: `handoff/ThreeDTerrestrialView/` / `handoff/TerrestrialPin/` /
-  `handoff/UniverseCircleReel/` / `handoff/WdStorySideTool/`
+- リールのデータを「固定サンプル」から「メインクラスタ `allPins`」に。3D とサムネを**同一 id のペア**に束ねる。
+- `_mainId`（中心最寄り）を**クラスタ代表**へ統一し、リール／地図／フォーカスが同じ id を相互更新する双方向ループにする。
+- サムネは `assets/sample/models/real-NN.jpg`（per-View に複製しない・共有プール参照）。色は役割トークン（`colors_and_type.css`）。
 
-## 取り込み済み
+## 実装の対応箇所（別 repo `univbrofd/toopdbq`・参考。本書の値が design 上の正）
 
-本 bundle は `/import-design-bundle` で取り込み・push 済み。Flutter 具現化は `/design-to-flutter UniverseView`。
+- `lib/component/ui/view/Earth/EarthClusterEngine.dart` / `EarthClusterModels.dart` — bucketing・cell 代表・`EarthClusterLayout{allPins, branches, role, main}`
+- `lib/component/ui/view/Earth/EarthRepresentativeElector.dart` — 代表選定（`repActiveT` 最大・hysteresis・ユーザーロック 1500ms）
+- `lib/component/ui/view/Planet/PlanetViewController.dart` — `mainTerrestrial`（Rxn）/ `selectRepresentative` / `enter3dFocus` / `exit3dFocus` / `focus3dPin` / `focus3dExpanded`
+- `lib/feature/Main/StoryOverlayView.dart` — `_buildClusterReel`（`mainTerrestrial.allPins` を読む）/ `_CirclePlaylist`（circle 別行・代表白枠）
+- `lib/component/ui/view/Earth/ThreeDTerrestrialView.dart` — フォーカスの AnimatedPositioned（320ms・main 判定）
+- `lib/model/Terrestrial.dart` — `id / lat / lng / has3D / threeDPath / thumbnailUrl / circleId`（3D とサムネは同一エンティティ）
+
+## Claude Design に貼るプロンプト
+
+```
+to claude
+------------------------------------------------------
+UniverseView の Earth Globe specimen を「実機の連携モデル」に合わせてリファクタして。
+現状は 3D・下部リール・メイン・フォーカスがバラバラのデータで、連動していない。
+
+索引: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/DesignSystem/_ds_manifest.json
+HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/handoff/UniverseView/HANDOFF.md
+（specimen: handoff/UniverseView/Earth Globe.html ＋ earth/*.js を直接リファクタしてよい）
+
+直す核（HANDOFF の表と「目標の連携モデル」のとおり）:
+1. データを 1 投稿 = 1 エンティティ {id,lat,lng,circleId,glbUrl,thumbUrl} に統一。
+   3D(glbUrl=現 POSTS の Firebase URL)とサムネ(thumbUrl=assets/sample/models/real-NN.jpg)を
+   同じ id のペアにする(real-NN.glb ↔ real-NN.jpg。生成元写真がサムネ)。
+2. クラスタリングを入れる: ピンをタイル cell で bin、画面中心に最も近い cell をメインクラスタに。
+3. 下部リール = メインクラスタの allPins を circle 別行で表示(代表=白2.5px枠/他=rgba(255,255,255,.2)1px、
+   cell は thumbUrl のみ)。固定4行サンプルはやめる。
+4. 代表 id を 1 本に統一して連動: リール白枠 / 地図の巨大 main / フォーカス対象 を同じ id に。
+   リール cell タップ→代表化(1500msロック)→地図再選定→白枠移動。
+   メイン 3D タップ→フォーカス(320ms easeOutCubic 全画面・360°)。非メイン タップ→地図がそこへ glide して新メイン。
+
+土台は USAGE_RULES.md と taste.md。色は colors_and_type.css の役割トークン、
+サムネは共有プール assets/sample/models/real-NN.jpg を参照(per-View に複製しない)。
+新規発明はしない。最終はダウンロード可能な bundle で出力して。
+--------------------------------------------------
+```
+
+## 取り込み
+
+Claude Design が bundle を export したら `/import-design-bundle {URL}` で取り込む（`handoff/UniverseView/` を更新・push）。
