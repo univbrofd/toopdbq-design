@@ -1,8 +1,9 @@
 # HANDOFF — UniverseView：クラスタ ⇄ リール ⇄ メイン ⇄ フォーカス の連携リファクタ
 
-`UniverseView` の live specimen（`Earth Globe.html` ＋ `earth/*.js`）を、**実機（Flutter）の連携モデルに合わせて
-リファクタ**する逆ハンドオフ。現 specimen は 3D・下部リール・メイン選定・フォーカスが**バラバラのデータ**で動いて
-おり、実機のように「1 つのクラスタを中心に全部が連動する」形になっていない。それを直す。
+`UniverseView` の live specimen（`Earth Globe.html` ＋ `earth/*.js`）の、**実機（Flutter）の連携モデルに合わせた
+リファクタ**を定義する living spec。3D・下部リール・メイン選定・フォーカスを **1 投稿 = 1 エンティティ ＋ 単一の代表 id**
+で連動させる。**現 specimen はこの方針で実装済み**（データ単一化 `posts.js` / 固定クラスタ / リール=メインクラスタの
+メンバー / サムネ=生成元写真）。下表は方針と「やってはいけない逸脱」の記録。さらに直す時はこの値に従う。
 
 > repo: `univbrofd/toopdbq-design` / branch `main` / raw base:
 > `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
@@ -15,7 +16,8 @@
 |---|---|---|
 | **下部リール** | 固定 4 行（渋谷コミュニティ等）の**無関係なサンプル画像**列。3D とは別データ | **メインクラスタのメンバー列**。中心クラスタの `allPins` を circle でグルーピングして出す |
 | **3D とサムネの同一性** | 3D = `real-NN.glb`（Firebase）、リール = `story-NN.png`。**別物で対応が無い** | **同一 story の二表現**。1 投稿 = `{id,lat,lng,circleId,glbUrl,thumbUrl}`。サンプルは `real-NN.glb`↔`real-NN.jpg`（**生成元の写真がサムネ**） |
-| **クラスタリング** | 11 件を独立配置。クラスタ概念が無い | **タイル cell で bin** し、画面中心に最も近い cell を**メインクラスタ**にする |
+| **クラスタリング** | 動的タイル bin で密集地帯（渋谷中心）がタイル境界で割れ、クラスタされない | **固定クラスタ**（posts.js の `cluster` 値）で bin し、画面中心に最も近いクラスタを**メインクラスタ**に |
+| **リールのサムネ** | `gen-thumb.html` で **GLB を 3D レンダした jpg** を thumbUrl にしてしまい、リストに 3D レンダが出る | thumbUrl = **生成元の写真そのもの**（`real-NN.jpg`）。3D を焼いた画像は使わない |
 | **メイン選定** | 画面中心最寄り 1 個を 2× にするだけ（孤立した値） | メイン = **メインクラスタの代表**。リールの白枠・地図の main・フォーカス対象と**同一 id で連動** |
 | **リール↔地図↔フォーカス** | 一方通行（タップで地図 glide のみ）。リールと代表が無関係 | **双方向ループ**。リール cell タップ→代表ロック→地図再選定→リール白枠移動→（main かつ 3D なら）フォーカス |
 
@@ -42,10 +44,17 @@
 - GLB は現 specimen `POSTS[].url`（`firebasestorage.googleapis.com/.../story/{id}/{id}.glb`、CORS `*`）をそのまま使う。
   **ユーザー投稿の GLB/写真は design repo に複製しない**（GLB は公開 URL 参照、サムネは上記サンプル写真で代用）。
 - circleId は全件 `seed_shibuya`（実機の渋谷シード）。デモ用に **2〜3 サークルに分けて**リールの複数行を見せてよい。
+- ⚠️ **サムネは生成元の写真そのもの**（`assets/sample/models/real-NN.jpg`・縦長 704×1530）。
+  **GLB を 3D レンダして焼いた画像をサムネにしない**（`tools/gen-thumb.html` で GLB を描画した jpg で `real-NN.jpg` を
+  上書きするのは誤り＝リールに 3D レンダが出る）。リール cell は `thumbUrl` だけを使い、3D ポートレート（`thumbFor`）へ
+  フォールバックさせない（3D の実レンダは edge-indicator chip 専用）。
 
-### クラスタリングと代表（実機の挙動）
-1. **bucketing**: 全ピンを zoom/canvas 依存のタイル cell（`z/x/y`）で bin。各 cell の**既定代表＝id 最小**のピン。
-2. **メインクラスタ**: cell のうち**画面中心に最も近い**ものを `role=main` にする。これが `mainTerrestrial`（リールの供給元）。
+### クラスタリングと代表（specimen = 固定クラスタ）
+1. **bucketing（固定）**: 各投稿が持つ **固定の `cluster` 値**（posts.js・地理ベースの手動グルーピング）で bin する。
+   **動的タイル bin は使わない**（密集地帯＝渋谷中心がタイル境界で割れてクラスタされないため。ユーザー指定で固定可）。
+   現状の固定グループ: `shibuya`(real-01/04/07/09/10/11) / `harajuku`(real-02/03/05/08) / `shinjuku`(real-06)。
+   投稿を足す/動かすときは `cluster` を手で振り直す。
+2. **メインクラスタ**: クラスタのうち**重心が画面中心に最も近い**ものを `role=main` に。これが `mainTerrestrial`（リールの供給元）。
 3. **代表選定（hysteresis）**: 毎フレ各クラスタの中心度 `repActiveT`(0–1, 中心=1) を見て、最大のピンを代表化。
    ただし**現代表より厳密に上回る時だけ**入れ替え（タイ無効＝ちらつき防止）。
 4. **ユーザーロック**: リール cell タップで選んだ代表は **1500ms ロック**（自動選定より優先）。

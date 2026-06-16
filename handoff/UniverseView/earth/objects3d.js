@@ -9,8 +9,20 @@
    lat/lng を map.project() で画面ピクセルに射影し、その位置に *固定ピクセルサイズ* で
    3D を描く（地図は位置の供給源としてのみ使う）。
 
+   連携モデル（実機準拠・このモジュールが調整役）:
+     1 投稿 = 1 エンティティ {id,lat,lng,circleId,glbUrl,thumbUrl}。3D は glbUrl を、
+     リールは thumbUrl を *同じ id* で引く。ピンをタイル cell で bin し、画面中心に
+     最も近い cell を「メインクラスタ」に。そのクラスタ内で中心に最も近い 1 投稿を
+     代表(repId)とし、地図の巨大 main / リール白枠 / フォーカス対象 を *すべて同じ
+     repId* に揃える（単一の真実）。クラスタ/代表が変わるたび onChange を発火し、
+     リール側（Earth Globe.html）が行を組み替え・白枠を移す。
+
    公開 API:
      window.Objects3D.init({ getMap, container, models:[{id,lat,lng,url}], ... })
+     window.Objects3D.onChange(cb)              // ({repId, clusterKey, ids}, rebuild)
+     window.Objects3D.selectRepresentative(id, {glide, lock})
+     window.Objects3D.focus(id) / .exitFocus()
+     window.Objects3D.thumbFor(id)              // 実 GLB から焼いたポートレート dataURL
    ========================================================================== */
 (function () {
   const D2R = Math.PI / 180;
@@ -18,14 +30,16 @@
   const cfg = {
     FOV: 38,
     DIST: 900,          // camera → object plane (world units, constant)
-    MARKER_PX: 96,      // 画面上の 3D マーカー高さ(px)。ズーム非依存で一定。
-    FOCUS_FRAC: 0.62,   // フォーカス時の高さ = min(w,h) * これ
+    MARKER_PX: 92,      // 画面上の 3D マーカー高さ(px)。ズーム非依存で一定。
+    FOCUS_FRAC: 0.82,   // フォーカス時の高さ = min(w,h) * これ（実機 全画面寄り）
+    FOCUS_STEP: 0.052,  // フォーカス進捗/フレーム → ≈320ms easeOutCubic
     FACE_DEG: -90,      // 基準ヤウ：GLB 既定は右(+X)向き → -90°でカメラ(手前)向き
     JITTER_DEG: 26,     // 投稿ごとの向き揺らぎ
     IDLE_SPIN: 0.0,     // マーカーの自動回転(rad/フレーム)。0=静止
     CULL_MARGIN: 140,   // 画面外カリングの余白(px)
-    MAIN_SCALE: 2.0,    // 画面中心に最も近い「メイン」マーカーの拡大率
+    MAIN_SCALE: 2.6,    // 代表(repId)マーカーの拡大率＝地図の「巨大 main」
     MAIN_LERP: 0.16,    // メイン拡大/縮小の補間速度（ポップ防止）
+    REP_LOCK_MS: 1500,  // 代表を手動選択した後、自動再選定を抑止する時間
   };
 
   let map, container, renderer, scene, camera;
@@ -38,8 +52,18 @@
   let focusId = null;
   let focusT = 0;                 // 0..1 progress
   let focusDir = 0;               // +1 entering, -1 leaving
-  let _mainId = null;             // id of the current center-nearest "main" marker
   const ZERO = new THREE.Vector3();
+
+  // ----- single source of truth: representative + main cluster -------------
+  // repId は「地図の巨大 main / リール白枠 / フォーカス対象」を貫く 1 本の id。
+  // mainCluster は repId を含むタイル cell（画面中心に最も近い cell）の全 pin。
+  let repId = null;               // current representative (the giant "main")
+  let repLockUntil = 0;           // performance.now() — 手動選択後の自動再選定ロック
+  let mainClusterKey = null;      // tile key of the current main cluster
+  let mainClusterIds = [];        // ids of all pins in the main cluster
+  let _mainId = null;             // backward-compat alias of repId (edge layer 等)
+  const changeCbs = [];           // onChange subscribers
+  const thumbCbs = [];            // onThumb subscribers (id, dataURL)
 
   // pointer / orbit
   let orbiting = false, lastX = 0, lastY = 0, didDrag = false;
@@ -123,7 +147,7 @@
   function addModel(m, i) {
     if (!m || !m.id || !m.url || typeof m.lat !== 'number' || typeof m.lng !== 'number') return;
     const faceY = (cfg.FACE_DEG + (((i * 47) % (cfg.JITTER_DEG * 2)) - cfg.JITTER_DEG)) * D2R;
-    const entry = { id: m.id, lat: m.lat, lng: m.lng, url: m.url, group: null, faceY, onScreen: false, worldH: 1, spin: 0, mainK: 0 };
+    const entry = { id: m.id, lat: m.lat, lng: m.lng, url: m.url, cluster: m.cluster || null, group: null, faceY, onScreen: false, worldH: 1, spin: 0, mainK: 0 };
     entries.set(m.id, entry);
 
     const doLoad = () => loader.load(m.url, (gltf) => {
@@ -149,6 +173,8 @@
       entry.thumb = captureThumb(model);
       const c0 = edgeChips.get(m.id);
       if (c0 && c0.img && entry.thumb) c0.img.src = entry.thumb;
+      // notify subscribers (reel uses this to fill any cell whose file thumb 404'd)
+      if (entry.thumb) thumbCbs.forEach((cb) => { try { cb(m.id, entry.thumb); } catch (e) {} });
       const g = new THREE.Group();
       g.add(model);
 
@@ -181,6 +207,91 @@
     if (MeshoptReady) MeshoptReady.then(doLoad); else doLoad();
   }
 
+  // ==========================================================================
+  // CLUSTERING + REPRESENTATIVE — the single linkage model
+  // ピンを *固定* クラスタ(posts.js の cluster 値)で bin → 画面中心に最も近い
+  // クラスタをメインクラスタに → そのクラスタ内で中心に最も近い 1 投稿を代表(repId)に。
+  // 代表は地図の巨大 main / リール白枠 / フォーカス対象 を貫く 1 本の id。
+  // WHY 固定: 動的タイル bin だと密集地帯(渋谷中心)がタイル境界で割れてクラスタされない。
+  // ==========================================================================
+
+  // bin every entry by its fixed `cluster` value; return the cluster nearest screen-center.
+  function computeMainCluster() {
+    const cells = new Map();   // cluster -> { ids, sumLat, sumLng, n }
+    entries.forEach((en) => {
+      const k = en.cluster || ('solo:' + en.id);   // fallback: ungrouped pin is its own cluster
+      let c = cells.get(k);
+      if (!c) { c = { ids: [], sumLat: 0, sumLng: 0, n: 0 }; cells.set(k, c); }
+      c.ids.push(en.id); c.sumLat += en.lat; c.sumLng += en.lng; c.n++;
+    });
+    const { w, h } = size();
+    const cx = w / 2, cy = h / 2;
+    let bestK = null, best = Infinity;
+    cells.forEach((c, k) => {
+      const p = map.project([c.sumLng / c.n, c.sumLat / c.n]);
+      const d = (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy);
+      if (d < best) { best = d; bestK = k; }
+    });
+    return { key: bestK, ids: bestK ? cells.get(bestK).ids.slice() : [] };
+  }
+
+  // pick the pin in `ids` nearest screen-center (the auto-representative).
+  function nearestInCluster(ids) {
+    const { w, h } = size();
+    const cx = w / 2, cy = h / 2;
+    let id = null, best = Infinity;
+    ids.forEach((i) => {
+      const en = entries.get(i); if (!en) return;
+      const p = map.project([en.lng, en.lat]);
+      const d = (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy);
+      if (d < best) { best = d; id = i; }
+    });
+    return id;
+  }
+
+  // recompute main cluster + representative each frame; fire onChange on change.
+  function updateMainAndRep() {
+    if (focusId) return;                  // selection frozen while focused
+    const cl = computeMainCluster();
+    let rebuild = false, repChanged = false;
+    if (cl.key !== mainClusterKey) { mainClusterKey = cl.key; rebuild = true; }
+    mainClusterIds = cl.ids;
+
+    const locked = performance.now() < repLockUntil;
+    if (!locked) {
+      // auto-representative = nearest-to-center within the main cluster
+      const auto = nearestInCluster(mainClusterIds);
+      if (auto && auto !== repId) { repId = auto; repChanged = true; }
+    } else if (repId && mainClusterIds.indexOf(repId) === -1) {
+      // locked rep drifted out of the (re-centered) main cluster → keep showing it,
+      // but ensure the reel includes it so the white frame has a home.
+      if (mainClusterIds.indexOf(repId) === -1) { mainClusterIds.push(repId); }
+    }
+    _mainId = repId;
+    if (rebuild || repChanged) fireChange(rebuild);
+  }
+
+  function fireChange(rebuild) {
+    const payload = { repId, clusterKey: mainClusterKey, ids: mainClusterIds.slice() };
+    changeCbs.forEach((cb) => { try { cb(payload, !!rebuild); } catch (e) {} });
+  }
+
+  // public: promote a pin to representative. Locks auto-selection for REP_LOCK_MS
+  // and (optionally) glides the map to re-center on it, so the map re-selects and
+  // the white frame / giant main move together.
+  function selectRepresentative(id, opts) {
+    opts = opts || {};
+    const en = entries.get(id); if (!en) return;
+    repId = id;
+    repLockUntil = performance.now() + (opts.lock != null ? opts.lock : cfg.REP_LOCK_MS);
+    if (mainClusterIds.indexOf(id) === -1) mainClusterIds.push(id);
+    _mainId = repId;
+    if (opts.glide !== false) {
+      map.easeTo({ center: [en.lng, en.lat], duration: 650, easing: easeOutCubic });
+    }
+    fireChange(false);          // move the white frame now; cluster rebuild follows the glide
+  }
+
   // ----- per-frame layout + render ------------------------------------------
   function layout() {
     const { w, h } = size();
@@ -188,29 +299,13 @@
     const focusWorld = Math.min(w, h) * cfg.FOCUS_FRAC * pxToWorld();
     const ease = focusDir > 0 ? easeOutCubic(focusT) : (1 - easeOutCubic(1 - focusT));
 
-    // ----- pick the on-screen marker nearest screen-center as the MAIN one ----
-    // (recomputed every frame so the main object follows pan/rotate). The chosen
-    // marker renders at MAIN_SCALE×; selection is suspended while a focus is open.
-    const cx = w / 2, cy = h / 2;
-    let mainId = null, mainBest = Infinity;
-    if (!focusId) {
-      entries.forEach((en) => {
-        if (!en.group) return;
-        const p = map.project([en.lng, en.lat]);
-        if (p.x < -cfg.CULL_MARGIN || p.x > w + cfg.CULL_MARGIN ||
-            p.y < -cfg.CULL_MARGIN || p.y > h + cfg.CULL_MARGIN) return;
-        const d = (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy);
-        if (d < mainBest) { mainBest = d; mainId = en.id; }
-      });
-    }
-    _mainId = mainId;
-
     entries.forEach((en) => {
       const g = en.group; if (!g) return;
       const isFocus = en.id === focusId;
 
-      // smooth grow/shrink toward the main-object scale (no pop while panning)
-      const mainTarget = (!focusId && en.id === mainId) ? 1 : 0;
+      // smooth grow/shrink toward the representative scale (no pop while panning).
+      // 巨大 main は常に repId（単一の真実）。フォーカス中は選定を止める。
+      const mainTarget = (!focusId && en.id === repId) ? 1 : 0;
       en.mainK += (mainTarget - en.mainK) * cfg.MAIN_LERP;
       if (en.mainK < 0.001) en.mainK = 0;
       const markerScaled = markerWorld * (1 + en.mainK * (cfg.MAIN_SCALE - 1));
@@ -249,10 +344,12 @@
   }
 
   function step() {
-    // focus progress
-    if (focusDir > 0 && focusT < 1) focusT = Math.min(1, focusT + 0.06);
+    // recompute main cluster + representative (the single linkage source)
+    updateMainAndRep();
+    // focus progress (≈320ms easeOutCubic in/out)
+    if (focusDir > 0 && focusT < 1) focusT = Math.min(1, focusT + cfg.FOCUS_STEP);
     if (focusDir < 0 && focusT > 0) {
-      focusT = Math.max(0, focusT - 0.06);
+      focusT = Math.max(0, focusT - cfg.FOCUS_STEP);
       if (focusT === 0) {
         focusId = null; focusDir = 0;
         if (container) container.classList.remove('o3d-focus-active');
@@ -320,11 +417,10 @@
     if (hits.length) {
       const en = entryFromObject(hits[0].object);
       if (!en) return;
-      // メインのオブジェクト（画面中心に最も近い＝拡大表示中）をタップ → フォーカス。
-      // それ以外をタップ → フォーカスせず、地図をその位置へ移動（＝そのオブジェクトが
-      // 中心＝新しいメインになる）。
-      if (en.id === _mainId) enterFocus(en.id);
-      else panToEntry(en);
+      // 代表(repId)＝巨大 main をタップ → フォーカス（320ms easeOutCubic・全画面・360°）。
+      // 非メインをタップ → 地図がそこへ glide してそのオブジェクトを新しいメイン（代表）に。
+      if (en.id === repId) enterFocus(en.id);
+      else selectRepresentative(en.id, { glide: true });
     }
   }
 
@@ -637,11 +733,38 @@
     g.appendChild(_range('最大表示数', 'maxCount', 3, 11, 1, ''));
     body.insertBefore(g, body.firstChild);
   }
+  function buildLinkPanel() {
+    const body = document.getElementById('panelBody');
+    if (!body) return;
+    const old = body.querySelector('#link-group'); if (old) old.remove();
+    const g = document.createElement('div'); g.className = 'group'; g.id = 'link-group';
+    const gt = document.createElement('div'); gt.className = 'gt';
+    gt.innerHTML = '連携モデル <span class="id">posts.js ↔ objects3d.js</span>';
+    g.appendChild(gt);
+    g.appendChild(_cfgRange('巨大 main 拡大率', 'MAIN_SCALE', 1.4, 3.4, 0.1, '×'));
+    g.appendChild(_cfgRange('フォーカスサイズ', 'FOCUS_FRAC', 0.6, 0.95, 0.01, ''));
+    body.insertBefore(g, body.firstChild);
+  }
+  // a range bound to a numeric key on `cfg` (the linkage tunables)
+  function _cfgRange(label, key, min, max, step, unit) {
+    const wrap = document.createElement('div'); wrap.className = 'ctrl';
+    const lab = document.createElement('div'); lab.className = 'lab';
+    const val = document.createElement('b'); val.textContent = cfg[key] + (unit || '');
+    lab.innerHTML = `<span>${label}</span>`; lab.appendChild(val);
+    const inp = document.createElement('input');
+    inp.type = 'range'; inp.min = min; inp.max = max; inp.step = step; inp.value = cfg[key];
+    inp.oninput = () => {
+      const v = parseFloat(inp.value); val.textContent = v + (unit || ''); cfg[key] = v;
+      mainClusterKey = null;   // force a cluster re-evaluation on next frame
+    };
+    wrap.appendChild(lab); wrap.appendChild(inp); return wrap;
+  }
   function setupEdgePanel() {
+    buildLinkPanel();
     buildEdgePanel();
     if (window.EarthLook && !window.EarthLook._edgePatched) {
       const orig = window.EarthLook.buildPanel;
-      window.EarthLook.buildPanel = function () { orig.apply(this, arguments); buildEdgePanel(); };
+      window.EarthLook.buildPanel = function () { orig.apply(this, arguments); buildLinkPanel(); buildEdgePanel(); };
       window.EarthLook._edgePatched = true;
     }
   }
@@ -650,8 +773,14 @@
     init,
     focus: enterFocus,
     exitFocus,
+    selectRepresentative,
+    onChange(cb) { if (typeof cb === 'function') { changeCbs.push(cb); if (mainClusterKey) cb({ repId, clusterKey: mainClusterKey, ids: mainClusterIds.slice() }, true); } },
+    onThumb(cb) { if (typeof cb === 'function') { thumbCbs.push(cb); entries.forEach((en) => { if (en.thumb) cb(en.id, en.thumb); }); } },
+    thumbFor(id) { const en = entries.get(id); return en ? en.thumb : null; },
+    get rep() { return repId; },
+    get cluster() { return mainClusterIds.slice(); },
     get focused() { return focusId; },
-    get main() { return _mainId; },
+    get main() { return repId; },
     edge: { get cfg() { return EDGE; }, refresh() { applyEdge(); } },
     _tick() { step(); },
     cfg,

@@ -265,6 +265,8 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 .cell .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cell.rep { border: 2.5px solid #fff; }
 .cell.rep .clip { inset: 1.5px; border-radius: 8px; }
+.cell.noimg .clip { background: #2A2A2A; }
+.cell.noimg .clip img { display: none; }
 .cell:active { transform: scale(.97); }
 /* ============================================================================
    WdSideTool — 縦並びアクションレール（DS components.css 由来）
@@ -575,9 +577,9 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
   <!-- ====================== STAGE: phone + presets ====================== -->
   <div class="stage">
     <div class="specimen-cap">
-      <div class="eyebrow">Live specimen · MapLibre + globe projection</div>
-      <h1>UniverseView — 地球儀（背景）</h1>
-      <p>実装エンジンそのまま：positron 淡色球 + 大気リング + 球縁白線 + 中心マーカー。ドラッグで回転 / ホイールで寄り引き。右の調整パネルで「見た目」を詰める。</p>
+      <div class="eyebrow">Live specimen · 実機の連携モデル</div>
+      <h1>UniverseView — クラスタ連動（3D · リール · メイン · フォーカス）</h1>
+      <p>1 投稿 = 1 エンティティ。ピンをタイル cell で bin し、中心に最も近い cell がメインクラスタ。代表 id を 1 本に統一し、<b>リール白枠 / 地図の巨大 main / フォーカス対象</b>を同じ id に揃える。リール cell タップ→代表化（地図再選定）、メイン 3D タップ→フォーカス、非メインタップ→glide して新メイン。</p>
     </div>
 
     <div class="phone" data-screen-label="UniverseView · Earth globe">
@@ -589,52 +591,9 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 
         <div class="scrim-top"></div>
 
-        <!-- ===== bottom chrome: circle playlist + post button (universe-list) ===== -->
+        <!-- ===== bottom chrome: cluster reel (built from main cluster's allPins) ===== -->
         <div class="playlist-veil"></div>
-        <div class="playlist" id="playlist">
-          <div class="crow">
-            <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-11.png" alt=""></span>
-              <span class="cname">渋谷コミュニティ</span>
-            </div>
-            <div class="cstrip">
-              <div class="cell rep" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel011.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel012.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel013.png" alt=""></div></div>
-            </div>
-          </div>
-          <div class="crow">
-            <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-12.png" alt=""></span>
-              <span class="cname">神宮前コミュニティ</span>
-            </div>
-            <div class="cstrip">
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel014.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel015.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel016.png" alt=""></div></div>
-            </div>
-          </div>
-          <div class="crow">
-            <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-13.png" alt=""></span>
-              <span class="cname">代々木サークル</span>
-            </div>
-            <div class="cstrip">
-              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/reel/reel017.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/reel/reel018.png" alt=""></div></div>
-            </div>
-          </div>
-          <div class="crow">
-            <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-14.png" alt=""></span>
-              <span class="cname">新宿グループ</span>
-            </div>
-            <div class="cstrip">
-              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/reel/reel019.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/reel/reel020.png" alt=""></div></div>
-            </div>
-          </div>
-        </div>
+        <div class="playlist" id="playlist"><!-- built by the reel controller from the main cluster --></div>
         <!-- ===== WdSideTool: 縦並びアクションレール（右端中央） ===== -->
         <div class="wd-side-tool" id="sideTool">
           <div class="wd-avatar">
@@ -681,7 +640,7 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       <button data-preset="region"><span class="ico">🗾</span>Region</button>
       <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
     </div>
-    <div class="hint">ドラッグ＝回転 · ホイール＝ズーム · 右ドラッグ＝傾き</div>
+    <div class="hint">リール cell タップ＝代表化 · メイン 3D タップ＝フォーカス · 非メイン＝glide · ドラッグ＝回転</div>
   </div>
 
   <!-- ====================== TUNING PANEL ====================== -->
@@ -706,28 +665,107 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
   </svg>
 </template>
 
+<!-- single source of truth: 1 post = 1 entity {id,lat,lng,circleId,glbUrl,thumbUrl} -->
+<script src="earth/posts.js"></script>
 <script src="earth/look.js"></script>
 <script src="earth/map-core.js"></script>
 <script src="earth/overlay.js"></script>
 <script src="earth/bridge.js"></script>
+
+<!-- 3D overlay: 画面空間の 3D マーカー（ズーム不依存の一定サイズ）＋タップでフォーカス→360°回覧 -->
+<script src="earth/objects3d.js"></script>
+
+<!-- ============================================================================
+  UNIVERSE LINKAGE — the one wiring that makes 3D · reel · main · focus agree.
+
+  ・3D オーバーレイ(objects3d.js) には posts の glbUrl を渡す。
+  ・下端リールは「メインクラスタの allPins」を circle 別の行で描き、cell は thumbUrl のみ。
+  ・代表(repId) は objects3d.js が 1 本に保持し、地図の巨大 main / リール白枠 /
+    フォーカス対象 を貫く。Objects3D.onChange で reel を組み替え・白枠を移動する。
+  ・リール cell タップ → selectRepresentative(id,{lock:1500}) → 地図がそこへ glide →
+    再選定 → 白枠移動。 メイン 3D タップ → フォーカス。非メイン タップ → glide して新メイン。
+  ============================================================================ -->
 <script>
-  /* circle playlist: tap a cell → promote to representative (white frame) + fire uv:select.
-     post button → fire uv:post. (Host wires these to 3D swap / composer in the app.) */
-  (function () {
+  (async function () {
+    const D = window.UniverseData;
+    if (window.MeshoptDecoder && MeshoptDecoder.ready) await MeshoptDecoder.ready;
+
+    const screen = document.querySelector('.phone .screen');
     const playlist = document.getElementById('playlist');
-    if (playlist) {
-      playlist.addEventListener('click', (e) => {
-        const cell = e.target.closest('.cell');
-        if (!cell) return;
-        playlist.querySelectorAll('.cell.rep').forEach(c => c.classList.remove('rep'));
-        cell.classList.add('rep');
-        cell.dispatchEvent(new CustomEvent('uv:select', { bubbles: true, detail: { circle: cell.getAttribute('data-circle') } }));
+
+    // ---- reel controller: render the main cluster's allPins as circle rows ----
+    let sig = '';   // signature of the currently-rendered cluster (rebuild only on change)
+    function reelSignature(ids) { return ids.slice().sort().join(','); }
+
+    function buildReel(ids, repId) {
+      playlist.innerHTML = '';
+      // group cluster pins by circle, preserving the data's circle order
+      const byCircle = new Map();
+      ids.forEach((id) => {
+        const p = D.byId[id]; if (!p) return;
+        if (!byCircle.has(p.circleId)) byCircle.set(p.circleId, []);
+        byCircle.get(p.circleId).push(p);
+      });
+      D.circleOrder.forEach((cid) => {
+        const pins = byCircle.get(cid); if (!pins || !pins.length) return;
+        const circle = D.circles[cid] || { name: cid, thumb: '' };
+        const row = document.createElement('div'); row.className = 'crow';
+        row.innerHTML =
+          '<div class="chead">' +
+            '<span class="cthumb"><img src="' + circle.thumb + '" alt=""></span>' +
+            '<span class="cname">' + circle.name + '</span>' +
+          '</div>' +
+          '<div class="cstrip"></div>';
+        const strip = row.querySelector('.cstrip');
+        pins.forEach((p) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (p.id === repId ? ' rep' : '');
+          cell.setAttribute('data-id', p.id);
+          cell.innerHTML = '<div class="clip"><img alt=""></div>';
+          const img = cell.querySelector('img');
+          img.src = p.thumbUrl;                                  // 共有プール real-NN.jpg（= 生成元の写真）
+          img.onerror = () => { cell.classList.add('noimg'); };  // 失敗時はプレースホルダ。3D レンダは使わない
+          strip.appendChild(cell);
+        });
+        playlist.appendChild(row);
       });
     }
-    const postBtn = document.querySelector('.post-btn');
-    if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
 
-    /* WdSideTool — like のタップでトグル（.liked + カウント増減） */
+    function highlightRep(repId) {
+      playlist.querySelectorAll('.cell').forEach((c) => {
+        c.classList.toggle('rep', c.getAttribute('data-id') === repId);
+      });
+    }
+
+    // tap a cell → that post becomes the representative (1500ms lock + map glide).
+    playlist.addEventListener('click', (e) => {
+      const cell = e.target.closest('.cell'); if (!cell) return;
+      const id = cell.getAttribute('data-id');
+      highlightRep(id);                                          // move the white frame at once
+      window.Objects3D.selectRepresentative(id, { glide: true, lock: 1500 });
+      cell.dispatchEvent(new CustomEvent('uv:select', { bubbles: true, detail: { id, circle: D.byId[id] && D.byId[id].circleId } }));
+    });
+
+    // ---- boot the 3D overlay with the SAME entities (url = glbUrl) ----
+    function boot() {
+      if (!window.EarthMap || !window.EarthMap.map || !window.Objects3D) { setTimeout(boot, 100); return; }
+      window.Objects3D.init({
+        getMap: () => window.EarthMap.map,
+        container: screen,
+        models: D.posts.map((p) => ({ id: p.id, lat: p.lat, lng: p.lng, url: p.glbUrl, cluster: p.cluster })),
+      });
+      // the representative / main cluster drive the reel — keep them in lockstep.
+      window.Objects3D.onChange((payload, rebuild) => {
+        const s = reelSignature(payload.ids);
+        if (rebuild || s !== sig) { sig = s; buildReel(payload.ids, payload.repId); }
+        else highlightRep(payload.repId);
+      });
+      // NOTE: リールのサムネは投稿の thumbUrl(real-NN.jpg = 生成元写真)だけを使う。
+      // 3D の実レンダ(thumbFor)はリストに出さない（edge-indicator chip 専用）。
+    }
+    boot();
+
+    // ---- WdSideTool: like toggle (unchanged) ----
     const likeAct = document.querySelector('.wd-side-tool .act[data-act="like"]');
     if (likeAct) {
       const ct = likeAct.querySelector('.ct');
@@ -737,49 +775,8 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
         likeAct.dispatchEvent(new CustomEvent('uv:like', { bubbles: true, detail: { liked } }));
       });
     }
-  })();
-</script>
-
-<!-- 3D overlay: 画面空間の 3D マーカー（ズーム不依存の一定サイズ）＋タップでフォーカス→360°回覧 -->
-<script src="earth/objects3d.js"></script>
-
-<!-- ============================================================================
-  3D ON MAP — 画面空間オーバーレイで実 3D 投稿 (real-NN.glb) を表示
-  各投稿の実 lat/lng (RTDB /story) を map.project() で毎フレ画面ピクセルに落とし、
-  その位置に *一定ピクセルサイズ* で 3D を描く（ズームしても大きさは一定）。
-  3D をタップ→フォーカス（中央拡大）→ドラッグで 360° 回覧。GLB は
-  EXT_meshopt_compression のため MeshoptDecoder.ready を待ってから init する。
-  ============================================================================ -->
-<script>
-  (async function () {
-    // GLB は本番 Firebase Storage の公開 URL を直接参照する（CORS: * なので Claude Design の
-    // ブラウザからも取得可）。design repo にユーザー投稿コンテンツを複製しない。
-    // url = RTDB /story の modelUrl。real-10 = ハチ公像 (CENTER と同位置)。
-    const POSTS = [
-      { id: 'real-01', lat: 35.66553394124979, lng: 139.70113334739187, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F143a6501-ecdd-4308-a15c-fe001a9e87e5%2F143a6501-ecdd-4308-a15c-fe001a9e87e5.glb?alt=media&token=acbff054-09fd-42df-a230-61df164c53d9' },
-      { id: 'real-02', lat: 35.67409735583507, lng: 139.68111601742362, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F1e12abf7-44fc-4079-84d6-2deb5febb45b%2F1e12abf7-44fc-4079-84d6-2deb5febb45b.glb?alt=media&token=00110597-b631-442c-a2d8-87618f43600c' },
-      { id: 'real-03', lat: 35.67536946903334, lng: 139.70509975719222, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F25eb1144-1387-4351-9365-bfa51378156b%2F25eb1144-1387-4351-9365-bfa51378156b.glb?alt=media&token=9ac6ec33-1333-4713-9bc0-fb93f9073177' },
-      { id: 'real-04', lat: 35.66527163126798, lng: 139.70095538623644, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F353711cd-ac35-4de2-9955-6456270e6e3d%2F353711cd-ac35-4de2-9955-6456270e6e3d.glb?alt=media&token=835211dc-c26a-4cf8-8f65-13b4d0c34ced' },
-      { id: 'real-05', lat: 35.675310344094484, lng: 139.69697935141744, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F7339918b-267f-4539-bd69-0f6e92453764%2F7339918b-267f-4539-bd69-0f6e92453764.glb?alt=media&token=054a4173-c80a-42c4-b052-f94a9513e4e4' },
-      { id: 'real-06', lat: 35.695838793359414, lng: 139.7662216045701, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F7fa30005-fed9-45d8-8aed-780aee8b5a2c%2F7fa30005-fed9-45d8-8aed-780aee8b5a2c.glb?alt=media&token=1db6cf4c-763a-4c84-9e69-83c3a596a600' },
-      { id: 'real-07', lat: 35.662117107192344, lng: 139.71270880388738, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2F97ef6494-a592-4b91-9b17-6763573ee93f%2F97ef6494-a592-4b91-9b17-6763573ee93f.glb?alt=media&token=63fd3cf6-990e-416b-8ebd-773f7e30a502' },
-      { id: 'real-08', lat: 35.66773639634803, lng: 139.69330244061905, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fbf56f848-04f8-41e6-b6f4-5471a7fc151c%2Fbf56f848-04f8-41e6-b6f4-5471a7fc151c.glb?alt=media&token=a81d7e33-6526-4837-8d65-2ebf042f2d10' },
-      { id: 'real-09', lat: 35.66573411618798, lng: 139.69614734172274, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fd91a62e2-b0e9-4eef-b431-177d8b7d0c27%2Fd91a62e2-b0e9-4eef-b431-177d8b7d0c27.glb?alt=media&token=faf2b753-ce43-4c1d-a46b-3b5d2bb616af' },
-      { id: 'real-10', lat: 35.65923593831696, lng: 139.7006143495087, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fe40ad36b-647d-4bcd-bb2b-16eccef94fa8%2Fe40ad36b-647d-4bcd-bb2b-16eccef94fa8.glb?alt=media&token=db6e1b18-7d7a-4708-bafa-f1d0a8e5377e' },
-      { id: 'real-11', lat: 35.66566109829807, lng: 139.70101954247983, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fe42972fe-8884-4863-9fd9-0d1642c738e6%2Fe42972fe-8884-4863-9fd9-0d1642c738e6.glb?alt=media&token=6d048a08-4750-4c21-ac79-295e29e329a7' },
-    ];
-    if (window.MeshoptDecoder && MeshoptDecoder.ready) await MeshoptDecoder.ready;
-
-    const screen = document.querySelector('.phone .screen');
-    function boot() {
-      if (!window.EarthMap || !window.EarthMap.map || !window.Objects3D) { setTimeout(boot, 100); return; }
-      window.Objects3D.init({
-        getMap: () => window.EarthMap.map,
-        container: screen,
-        models: POSTS,           // {id,lat,lng,url} — 画面空間オーバーレイが各点を毎フレ project して一定サイズで描画。
-      });
-    }
-    boot();
+    const postBtn = document.querySelector('.post-btn');
+    if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
   })();
 </script>
 </body>

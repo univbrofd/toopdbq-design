@@ -194,7 +194,7 @@
 
     const note = document.createElement('div');
     note.className = 'note';
-    note.innerHTML = 'これは <code>EarthView</code> の背景レイヤだけの specimen。投稿サムネ / クラスタピン / バッジ / リールは <code>comp-universe-screen.html</code> の領分。';
+    note.innerHTML = '\u30bf\u30a4\u30eb cell \u30af\u30e9\u30b9\u30bf\u30ea\u30f3\u30b0\u3068\u4ee3\u8868(repId)\u9023\u52d5\u306f <code>objects3d.js</code>\u3001\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u306f <code>posts.js</code>\u3001\u30ea\u30fc\u30eb\u7d44\u307f\u7acb\u3066\u306f <code>Earth Globe.html</code> \u304c\u62c5\u3046\u3002\u3053\u306e\u30d1\u30cd\u30eb\u306f\u80cc\u666f\u30ec\u30a4\u30e4\u306e\u898b\u305f\u76ee\u3092\u8a70\u3081\u308b\u7528\u3002';
     body.appendChild(note);
   }
 
