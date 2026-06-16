@@ -266,6 +266,41 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 .cell.rep { border: 2.5px solid #fff; }
 .cell.rep .clip { inset: 1.5px; border-radius: 8px; }
 .cell:active { transform: scale(.97); }
+/* ============================================================================
+   WdSideTool — 縦並びアクションレール（DS components.css 由来）
+   avatar(poster+follow) → like → comment → pin · 右端中央に配置
+   ========================================================================== */
+.wd-side-tool {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.wd-side-tool .wd-icon-btn { width: 47px; height: 47px; }
+.wd-side-tool .act { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.wd-side-tool .act .ct {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); font-variant-numeric: tabular-nums;
+}
+/* poster avatar — a touch larger + extra gap to the actions */
+.wd-side-tool .wd-avatar { position: relative; width: 48px; height: 48px; flex: none; margin-bottom: 4px; }
+.wd-side-tool .wd-avatar > img {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,.7);
+}
+.wd-side-tool .wd-avatar .b {
+  position: absolute; right: -3px; bottom: -3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+.wd-side-tool .wd-avatar .b img { width: 9px; height: 9px; filter: brightness(0); }
+/* liked — like button fills with --state-like (white heart on pink, soft glow) */
+.wd-side-tool .act.liked .wd-icon-btn {
+  background: var(--state-like); backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 2px 10px rgba(255,62,136,.45);
+}
+.wd-side-tool .act.liked .wd-icon-btn::after { display: none; }
+.wd-side-tool .act.liked .wd-icon-btn img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+.wd-side-tool .act.liked .ct { color: var(--state-like); }
+
 .post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 55; width: 56px; height: 56px; }
 .post-btn.wd-icon-btn.color > img { width: 25px; height: 25px;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
@@ -387,6 +422,151 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================================
+   3D OVERLAY  (objects3d.js) — screen-space markers + focus/orbit chrome
+   ========================================================================== */
+.o3d-scrim {
+  /* sits just ABOVE the map/globe but BELOW all floating app chrome
+     (playlist 31/46 · side-tool 50 · post 55 · statusbar 60), so focusing
+     an object darkens only the MAP — the UI stays lit and in front. */
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: var(--scrim); opacity: 0;
+}
+.o3d-chrome { position: absolute; inset: 0; z-index: 58; pointer-events: none; opacity: 0; }
+
+/* While a 3D object is focused, lift the interactive app chrome ABOVE the
+   focused canvas (z57) + chrome (z58) so the circle list, side-tool rail and
+   post button stay tappable — and because their own handlers never close the
+   focus, tapping them leaves the focus open. (Status bar 60 / island 70 stay
+   on top.) Empty/object area still orbits & tap-to-closes via the canvas. */
+.screen.o3d-focus-active .playlist,
+.screen.o3d-focus-active .wd-side-tool,
+.screen.o3d-focus-active .post-btn { z-index: 59; }
+.o3d-close {
+  position: absolute; top: 72px; right: 18px; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  border: 0; border-radius: 50%; pointer-events: auto;
+  background: var(--glass-fill);
+  backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .12s var(--ease-out);
+}
+.o3d-close::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.o3d-close:active { transform: scale(.92); }
+.o3d-hint {
+  position: absolute; left: 50%; bottom: 116px; transform: translateX(-50%);
+  font-family: var(--font-jp); font-weight: 600; font-size: 12px; color: var(--text-2);
+  letter-spacing: .02em; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  padding: 7px 15px; border-radius: var(--radius-pill);
+  background: rgba(0,0,0,.34); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: opacity .3s var(--ease-out);
+}
+
+/* ============================================================================
+   周辺オブジェクト指標 — off-screen neighbour edge indicators (objects3d.js)
+   画面の淵に沿ってクランプした小さなグラス・チップが、画面外にある近隣オブジェクトの
+   *方向*(矢印) と *距離* を提示する。チップの中身は対象 3D の実ポートレート。
+   z4: bg(0) < map(1) < EDGE(4) < o3d-scrim(5) < 3D markers(6) < scrim/chrome …
+   → 実 3D マーカーや app chrome（オーバーレイ）の「下の層」に潜り、淵で重なる時は
+     その後ろへ回り込む。
+   ========================================================================== */
+.o3d-edge { position: absolute; inset: 0; z-index: 4; pointer-events: none; --ei-size: 40px; }
+.o3d-edge-chip {
+  position: absolute; left: 0; top: 0; will-change: transform;
+  padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.o3d-edge-chip.on { opacity: 1; pointer-events: auto; }
+
+/* pulse ring (chip-level so it isn't clipped by the disc) */
+.o3d-edge-chip::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: var(--ei-size); height: var(--ei-size); border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.55); transform: translate(-50%,-50%);
+  opacity: 0; pointer-events: none;
+}
+.o3d-edge--pulse .o3d-edge-chip.on::before { animation: ei-ping 2.8s var(--ease-out) infinite; }
+@keyframes ei-ping {
+  0%   { transform: translate(-50%,-50%) scale(1);   opacity: .55; }
+  70%  { transform: translate(-50%,-50%) scale(1.7); opacity: 0; }
+  100% { transform: translate(-50%,-50%) scale(1.7); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .o3d-edge--pulse .o3d-edge-chip.on::before { animation: none; } }
+
+/* the glass disc holding the object's portrait */
+.o3d-edge-chip .disc {
+  position: relative; display: block; width: var(--ei-size); height: var(--ei-size);
+  border-radius: 50%; overflow: hidden;
+  background: var(--lg-tint-dark, rgba(8,8,12,.55));
+  backdrop-filter: blur(10px) saturate(150%); -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 6px 18px rgba(0,0,0,.5);
+  transition: transform .12s var(--ease-out);
+}
+.o3d-edge-chip:active .disc { transform: scale(.9); }
+.o3d-edge-chip .disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.o3d-edge-chip .disc img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.5));
+}
+/* directional chevron — JS sets transform (rotate to true bearing, push outward) */
+.o3d-edge-chip .arrow {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+  border-left: 8px solid #fff; transform-origin: center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.65));
+}
+/* distance readout (large value + small unit — DS numeral convention) */
+.o3d-edge-chip .dist {
+  position: absolute; left: 50%; top: calc(var(--ei-size) + 8px); transform: translateX(-50%);
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1; color: #fff;
+  letter-spacing: .01em; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.85);
+  font-variant-numeric: tabular-nums;
+}
+.o3d-edge-chip .dist i { font-style: normal; font-size: 8px; font-weight: 600; opacity: .82; margin-left: 1px; }
+.o3d-edge--nodist .o3d-edge-chip .dist { display: none; }
+/* when a chip bleeds past the rim, push its distance label to the INNER side so it stays on-screen */
+.o3d-edge-chip.edge-l .dist { left: calc(var(--ei-size) + 7px); top: 50%; transform: translateY(-50%); }
+.o3d-edge-chip.edge-r .dist { left: auto; right: calc(var(--ei-size) + 7px); top: 50%; transform: translateY(-50%); }
+.o3d-edge-chip.edge-b .dist { top: auto; bottom: calc(var(--ei-size) + 8px); }
+
+/* style: arrow-only — drop the disc, enlarge the chevron, sit it on the border */
+.o3d-edge--arrow .o3d-edge-chip .disc,
+.o3d-edge--arrow .o3d-edge-chip::before { display: none; }
+.o3d-edge--arrow .o3d-edge-chip .arrow {
+  border-top-width: 8px; border-bottom-width: 8px; border-left-width: 13px;
+}
+/* style: dot — a small luminous point */
+.o3d-edge--dot .o3d-edge-chip .disc {
+  width: 13px; height: 13px; background: #fff;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18), 0 0 10px rgba(255,255,255,.55), 0 2px 6px rgba(0,0,0,.6);
+  margin: calc((var(--ei-size) - 13px) / 2);
+}
+.o3d-edge--dot .o3d-edge-chip .disc img,
+.o3d-edge--dot .o3d-edge-chip .disc::after { display: none; }
+.o3d-edge--dot .o3d-edge-chip::before { width: 13px; height: 13px; }
+
+/* segmented control inside the tuning panel */
+.seg { display: flex; gap: 5px; }
+.seg button {
+  flex: 1; appearance: none; cursor: pointer; padding: 7px 4px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05);
+  font-family: var(--font-jp); font-weight: 600; font-size: 11px; color: var(--text-2);
+  transition: all .15s var(--ease-standard);
+}
+.seg button:hover { color: var(--text-1); }
+.seg button.sel { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.28); }
 </style>
 </head>
 <body>
@@ -414,47 +594,67 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
         <div class="playlist" id="playlist">
           <div class="crow">
             <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-01.png" alt=""></span>
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-11.png" alt=""></span>
               <span class="cname">渋谷コミュニティ</span>
             </div>
             <div class="cstrip">
-              <div class="cell rep" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-01.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-02.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/uv/story-03.png" alt=""></div></div>
+              <div class="cell rep" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel011.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel012.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-01"><div class="clip"><img src="../../assets/sample/reel/reel013.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-02.png" alt=""></span>
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-12.png" alt=""></span>
               <span class="cname">神宮前コミュニティ</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-04.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-05.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/uv/story-06.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel014.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel015.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-02"><div class="clip"><img src="../../assets/sample/reel/reel016.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-03.png" alt=""></span>
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-13.png" alt=""></span>
               <span class="cname">代々木サークル</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-07.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/uv/story-08.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/reel/reel017.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-03"><div class="clip"><img src="../../assets/sample/reel/reel018.png" alt=""></div></div>
             </div>
           </div>
           <div class="crow">
             <div class="chead">
-              <span class="cthumb"><img src="../../assets/sample/uv/circle-04.png" alt=""></span>
+              <span class="cthumb"><img src="../../assets/sample/uv/circle-14.png" alt=""></span>
               <span class="cname">新宿グループ</span>
             </div>
             <div class="cstrip">
-              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-09.png" alt=""></div></div>
-              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/uv/story-10.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/reel/reel019.png" alt=""></div></div>
+              <div class="cell" data-circle="circle-04"><div class="clip"><img src="../../assets/sample/reel/reel020.png" alt=""></div></div>
             </div>
           </div>
         </div>
+        <!-- ===== WdSideTool: 縦並びアクションレール（右端中央） ===== -->
+        <div class="wd-side-tool" id="sideTool">
+          <div class="wd-avatar">
+            <img src="../../assets/sample/user/user007.jpg" style="object-position:50% 30%;" alt="poster">
+            <span class="b"><img src="../../assets/icons/icon_add.png" alt="follow"></span>
+          </div>
+          <div class="act" data-act="like">
+            <button class="wd-icon-btn" aria-label="いいね"><img src="../../assets/icons/icon_like.png" alt=""></button>
+            <span class="ct">1.2k</span>
+          </div>
+          <div class="act" data-act="comment">
+            <button class="wd-icon-btn" aria-label="コメント"><img src="../../assets/icons/icon_comment.png" alt=""></button>
+            <span class="ct">84</span>
+          </div>
+          <div class="act" data-act="pin">
+            <button class="wd-icon-btn" aria-label="ピン"><img src="../../assets/icons/icon_pin.png" alt=""></button>
+            <span class="ct">312</span>
+          </div>
+        </div>
+
         <button class="post-btn wd-icon-btn color has-badge" aria-label="投稿">
           <img src="../../assets/icons/icon_camera.png" alt="post">
           <span class="wd-badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
@@ -510,8 +710,6 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 <script src="earth/map-core.js"></script>
 <script src="earth/overlay.js"></script>
 <script src="earth/bridge.js"></script>
-<!-- 3D layer: 実機の 3D 投稿 (real-NN.glb) を story の実 lat/lng に geo-anchor して地図に乗せる -->
-<script src="earth/models.js"></script>
 <script>
   /* circle playlist: tap a cell → promote to representative (white frame) + fire uv:select.
      post button → fire uv:post. (Host wires these to 3D swap / composer in the app.) */
@@ -528,18 +726,32 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
     }
     const postBtn = document.querySelector('.post-btn');
     if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
+
+    /* WdSideTool — like のタップでトグル（.liked + カウント増減） */
+    const likeAct = document.querySelector('.wd-side-tool .act[data-act="like"]');
+    if (likeAct) {
+      const ct = likeAct.querySelector('.ct');
+      likeAct.querySelector('.wd-icon-btn').addEventListener('click', () => {
+        const liked = likeAct.classList.toggle('liked');
+        ct.textContent = liked ? '1.3k' : '1.2k';
+        likeAct.dispatchEvent(new CustomEvent('uv:like', { bubbles: true, detail: { liked } }));
+      });
+    }
   })();
 </script>
 
+<!-- 3D overlay: 画面空間の 3D マーカー（ズーム不依存の一定サイズ）＋タップでフォーカス→360°回覧 -->
+<script src="earth/objects3d.js"></script>
+
 <!-- ============================================================================
-  3D ON MAP — アプリと同じ位置に実 3D 投稿 (real-NN.glb) を乗せる
-  各投稿の実 lat/lng (RTDB /story) に geo-anchor。models.js (three.js custom layer) が
-  globe projection 追従で地表に描く。GLB は EXT_meshopt_compression のため
-  MeshoptDecoder.ready を待ってから setModels する。SCALE_M は実寸(m)・調整可。
+  3D ON MAP — 画面空間オーバーレイで実 3D 投稿 (real-NN.glb) を表示
+  各投稿の実 lat/lng (RTDB /story) を map.project() で毎フレ画面ピクセルに落とし、
+  その位置に *一定ピクセルサイズ* で 3D を描く（ズームしても大きさは一定）。
+  3D をタップ→フォーカス（中央拡大）→ドラッグで 360° 回覧。GLB は
+  EXT_meshopt_compression のため MeshoptDecoder.ready を待ってから init する。
   ============================================================================ -->
 <script>
   (async function () {
-    const SCALE_M = 18;   // 地表に乗る 3D の実寸(m)。大きく見せたいなら上げる。
     // GLB は本番 Firebase Storage の公開 URL を直接参照する（CORS: * なので Claude Design の
     // ブラウザからも取得可）。design repo にユーザー投稿コンテンツを複製しない。
     // url = RTDB /story の modelUrl。real-10 = ハチ公像 (CENTER と同位置)。
@@ -557,9 +769,17 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       { id: 'real-11', lat: 35.66566109829807, lng: 139.70101954247983, url: 'https://firebasestorage.googleapis.com/v0/b/toopdbq.appspot.com/o/story%2Fe42972fe-8884-4863-9fd9-0d1642c738e6%2Fe42972fe-8884-4863-9fd9-0d1642c738e6.glb?alt=media&token=6d048a08-4750-4c21-ac79-295e29e329a7' },
     ];
     if (window.MeshoptDecoder && MeshoptDecoder.ready) await MeshoptDecoder.ready;
-    window.setModels({
-      models: POSTS.map(p => ({ id: p.id, lat: p.lat, lng: p.lng, url: p.url, scale: SCALE_M })),
-    });
+
+    const screen = document.querySelector('.phone .screen');
+    function boot() {
+      if (!window.EarthMap || !window.EarthMap.map || !window.Objects3D) { setTimeout(boot, 100); return; }
+      window.Objects3D.init({
+        getMap: () => window.EarthMap.map,
+        container: screen,
+        models: POSTS,           // {id,lat,lng,url} — 画面空間オーバーレイが各点を毎フレ project して一定サイズで描画。
+      });
+    }
+    boot();
   })();
 </script>
 </body>

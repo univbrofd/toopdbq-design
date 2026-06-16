@@ -109,6 +109,9 @@
           });
           o.renderOrder = 999;
         });
+        // heading (yaw about the model's vertical axis, radians). Without this every
+        // GLB inherits one world orientation and they all face the same way.
+        if (typeof entry.heading === "number") obj.rotation.y = entry.heading;
         _modelScene.add(obj);
         entry.object = obj;
         dlog("model-loaded", { id: entry.id });
@@ -162,10 +165,12 @@
           existing.lat = m.lat;
           existing.lng = m.lng;
           existing.scale = m.scale;
+          existing.heading = m.heading;
+          if (existing.object && typeof m.heading === "number") existing.object.rotation.y = m.heading;
           return;
         }
         if (existing) _disposeEntry(existing);
-        const entry = { id: m.id, lat: m.lat, lng: m.lng, url: m.url, scale: m.scale, object: null };
+        const entry = { id: m.id, lat: m.lat, lng: m.lng, url: m.url, scale: m.scale, heading: m.heading, object: null };
         _modelEntries.set(m.id, entry);
         _loadEntry(entry);
       });
