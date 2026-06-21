@@ -87,7 +87,7 @@
   `MARKER_PX=92` / `FOCUS_FRAC≈0.6` / `FOCUS_STEP≈0.052`(≈320ms easeOutCubic) / 非メインは `IDLE_SPIN` 自動回転・代表は静止。
 - **focus dock**（`.o3d-dock`）: フォーカス中、同クラスタの他メンバーを画面下部に弧カルーセルで 3D サムネ並置。頂点=最大強調・タップで対象切替。
 - **off-screen edge indicator**（`.o3d-edge`）: 画面外の近隣オブジェクトを淵にクランプしたグラスチップで *方向(矢印)+距離* 提示。中身は実 3D ポートレート。
-- **story fullscreen**（`.story-fs`）: 3D クイックタップ→そのリスト写真/動画を Hero 拡大(全画面)。長押し=3D フォーカス/回覧。
+- **story fullscreen = 2D スワイプフィード**（`.story-fs` / `.sfs-scroller`）: 3D/リール cell タップ→ Hero 拡大後、クラスタ ≥2 で 2D グリッドフィードに展開（横=同サークルの他投稿 / 縦=近傍サークル〔重心距離順〕）。Instagram ストーリー型セグメント進捗・スワイプヒント・近傍ウィンドウだけ遅延実体化。長押し=3D フォーカス/回覧。
 - **動画 totem**（`.o3d-media-card`）: 投稿動画カードを 3D オブジェクト真下に積み、足元を溶接（weld 影）して「3D+動画=1 ピン」に。
 - **WdSideTool / playlist / preset-rail / tuning panel** は specimen 制御用チューニング面（`look.js`）。app chrome の値の出どころ。
 

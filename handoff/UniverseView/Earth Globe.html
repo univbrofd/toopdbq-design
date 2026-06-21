@@ -705,15 +705,49 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 /* fullscreen: hide the poster user avatar on the side rail (keep like/comment/pin) */
 .screen.story-open .wd-side-tool .wd-avatar { display: none; }
 .story-fs .sfs-media { position: absolute; inset: 0; overflow: hidden; }
+/* ---- 2D cluster feed: rows = circles (vertical snap), columns = posts in a circle (horizontal snap) ---- */
+.story-fs .sfs-scroller { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+  scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-y;
+  background: #000; opacity: 0; pointer-events: none; overscroll-behavior: contain; }
+.story-fs .sfs-scroller.live { opacity: 1; pointer-events: auto; }
+.story-fs .sfs-scroller::-webkit-scrollbar { display: none; }
+.story-fs .sfs-row { position: relative; width: 100%; height: 100%; display: flex; flex: none;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-snap-align: start; scroll-snap-stop: always;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; touch-action: pan-x; background: #000; }
+.story-fs .sfs-row::-webkit-scrollbar { display: none; }
+.story-fs .sfs-page { position: relative; width: 100%; height: 100%; flex: none; overflow: hidden; background: #000;
+  scroll-snap-align: start; scroll-snap-stop: always; }
+.story-fs .sfs-page > video, .story-fs .sfs-page > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs.feed .sfs-bar .fill { animation: none !important; }
+/* swipe hint — only at the origin cell, points to the available direction (→ same circle / ↓ other circle) */
+.story-fs .sfs-hint { position: absolute; left: 50%; bottom: 118px; transform: translateX(-50%); z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out);
+  font: 600 11.5px var(--font-jp); color: #fff; letter-spacing: .04em; text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+.story-fs.feed.expanded .sfs-hint.show { opacity: 1; }
+.story-fs .sfs-hint.gone { opacity: 0 !important; }
+.story-fs .sfs-hint .chev { animation: sfsHintBob 1.5s var(--ease-out) infinite; }
+@keyframes sfsHintBob { 0%,100% { transform: translateY(0); opacity:.55; } 50% { transform: translateY(5px); opacity:1; } }
+/* horizontal variant — sits at the right edge, arrow points right, bobs sideways */
+.story-fs .sfs-hint.horiz { left: auto; right: 16px; bottom: 50%; transform: translateY(50%); flex-direction: row; }
+.story-fs .sfs-hint.horiz .chev { animation: sfsHintBobX 1.5s var(--ease-out) infinite; }
+@keyframes sfsHintBobX { 0%,100% { transform: rotate(-90deg) translateY(0); opacity:.55; } 50% { transform: rotate(-90deg) translateY(5px); opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .story-fs .sfs-hint .chev { animation: none; } }
 .story-fs .sfs-media > video, .story-fs .sfs-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .story-fs .sfs-scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 168px; pointer-events: none;
   background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.26) 46%, transparent 100%); }
 .story-fs .sfs-scrim-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; pointer-events: none;
   background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%); }
 .story-fs .sfs-bar { position: absolute; top: 70px; left: 16px; right: 16px; height: 2.5px; border-radius: 2px;
-  background: rgba(255,255,255,.3); overflow: hidden; }
+  background: rgba(255,255,255,.3); overflow: hidden; display: flex; gap: 0; }
+/* segmented (ストーリー型): 横のアイテム数だけミシン目に区切る */
+.story-fs.feed .sfs-bar { background: transparent; overflow: visible; gap: 4px; }
+.story-fs.feed .sfs-bar .fill { display: none; }
+.story-fs .sfs-bar .seg { flex: 1 1 0; min-width: 0; height: 100%; border-radius: 2px; background: rgba(255,255,255,.3); overflow: hidden; }
+.story-fs .sfs-bar .seg .sfill { display: block; height: 100%; width: 100%; background: #fff; transform-origin: left; transform: scaleX(0); transition: transform .08s linear; }
+.story-fs .sfs-bar .seg.done .sfill { transform: scaleX(1); }
 .story-fs .sfs-bar .fill { display: block; height: 100%; width: 100%; background: #fff; transform-origin: left; transform: scaleX(0); }
-.story-fs.open .sfs-bar .fill { animation: sfs-fill 6s linear forwards; }
+.story-fs.open:not(.feed) .sfs-bar .fill { animation: sfs-fill 6s linear forwards; }
 .story-fs.is-video .sfs-bar .fill { animation: none !important; }
 @keyframes sfs-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 .story-fs .sfs-head { position: absolute; top: 84px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; }
@@ -813,6 +847,7 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 
         <!-- ===== story fullscreen: 3D タップ → リスト写真をフルスクリーン ===== -->
         <div class="story-fs" id="storyFs" aria-hidden="true">
+          <div class="sfs-scroller" id="sfsScroller" aria-hidden="true"></div>
           <div class="sfs-media" id="sfsMedia"></div>
           <div class="sfs-scrim-top"></div>
           <div class="sfs-scrim-bot"></div>
@@ -828,6 +863,9 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
               <b id="sfsFootName">渋谷コミュニティ</b>
               <span class="ds" id="sfsFootDesc">渋谷駅周辺のコミュニティ</span>
             </div>
+          </div>
+          <div class="sfs-hint"><span class="ht">別のサークル</span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 18 18"><path d="M4 7l5 5 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
           </div>
         </div>
 
@@ -992,6 +1030,8 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
     // ---- story fullscreen: open the tapped object's list photo full-bleed ----
     const fsEl = document.getElementById('storyFs');
     const fsMedia = document.getElementById('sfsMedia');
+    const scroller = document.getElementById('sfsScroller');
+    const hintEl2 = fsEl && fsEl.querySelector('.sfs-hint');
     const fsFill = fsEl && fsEl.querySelector('.sfs-bar .fill');
     const fsFootName = document.getElementById('sfsFootName');
     const fsFootImg = document.getElementById('sfsFootImg');
@@ -999,6 +1039,209 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
     let storyOrigin = null;                  // 拡大元のリール cell（位置・サイズはそのまま残る）
     let movedNode = null, movedHome = null;  // サムネから借りているメディアと、その戻し先(.clip)
     let closeTimer = null;
+    // ---- 2D クラスタフィード: 横=同じサークルの投稿、縦=サークル切替（行=サークル / 列=投稿）----
+    let feedRows = [];                       // [{ key, el(row), cells:[{id,el(cell),media,isVideo,built}] }]
+    let feedRow = -1, feedCol = -1, feedOriginRow = -1, feedOriginCol = -1;
+    let progressNode = null, scrollRaf = 0;
+    let barSegs = [];                        // ストーリー型シークバーのセグメント（横アイテム=投稿ごと）
+    // 横のアイテム数だけセグメントを作る（ミシン目）。
+    function buildBar(n) {
+      const bar = fsEl && fsEl.querySelector('.sfs-bar'); if (!bar) return;
+      barSegs.forEach((s) => { if (s.seg.parentNode) s.seg.parentNode.removeChild(s.seg); });
+      barSegs = [];
+      for (let i = 0; i < n; i++) {
+        const seg = document.createElement('span'); seg.className = 'seg';
+        const sfill = document.createElement('span'); sfill.className = 'sfill';
+        seg.appendChild(sfill); bar.appendChild(seg);
+        barSegs.push({ seg, sfill });
+      }
+    }
+    // 現在列(activeCol)より左=完了 / 右=未再生 / 現在=進捗(onProgress が騆動)。
+    function updateBar(activeCol) {
+      barSegs.forEach((s, i) => {
+        if (i < activeCol) { s.seg.classList.add('done'); s.sfill.style.transform = ''; }   // done → CSS scaleX(1)
+        else { s.seg.classList.remove('done'); if (i > activeCol) s.sfill.style.transform = 'scaleX(0)'; }
+      });
+    }
+    function setFoot(id) {
+      const p = D.byId[id]; if (!p) return;
+      const circle = D.circles[p.circleId];
+      if (circle) {
+        if (fsFootName) fsFootName.textContent = circle.name;
+        if (fsFootImg) fsFootImg.src = circle.thumb || '';
+        if (fsFootDesc) fsFootDesc.textContent = circle.desc || '';
+      }
+    }
+    function onProgress() {
+      if (!progressNode || !progressNode.duration) return;
+      const p = progressNode.currentTime / progressNode.duration;
+      if (barSegs.length && barSegs[feedCol]) barSegs[feedCol].sfill.style.transform = 'scaleX(' + p + ')';
+      else if (fsFill) fsFill.style.transform = 'scaleX(' + p + ')';   // 単体表示フォールバック
+    }
+    function bindProgress(cell) {
+      if (progressNode) { progressNode.removeEventListener('timeupdate', onProgress); progressNode = null; }
+      if (cell && cell.isVideo && cell.media) { fsEl.classList.add('is-video'); progressNode = cell.media; progressNode.addEventListener('timeupdate', onProgress); onProgress(); }
+      else {
+        fsEl.classList.remove('is-video');
+        if (barSegs.length && barSegs[feedCol]) barSegs[feedCol].sfill.style.transform = 'scaleX(1)';  // 画像：現在セグを満たす
+        else if (fsFill) fsFill.style.transform = 'scaleX(1)';
+      }
+    }
+    function clampN(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    // セルのメディアを遅延生成（近傍ウィンドウだけ実体化）。
+    function ensureCell(r, c) {
+      const row = feedRows[r]; const cell = row && row.cells[c]; if (!cell || cell.built) return;
+      const p = D.byId[cell.id]; if (!p) return;
+      let m;
+      if (cell.isVideo) {
+        m = document.createElement('video');
+        m.muted = true; m.loop = true; m.playsInline = true; m.setAttribute('playsinline', '');
+        m.preload = 'auto'; m.src = p.videoUrl;
+      } else {
+        m = document.createElement('img'); m.src = p.thumbUrl || '';
+      }
+      cell.el.appendChild(m); cell.media = m; cell.built = true;
+    }
+    function unloadCell(r, c) {
+      const row = feedRows[r]; const cell = row && row.cells[c]; if (!cell || !cell.built) return;
+      if (r === feedOriginRow && c === feedOriginCol) return;   // 原点=借用ノードは常に保持
+      if (cell.media === movedNode) return;
+      if (cell.isVideo && cell.media) { try { cell.media.pause(); } catch (_) {} cell.media.removeAttribute('src'); try { cell.media.load(); } catch (_) {} }
+      if (cell.media && cell.media.parentNode) cell.media.parentNode.removeChild(cell.media);
+      cell.media = null; cell.built = false;
+    }
+    function rowCurrentCol(row) {
+      const w = row.el.clientWidth || 1;
+      return clampN(Math.round(row.el.scrollLeft / w), 0, row.cells.length - 1);
+    }
+    // 横=同じサークル、縦=別サークル。スワイプ可能な方向のヒントを出す（原点でのみ）。
+    function updateHint(r, c) {
+      if (!hintEl2) return;
+      if (r !== feedOriginRow || c !== feedOriginCol) { hintEl2.classList.remove('show'); hintEl2.classList.add('gone'); return; }
+      const row = feedRows[r];
+      const moreRight = c < row.cells.length - 1;          // 同じサークルに右の投稿がある
+      const moreDown = r < feedRows.length - 1;            // 下に別のサークルがある
+      const ht = hintEl2.querySelector('.ht');
+      hintEl2.classList.remove('gone');
+      if (moreRight) { hintEl2.classList.add('horiz', 'show'); if (ht) ht.textContent = '同じサークル'; }
+      else if (moreDown) { hintEl2.classList.remove('horiz'); hintEl2.classList.add('show'); if (ht) ht.textContent = '別のサークル'; }
+      else { hintEl2.classList.remove('show'); }
+    }
+    // (r,c) をアクティブ化：近傍を実体化、その動画だけ再生、フッター/プログレス/ヒントを差し替え。
+    function setActive(r, c) {
+      if (!feedRows.length) return;
+      r = clampN(r, 0, feedRows.length - 1);
+      c = clampN(c, 0, feedRows[r].cells.length - 1);
+      if (r === feedRow && c === feedCol) return;
+      feedRow = r; feedCol = c;
+      feedRows.forEach((row, ri) => {
+        const dr = Math.abs(ri - r);
+        const curCol = (ri === r) ? c : rowCurrentCol(row);
+        row.cells.forEach((cell, ci) => {
+          if (ri === r) { if (Math.abs(ci - c) <= 1) ensureCell(ri, ci); else if (Math.abs(ci - c) >= 3) unloadCell(ri, ci); }
+          else if (dr === 1) { if (ci === curCol) ensureCell(ri, ci); else unloadCell(ri, ci); }
+          else unloadCell(ri, ci);
+        });
+      });
+      feedRows.forEach((row, ri) => row.cells.forEach((cell, ci) => {
+        if (!cell.isVideo || !cell.media) return;
+        if (ri === r && ci === c) { cell.media.play().catch(() => {}); }
+        else { try { cell.media.pause(); } catch (_) {} }
+      }));
+      const active = feedRows[r].cells[c];
+      const row = feedRows[r];
+      if (barSegs.length !== row.cells.length) buildBar(row.cells.length);   // 横アイテム数だけセグメント
+      updateBar(c);
+      bindProgress(active);
+      setFoot(active.id);
+      updateHint(r, c);
+    }
+    // スクロール（縦=行 / 横=アクティブ行の列）を読んでアクティブセルを更新。
+    function recompute() {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        if (!feedRows.length) return;
+        const h = scroller.clientHeight || 1;
+        const r = clampN(Math.round(scroller.scrollTop / h), 0, feedRows.length - 1);
+        const c = rowCurrentCol(feedRows[r]);
+        setActive(r, c);
+      });
+    }
+    // クラスタ重心 + 簡易距離（近傍サークルの並び順用）。
+    function clusterCentroid(ids) {
+      let la = 0, ln = 0, n = 0;
+      ids.forEach((id) => { const p = D.byId[id]; if (!p) return; la += p.lat; ln += p.lng; n++; });
+      return n ? { lat: la / n, lng: ln / n } : null;
+    }
+    function geoDist(a, b) { const dx = a.lng - b.lng, dy = a.lat - b.lat; return dx * dx + dy * dy; }
+    // 行モデル：アクティブのサークル → その近傍サークル（近い順）。各行 = そのサークルの投稿列。
+    function buildFeedModel(activeId) {
+      const groups = new Map();   // cluster -> [ids]（posts 順）
+      D.posts.forEach((p) => { const k = p.cluster || ('solo:' + p.id); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p.id); });
+      const actKey = (D.byId[activeId] && D.byId[activeId].cluster) || ('solo:' + activeId);
+      const actCen = clusterCentroid(groups.get(actKey) || [activeId]);
+      const others = [...groups.keys()].filter((k) => k !== actKey).sort((a, b) => {
+        const ca = clusterCentroid(groups.get(a)), cb = clusterCentroid(groups.get(b));
+        return ((ca && actCen) ? geoDist(actCen, ca) : Infinity) - ((cb && actCen) ? geoDist(actCen, cb) : Infinity);
+      });
+      return [actKey, ...others].map((k) => ({ key: k, ids: (groups.get(k) || []).slice() }));
+    }
+    // 2 件以上あれば 2D グリッドに展開（タップした 1 件を初期スナップ位置に）。
+    function buildFeed(activeId) {
+      if (!scroller) return;
+      const model = buildFeedModel(activeId);
+      const total = model.reduce((n, g) => n + g.ids.length, 0);
+      if (total <= 1) return;                                // 1 件だけ → 従来のズーム表示のまま
+      let oRow = 0, oCol = 0;
+      model.forEach((g, ri) => { const ci = g.ids.indexOf(activeId); if (ci >= 0) { oRow = ri; oCol = ci; } });
+      feedOriginRow = oRow; feedOriginCol = oCol;
+      if (movedNode && movedNode.removeEventListener) movedNode.removeEventListener('timeupdate', onVidTime);
+      scroller.innerHTML = ''; feedRows = [];
+      model.forEach((g, ri) => {
+        const rowEl = document.createElement('div'); rowEl.className = 'sfs-row'; rowEl.setAttribute('data-row', ri);
+        const cells = g.ids.map((pid, ci) => {
+          const p = D.byId[pid];
+          const cell = document.createElement('div'); cell.className = 'sfs-page'; cell.setAttribute('data-id', pid);
+          rowEl.appendChild(cell);
+          let media = null, built = false;
+          if (ri === oRow && ci === oCol && movedNode) { media = movedNode; cell.appendChild(media); built = true; }
+          return { id: pid, el: cell, media, isVideo: media ? (media.tagName === 'VIDEO') : !!(p && p.videoUrl), built };
+        });
+        rowEl.addEventListener('scroll', recompute, { passive: true });
+        scroller.appendChild(rowEl);
+        feedRows.push({ key: g.key, el: rowEl, cells });
+      });
+      fsEl.classList.add('feed');
+      fsMedia.style.display = 'none';                        // ズーム面を隠し、フィードへバトンタッチ
+      scroller.classList.add('live');
+      scroller.style.overflowY = 'auto';
+      scroller.scrollTop = oRow * scroller.clientHeight;
+      feedRows[oRow].el.scrollLeft = oCol * feedRows[oRow].el.clientWidth;
+      feedRow = -1; feedCol = -1;
+      setActive(oRow, oCol);
+      scroller.addEventListener('scroll', recompute, { passive: true });
+    }
+    function teardownFeed() {
+      if (!feedRows.length) { fsEl.classList.remove('feed'); return; }
+      if (scroller) scroller.removeEventListener('scroll', recompute);
+      if (progressNode) { progressNode.removeEventListener('timeupdate', onProgress); progressNode = null; }
+      feedRows.forEach((row) => {
+        row.el.removeEventListener('scroll', recompute);
+        row.cells.forEach((cell) => {
+          if (!cell.media || cell.media === movedNode) return;   // 借用ノードは returnMedia が戻す / 未生成はスキップ
+          if (cell.isVideo) { try { cell.media.pause(); } catch (_) {} cell.media.removeAttribute('src'); try { cell.media.load(); } catch (_) {} }
+          if (cell.media.parentNode) cell.media.parentNode.removeChild(cell.media);
+        });
+      });
+      if (movedNode && movedNode.parentNode) movedNode.parentNode.removeChild(movedNode);  // detach → returnMedia が再配置
+      buildBar(0);                                            // セグメントを破棄（単体パスの .fill は残る）
+      feedRows = []; feedRow = -1; feedCol = -1; feedOriginRow = -1; feedOriginCol = -1;
+      if (scroller) { scroller.classList.remove('live'); scroller.style.overflowY = ''; scroller.innerHTML = ''; scroller.scrollTop = 0; }
+      if (hintEl2) hintEl2.classList.remove('show', 'horiz', 'gone');
+      fsEl.classList.remove('feed');
+      fsMedia.style.display = '';
+    }
     const idPostBtn = document.querySelector('.post-btn');   // WdIdentityTool 右スタック上段(camera)
     const idEditBtn = document.querySelector('.edit-btn');   // 〃 下段(pen)
     function raiseIdentityStack() {                          // pen を下から押し上げ、post を 12px ギャップ上へ
@@ -1125,7 +1368,7 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
         fsEl.style.transition = '';
         setGeom('0px', '0px', sw + 'px', sh + 'px', '0px');    // → fullscreen
         fsEl.classList.add('expanded');
-        requestAnimationFrame(footFlyIn);
+        requestAnimationFrame(() => { footFlyIn(); buildFeed(id); });   // 展開後にクラスタを縦フィード化
       });
     }
 
@@ -1146,8 +1389,10 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       fsEl.style.transition = 'none';
       setGeom('', '', '', '', '');
       void fsEl.offsetWidth; fsEl.style.transition = '';
+      teardownFeed();                                         // フィードを破棄（借用ノードは下の returnMedia が戻す）
       returnMedia();
       footReset();                                             // フッターのインライン transform を解除し chead を再表示
+      if (hintEl2) hintEl2.classList.remove('gone');
       if (storyOrigin) storyOrigin.classList.remove('borrowed'); // メディアを戻してからセルを再表示
       storyOrigin = null;
     }
@@ -1157,7 +1402,10 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       fsEl.classList.remove('expanded');                       // fade chrome out
       lowerIdentityStack();                                    // pen を下へ戻し post を定位置へ降ろす
       footFlyOut();                                            // サークルのアイコン+名前を元のリスト位置へ戻す
-      if (storyOrigin && screen.contains(storyOrigin)) {
+      if (scroller) scroller.style.overflowY = 'hidden';       // 縮小中はフィードのスクロールを凍結
+      if (feedRows[feedRow]) feedRows[feedRow].el.style.overflowX = 'hidden';
+      const atOrigin = feedRows.length ? (feedRow === feedOriginRow && feedCol === feedOriginCol) : true;
+      if (atOrigin && storyOrigin && screen.contains(storyOrigin)) {
         const r = rectIn(screen, storyOrigin);
         setGeom(r.top + 'px', r.left + 'px', r.width + 'px', r.height + 'px', '11px');
         if (closeTimer) clearTimeout(closeTimer);
