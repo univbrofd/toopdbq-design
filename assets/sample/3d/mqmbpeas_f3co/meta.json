@@ -1,0 +1,18 @@
+{
+  "id": "mqmbpeas_f3co",
+  "name": "social_coou_93826_httpss.mj.run_2BK9HBvFA4_--ar_143256_--video_1_714d2b58-bf82-4664-8e3e-fda6ddf51cdf_1.mp4",
+  "time": 1781957867488,
+  "isVideo": true,
+  "quality": "detailed",
+  "status": "done",
+  "files": {
+    "thumbnail": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmbpeas_f3co/thumbnail.jpg",
+    "video": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmbpeas_f3co/video.mp4",
+    "model": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmbpeas_f3co/model.glb"
+  },
+  "taskId": "5697d0cd-f5ac-48cb-bcdb-9ee7b515b5ff",
+  "glbBytes": 3311332,
+  "consumedCredit": 60,
+  "balanceAfter": 640,
+  "error": null
+}

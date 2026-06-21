@@ -1,0 +1,18 @@
+{
+  "id": "mqmcyl7q_ts1m",
+  "name": "social_coou_93826__--ar_5191_--motion_high_--video_1_27512f36-ab5a-4177-af9b-ead488e3cd96_0.mp4",
+  "time": 1781959975961,
+  "isVideo": true,
+  "quality": "detailed",
+  "status": "done",
+  "files": {
+    "thumbnail": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmcyl7q_ts1m/thumbnail.jpg",
+    "video": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmcyl7q_ts1m/video.mp4",
+    "model": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmcyl7q_ts1m/model.glb"
+  },
+  "taskId": "5bea3b1f-bf68-46bd-870e-0f500f339225",
+  "glbBytes": 4868516,
+  "consumedCredit": 60,
+  "balanceAfter": 160,
+  "error": null
+}

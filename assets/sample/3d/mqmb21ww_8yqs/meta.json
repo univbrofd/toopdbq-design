@@ -1,0 +1,18 @@
+{
+  "id": "mqmb21ww_8yqs",
+  "name": "(復元) mqmb21ww_8yqs",
+  "time": 1781957265322,
+  "isVideo": true,
+  "quality": "standard",
+  "taskId": "5655502d-7ad7-474f-a1fb-abaa7031859d",
+  "glbBytes": 662648,
+  "consumedCredit": 30,
+  "balanceAfter": 820,
+  "status": "done",
+  "recovered": true,
+  "files": {
+    "thumbnail": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmb21ww_8yqs/thumbnail.jpg",
+    "video": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmb21ww_8yqs/video.mp4",
+    "model": "https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/mqmb21ww_8yqs/model.glb"
+  }
+}
