@@ -14,6 +14,7 @@
    3D オーバーレイ(objects3d.js) は glbUrl を、下端リールは thumbUrl を、同じ id で
    引く。代表 id を 1 本に統一して「リール白枠 / 地図の巨大 main / フォーカス対象」を
    連動させる（連動の実体は objects3d.js + Earth Globe.html の reel controller）。
+   ※ handoff 配置（handoff/UniverseView/）からは共有プールを ../../assets/ で参照する。
    ========================================================================== */
 (function () {
   // user / circle center — 渋谷ハチ公像 (map-core.js の CENTER と一致)
@@ -21,11 +22,28 @@
 
   // サークル（実機 SampleCircleData 由来の名／DS 同梱の circle-NN サムネ）
   const circles = {
-    'circle-01': { name: '渋谷コミュニティ',   thumb: '../../assets/sample/uv/circle-11.png' },
-    'circle-02': { name: '神宮前コミュニティ', thumb: '../../assets/sample/uv/circle-12.png' },
-    'circle-03': { name: '代々木サークル',     thumb: '../../assets/sample/uv/circle-13.png' },
-    'circle-04': { name: '新宿グループ',       thumb: '../../assets/sample/uv/circle-14.png' },
+    'circle-01': { name: '渋谷コミュニティ',   desc: '渋谷駅周辺のコミュニティ', thumb: '../../assets/sample/uv/circle-11.png' },
+    'circle-02': { name: '神宮前コミュニティ', desc: '神宮前エリアの仲間たち',   thumb: '../../assets/sample/uv/circle-12.png' },
+    'circle-03': { name: '代々木サークル',     desc: '代々木公園が拠点',         thumb: '../../assets/sample/uv/circle-13.png' },
+    'circle-04': { name: '新宿グループ',       desc: '新宿の街をシェア',         thumb: '../../assets/sample/uv/circle-14.png' },
+    // ── 新クラスタ用サークル（uv サムネを循環利用）────────────────────────
+    'circle-05': { name: '道玄坂コミュニティ', desc: '道玄坂の坂上から',         thumb: '../../assets/sample/uv/circle-11.png' },
+    'circle-06': { name: '宮益坂グループ',     desc: '宮益坂エリアの仲間たち',   thumb: '../../assets/sample/uv/circle-12.png' },
+    'circle-07': { name: '原宿コミュニティ',   desc: '原宿駅周辺のコミュニティ', thumb: '../../assets/sample/uv/circle-13.png' },
+    'circle-08': { name: '表参道サークル',     desc: '表参道のけやき並木',       thumb: '../../assets/sample/uv/circle-14.png' },
+    'circle-09': { name: '恵比寿コミュニティ', desc: '恵比寿の路地裏から',       thumb: '../../assets/sample/uv/circle-11.png' },
+    'circle-10': { name: '中目黒グループ',     desc: '目黒川沿いのみんな',       thumb: '../../assets/sample/uv/circle-12.png' },
   };
+
+  // Studio 3D サンプルの raw ベース（public・CORS:*）。GLB / mp4 はバイナリ取り込み不可の
+  // ため raw を直接参照（three.js GLTFLoader / <video> ともクロスオリジンで読める）。
+  // thumbnail.jpg はローカル取り込み済み（../../assets/sample/3d/{id}/thumbnail.jpg）。
+  const S3D = 'https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/assets/sample/3d/';
+  const studio = (id) => ({
+    glbUrl:   S3D + id + '/model.glb',
+    thumbUrl: '../../assets/sample/3d/' + id + '/thumbnail.jpg',
+    video:    S3D + id + '/video.mp4',
+  });
 
   // GLB base — 本番 RTDB /story の modelUrl（公開 URL）。real-10 = ハチ公像(=CENTER)。
   const GLB = {
@@ -46,22 +64,67 @@
   // cluster = *固定*のクラスタ割当（地理ベースの手動グルーピング）。動的なタイル bin だと
   // 密集地帯(渋谷中心)がタイル境界で割れてクラスタされないため、固定で束ねる。
   // メインクラスタ = この cluster 群のうち画面中心に最も近いもの。リールはその全メンバー。
+  // 2 オブジェクト。real-10 = ハチ公像(CENTER)、real-09 = その約80m 北東に置く 2 個目。
+  // 同じ cluster 'shibuya' で束ねるので、両方ともメインクラスタ＝リール／地図に同時表示。
   const posts = [
-    { id: 'real-01', lat: 35.66553394124979, lng: 139.70113334739187, circleId: 'circle-01', cluster: 'shibuya' },
-    { id: 'real-02', lat: 35.67409735583507, lng: 139.68111601742362, circleId: 'circle-03', cluster: 'harajuku' },
-    { id: 'real-03', lat: 35.67536946903334, lng: 139.70509975719222, circleId: 'circle-02', cluster: 'harajuku' },
-    { id: 'real-04', lat: 35.66527163126798, lng: 139.70095538623644, circleId: 'circle-01', cluster: 'shibuya' },
-    { id: 'real-05', lat: 35.675310344094484, lng: 139.69697935141744, circleId: 'circle-02', cluster: 'harajuku' },
-    { id: 'real-06', lat: 35.695838793359414, lng: 139.7662216045701,  circleId: 'circle-04', cluster: 'shinjuku' },
-    { id: 'real-07', lat: 35.662117107192344, lng: 139.71270880388738, circleId: 'circle-01', cluster: 'shibuya' },
-    { id: 'real-08', lat: 35.66773639634803,  lng: 139.69330244061905, circleId: 'circle-03', cluster: 'harajuku' },
-    { id: 'real-09', lat: 35.66573411618798,  lng: 139.69614734172274, circleId: 'circle-01', cluster: 'shibuya' },
-    { id: 'real-10', lat: 35.65923593831696,  lng: 139.7006143495087,  circleId: 'circle-01', cluster: 'shibuya' },
-    { id: 'real-11', lat: 35.66566109829807,  lng: 139.70101954247983, circleId: 'circle-01', cluster: 'shibuya' },
+    { id: 'real-10', lat: CENTER[1], lng: CENTER[0], circleId: 'circle-01', cluster: 'shibuya', video: '../../assets/sample/models/real-10.mp4' },
+    { id: 'real-09', lat: CENTER[1], lng: CENTER[0], circleId: 'circle-01', cluster: 'shibuya', video: 'uploads/social_coou_93826_httpss.mj.run6rjKpUJCKXI_--ar_59128_--video_1_400b99f8-5d82-47b5-8281-72ae75f41ce7_0.mp4' },
+    // Studio 3D サンプル（mqmav1c7_wnam）= 1 投稿 = 動画 + 先頭フレーム + 3D。
+    // glb/thumb/video はローカル取り込み済みの共有プール ../../assets/sample/3d/{id}/ を直接参照。
+    { id: 'mqmav1c7_wnam', lat: CENTER[1], lng: CENTER[0], circleId: 'circle-01', cluster: 'shibuya',
+      glbUrl:   '../../assets/sample/3d/mqmav1c7_wnam/model.glb',
+      thumbUrl: '../../assets/sample/3d/mqmav1c7_wnam/thumbnail.jpg',
+      video:    '../../assets/sample/3d/mqmav1c7_wnam/video.mp4' },
+    // Studio 3D サンプル（mqmaxkwz_tkvb）= 画像投稿 → 3D（動画なし・画像 → 3D の 2 段）。
+    // shibuya から北東 約600m に新クラスタ 'jingumae'（circle-02 神宮前）として置く。
+    { id: 'mqmaxkwz_tkvb', lat: 35.66075, lng: 139.70225, circleId: 'circle-02', cluster: 'jingumae',
+      glbUrl:   '../../assets/sample/3d/mqmaxkwz_tkvb/model.glb',
+      thumbUrl: '../../assets/sample/3d/mqmaxkwz_tkvb/thumbnail.jpg' },   // video 無し → videoUrl は null
+    // Studio 3D サンプル（mqmay0ya_pk9f）= 動画投稿・quality=detailed の高精細 GLB（約4.85MB）。
+    // shibuya から北西 約600m に新クラスタ 'yoyogi'（circle-03 代々木）として置く。動画 + 先頭フレーム + 3D。
+    { id: 'mqmay0ya_pk9f', lat: 35.66305, lng: 139.69564, circleId: 'circle-03', cluster: 'yoyogi',
+      glbUrl:   '../../assets/sample/3d/mqmay0ya_pk9f/model.glb',
+      thumbUrl: '../../assets/sample/3d/mqmay0ya_pk9f/thumbnail.jpg',
+      video:    '../../assets/sample/3d/mqmay0ya_pk9f/video.mp4' },
+
+    // ════════════════════════════════════════════════════════════════════════
+    // 新規 Studio 3D 12 件（mqmb… / mqmc…）。すべて動画投稿。GLB/動画は raw 参照。
+    //
+    //  ① 近隣に新クラスタを 2 つ（渋谷ハチ公の至近 ~300m）:
+    //     ・dogenzaka（道玄坂・南西）= mqmbpeas_f3co
+    //     ・miyamasu （宮益坂・北東）= mqmbpk42_d6sz
+    //  ② 残り 10 件 = 5 クラスタへ均等(各 2 件)。広域に散らして別ピンとして見える様に:
+    //     harajuku / omotesando / ebisu / nakameguro / shinjuku
+    // ════════════════════════════════════════════════════════════════════════
+
+    // ── ① 近隣の新クラスタ（単独メンバー・ハチ公至近）──────────────────────
+    { id: 'mqmbpeas_f3co', lat: 35.65730, lng: 139.69790, circleId: 'circle-05', cluster: 'dogenzaka', ...studio('mqmbpeas_f3co') },
+    { id: 'mqmbpk42_d6sz', lat: 35.66020, lng: 139.70280, circleId: 'circle-06', cluster: 'miyamasu',  ...studio('mqmbpk42_d6sz') },
+
+    // ── ② harajuku（原宿駅周辺・北 ~1.3km）×2 ─────────────────────────────
+    { id: 'mqmb21ww_8yqs', lat: 35.67020, lng: 139.70270, circleId: 'circle-07', cluster: 'harajuku', ...studio('mqmb21ww_8yqs') },
+    { id: 'mqmbpn15_v9lg', lat: 35.67085, lng: 139.70380, circleId: 'circle-07', cluster: 'harajuku', ...studio('mqmbpn15_v9lg') },
+
+    // ── ② omotesando（表参道・北東 ~1.5km）×2 ────────────────────────────
+    { id: 'mqmcjxrf_jsvq', lat: 35.66520, lng: 139.71240, circleId: 'circle-08', cluster: 'omotesando', ...studio('mqmcjxrf_jsvq') },
+    { id: 'mqmcqqwa_wa2w', lat: 35.66585, lng: 139.71340, circleId: 'circle-08', cluster: 'omotesando', ...studio('mqmcqqwa_wa2w') },
+
+    // ── ② ebisu（恵比寿駅・南東 ~1.5km）×2 ───────────────────────────────
+    { id: 'mqmcqvk9_82tm', lat: 35.64670, lng: 139.71000, circleId: 'circle-09', cluster: 'ebisu', ...studio('mqmcqvk9_82tm') },
+    { id: 'mqmcslrd_nb9u', lat: 35.64720, lng: 139.71090, circleId: 'circle-09', cluster: 'ebisu', ...studio('mqmcslrd_nb9u') },
+
+    // ── ② nakameguro（中目黒・南西 ~1.8km）×2 ────────────────────────────
+    { id: 'mqmcygak_b0id', lat: 35.64400, lng: 139.69850, circleId: 'circle-10', cluster: 'nakameguro', ...studio('mqmcygak_b0id') },
+    { id: 'mqmcyl7q_ts1m', lat: 35.64455, lng: 139.69940, circleId: 'circle-10', cluster: 'nakameguro', ...studio('mqmcyl7q_ts1m') },
+
+    // ── ② shinjuku（新宿駅・北 ~3.5km・既存 circle-04 を再利用）×2 ─────────
+    { id: 'mqmcyoah_ssvh', lat: 35.68960, lng: 139.70050, circleId: 'circle-04', cluster: 'shinjuku', ...studio('mqmcyoah_ssvh') },
+    { id: 'mqmcyrxm_wpic', lat: 35.69025, lng: 139.70150, circleId: 'circle-04', cluster: 'shinjuku', ...studio('mqmcyrxm_wpic') },
   ].map((p) => ({
     ...p,
-    glbUrl:   GLB[p.id],
-    thumbUrl: '../../assets/sample/models/' + p.id + '.jpg',   // 共有プールを参照
+    glbUrl:   p.glbUrl   || GLB[p.id],                    // 投稿が明示した URL を優先（無ければ本番 GLB）
+    thumbUrl: p.thumbUrl || '../../assets/sample/models/' + p.id + '.jpg',  // 〃（無ければ共有プール real-NN.jpg）
+    videoUrl: p.video || null,                            // フルスクリーン時に再生する動画（任意）
   }));
 
   const byId = {};

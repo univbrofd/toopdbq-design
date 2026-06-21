@@ -31,15 +31,22 @@
     FOV: 38,
     DIST: 900,          // camera → object plane (world units, constant)
     MARKER_PX: 92,      // 画面上の 3D マーカー高さ(px)。ズーム非依存で一定。
-    FOCUS_FRAC: 0.82,   // フォーカス時の高さ = min(w,h) * これ（実機 全画面寄り）
+    FOCUS_FRAC: 0.6,   // フォーカス時の高さ = min(w,h) * これ（実機 全画面寄り）
     FOCUS_STEP: 0.052,  // フォーカス進捗/フレーム → ≈320ms easeOutCubic
     FACE_DEG: -90,      // 基準ヤウ：GLB 既定は右(+X)向き → -90°でカメラ(手前)向き
     JITTER_DEG: 26,     // 投稿ごとの向き揺らぎ
-    IDLE_SPIN: 0.0,     // マーカーの自動回転(rad/フレーム)。0=静止
+    IDLE_SPIN: 0.01,    // メインじゃないオブジェクトの自動回転(rad/フレーム)。代表(main)は静止。
     CULL_MARGIN: 140,   // 画面外カリングの余白(px)
-    MAIN_SCALE: 2.6,    // 代表(repId)マーカーの拡大率＝地図の「巨大 main」
+    CENTER_Y_FRAC: 0.62,// 「中心」と見なす画面上の縦位置 = h × これ（下にずらすほど下寄り判定）
+    MAIN_SCALE: 3.4,    // 代表(repId)マーカーの拡大率＝地図の「巨大 main」
     MAIN_LERP: 0.16,    // メイン拡大/縮小の補間速度（ポップ防止）
+    FLOAT_FRAC: 0.22,   // マーカーを地点から浮かせる量＝marker高さ × これ（接地点の上に隙間）
+    SHADOW_W: 0.60,     // 接地点の影の横幅＝marker高さ × これ
+    SHADOW_H: 0.20,     // 〃 縦幅（楕円につぶす）
+    SHADOW_OPACITY: 0.7,// 影の濃さ
     REP_LOCK_MS: 1500,  // 代表を手動選択した後、自動再選定を抑止する時間
+    LONG_PRESS_MS: 420, // 長押し判定の閾値(ms)。これ以上で 3D フォーカス、未満のタップは写真フルスクリーン。
+    PRESS_MOVE_TOL: 10, // 長押し/タップを無効化する移動量(px)。これ以上動かしたらドラッグ扱い。
   };
 
   let map, container, renderer, scene, camera;
@@ -47,6 +54,27 @@
   const loader = new THREE.GLTFLoader();
   const entries = new Map();      // id -> { lat,lng,url,group,faceY,onScreen,worldH }
   let running = false;
+
+  // ----- 3D media totem: each post's looping video card, stacked under its 3D --
+  let mediaEl = null;
+  const mediaCards = new Map();   // id -> { el, node }
+
+  // ----- focus-state dock: hidden cluster members shown bottom-left as an arc --
+  let dockEl = null;
+  let dockCapEl = null;
+  const dockItems = new Map();    // id -> { el, img }
+  // arc carousel state: a continuous scroll position (in member-index units).
+  let dockScroll = 0, dockTarget = 0;
+  let dockDragging = false, dockMoved = false, dockStartX = 0, dockStartScroll = 0;
+  let dockSig = '';
+  // ----- non-focus bottom carousel (scrollable horizontal row of 3D objects) --
+  let carStripEl = null;
+  let carPos = 0, carTarget = 0, carInit = false;
+  let carClusterKey = null;          // which cluster the carousel currently represents
+  const clusterSel = new Map();      // clusterKey -> 그 cluster で最後に選んだ代表 id（クラスタ別に記憶）
+  let carDragging = false, carMoved = false, carStartX = 0, carStartPos = 0, carDownX = 0;
+  // R=弧半径(px) STEP=隔角(rad) AX/AY=頂点位置(dock領域比) CULL=表示角幅上限
+  const DOCK = { R: 210, STEP: 0.34, AX: 0.42, AY: 0.30, EASE: 0.2, CULL: 1.5 };
 
   // focus state
   let focusId = null;
@@ -61,9 +89,15 @@
   let repLockUntil = 0;           // performance.now() — 手動選択後の自動再選定ロック
   let mainClusterKey = null;      // tile key of the current main cluster
   let mainClusterIds = [];        // ids of all pins in the main cluster
+  let mapMarkerIds = [];          // ids drawn as on-map markers this frame (repId + each non-main cluster rep)
   let _mainId = null;             // backward-compat alias of repId (edge layer 等)
   const changeCbs = [];           // onChange subscribers
   const thumbCbs = [];            // onThumb subscribers (id, dataURL)
+  const tapCbs = [];              // onTap subscribers (id) — 短いタップで発火（写真フルスクリーン用）
+  const mediaTapCbs = [];        // onMediaTap subscribers (id, cardEl) — マッピングされた動画をタップ
+
+  // press detection (long-press → focus / tap → onTap)
+  let pressTimer = null, pressStart = null, pressMoved = false, pressEntry = null, longFired = false;
 
   // pointer / orbit
   let orbiting = false, lastX = 0, lastY = 0, didDrag = false;
@@ -72,10 +106,53 @@
   const raycaster = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
 
+  // shared soft radial shadow texture (one canvas, reused by every object's ground shadow)
+  let _shadowTex = null;
+  function shadowTexture() {
+    if (_shadowTex) return _shadowTex;
+    const c = document.createElement('canvas'); c.width = c.height = 128;
+    const x = c.getContext('2d');
+    const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, 'rgba(0,0,0,1)');
+    g.addColorStop(0.22, 'rgba(0,0,0,0.55)');
+    g.addColorStop(0.6, 'rgba(0,0,0,0.18)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+    _shadowTex = new THREE.CanvasTexture(c);
+    return _shadowTex;
+  }
+
   // ----- focus chrome ------------------------------------------------------
   // z-order inside .screen: map(1) < scrim-dim(5) < 3D canvas(6) < chrome(9)
-  let scrimEl, chromeEl, closeEl, hintEl;
+  let scrimEl, chromeEl, closeEl, hintEl, focusBgEl, focusGradEl, playEl;
   function buildChrome() {
+
+    // フォーカス背景グラデーション：デザインシステムのメイングラデーション（斜め方向）を
+    // フルスクリーンで敷き、波打つようにアニメーション。ブラー背景の縁から色が滲み出る。
+    focusGradEl = document.createElement('div');
+    focusGradEl.className = 'o3d-focus-grad';
+    focusGradEl.style.cssText =
+      'position:absolute;inset:-15%;z-index:4;opacity:0;pointer-events:none;' +
+      'transition:opacity .3s var(--ease-out);' +
+      'background:' +
+        'radial-gradient(55% 55% at 22% 28%, #fff0a6 0%, rgba(255,240,166,0) 60%),' +
+        'radial-gradient(60% 60% at 80% 24%, #005f67 0%, rgba(0,95,103,0) 62%),' +
+        'radial-gradient(60% 60% at 78% 80%, #ff3e88 0%, rgba(255,62,136,0) 60%),' +
+        'radial-gradient(60% 60% at 18% 82%, #d0a052 0%, rgba(208,160,82,0) 62%),' +
+        'linear-gradient(135deg, #fff0a6 0%, #005f67 38%, #ff3e88 70%, #d0a052 100%);' +
+      'background-size:180% 180%,180% 180%,180% 180%,180% 180%,200% 200%;' +
+      'filter:saturate(150%);' +
+      'animation:o3dGradFlow 14s ease-in-out infinite;';
+    container.appendChild(focusGradEl);
+
+    // フォーカス背景：フォーカス中のオブジェクトのサムネイルをぼかして敷く（scrim の下）。
+    focusBgEl = document.createElement('div');
+    focusBgEl.className = 'o3d-focus-bg';
+    focusBgEl.style.cssText = 'position:absolute;inset:0;z-index:5;background-size:cover;background-position:center;filter:blur(8px);transform:scale(1.0);opacity:0;transition:opacity .3s var(--ease-out);pointer-events:none;' +
+      '-webkit-mask:radial-gradient(120% 120% at 50% 50%, #000 52%, rgba(0,0,0,0) 92%);' +
+      'mask:radial-gradient(120% 120% at 50% 50%, #000 52%, rgba(0,0,0,0) 92%);';
+    container.appendChild(focusBgEl);
+
     scrimEl = document.createElement('div');
     scrimEl.className = 'o3d-scrim';      // dim only — pointer-events:none always
     container.appendChild(scrimEl);
@@ -85,12 +162,23 @@
     chromeEl.innerHTML =
       '<button class="o3d-close" aria-label="閉じる">' +
         '<svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' +
-      '</button>' +
-      '<div class="o3d-hint">ドラッグで360°回転 · タップで閉じる</div>';
+      '</button>';
     container.appendChild(chromeEl);
     closeEl = chromeEl.querySelector('.o3d-close');
-    hintEl = chromeEl.querySelector('.o3d-hint');
+    hintEl = null;
     closeEl.addEventListener('click', (e) => { e.stopPropagation(); exitFocus(); });
+
+    // 再生ボタン：画面下部中央（ボトムから 50px 上）。タップで動画をフルスクリーン再生。
+    playEl = document.createElement('button');
+    playEl.className = 'o3d-play';
+    playEl.setAttribute('aria-label', '再生');
+    playEl.style.cssText = 'position:absolute;left:50%;bottom:50px;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;pointer-events:none;background:rgba(0,0,0,.42);backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 20px rgba(0,0,0,.5);';
+    playEl.innerHTML = '<svg width="22" height="24" viewBox="0 0 22 24" style="margin-left:3px"><path d="M3 2.5v19l16-9.5z" fill="#fff"/></svg>';
+    chromeEl.appendChild(playEl);
+    playEl.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (focusId) mediaTapCbs.forEach((cb) => { try { cb(focusId, null); } catch (_) {} });
+    });
   }
 
   function size() { return { w: container.clientWidth, h: container.clientHeight }; }
@@ -106,6 +194,63 @@
     return { x: nx * hW, y: ny * hH };
   }
 
+  // 反転モード：代表を含むメインクラスタの全メンバーを、画面下に *横並びリスト* でドックする。
+  function dockList() {
+    return mainClusterIds.slice();   // 安定した並び（順序は変えない）
+  }
+  const CAR_PITCH = 104;             // カルーセルの中心間ピッチ(px)
+  // index 番目を、carPos(現在の中央位置) を基準に左右へ並べる。中央のものは少し大きい。
+  function dockSlot(index) {
+    const { w, h } = size();
+    const objHpx = 84;            // 各オブジェクトの画面サイズ（最大寸 px）
+    const sx = w / 2 + (index - carPos) * CAR_PITCH;
+    const sy = h - 104;
+    return { sx, sy, objHpx };
+  }
+
+  // 下部カルーセル：ドラッグ/スワイプで横スクロール。中央に来たものが代表になり、
+  // 地図の動画が切り替わる。中央以外をタップ → そこへスクロール。中央をタップ → フォーカス(360°)。
+  function buildCarStrip() {
+    carStripEl = document.createElement('div');
+    carStripEl.className = 'o3d-carstrip';
+    carStripEl.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:172px;z-index:8;touch-action:none;cursor:grab;';
+    container.appendChild(carStripEl);
+    carStripEl.addEventListener('pointerdown', onCarDown);
+    window.addEventListener('pointermove', onCarMove);
+    window.addEventListener('pointerup', onCarUp);
+  }
+  function onCarDown(e) {
+    const ids = dockList(); if (!ids.length) return;
+    e.stopPropagation();
+    carDragging = true; carMoved = false;
+    carStartX = e.clientX; carStartPos = carPos;
+    const rect = container.getBoundingClientRect();
+    carDownX = e.clientX - rect.left;
+    try { carStripEl.setPointerCapture(e.pointerId); } catch (_) {}
+    carStripEl.style.cursor = 'grabbing';
+  }
+  function onCarMove(e) {
+    if (!carDragging) return;
+    const ids = dockList();
+    const dx = e.clientX - carStartX;
+    if (Math.abs(dx) > 6) carMoved = true;
+    carPos = clamp(carStartPos - dx / CAR_PITCH, 0, Math.max(0, ids.length - 1));
+  }
+  function onCarUp() {
+    if (!carDragging) return;
+    carDragging = false;
+    if (carStripEl) carStripEl.style.cursor = 'grab';
+    const ids = dockList(); const n = ids.length; if (!n) return;
+    if (carMoved) {
+      carTarget = clamp(Math.round(carPos), 0, n - 1);          // snap → 中央が代表に
+    } else {
+      const { w } = size();
+      const idx = clamp(Math.round(carPos + (carDownX - w / 2) / CAR_PITCH), 0, n - 1);
+      if (idx === Math.round(carPos)) enterFocus(ids[idx]);     // 中央タップ → フォーカス
+      else carTarget = idx;                                     // 横タップ → そこへスクロール
+    }
+  }
+
   function init(opts) {
     map = opts.getMap();
     container = opts.container;
@@ -117,14 +262,22 @@
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.setSize(w, h, false);
+    // 発色契約 (採用値 "ACES 標準"): sRGB + ACES exposure 1.05 + IBL。彩度/コントラストは canvas に CSS filter。
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
     const cv = renderer.domElement;
     cv.className = 'o3d-canvas';
-    cv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:6;pointer-events:none;';
+    cv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:6;pointer-events:none;filter:saturate(1.12) contrast(1.06);';
     container.appendChild(cv);
 
     scene = new THREE.Scene();
-    scene.add(new THREE.AmbientLight(0xffffff, 1.05));
-    const key = new THREE.DirectionalLight(0xffffff, 0.85); key.position.set(0.5, 0.9, 1.2); scene.add(key);
+    // PBR の反射成分を起こす環境光(IBL)。無いと光沢部が黒く沈む。RoomEnvironment 未ロードでも壊さない。
+    if (THREE.RoomEnvironment) {
+      scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+    }
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(0.5, 0.9, 1.2); scene.add(key);
     const rim = new THREE.DirectionalLight(0xbcd0ff, 0.35); rim.position.set(-0.6, 0.2, -1); scene.add(rim);
 
     camera = new THREE.PerspectiveCamera(cfg.FOV, w / h, 1, 6000);
@@ -132,8 +285,16 @@
 
     buildChrome();
     buildEdgeLayer();
+    buildMediaLayer();
+    buildFocusDock();
+    buildCarStrip();
 
-    map.on('click', onMapClick);
+    // tap = 写真フルスクリーン / 長押し = 3D フォーカスを 判別する press 検出をマップ canvas に付ける。
+    const mcv = map.getCanvas();
+    mcv.addEventListener('pointerdown', onPressDown);
+    window.addEventListener('pointermove', onPressMove);
+    window.addEventListener('pointerup', onPressUp);
+    mcv.addEventListener('pointercancel', cancelPress);
     cv.addEventListener('pointerdown', onDown);
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
@@ -167,12 +328,11 @@
       model.traverse((o) => {
         if (!o.material) return;
         const mats = Array.isArray(o.material) ? o.material : [o.material];
-        mats.forEach((mm) => { if (mm) { mm.depthTest = true; mm.depthWrite = true; } });
+        mats.forEach((mm) => { if (mm) { mm.depthTest = true; mm.depthWrite = true; if ('envMapIntensity' in mm) mm.envMapIntensity = 0.5; } });
       });
       // capture a tiny portrait of THIS object for its edge-indicator chip.
       entry.thumb = captureThumb(model);
-      const c0 = edgeChips.get(m.id);
-      if (c0 && c0.img && entry.thumb) c0.img.src = entry.thumb;
+      // 縁チップは動画サムネ(thumbUrl)で固定 → GLB ロード後も 3D ポートレートで上書きしない。
       // notify subscribers (reel uses this to fill any cell whose file thumb 404'd)
       if (entry.thumb) thumbCbs.forEach((cb) => { try { cb(m.id, entry.thumb); } catch (e) {} });
       const g = new THREE.Group();
@@ -202,6 +362,18 @@
       g.visible = false;
       scene.add(g);
       entry.group = g;
+
+      // ground shadow — a soft camera-facing ellipse pinned to the projected
+      // lat/lng point. The object floats above it (see layout), so the gap reads
+      // as "hovering". Drawn before/under the object, no depth write.
+      const shadow = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({ map: shadowTexture(), transparent: true, depthTest: false, depthWrite: false, opacity: cfg.SHADOW_OPACITY })
+      );
+      shadow.renderOrder = 0;
+      shadow.visible = false;
+      scene.add(shadow);
+      entry.shadow = shadow;
     }, undefined, (err) => console.warn('objects3d load error', m.id, err));
 
     if (MeshoptReady) MeshoptReady.then(doLoad); else doLoad();
@@ -225,7 +397,7 @@
       c.ids.push(en.id); c.sumLat += en.lat; c.sumLng += en.lng; c.n++;
     });
     const { w, h } = size();
-    const cx = w / 2, cy = h / 2;
+    const cx = w / 2, cy = h * cfg.CENTER_Y_FRAC;
     let bestK = null, best = Infinity;
     cells.forEach((c, k) => {
       const p = map.project([c.sumLng / c.n, c.sumLat / c.n]);
@@ -238,7 +410,7 @@
   // pick the pin in `ids` nearest screen-center (the auto-representative).
   function nearestInCluster(ids) {
     const { w, h } = size();
-    const cx = w / 2, cy = h / 2;
+    const cx = w / 2, cy = h * cfg.CENTER_Y_FRAC;
     let id = null, best = Infinity;
     ids.forEach((i) => {
       const en = entries.get(i); if (!en) return;
@@ -257,15 +429,10 @@
     if (cl.key !== mainClusterKey) { mainClusterKey = cl.key; rebuild = true; }
     mainClusterIds = cl.ids;
 
-    const locked = performance.now() < repLockUntil;
-    if (!locked) {
-      // auto-representative = nearest-to-center within the main cluster
+    // 代表はカルーセル(下部の横並びリスト)が所有する。repId が無効な時だけ自動選定。
+    if (!repId || mainClusterIds.indexOf(repId) === -1) {
       const auto = nearestInCluster(mainClusterIds);
       if (auto && auto !== repId) { repId = auto; repChanged = true; }
-    } else if (repId && mainClusterIds.indexOf(repId) === -1) {
-      // locked rep drifted out of the (re-centered) main cluster → keep showing it,
-      // but ensure the reel includes it so the white frame has a home.
-      if (mainClusterIds.indexOf(repId) === -1) { mainClusterIds.push(repId); }
     }
     _mainId = repId;
     if (rebuild || repChanged) fireChange(rebuild);
@@ -292,16 +459,255 @@
     fireChange(false);          // move the white frame now; cluster rebuild follows the glide
   }
 
+  // ----- 3D media totem ------------------------------------------------------
+  // A DOM layer (z2, under the 3D canvas) of vertical video cards. Each frame we
+  // project the post's lat/lng and seat its card directly beneath the 3D object's
+  // feet, scaling both with the same mainK — so object + video read as one mapped
+  // pin (オブジェクトと動画を縦に並べ、一体としてマッピング).
+  function buildMediaLayer() {
+    mediaEl = document.createElement('div');
+    mediaEl.className = 'o3d-media';
+    // 中心(代表)オブジェクトの動画は画面左下に固定表示する → 下端スクリム(z40)より
+    // 前面に出して、はっきり読めるようにする（side-tool 50 / status 60 の下）。
+    mediaEl.style.cssText = 'position:absolute;inset:0;z-index:45;pointer-events:none;';
+    container.appendChild(mediaEl);
+  }
+  function ensureMediaCard(en) {
+    let c = mediaCards.get(en.id);
+    if (c) return c;
+    const post = (window.UniverseData && window.UniverseData.byId[en.id]) || {};
+    const el = document.createElement('div');
+    el.className = 'o3d-media-card';
+    if (post.videoUrl) {
+      el.innerHTML = '<div class="mclip"><video muted loop playsinline preload="auto"></video></div><span class="weld"></span>';
+      const v = el.querySelector('video');
+      v.src = post.videoUrl; v.play().catch(() => {});
+    } else {
+      el.innerHTML = '<div class="mclip"><img alt=""></div><span class="weld"></span>';
+      el.querySelector('img').src = post.thumbUrl || '';
+    }
+    // マッピングされた動画をタップ → フルスクリーン（HTML 側の openStory を呼ぶ）。
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      mediaTapCbs.forEach((cb) => { try { cb(en.id, el); } catch (_) {} });
+    });
+    mediaEl.appendChild(el);
+    c = { el, node: el.querySelector('video, img') };
+    mediaCards.set(en.id, c);
+    return c;
+  }
+  // 反転モード：動画カードを地図の lat/lng 点に「立てる」＝マーカー。点の少し上に下端を
+  // 置き、足元に weld(接地影)。markerScaled は world 単位（代表は MAIN_SCALE で巨大化）。
+  function positionMedia(en, p, markerScaled, vis) {
+    const c = ensureMediaCard(en);
+    if (!vis || !p) { c.el.style.display = 'none'; return; }
+    c.el.style.display = '';
+    const weld = c.el.querySelector('.weld');
+    const objHpx = markerScaled / pxToWorld();           // marker height on screen (px)
+    const cardW = objHpx * 0.62;
+    const cardH = objHpx * 1.12;
+    const floatPx = objHpx * cfg.FLOAT_FRAC;             // gap between card foot and the ground point
+    const top = (p.y - floatPx) - cardH;                 // card stands on the projected point
+    const left = p.x - cardW / 2;
+    c.el.style.width = cardW + 'px';
+    c.el.style.height = cardH + 'px';
+    c.el.style.transform = 'translate(' + left + 'px,' + top + 'px)';
+    c.el.style.zIndex = 3;
+    c.el.style.pointerEvents = 'auto';                    // タップでフルスクリーンを開く
+    c.el.style.cursor = 'pointer';
+    // 接地影(weld)はカード足元ではなく *本来の lat/lng 点(p.y)* に落とす。
+    // カードは floatPx 分だけその上に浮き、3D マーカーと同じ「浮いて見える」表現に。
+    if (weld) { weld.style.display = ''; weld.style.bottom = (-floatPx) + 'px'; }
+  }
+
+  // フォーカス中：そのオブジェクトの動画カードを画面左下に出す（タップ→フルスクリーン）。
+  function positionMediaCorner(en) {
+    const c = ensureMediaCard(en);
+    c.el.style.display = '';
+    const { h } = size();
+    const cardW = 104, cardH = 156;
+    c.el.style.width = cardW + 'px';
+    c.el.style.height = cardH + 'px';
+    c.el.style.transform = 'translate(16px,' + (h - cardH - 40) + 'px)';
+    c.el.style.zIndex = 3;
+    c.el.style.pointerEvents = 'auto';
+    c.el.style.cursor = 'pointer';
+    const weld = c.el.querySelector('.weld'); if (weld) weld.style.display = 'none';
+  }
+
+  // ----- focus-state member dock --------------------------------------------
+  // フォーカス中だけ、クラスタの「裏に隠れている」メンバーを画面下部に 3D サムネで
+  // 並べる。タップでフォーカス対象をそのオブジェクトへ切り替える。
+  function buildFocusDock() {
+    dockEl = document.createElement('div');
+    dockEl.className = 'o3d-dock';
+    dockEl.innerHTML = '';
+    dockCapEl = null;
+    container.appendChild(dockEl);
+    dockEl.addEventListener('pointerdown', onDockDown);
+    window.addEventListener('pointermove', onDockMove);
+    window.addEventListener('pointerup', onDockUp);
+    dockEl.addEventListener('wheel', onDockWheel, { passive: false });
+  }
+  function currentMembers() {
+    return (focusId != null) ? mainClusterIds.filter((id) => id !== focusId) : [];
+  }
+  function dockItemEl(en) {
+    let it = dockItems.get(en.id);
+    if (it) return it;
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'o3d-dock-item';
+    el.setAttribute('data-id', en.id);
+    el.innerHTML = '<span class="ring"></span><span class="disc"><img alt=""></span>';
+    if (en.thumb) el.querySelector('img').src = en.thumb;
+    it = { el, img: el.querySelector('img') };
+    dockItems.set(en.id, it);
+    return it;
+  }
+  function updateDock() {
+    if (!dockEl) return;
+    dockEl.style.display = 'none';   // フォーカス中のメンバードックは表示しない
+    return;
+    /* eslint-disable no-unreachable */
+    const active = focusId != null;
+    const a = focusDir > 0 ? easeOutCubic(focusT) : (1 - easeOutCubic(1 - focusT));
+    dockEl.style.opacity = active ? a : 0;
+    dockEl.style.pointerEvents = (active && focusT > 0.5) ? 'auto' : 'none';
+
+    const members = currentMembers();
+    // reset the carousel whenever the member set changes (e.g. after a switch)
+    const sig = members.join(',');
+    if (sig !== dockSig) { dockSig = sig; dockScroll = 0; dockTarget = 0; dockDragging = false; }
+
+    const want = new Set(members);
+    dockItems.forEach((it, id) => { if (!want.has(id)) it.el.style.display = 'none'; });
+    if (!members.length) { if (dockCapEl) dockCapEl.style.opacity = '0'; return; }
+
+    // settle toward the snap target unless actively dragging
+    if (!dockDragging) dockScroll += (dockTarget - dockScroll) * DOCK.EASE;
+
+    const W = dockEl.clientWidth || 1, H = dockEl.clientHeight || 1;
+    const ax = W * DOCK.AX, ay = H * DOCK.AY;
+    let apexId = null, apexAbs = Infinity;
+
+    members.forEach((id, i) => {
+      const en = entries.get(id); if (!en) return;
+      const it = dockItemEl(en);
+      if (it.el.parentNode !== dockEl) dockEl.appendChild(it.el);
+      it.el.style.display = '';
+      if (en.thumb && it.img.getAttribute('src') !== en.thumb) it.img.src = en.thumb;
+
+      // angular offset from the apex; place along the hill arc (apex highest).
+      const th = (i - dockScroll) * DOCK.STEP;
+      const ath = Math.abs(th);
+      if (ath > DOCK.CULL) { it.el.style.opacity = '0'; it.el.style.pointerEvents = 'none'; it.el.classList.remove('apex'); return; }
+      const k = 1 - ath / DOCK.CULL;                 // 1 at apex → 0 at cull edge
+      const x = ax + DOCK.R * Math.sin(th);
+      const y = ay + DOCK.R * (1 - Math.cos(th));
+      const scale = 0.6 + 0.62 * k;                  // ≈1.22 apex → 0.6 edge
+      it.el.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + scale + ')';
+      it.el.style.opacity = String(0.3 + 0.7 * k);
+      it.el.style.zIndex = String(120 - Math.round(ath * 40));
+      it.el.style.pointerEvents = 'auto';
+      it.el.classList.toggle('apex', ath < DOCK.STEP * 0.5);
+      if (ath < apexAbs) { apexAbs = ath; apexId = id; }
+    });
+
+    // caption under the apex member (its circle name)
+    if (dockCapEl) {
+      const D = window.UniverseData;
+      const post = apexId && D && D.byId[apexId];
+      const circle = post && D.circles[post.circleId];
+      dockCapEl.querySelector('b').textContent = circle ? circle.name : '';
+      const capY = ay + 33 * 1.22 + 12;              // just below the enlarged apex disc
+      dockCapEl.style.transform = 'translate(' + ax + 'px,' + capY + 'px) translateX(-50%)';
+      dockCapEl.style.opacity = (active && focusT > 0.55 && apexId) ? String(a) : '0';
+    }
+  }
+  // drag / wheel to slide the arc; a tap (no drag) switches focus to that member.
+  function onDockDown(e) {
+    if (focusId == null || focusT < 0.5) return;
+    e.stopPropagation();
+    dockDragging = true; dockMoved = false;
+    dockStartX = e.clientX; dockStartScroll = dockScroll;
+  }
+  function onDockMove(e) {
+    if (!dockDragging) return;
+    const dx = e.clientX - dockStartX;
+    if (Math.abs(dx) > 5) dockMoved = true;
+    const span = DOCK.R * DOCK.STEP;                 // px traveled per member at the apex
+    const n = currentMembers().length;
+    dockScroll = clamp(dockStartScroll - dx / span, 0, Math.max(0, n - 1));
+  }
+  function onDockUp(e) {
+    if (!dockDragging) return;
+    dockDragging = false;
+    const n = currentMembers().length;
+    if (dockMoved) {
+      dockTarget = clamp(Math.round(dockScroll), 0, Math.max(0, n - 1));
+    } else {
+      const itEl = e.target && e.target.closest && e.target.closest('.o3d-dock-item');
+      const id = itEl && itEl.getAttribute('data-id');
+      if (id) switchFocus(id);
+    }
+  }
+  function onDockWheel(e) {
+    if (focusId == null) return;
+    e.preventDefault();
+    const n = currentMembers().length;
+    dockTarget = clamp(dockTarget + (e.deltaY > 0 ? 1 : -1), 0, Math.max(0, n - 1));
+  }
+  // switch the focused object to a dock member (it also becomes the representative).
+  function switchFocus(id) {
+    const en = entries.get(id); if (!en) return;
+    selectRepresentative(id, { glide: false });   // 代表をそれに（フォーカス中は自動再選定なし）
+    focusId = id; focusDir = 1;                    // フォーカス対象を切り替え
+    spinY = 0; spinX = 0; velY = 0;
+    focusT = Math.max(focusT * 0.6, 0.45);         // 少し縮めて再拡大 → 入れ替わりが分かる
+    dockScroll = 0; dockTarget = 0; dockSig = '';  // 新しいメンバー集合で弧をリセット
+    if (container) container.classList.add('o3d-focus-active');
+  }
+
   // ----- per-frame layout + render ------------------------------------------
+  // place an entry's soft ground ellipse at its projected lat/lng point (the
+  // cluster's spot on the map), sized to the floating marker's footprint.
+  function placeShadow(en, p, markerScaled) {
+    const sh = en.shadow; if (!sh) return;
+    const mk = screenToPlane(p.x, p.y);                 // ground point under the marker
+    sh.scale.set(markerScaled * cfg.SHADOW_W, markerScaled * cfg.SHADOW_H, 1);
+    sh.position.set(mk.x, mk.y, -cfg.DIST);
+    sh.renderOrder = 2;                                 // under the object (renderOrder 3)
+    sh.visible = true;
+  }
+
   function layout() {
     const { w, h } = size();
     const markerWorld = cfg.MARKER_PX * pxToWorld();
     const focusWorld = Math.min(w, h) * cfg.FOCUS_FRAC * pxToWorld();
     const ease = focusDir > 0 ? easeOutCubic(focusT) : (1 - easeOutCubic(1 - focusT));
+    const dockIds = dockList();
+    const dockN = dockIds.length;
+
+    // 中心にないクラスタは「代表 1 つだけ」を地図に出す（メンバー全部は出さない）。
+    // 各非メインクラスタごとに、画面中心に最も近いメンバーを代表に選ぶ。
+    const ccx = w / 2, ccy = h * cfg.CENTER_Y_FRAC;
+    const nonMainRep = {};   // clusterKey -> 代表 id
+    const nonMainBest = {};  // clusterKey -> 中心からの距離^2
+    entries.forEach((en) => {
+      const k = en.cluster || ('solo:' + en.id);
+      if (k === mainClusterKey) return;            // メインクラスタはドック＋メディアで別扱い
+      const pp = map.project([en.lng, en.lat]);
+      const d2 = (pp.x - ccx) * (pp.x - ccx) + (pp.y - ccy) * (pp.y - ccy);
+      if (nonMainBest[k] === undefined || d2 < nonMainBest[k]) { nonMainBest[k] = d2; nonMainRep[k] = en.id; }
+    });
+    // 地図にマーカーとして出る代表 id（縁指標の対象）＝メイン代表 + 各非メインクラスタの代表。
+    mapMarkerIds = Object.keys(nonMainRep).map((k) => nonMainRep[k]);
+    if (repId) mapMarkerIds.push(repId);
 
     entries.forEach((en) => {
       const g = en.group; if (!g) return;
       const isFocus = en.id === focusId;
+      const slotIdx = dockIds.indexOf(en.id);
 
       // smooth grow/shrink toward the representative scale (no pop while panning).
       // 巨大 main は常に repId（単一の真実）。フォーカス中は選定を止める。
@@ -311,33 +717,69 @@
       const markerScaled = markerWorld * (1 + en.mainK * (cfg.MAIN_SCALE - 1));
 
       if (isFocus) {
-        // animate from marker transform → centered focus transform
-        const p = map.project([en.lng, en.lat]);
-        const mk = screenToPlane(p.x, p.y);
-        const wH = lerp(markerScaled, focusWorld, ease);
-        const lift = 0.5 * markerScaled * (en.hRatio || 1);   // marker rests on the point
+        // フォーカス：ドック行のそのスロットから画面中央へ飛んで拡大する。
+        const slot = dockSlot(slotIdx < 0 ? Math.round(carPos) : slotIdx);
+        const startScale = slot.objHpx * pxToWorld();
+        const mk = screenToPlane(slot.sx, slot.sy);
+        const wH = lerp(startScale, focusWorld, ease);
         g.scale.setScalar(wH);
-        g.position.set(lerp(mk.x, 0, ease), lerp(mk.y + lift, 0, ease), -cfg.DIST);
+        g.position.set(lerp(mk.x, 0, ease), lerp(mk.y, 0, ease), -cfg.DIST);
         g.rotation.y = en.faceY + spinY;
         g.rotation.x = spinX;
         g.visible = true;
         g.renderOrder = 10;
+        if (en.shadow) en.shadow.visible = false;
+        positionMedia(en, null, 0, false);          // フォーカス中は左下カードを出さない（背景の動画で十分）
       } else {
-        // normal marker: constant px size at projected screen point
+        // 反転：メインクラスタの全オブジェクトを画面下に横並び、代表の動画だけを地図にマッピング。
         const p = map.project([en.lng, en.lat]);
         const onScreen = p.x > -cfg.CULL_MARGIN && p.x < w + cfg.CULL_MARGIN &&
                          p.y > -cfg.CULL_MARGIN && p.y < h + cfg.CULL_MARGIN;
-        // dim/hide others while a focus is active
         const hidden = focusId && ease > 0.04;
-        g.visible = onScreen && !hidden;
-        if (g.visible) {
-          const mk = screenToPlane(p.x, p.y);
-          const lift = 0.5 * markerScaled * (en.hRatio || 1);
-          g.scale.setScalar(markerScaled);
-          g.position.set(mk.x, mk.y + lift, -cfg.DIST);
-          if (cfg.IDLE_SPIN) en.spin += cfg.IDLE_SPIN;
-          g.rotation.set(0, en.faceY + en.spin, 0);
-          g.renderOrder = en.mainK > 0.5 ? 2 : 1;   // main draws above neighbours
+        const inDock = slotIdx >= 0;
+        const isRep = en.id === repId;
+        const inMain = mainClusterIds.indexOf(en.id) !== -1;
+        if (inMain) {
+          // メインクラスタ（中心に来たクラスタ）：オブジェクトは画面下のドックへ、
+          // 代表の動画だけを地図の lat/lng 点にマッピング（現状どおり）。
+          // 下のオブジェリストはフォーカス中もずっと表示（フォーカス対象は中央の大表示へ抜ける）。
+          g.visible = inDock;
+          if (g.visible) {
+            const slot = dockSlot(slotIdx);
+            const isCenter = slotIdx === Math.round(carPos);
+            const dockScale = slot.objHpx * pxToWorld() * (isCenter ? 1.6 : 1);   // 中央のオブジェクトは 1.6 倍
+            const mk = screenToPlane(slot.sx, slot.sy);
+            g.scale.setScalar(dockScale);
+            g.position.set(mk.x, mk.y, -cfg.DIST);
+            // リストのオブジェクトは中央(代表)も含めて全て自動回転（位相は step() がロード後から個別に進める）。
+            g.rotation.set(0, en.faceY + en.spin, 0);
+            g.renderOrder = isCenter ? 4 : 3;
+          }
+          if (en.shadow) en.shadow.visible = false;   // ドックしたオブジェクトは地図の接地影なし
+          // 動画カードは代表の lat/lng 点に立つマーカーとして表示。
+          if (isRep && onScreen && !hidden) positionMedia(en, p, markerScaled, true);
+          else positionMedia(en, null, 0, false);
+        } else {
+          // 中心にないクラスタ：動画カードは出さず、3D オブジェクトそのものを lat/lng 点に
+          // 立つマーカーとして地図に表示する。ただし *クラスタの代表 1 つだけ*（メンバー全部は
+          // 出さない）。タップ → glide で中心へ来て新メイン（動画表示）。
+          positionMedia(en, null, 0, false);
+          const clusterKey = en.cluster || ('solo:' + en.id);
+          const isClusterRep = nonMainRep[clusterKey] === en.id;
+          if (isClusterRep && onScreen && !hidden) {
+            const objHpx = markerWorld / pxToWorld();        // marker height on screen (px)
+            const floatPx = objHpx * cfg.FLOAT_FRAC;         // 接地点の上に少し浮かせる
+            const mk = screenToPlane(p.x, p.y - floatPx - objHpx / 2);  // 足元を点に合わせて中央へ
+            g.visible = true;
+            g.scale.setScalar(markerWorld);
+            g.position.set(mk.x, mk.y, -cfg.DIST);
+            g.rotation.set(0, en.faceY + en.spin, 0);
+            g.renderOrder = 3;
+            placeShadow(en, p, markerWorld);            // クラスタの位置に接地影をつける
+          } else {
+            g.visible = false;
+            if (en.shadow) en.shadow.visible = false;
+          }
         }
       }
     });
@@ -346,6 +788,9 @@
   function step() {
     // recompute main cluster + representative (the single linkage source)
     updateMainAndRep();
+    // 各オブジェクトの自動回転は、その GLB のロード完了(group 生成)後から個別に進める。
+    // → ロード時刻がバラけるぶん位相が揃わず、同時ではなく独立して回り始めて見える。
+    if (cfg.IDLE_SPIN) entries.forEach((en) => { if (en.group) en.spin += cfg.IDLE_SPIN; });
     // focus progress (≈320ms easeOutCubic in/out)
     if (focusDir > 0 && focusT < 1) focusT = Math.min(1, focusT + cfg.FOCUS_STEP);
     if (focusDir < 0 && focusT > 0) {
@@ -362,8 +807,32 @@
     if (scrimEl) {
       const vis = focusId != null;
       const a = focusDir > 0 ? easeOutCubic(focusT) : (1 - easeOutCubic(1 - focusT));
-      scrimEl.style.opacity = vis ? a : 0;
+      scrimEl.style.opacity = vis ? a * 0.4 : 0;
       chromeEl.style.opacity = vis ? a : 0;
+      if (focusGradEl) focusGradEl.style.opacity = vis ? a : 0;
+      if (focusBgEl) {
+        focusBgEl.style.opacity = vis ? a : 0;
+        if (vis && focusId && focusBgEl.dataset.id !== focusId) {
+          focusBgEl.dataset.id = focusId;
+          const en0 = entries.get(focusId);
+          const post0 = window.UniverseData && window.UniverseData.byId[focusId];
+          const vurl = post0 && post0.videoUrl;
+          // 背景は動画があれば動画（左下カードと一致）、無ければサムネ画像をぼかして敷く。
+          if (vurl) {
+            focusBgEl.style.backgroundImage = 'none';
+            focusBgEl.innerHTML = '<video muted playsinline preload="auto" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"></video>';
+            const v = focusBgEl.querySelector('video'); v.src = vurl;
+            // 背景は再生しない：最初のフレームで静止させる。
+            v.addEventListener('loadeddata', () => { try { v.pause(); if (v.currentTime < 0.05) v.currentTime = 0.05; } catch (_) {} }, { once: true });
+          } else {
+            const url = (post0 && post0.thumbUrl) || (en0 && en0.thumb) || '';
+            focusBgEl.innerHTML = '';
+            focusBgEl.style.backgroundImage = url ? 'url("' + url + '")' : 'none';
+          }
+        }
+      }
+      if (mediaEl) mediaEl.style.zIndex = focusId ? 59 : 45;   // フォーカス中は左下動画をオービトより前面へ
+      if (playEl) playEl.style.pointerEvents = (vis && focusT > 0.3) ? 'auto' : 'none';
       // Keep the chrome CONTAINER click-through — otherwise its full-screen
       // inset:0 box (z-index 58) swallows every drag before it reaches the 3D
       // canvas (z-index 57) underneath, killing 360° orbit. The close button
@@ -386,11 +855,55 @@
         closeEl.style.right = 'auto';
         closeEl.style.left = (bx - btn / 2) + 'px';
         closeEl.style.top = (by - btn / 2) + 'px';
+        // 再生ボタンはリストの一部：フォーカス対象が抜けたスロットへ入り、スクロールに追従する。
+        // → 位置は dockSlot(フォーカス対象の index) で算出（carPos 連動）。ドラッグで一緒に流れ、
+        //   中央に収まると停止。リスト内のオブジェクトが「フォーカス＝再生ボタン」に化けて見える。
+        if (playEl) {
+          const dockIds = dockList();
+          const fidx = dockIds.indexOf(focusId);
+          const slot = dockSlot(fidx >= 0 ? fidx : Math.round(carPos));
+          playEl.style.left = slot.sx + 'px';
+          playEl.style.top = slot.sy + 'px';
+          playEl.style.bottom = 'auto';
+          playEl.style.transform = 'translate(-50%,-50%)';
+        }
       }
+    }
+
+    // 下部カルーセル：ターゲットへイージング。中央に来たものを代表に（フォーカス中はフォーカス対象に）。
+    {
+      const ids = dockList();
+      if (ids.length) {
+        // メインクラスタが切り替わったら、そのクラスタ固有の選択を復元する（index は共有しない）。
+        // 直近に明示選択(selectRepresentative)した代表はロック中なら尊重。無ければ前回選択／中心最寄り。
+        if (mainClusterKey !== carClusterKey) {
+          carClusterKey = mainClusterKey;
+          const locked = performance.now() < repLockUntil;
+          let want;
+          if (locked && ids.indexOf(repId) !== -1) { want = repId; }
+          else { want = clusterSel.get(mainClusterKey); if (!want || ids.indexOf(want) === -1) want = (ids.indexOf(repId) !== -1) ? repId : ids[0]; }
+          carPos = carTarget = Math.max(0, ids.indexOf(want));
+          carInit = true;
+          if (want && want !== repId && !focusId) { repId = want; _mainId = repId; fireChange(false); }
+          clusterSel.set(mainClusterKey, want);
+        }
+        if (!carInit) { carPos = Math.max(0, ids.indexOf(repId)); carTarget = carPos; carInit = true; }
+        if (!carDragging) carPos += (carTarget - carPos) * 0.18;
+        const ci = clamp(Math.round(carPos), 0, ids.length - 1);
+        const cid = ids[ci];
+        if (cid) {
+          if (focusId) { if (cid !== focusId) switchFocus(cid); }   // フォーカス中：中心のものへフォーカス切替
+          else if (cid !== repId) { repId = cid; _mainId = repId; fireChange(false); }
+          if (!focusId) clusterSel.set(mainClusterKey, cid);        // このクラスタの選択を記憶
+        }
+      }
+      // リストは常に操作可能。フォーカス中はオービット用キャンバス(z57)より上に出して下端で操作。
+      if (carStripEl) { carStripEl.style.pointerEvents = 'auto'; carStripEl.style.zIndex = focusId ? 57 : 8; }
     }
 
     layout();
     updateEdges();
+    updateDock();
     renderer.render(scene, camera);
   }
 
@@ -405,23 +918,61 @@
     return null;
   }
 
-  function onMapClick(e) {
-    if (focusId) return;
+  // raycast a container-space pixel → the entry whose visible marker is hit (or null).
+  function raycastAt(px, py) {
     const { w, h } = size();
-    ndc.x = (e.point.x / w) * 2 - 1;
-    ndc.y = -((e.point.y / h) * 2 - 1);
+    ndc.x = (px / w) * 2 - 1;
+    ndc.y = -((py / h) * 2 - 1);
     raycaster.setFromCamera(ndc, camera);
     const objs = [];
     entries.forEach((en) => { if (en.group && en.group.visible) objs.push(en.group); });
     const hits = raycaster.intersectObjects(objs, true);
-    if (hits.length) {
-      const en = entryFromObject(hits[0].object);
-      if (!en) return;
-      // 代表(repId)＝巨大 main をタップ → フォーカス（320ms easeOutCubic・全画面・360°）。
-      // 非メインをタップ → 地図がそこへ glide してそのオブジェクトを新しいメイン（代表）に。
-      if (en.id === repId) enterFocus(en.id);
-      else selectRepresentative(en.id, { glide: true });
+    return hits.length ? entryFromObject(hits[0].object) : null;
+  }
+
+  function cancelPress() {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    pressEntry = null; pressStart = null;
+  }
+
+  // pointerdown on the map: figure out which object (if any) is under the finger,
+  // and arm a long-press timer. Holding still past LONG_PRESS_MS → 3D focus.
+  function onPressDown(e) {
+    if (focusId) return;                 // already focused — orbit handlers take over
+    const rect = container.getBoundingClientRect();
+    pressEntry = raycastAt(e.clientX - rect.left, e.clientY - rect.top);
+    pressStart = { x: e.clientX, y: e.clientY };
+    pressMoved = false; longFired = false;
+    if (pressTimer) clearTimeout(pressTimer);
+    if (pressEntry) {
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        if (pressMoved || focusId || !pressEntry) return;
+        longFired = true;                // 長押し → フォーカス（320ms easeOutCubic・全画面・360°）
+        enterFocus(pressEntry.id);
+      }, cfg.LONG_PRESS_MS);
     }
+  }
+
+  // any meaningful movement → it's a globe drag, not a press: cancel tap & long-press.
+  function onPressMove(e) {
+    if (!pressStart) return;
+    if (Math.abs(e.clientX - pressStart.x) + Math.abs(e.clientY - pressStart.y) > cfg.PRESS_MOVE_TOL) {
+      pressMoved = true;
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    }
+  }
+
+  // pointerup: a quick tap (no drag, long-press not yet fired) routes to:
+  //   ・代表(repId) を タップ → onTap 発火（= リストの写真をフルスクリーン表示）
+  //   ・非メイン を タップ   → 地図がそこへ glide して新しいメイン（代表）に
+  function onPressUp() {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+    const en = pressEntry; const moved = pressMoved; const fired = longFired;
+    pressEntry = null; pressStart = null;
+    if (focusId || fired || moved || !en) return;
+    if (en.id === repId) enterFocus(en.id);                 // タップ → フォーカス状態へ
+    else selectRepresentative(en.id, { glide: true });
   }
 
   function panToEntry(en) {
@@ -467,8 +1018,7 @@
     if (hintEl) hintEl.style.opacity = 0;
   }
   function onUp() {
-    if (orbiting && focusId != null && !didDrag) exitFocus();   // tap (no drag) on canvas → close
-    orbiting = false;
+    orbiting = false;                                  // フォーカス中はドラッグ回転のみ（タップ動作なし）
   }
 
   function onResize() {
@@ -489,15 +1039,15 @@
   // オブジェクトを、その方向(矢印)・距離つきで縁に提示し『一個だけで寂しい』を解消。
   // 各チップの中身は対象 3D の実ポートレート(captureThumb)。タップでそこへパン。
   // ==========================================================================
-  const EDGE_LS = 'toopdbq.edgeInd.v2';
+  const EDGE_LS = 'toopdbq.edgeInd.v3';
   const EDGE_DEFAULTS = {
     enabled: true,
-    style: 'portrait',   // portrait | arrow | dot
-    size: 40,            // chip diameter (px)
-    showDistance: true,
+    style: 'portrait',   // portrait | arrow | dot — サムネ
+    size: 56,            // chip diameter (px)
+    showDistance: false, // 距離ラベルなし
     pulse: true,
-    maxCount: 8,
-    sparseMax: 2,        // 画面内の「別々の」オブジェクトが これ以下 の時だけ出す（99 = 常時）
+    maxCount: 1,         // いっぺんに 1 つまで
+    sparseMax: 99,       // 常に表示（画面内の数に関係なく出す）
   };
   // 画面の淵ギリギリまで寄せる：ディスク外縁が画面端を少しはみ出す（poke）所まで。
   // 端で重なる実 3D マーカー / app chrome（オーバーレイ）の下の層に潜る（CSS .o3d-edge=4）。
@@ -521,9 +1071,15 @@
     thumbR = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     thumbR.setPixelRatio(2);
     thumbR.setSize(THUMB_PX, THUMB_PX, false);
+    thumbR.outputEncoding = THREE.sRGBEncoding;
+    thumbR.toneMapping = THREE.ACESFilmicToneMapping;
+    thumbR.toneMappingExposure = 1.05;
     thumbScene = new THREE.Scene();
-    thumbScene.add(new THREE.AmbientLight(0xffffff, 1.15));
-    const k = new THREE.DirectionalLight(0xffffff, 0.95); k.position.set(0.45, 0.9, 1.1); thumbScene.add(k);
+    if (THREE.RoomEnvironment) {
+      thumbScene.environment = new THREE.PMREMGenerator(thumbR).fromScene(new THREE.RoomEnvironment(), 0.04).texture;
+    }
+    thumbScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const k = new THREE.DirectionalLight(0xffffff, 1.1); k.position.set(0.45, 0.9, 1.1); thumbScene.add(k);
     const r = new THREE.DirectionalLight(0xbcd0ff, 0.4); r.position.set(-0.6, 0.2, -1); thumbScene.add(r);
     thumbCam = new THREE.PerspectiveCamera(34, 1, 0.01, 100);
     thumbCam.position.set(0, 0.12, 2.25);
@@ -535,7 +1091,7 @@
       ensureThumbR();
       const holder = new THREE.Group();
       holder.add(model);              // borrow the model briefly
-      holder.rotation.set(0, -0.5, 0);
+      holder.rotation.set(0, -Math.PI / 2, 0);   // GLB 既定は右(+X)向き → -90°で正面(カメラ)向き
       thumbScene.add(holder);
       thumbR.render(thumbScene, thumbCam);
       const url = thumbR.domElement.toDataURL('image/png');
@@ -559,13 +1115,19 @@
     container.appendChild(edgeEl);
     applyEdge();
   }
+  // 縁チップの絵柄は「動画のサムネイル画像」(投稿の thumbUrl) を使う。3D ポートレート(en.thumb)
+  // ではなく、投稿が持つ生成元写真/動画サムネを出す。無ければ 3D ポートレートにフォールバック。
+  function edgeThumbFor(en) {
+    const post = window.UniverseData && window.UniverseData.byId && window.UniverseData.byId[en.id];
+    return (post && (post.thumbUrl || post.posterUrl)) || en.thumb || '';
+  }
   function ensureChip(en) {
     let c = edgeChips.get(en.id);
     if (c) return c;
     const el = document.createElement('button');
     el.type = 'button'; el.className = 'o3d-edge-chip';
     el.innerHTML = '<span class="disc"><img alt=""></span><span class="arrow"></span><span class="dist"></span>';
-    if (en.thumb) el.querySelector('img').src = en.thumb;
+    const t0 = edgeThumbFor(en); if (t0) el.querySelector('img').src = t0;
     el.addEventListener('click', (e) => { e.stopPropagation(); panToEntry(en); });
     edgeEl.appendChild(el);
     c = { el, img: el.querySelector('img'), arrow: el.querySelector('.arrow'), dist: el.querySelector('.dist') };
@@ -600,6 +1162,16 @@
     return Math.round(m) + '<i>m</i>';
   }
 
+  // 視点中心 → 対象 の初期方位（rad, 0=北・時計回り）。globe で project() が裏側/画面外に
+  // 返す不正値に依らず、地理的な真方向を出す。
+  function bearingRad(lat1, lng1, lat2, lng2) {
+    const toR = Math.PI / 180;
+    const p1 = lat1 * toR, p2 = lat2 * toR, dL = (lng2 - lng1) * toR;
+    const y = Math.sin(dL) * Math.cos(p2);
+    const x = Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dL);
+    return Math.atan2(y, x);
+  }
+
   function updateEdges() {
     if (!edgeEl) return;
     if (!EDGE.enabled || focusId) { edgeEl.style.display = 'none'; return; }
@@ -616,6 +1188,7 @@
     const off = []; const insidePts = [];
     entries.forEach((en) => {
       if (!en.group) return;
+      if (en.id !== repId && mapMarkerIds.indexOf(en.id) === -1) { hideChip(en.id); return; }   // 地図に出る各クラスタ代表のみ縁指標
       const p = map.project([en.lng, en.lat]);
       if (p.x >= rc.l && p.x <= rc.r && p.y >= rc.t && p.y <= rc.b) { insidePts.push(p); hideChip(en.id); return; }
       off.push({ en, p, dm: haversine(ctr.lat, ctr.lng, en.lat, en.lng) });
@@ -633,8 +1206,12 @@
     edgeChips.forEach((c, id) => { if (!ids.has(id)) c.el.classList.remove('on'); });
 
     const perim = 2 * ((rc.r - rc.l) + (rc.b - rc.t));
-    const placed = shown.map(({ en, p, dm }) => {
-      const dx = p.x - ocx, dy = p.y - ocy;
+    const mb = ((map.getBearing && map.getBearing()) || 0) * Math.PI / 180;   // 地図の回転
+    const placed = shown.map(({ en, dm }) => {
+      // 方向は GEO 方位（ビュー中心 → 対象）から決める。配置辺と矢印を同じ値から導くので必ず一致。
+      // screen: 北=上(dy=-1) 東=右(dx=+1)、地図回転 mb を引く。
+      const sb = bearingRad(ctr.lat, ctr.lng, en.lat, en.lng) - mb;
+      const dx = Math.sin(sb), dy = -Math.cos(sb);
       const tx = dx > 0 ? (rc.r - ocx) / dx : dx < 0 ? (rc.l - ocx) / dx : Infinity;
       const ty = dy > 0 ? (rc.b - ocy) / dy : dy < 0 ? (rc.t - ocy) / dy : Infinity;
       const t = Math.min(tx, ty);
@@ -662,7 +1239,7 @@
       if (poke > 0) { c.arrow.style.display = 'none'; }   // ディスクが淵に乗る → 位置そのものが方向の手がかり
       else { c.arrow.style.display = ''; c.arrow.style.transform = `translate(-50%,-50%) rotate(${pl.bearing}rad) translateX(${push}px)`; }
       if (EDGE.showDistance) c.dist.innerHTML = fmtDist(pl.dm);
-      if (c.img && pl.en.thumb && c.img.getAttribute('src') !== pl.en.thumb) c.img.src = pl.en.thumb;
+      const et = edgeThumbFor(pl.en); if (c.img && et && c.img.getAttribute('src') !== et) c.img.src = et;
       c.el.classList.add('on');
     });
   }
@@ -730,7 +1307,7 @@
       () => EDGE.showDistance ? 1 : 0, (v) => { EDGE.showDistance = !!+v; applyEdge(); }));
     g.appendChild(_seg('パルス', [{ id: 1, label: 'ON' }, { id: 0, label: 'OFF' }],
       () => EDGE.pulse ? 1 : 0, (v) => { EDGE.pulse = !!+v; applyEdge(); }));
-    g.appendChild(_range('最大表示数', 'maxCount', 3, 11, 1, ''));
+    g.appendChild(_range('最大表示数', 'maxCount', 1, 11, 1, ''));
     body.insertBefore(g, body.firstChild);
   }
   function buildLinkPanel() {
@@ -775,7 +1352,9 @@
     exitFocus,
     selectRepresentative,
     onChange(cb) { if (typeof cb === 'function') { changeCbs.push(cb); if (mainClusterKey) cb({ repId, clusterKey: mainClusterKey, ids: mainClusterIds.slice() }, true); } },
+    onTap(cb) { if (typeof cb === 'function') tapCbs.push(cb); },
     onThumb(cb) { if (typeof cb === 'function') { thumbCbs.push(cb); entries.forEach((en) => { if (en.thumb) cb(en.id, en.thumb); }); } },
+    onMediaTap(cb) { if (typeof cb === 'function') mediaTapCbs.push(cb); },
     thumbFor(id) { const en = entries.get(id); return en ? en.thumb : null; },
     get rep() { return repId; },
     get cluster() { return mainClusterIds.slice(); },

@@ -14,6 +14,8 @@
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
+<!-- RoomEnvironment — PBR の IBL 用 (発色契約: objects3d.js / models.js が PMREMGenerator で使用) -->
+<script src="https://unpkg.com/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
 
 <style>
 /* ============================================================================
@@ -259,15 +261,19 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 .cstrip { display: flex; gap: 8px; overflow-x: auto; padding: 0 76px 0 16px; scrollbar-width: none; }
 .cstrip::-webkit-scrollbar { display: none; }
 .cell { position: relative; width: 75px; height: 134px; flex: none; border-radius: 11px;
-  border: 1px solid rgba(255,255,255,.2); overflow: hidden; background: #2a2a2a; cursor: pointer;
+  border: none; overflow: hidden; background: transparent; cursor: pointer;
   transition: transform .22s var(--ease-out); }
 .cell .clip { position: absolute; inset: 1px; border-radius: 9px; overflow: hidden; }
-.cell .clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cell .clip img, .cell .clip video { width: 100%; height: 100%; object-fit: contain; display: block; }
 .cell.rep { border: 2.5px solid #fff; }
 .cell.rep .clip { inset: 1.5px; border-radius: 8px; }
-.cell.noimg .clip { background: #2A2A2A; }
+.cell.noimg .clip { background: transparent; }
 .cell.noimg .clip img { display: none; }
 .cell:active { transform: scale(.97); }
+/* origin cell: while its media is borrowed up into fullscreen, the leftover frame + gray bg fade away */
+.cell.borrowed { opacity: 0; transition: opacity .34s var(--ease-out); }
+/* the reel's circle header hides while its icon+name fly into the fullscreen footer */
+.chead.borrowed { opacity: 0; transition: opacity .18s var(--ease-out); }
 /* ============================================================================
    WdSideTool — 縦並びアクションレール（DS components.css 由来）
    avatar(poster+follow) → like → comment → pin · 右端中央に配置
@@ -303,9 +309,22 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 .wd-side-tool .act.liked .wd-icon-btn img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
 .wd-side-tool .act.liked .ct { color: var(--state-like); }
 
-.post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 55; width: 56px; height: 56px; }
+.post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 55; width: 56px; height: 56px;
+  transition: transform .4s var(--ease-out), opacity .15s var(--ease-out), filter .12s var(--ease-out); }
 .post-btn.wd-icon-btn.color > img { width: 25px; height: 25px;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.post-btn:active { transform: scale(.94); }
+
+/* ── WdIdentityTool 右スタック下段（pen / 編集）─────────────────────────────
+   フルスクリーン時、画面下から滑り上がって投稿ボタンを押し上げ、camera(上)＋pen(下)の
+   縦2連スタックを作る。投稿ボタンと中心軸（右からの中心）を揃える。 */
+.edit-btn { position: absolute; right: 14px; bottom: 26px; z-index: 55; width: 52px; height: 52px;
+  opacity: 0; transform: translateY(88px); pointer-events: none;
+  transition: transform .44s var(--ease-out), opacity .3s var(--ease-out); }
+.edit-btn img { width: 42%; height: 42%;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+/* story-open の押し上げ／pen 表示は JS が openStory/closeStory でインライン駆動する
+   （.screen.story-open 子孫セレクタが一部効かない描画環境のため、確実なインライン制御に） */
 .specimen-tag {
   position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
   z-index: 55; pointer-events: none;
@@ -426,6 +445,38 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ============================================================================
+   3D MEDIA TOTEM  (objects3d.js) — per-post 動画カードを 3D オブジェクトの真下に
+   縦に積み、lat/lng に射影して "オブジェクト＋動画 = 一体の 1 ピン" としてマッピング。
+   z2: bg(0) < map(1) < MEDIA(2) < strato/frame(2/3) < o3d-edge(4) < scrim(5) < 3D(6)
+   → 3D オブジェクト本体(z6)はカード(z2)の上に描かれ、足元がカード上端へ重なる。
+   ========================================================================== */
+.o3d-media-card {
+  position: absolute; top: 0; left: 0; pointer-events: none;
+  will-change: transform, width, height;
+}
+.o3d-media-card .mclip {
+  position: absolute; inset: 0; border-radius: 13px; overflow: hidden;
+  background: #16161b;
+  box-shadow: 0 14px 30px rgba(0,0,0,.6), 0 3px 10px rgba(0,0,0,.45),
+              inset 0 1px 0 var(--lg-specular-top, rgba(255,255,255,.18));
+}
+.o3d-media-card .mclip::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.o3d-media-card .mclip video,
+.o3d-media-card .mclip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* soft contact shadow welding the object's head to the card's bottom edge */
+.o3d-media-card .weld {
+  position: absolute; left: 50%; bottom: 0; transform: translate(-50%,58%);
+  width: 64%; height: 16px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.55) 0%, transparent 75%);
+  pointer-events: none;
+}
+
+/* ============================================================================
    3D OVERLAY  (objects3d.js) — screen-space markers + focus/orbit chrome
    ========================================================================== */
 .o3d-scrim {
@@ -434,6 +485,17 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
      an object darkens only the MAP — the UI stays lit and in front. */
   position: absolute; inset: 0; z-index: 5; pointer-events: none;
   background: var(--scrim); opacity: 0;
+}
+/* フォーカス背景グラデーションの波打つフロー：斜め方向に流れ、ゆっくり脈動する。 */
+@keyframes o3dGradFlow {
+  0%   { background-position: 0% 30%, 100% 0%, 80% 100%, 10% 90%, 0% 50%;
+         transform: scale(1) rotate(0deg); }
+  25%  { background-position: 30% 60%, 70% 30%, 100% 70%, 0% 60%, 35% 65%; }
+  50%  { background-position: 60% 100%, 40% 70%, 60% 30%, 40% 20%, 100% 50%;
+         transform: scale(1.06) rotate(1.5deg); }
+  75%  { background-position: 30% 60%, 20% 100%, 30% 60%, 70% 50%, 65% 35%; }
+  100% { background-position: 0% 30%, 100% 0%, 80% 100%, 10% 90%, 0% 50%;
+         transform: scale(1) rotate(0deg); }
 }
 .o3d-chrome { position: absolute; inset: 0; z-index: 58; pointer-events: none; opacity: 0; }
 
@@ -460,6 +522,49 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
 .o3d-close:active { transform: scale(.92); }
+
+/* ============================================================================
+   FOCUS DOCK  (objects3d.js) — フォーカス中だけ、クラスタの裏に隠れたメンバーを
+   画面下部に 3D サムネで並べる。タップでフォーカス対象を切り替え。
+   ========================================================================== */
+/* 弧カルーセル：フォーカス対象の左下に、クラスタの他メンバーを「丘」状の弧へ並べる。
+   頂点(中心)のメンバーが最大＝強調。ドラッグ/ホイールでスライド、タップで切り替え。
+   マップ表示では非表示（フォーカス中のみ）。位置は JS が毎フレーム弧上に配置。 */
+.o3d-dock {
+  position: absolute; left: 0; bottom: 0; width: 72%; height: 232px; z-index: 59;
+  pointer-events: none; opacity: 0; overflow: visible; touch-action: none;
+  transition: opacity .3s var(--ease-out);
+}
+.o3d-dock-item {
+  position: absolute; top: 0; left: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px;
+  border: 0; padding: 0; background: none; cursor: pointer; pointer-events: auto;
+  will-change: transform, opacity;
+}
+.o3d-dock-item .ring {
+  position: absolute; left: 50%; top: 50%; width: 156%; height: 156%;
+  transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,255,255,.24) 0%, rgba(255,255,255,.07) 46%, transparent 72%);
+  opacity: 0; transition: opacity .25s var(--ease-out);
+}
+.o3d-dock-item.apex .ring { opacity: 1; }
+.o3d-dock-item .disc {
+  position: absolute; inset: 0; border-radius: 16px; overflow: visible; background: none;
+  transition: transform .12s var(--ease-out);
+}
+.o3d-dock-item .disc img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.62));
+}
+.o3d-dock-item:active .disc { transform: scale(.9); }
+/* 頂点メンバーの名前ラベル（弧の頂点直下） */
+.o3d-dock-cap {
+  position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0;
+  transition: opacity .25s var(--ease-out);
+  font-family: var(--font-jp); font-weight: 700; font-size: 12px; color: #fff;
+  letter-spacing: .02em; white-space: nowrap; text-shadow: 0 1px 5px rgba(0,0,0,.9);
+  padding: 5px 13px; border-radius: var(--radius-pill);
+  background: rgba(0,0,0,.34); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
 .o3d-hint {
   position: absolute; left: 50%; bottom: 116px; transform: translateX(-50%);
   font-family: var(--font-jp); font-weight: 600; font-size: 12px; color: var(--text-2);
@@ -518,8 +623,7 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
 .o3d-edge-chip .disc img {
-  width: 100%; height: 100%; object-fit: contain; display: block;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,.5));
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 /* directional chevron — JS sets transform (rotate to true bearing, push outward) */
 .o3d-edge-chip .arrow {
@@ -569,6 +673,93 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 }
 .seg button:hover { color: var(--text-1); }
 .seg button.sel { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.28); }
+
+/* ============================================================================
+   STORY FULLSCREEN  — tap a 3D object → its list photo opens full-bleed
+   (long-press the object = 3D focus/orbit; this is the quick-tap surface).
+   Sits above the floating app chrome (post 55 · side-tool 50) but below the
+   SafeArea status bar (60) / island (70) so system chrome stays legible.
+   ========================================================================== */
+.story-fs {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 58; opacity: 0; pointer-events: none; overflow: hidden;
+  background: #000; border-radius: 0;
+  transition: top .44s var(--ease-out), left .44s var(--ease-out),
+              width .44s var(--ease-out), height .44s var(--ease-out),
+              border-radius .44s var(--ease-out), opacity .18s var(--ease-out);
+}
+.story-fs.open { opacity: 1; pointer-events: auto; }
+/* chrome (progress / header / scrims) fades in once expanded — not while it's still a tiny thumbnail */
+.story-fs .sfs-scrim-top, .story-fs .sfs-scrim-bot, .story-fs .sfs-bar, .story-fs .sfs-head {
+  opacity: 0; transition: opacity .28s var(--ease-out);
+}
+.story-fs.expanded .sfs-scrim-top, .story-fs.expanded .sfs-scrim-bot,
+.story-fs.expanded .sfs-bar, .story-fs.expanded .sfs-head { opacity: 1; }
+/* 3D フォーカスと同じレイヤリング：外側のボタン群はフルスクリーンの上に常に見える。
+   (status bar 60 / island 70 はそのさらに上) */
+.screen.story-open .playlist,
+.screen.story-open .wd-side-tool,
+.screen.story-open .edit-btn,
+.screen.story-open .post-btn { z-index: 59; }
+.screen.story-open .o3d-chrome { display: none; }
+/* fullscreen: hide the poster user avatar on the side rail (keep like/comment/pin) */
+.screen.story-open .wd-side-tool .wd-avatar { display: none; }
+.story-fs .sfs-media { position: absolute; inset: 0; overflow: hidden; }
+.story-fs .sfs-media > video, .story-fs .sfs-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs .sfs-scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 168px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.26) 46%, transparent 100%); }
+.story-fs .sfs-scrim-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%); }
+.story-fs .sfs-bar { position: absolute; top: 70px; left: 16px; right: 16px; height: 2.5px; border-radius: 2px;
+  background: rgba(255,255,255,.3); overflow: hidden; }
+.story-fs .sfs-bar .fill { display: block; height: 100%; width: 100%; background: #fff; transform-origin: left; transform: scaleX(0); }
+.story-fs.open .sfs-bar .fill { animation: sfs-fill 6s linear forwards; }
+.story-fs.is-video .sfs-bar .fill { animation: none !important; }
+@keyframes sfs-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.story-fs .sfs-head { position: absolute; top: 84px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; }
+.story-fs .sfs-av { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex: none;
+  border: 1.5px solid rgba(255,255,255,.85); box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+.story-fs .sfs-av img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+.story-fs .sfs-meta { display: flex; flex-direction: column; line-height: 1.22; min-width: 0; }
+.story-fs .sfs-meta b { font: 700 13px var(--font-jp); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .sfs-meta i { font: 500 10.5px var(--font-latin); font-style: normal; color: rgba(255,255,255,.82);
+  text-shadow: 0 1px 3px rgba(0,0,0,.85); letter-spacing: .02em; }
+.story-fs .sfs-close { margin-left: auto; width: 34px; height: 34px; flex: none; display: flex; align-items: center;
+  justify-content: center; border: 0; border-radius: 50%; cursor: pointer; background: var(--glass-fill);
+  backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .12s var(--ease-out); }
+.story-fs .sfs-close:active { transform: scale(.92); }
+/* circle footer — WdIdentityTool 左バー（WdCircleBar glass pill）。リールの
+   circle icon+title がここへ降りてきて、ベタな見出しから glass の identity pill へ
+   形を変える（footFlyIn の FLIP がそのまま効く）。右側の camera/pen スタックと合わせて
+   全体が WdIdentityTool になる。 */
+.story-fs .sfs-foot { position: absolute; left: 18px; right: 78px; bottom: 26px; z-index: 2;
+  display: flex; align-items: center; gap: 10px; pointer-events: none;
+  padding: 6px 18px 6px 6px; border-radius: var(--radius-pill);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%),
+    var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .3s var(--ease-out), transform .42s var(--ease-out); }
+.story-fs .sfs-foot::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.story-fs.expanded .sfs-foot { opacity: 1; transform: translateY(0); }
+.story-fs .sfs-foot .ft { width: 44px; height: 44px; border-radius: 50%; flex: none; overflow: hidden;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+.story-fs .sfs-foot .ft img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs .sfs-foot .col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.story-fs .sfs-foot b { font: 700 14px var(--font-jp); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .sfs-foot .ds { font: 400 11px var(--font-latin); color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) { .story-fs.open .sfs-bar .fill { animation: none; transform: scaleX(1); } }
 </style>
 </head>
 <body>
@@ -591,9 +782,6 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
 
         <div class="scrim-top"></div>
 
-        <!-- ===== bottom chrome: cluster reel (built from main cluster's allPins) ===== -->
-        <div class="playlist-veil"></div>
-        <div class="playlist" id="playlist"><!-- built by the reel controller from the main cluster --></div>
         <!-- ===== WdSideTool: 縦並びアクションレール（右端中央） ===== -->
         <div class="wd-side-tool" id="sideTool">
           <div class="wd-avatar">
@@ -618,6 +806,30 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
           <img src="../../assets/icons/icon_camera.png" alt="post">
           <span class="wd-badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
         </button>
+        <!-- WdIdentityTool 右スタック下段：pen（編集）。フルスクリーンで下から押し上がる -->
+        <button class="edit-btn wd-icon-btn" aria-label="編集">
+          <img src="../../assets/icons/icon_edit.png" alt="edit">
+        </button>
+
+        <!-- ===== story fullscreen: 3D タップ → リスト写真をフルスクリーン ===== -->
+        <div class="story-fs" id="storyFs" aria-hidden="true">
+          <div class="sfs-media" id="sfsMedia"></div>
+          <div class="sfs-scrim-top"></div>
+          <div class="sfs-scrim-bot"></div>
+          <div class="sfs-bar"><span class="fill"></span></div>
+          <div class="sfs-head">
+            <button class="sfs-close" id="sfsClose" aria-label="閉じる">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="sfs-foot">
+            <span class="ft"><img id="sfsFootImg" alt=""></span>
+            <div class="col">
+              <b id="sfsFootName">渋谷コミュニティ</b>
+              <span class="ds" id="sfsFootDesc">渋谷駅周辺のコミュニティ</span>
+            </div>
+          </div>
+        </div>
 
         <!-- SafeArea chrome only (no app UI) -->
         <div class="statusbar">
@@ -640,7 +852,7 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       <button data-preset="region"><span class="ico">🗾</span>Region</button>
       <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
     </div>
-    <div class="hint">リール cell タップ＝代表化 · メイン 3D タップ＝フォーカス · 非メイン＝glide · ドラッグ＝回転</div>
+    <div class="hint">3D タップ＝フォーカス（360°回覧） · フォーカス中は左下のリストをスライドで切り替え · ドラッグ＝地図を回転</div>
   </div>
 
   <!-- ====================== TUNING PANEL ====================== -->
@@ -721,10 +933,12 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
           const cell = document.createElement('div');
           cell.className = 'cell' + (p.id === repId ? ' rep' : '');
           cell.setAttribute('data-id', p.id);
+          // リストは動画ではなく 3D オブジェクトのレンダ(thumbFor)を出す。
           cell.innerHTML = '<div class="clip"><img alt=""></div>';
           const img = cell.querySelector('img');
-          img.src = p.thumbUrl;                                  // 共有プール real-NN.jpg（= 生成元の写真）
-          img.onerror = () => { cell.classList.add('noimg'); };  // 失敗時はプレースホルダ。3D レンダは使わない
+          const obj = window.Objects3D && window.Objects3D.thumbFor && window.Objects3D.thumbFor(p.id);
+          img.src = obj || p.thumbUrl;                           // 3D ポートレート（無ければ写真フォールバック）
+          img.onerror = () => { cell.classList.add('noimg'); };
           strip.appendChild(cell);
         });
         playlist.appendChild(row);
@@ -737,14 +951,16 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       });
     }
 
-    // tap a cell → that post becomes the representative (1500ms lock + map glide).
-    playlist.addEventListener('click', (e) => {
+    // tap a cell → that post becomes the representative (the on-map object swaps to it).
+    if (playlist) playlist.addEventListener('click', (e) => {
       const cell = e.target.closest('.cell'); if (!cell) return;
       const id = cell.getAttribute('data-id');
       highlightRep(id);                                          // move the white frame at once
-      window.Objects3D.selectRepresentative(id, { glide: true, lock: 1500 });
+      window.Objects3D.selectRepresentative(id, { glide: false, lock: 1500 });
       cell.dispatchEvent(new CustomEvent('uv:select', { bubbles: true, detail: { id, circle: D.byId[id] && D.byId[id].circleId } }));
     });
+
+    // リスト無し：地図のオブジェクトを タップ → フォーカス状態（objects3d.js で処理）。
 
     // ---- boot the 3D overlay with the SAME entities (url = glbUrl) ----
     function boot() {
@@ -756,14 +972,205 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
       });
       // the representative / main cluster drive the reel — keep them in lockstep.
       window.Objects3D.onChange((payload, rebuild) => {
+        if (!playlist) return;
         const s = reelSignature(payload.ids);
         if (rebuild || s !== sig) { sig = s; buildReel(payload.ids, payload.repId); }
         else highlightRep(payload.repId);
+      });
+      // 3D オブジェクトを タップ → フォーカス状態（objects3d.js が処理）。フォーカス中の
+      // 下部ドックで裏のメンバーをタップ → そのオブジェクトへ切り替え。
+      // GLB が焼けたら（非同期）リストのセルを 3D ポートレートへ差し替える。
+      window.Objects3D.onThumb((id, url) => {
+        if (!url || !playlist) return;
+        playlist.querySelectorAll('.cell[data-id="' + id + '"] .clip img').forEach((img) => { img.src = url; });
       });
       // NOTE: リールのサムネは投稿の thumbUrl(real-NN.jpg = 生成元写真)だけを使う。
       // 3D の実レンダ(thumbFor)はリストに出さない（edge-indicator chip 専用）。
     }
     boot();
+
+    // ---- story fullscreen: open the tapped object's list photo full-bleed ----
+    const fsEl = document.getElementById('storyFs');
+    const fsMedia = document.getElementById('sfsMedia');
+    const fsFill = fsEl && fsEl.querySelector('.sfs-bar .fill');
+    const fsFootName = document.getElementById('sfsFootName');
+    const fsFootImg = document.getElementById('sfsFootImg');
+    const fsFootDesc = document.getElementById('sfsFootDesc');
+    let storyOrigin = null;                  // 拡大元のリール cell（位置・サイズはそのまま残る）
+    let movedNode = null, movedHome = null;  // サムネから借りているメディアと、その戻し先(.clip)
+    let closeTimer = null;
+    const idPostBtn = document.querySelector('.post-btn');   // WdIdentityTool 右スタック上段(camera)
+    const idEditBtn = document.querySelector('.edit-btn');   // 〃 下段(pen)
+    function raiseIdentityStack() {                          // pen を下から押し上げ、post を 12px ギャップ上へ
+      if (idPostBtn) idPostBtn.style.transform = 'translateY(-66px)';
+      if (idEditBtn) { idEditBtn.style.opacity = '1'; idEditBtn.style.transform = 'translateY(0)'; idEditBtn.style.pointerEvents = 'auto'; }
+    }
+    function lowerIdentityStack() {                          // 元に戻す（pen は下へ・post は定位置へ）
+      if (idPostBtn) idPostBtn.style.transform = '';
+      if (idEditBtn) { idEditBtn.style.opacity = ''; idEditBtn.style.transform = ''; idEditBtn.style.pointerEvents = ''; }
+    }
+
+    function rectIn(parent, el) {
+      const pr = parent.getBoundingClientRect(), r = el.getBoundingClientRect();
+      return { top: r.top - pr.top, left: r.left - pr.left, width: r.width, height: r.height };
+    }
+    function setGeom(top, left, width, height, radius) {
+      fsEl.style.top = top; fsEl.style.left = left;
+      fsEl.style.width = width; fsEl.style.height = height;
+      fsEl.style.borderRadius = radius;
+    }
+    function onVidTime() {
+      if (!fsFill || !movedNode || !movedNode.duration) return;
+      fsFill.style.transform = 'scaleX(' + (movedNode.currentTime / movedNode.duration) + ')';
+    }
+
+    // ---- circle footer FLIP: the reel's circle icon+title fly down into the footer ----
+    function cheadFor(originEl) {
+      const crow = originEl && originEl.closest('.crow');
+      return crow ? crow.querySelector('.chead') : null;
+    }
+    function footOverlay(chead) {
+      const foot = fsEl.querySelector('.sfs-foot');
+      const fIcon = foot.querySelector('.ft'), hIcon = chead.querySelector('.cthumb');
+      const fr = rectIn(screen, foot), fi = rectIn(screen, fIcon), hi = rectIn(screen, hIcon);
+      const ox = (fi.left + fi.width / 2) - fr.left, oy = (fi.top + fi.height / 2) - fr.top;
+      const dx = (hi.left + hi.width / 2) - (fi.left + fi.width / 2);
+      const dy = (hi.top + hi.height / 2) - (fi.top + fi.height / 2);
+      return { origin: ox + 'px ' + oy + 'px',
+               transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + (hi.width / fi.width) + ')' };
+    }
+    function footFlyIn() {
+      const foot = fsEl.querySelector('.sfs-foot'), chead = cheadFor(storyOrigin);
+      if (!foot || !chead) return;                       // 元 chead が無い(3D タップ等) → CSS フォールバック
+      chead.classList.add('borrowed');                   // 元のアイコン+名前を隠し、同じものが飛んだように見せる
+      const o = footOverlay(chead);
+      foot.style.transition = 'none';
+      foot.style.transformOrigin = o.origin;
+      foot.style.transform = o.transform; foot.style.opacity = '1';
+      void foot.offsetWidth;
+      foot.style.transition = 'transform .46s var(--ease-out), opacity .26s var(--ease-out)';
+      foot.style.transform = 'translate(0px,0px) scale(1)';
+    }
+    function footFlyOut() {
+      const foot = fsEl.querySelector('.sfs-foot'), chead = cheadFor(storyOrigin);
+      if (!foot || !chead) return;
+      const o = footOverlay(chead);                      // chead は borrowed(opacity0)だがレイアウトは生きている
+      foot.style.transition = 'transform .42s var(--ease-out), opacity .3s var(--ease-out)';
+      foot.style.transformOrigin = o.origin;
+      foot.style.transform = o.transform;
+    }
+    function footReset() {
+      const foot = fsEl.querySelector('.sfs-foot');
+      if (foot) { foot.style.transition = 'none'; foot.style.transform = ''; foot.style.transformOrigin = ''; foot.style.opacity = ''; }
+      const chead = cheadFor(storyOrigin);
+      if (chead) chead.classList.remove('borrowed');
+    }
+
+    // open: borrow the thumbnail's OWN media (no duplicate fullscreen media) and zoom it up.
+    function openStory(id, originEl) {
+      const p = D.byId[id]; if (!p || !fsEl) return;
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      if (movedNode) return;                                   // already showing one
+      const circle = D.circles[p.circleId];
+      if (circle) {                                            // サークルのアイコン+タイトルをフッターへ
+        if (fsFootName) fsFootName.textContent = circle.name;
+        if (fsFootImg) fsFootImg.src = circle.thumb || '';
+        if (fsFootDesc) fsFootDesc.textContent = circle.desc || '';
+      }
+
+      originEl = originEl || (playlist && playlist.querySelector('.cell[data-id="' + id + '"]'));
+      storyOrigin = originEl || null;
+      if (storyOrigin) storyOrigin.classList.add('borrowed');  // 残った枠＋グレー背景をフェードで消す
+
+      // 借用：サムネ内の動画/画像ノードをフルスクリーン面へ移す。セル自体は同位置・同サイズのまま。
+      const clip = originEl && originEl.querySelector('.clip, .mclip');
+      const node = clip && clip.querySelector('video, img');
+      if (node) {
+        movedNode = node; movedHome = clip;
+        fsMedia.appendChild(node);                             // reparent in same document → 再生継続
+        const isVid = node.tagName === 'VIDEO';
+        fsEl.classList.toggle('is-video', isVid);
+        if (isVid) { node.muted = true; node.play().catch(() => {}); node.addEventListener('timeupdate', onVidTime); }
+        else if (fsFill) { fsFill.style.transform = 'scaleX(0)'; }
+      } else if (p.videoUrl) {
+        // origin カードが無い（フォーカス中の再生ボタン）→ 新規 video を生成して全画面再生。
+        const v = document.createElement('video');
+        v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.src = p.videoUrl;
+        fsMedia.appendChild(v);
+        movedNode = v; movedHome = null;                       // 生成物 → クローズ時に削除
+        fsEl.classList.add('is-video');
+        v.play().catch(() => {});
+        v.addEventListener('timeupdate', onVidTime);
+      }
+
+      const sw = screen.clientWidth, sh = screen.clientHeight;
+      fsEl.classList.add('open');
+      if (screen) screen.classList.add('story-open');          // raise the outer buttons above the fullscreen
+      raiseIdentityStack();                                    // pen が下から現れ post を押し上げ → WdIdentityTool
+      fsEl.setAttribute('aria-hidden', 'false');
+
+      if (originEl) {
+        // start exactly over the thumbnail
+        const r = rectIn(screen, originEl);
+        fsEl.style.transition = 'none';
+        setGeom(r.top + 'px', r.left + 'px', r.width + 'px', r.height + 'px', '11px');
+      } else {
+        fsEl.style.transition = 'none';
+        setGeom('0px', '0px', sw + 'px', sh + 'px', '0px');
+      }
+      void fsEl.offsetWidth;                                   // commit the start frame (transition still off)
+      // next frame: restore the transition, set the fullscreen target so the geometry transition fires,
+      // then run the footer FLIP in a SECOND frame so its forced reflow can't re-commit the start frame.
+      requestAnimationFrame(() => {
+        fsEl.style.transition = '';
+        setGeom('0px', '0px', sw + 'px', sh + 'px', '0px');    // → fullscreen
+        fsEl.classList.add('expanded');
+        requestAnimationFrame(footFlyIn);
+      });
+    }
+
+    function returnMedia() {
+      if (movedNode && movedHome) {
+        if (movedNode.tagName === 'VIDEO') { movedNode.removeEventListener('timeupdate', onVidTime); movedNode.pause(); movedNode.currentTime = 0; }  // フォーカスを抜けたら停止
+        movedHome.appendChild(movedNode);                      // サムネへ戻す → リストはそのまま
+      } else if (movedNode && !movedHome) {
+        if (movedNode.tagName === 'VIDEO') { movedNode.removeEventListener('timeupdate', onVidTime); movedNode.pause(); }
+        movedNode.remove();                                    // 生成した video は削除
+      }
+      movedNode = null; movedHome = null;
+    }
+    function finalizeClose() {
+      fsEl.classList.remove('open', 'expanded');
+      if (screen) screen.classList.remove('story-open');
+      fsEl.setAttribute('aria-hidden', 'true');
+      fsEl.style.transition = 'none';
+      setGeom('', '', '', '', '');
+      void fsEl.offsetWidth; fsEl.style.transition = '';
+      returnMedia();
+      footReset();                                             // フッターのインライン transform を解除し chead を再表示
+      if (storyOrigin) storyOrigin.classList.remove('borrowed'); // メディアを戻してからセルを再表示
+      storyOrigin = null;
+    }
+    // close: shrink back into the thumbnail, then return the media + hide
+    function closeStory() {
+      if (!fsEl || !fsEl.classList.contains('open')) return;
+      fsEl.classList.remove('expanded');                       // fade chrome out
+      lowerIdentityStack();                                    // pen を下へ戻し post を定位置へ降ろす
+      footFlyOut();                                            // サークルのアイコン+名前を元のリスト位置へ戻す
+      if (storyOrigin && screen.contains(storyOrigin)) {
+        const r = rectIn(screen, storyOrigin);
+        setGeom(r.top + 'px', r.left + 'px', r.width + 'px', r.height + 'px', '11px');
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => { closeTimer = null; finalizeClose(); }, 460);
+      } else {
+        finalizeClose();
+      }
+    }
+    if (fsEl) {
+      fsEl.addEventListener('click', closeStory);              // tap anywhere (incl. ×) closes
+      const fill = fsEl.querySelector('.sfs-bar .fill');
+      if (fill) fill.addEventListener('animationend', closeStory);  // 画像：progress 完了 → auto-close
+    }
 
     // ---- WdSideTool: like toggle (unchanged) ----
     const likeAct = document.querySelector('.wd-side-tool .act[data-act="like"]');
@@ -777,6 +1184,13 @@ button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
     }
     const postBtn = document.querySelector('.post-btn');
     if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
+    const editBtn = document.querySelector('.edit-btn');
+    if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); editBtn.dispatchEvent(new CustomEvent('uv:edit', { bubbles: true })); });
+
+    // 地図にマッピングされた動画をタップ → そのままフルスクリーン表示
+    if (window.Objects3D && window.Objects3D.onMediaTap) {
+      window.Objects3D.onMediaTap((id, card) => openStory(id, card));
+    }
   })();
 </script>
 </body>

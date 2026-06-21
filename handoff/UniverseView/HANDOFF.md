@@ -76,6 +76,21 @@
 `代表 id` が、(a) リールの白枠 (b) 地図上の巨大 main (c) フォーカス対象 を**1 つの id**で結ぶ。現 specimen の
 `_mainId`（中心最寄り）を**この代表 id に統一**し、リール選択・地図 glide・フォーカスがすべて同じ id を更新するようにする。
 
+## specimen の現況（最新イテレーション・objects3d.js が中核）
+
+連携モデル（上記）に加え、現 specimen は次を実装済み。実機反映時はこの挙動・値に合わせる:
+
+- **データ = Studio 3D サンプル**（`posts.js`）。1 投稿 = `{id,lat,lng,circleId,cluster,glbUrl,thumbUrl,videoUrl}`。
+  共有プール `../../assets/sample/3d/{id}/`（model.glb / thumbnail.jpg / video.mp4）と本番 GLB(real-NN) を id で参照。
+  10 クラスタ（shibuya / jingumae / yoyogi / dogenzaka / miyamasu / harajuku / omotesando / ebisu / nakameguro / shinjuku）。
+- **3D = 画面空間オーバーレイ**（`objects3d.js`）。地図ズームに依らず *固定 px サイズ*で描く（地表貼付の `models.js` とは別実装）。
+  `MARKER_PX=92` / `FOCUS_FRAC≈0.6` / `FOCUS_STEP≈0.052`(≈320ms easeOutCubic) / 非メインは `IDLE_SPIN` 自動回転・代表は静止。
+- **focus dock**（`.o3d-dock`）: フォーカス中、同クラスタの他メンバーを画面下部に弧カルーセルで 3D サムネ並置。頂点=最大強調・タップで対象切替。
+- **off-screen edge indicator**（`.o3d-edge`）: 画面外の近隣オブジェクトを淵にクランプしたグラスチップで *方向(矢印)+距離* 提示。中身は実 3D ポートレート。
+- **story fullscreen**（`.story-fs`）: 3D クイックタップ→そのリスト写真/動画を Hero 拡大(全画面)。長押し=3D フォーカス/回覧。
+- **動画 totem**（`.o3d-media-card`）: 投稿動画カードを 3D オブジェクト真下に積み、足元を溶接（weld 影）して「3D+動画=1 ピン」に。
+- **WdSideTool / playlist / preset-rail / tuning panel** は specimen 制御用チューニング面（`look.js`）。app chrome の値の出どころ。
+
 ## スマホ配置文脈
 
 画面 **402×874 + SafeArea**（iPhone 17 / iOS 最新・`DesignSystem/preview/card.css` `.phone`）。globe は full-bleed 背景。
