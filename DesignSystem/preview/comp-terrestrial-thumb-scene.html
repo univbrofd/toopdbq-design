@@ -1,0 +1,175 @@
+<!-- @dsCard group="Components" name="ThumbnailTerrestrialView — 配置シーン" subtitle="実機 393×852 · ダーク globe 上に main 大 + normal/件数 小を配置 · pole 溶接の浮遊感と最小44pt タップ範囲" viewport="441x900" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body{background:radial-gradient(140% 100% at 50% -10%,#15131f 0%,#0a0a10 50%,#060608 100%);
+    align-items:center;padding:28px 20px;}
+
+  /* ---- dark MapLibre-style globe surface ---- */
+  .map{position:absolute;inset:0;
+    background:radial-gradient(125% 95% at 50% 8%, #16273a 0%, #0d1726 38%, #080d16 72%, #05080e 100%);}
+  .map .streets{position:absolute;inset:-25%;opacity:.55;
+    background-image:
+      repeating-linear-gradient(26deg, transparent 0 52px, rgba(125,160,205,.055) 52px 53px),
+      repeating-linear-gradient(116deg, transparent 0 66px, rgba(125,160,205,.045) 66px 67px),
+      repeating-linear-gradient(26deg, transparent 0 158px, rgba(125,160,205,.05) 158px 160px);}
+  .map .river{position:absolute;left:-10%;top:18%;width:130%;height:120px;transform:rotate(-19deg);
+    background:linear-gradient(90deg, transparent, rgba(40,90,140,.30) 30%, rgba(40,90,140,.30) 70%, transparent);
+    filter:blur(7px);}
+  .map .park{position:absolute;right:-6%;bottom:14%;width:230px;height:200px;border-radius:48% 52% 60% 40%;
+    background:radial-gradient(circle at 40% 40%, rgba(40,86,60,.34), rgba(30,60,44,.10) 70%, transparent);
+    filter:blur(3px);}
+  .map .glow{position:absolute;left:50%;top:6%;transform:translateX(-50%);width:300px;height:240px;
+    border-radius:50%;background:radial-gradient(circle, rgba(70,130,190,.20), transparent 68%);filter:blur(6px);}
+  .map .vignette{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 40%, transparent 52%, rgba(0,0,0,.55) 100%);}
+
+  /* ---- glass header (UniverseView chrome, minimal) ---- */
+  .uv-head{position:absolute;top:64px;left:16px;right:16px;display:flex;align-items:center;
+    justify-content:space-between;gap:10px;z-index:40;}
+  .uv-loc{display:flex;align-items:center;gap:8px;padding:7px 13px 7px 9px;border-radius:var(--radius-pill);
+    background:rgba(8,10,16,.5);backdrop-filter:blur(12px) saturate(150%);
+    -webkit-backdrop-filter:blur(12px) saturate(150%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.16), 0 4px 14px rgba(0,0,0,.4);}
+  .uv-loc .dot{width:7px;height:7px;border-radius:50%;background:var(--gradient-colorful-linear);
+    box-shadow:0 0 8px rgba(255,120,160,.7);}
+  .uv-loc span{font-family:var(--font-jp);font-weight:700;font-size:12px;color:var(--text-1);}
+  .uv-circ{width:38px;height:38px;border-radius:50%;overflow:hidden;
+    box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.5), 0 4px 14px rgba(0,0,0,.5);}
+  .uv-circ img{width:100%;height:100%;object-fit:cover;}
+
+  /* ===== PIN SYSTEM (shared with comp-terrestrial-thumbnail) ===== */
+  .pin{position:absolute;display:flex;flex-direction:column;align-items:center;z-index:3;}
+  .pin.main{z-index:6;}
+  .tp-thumb{position:relative;width:var(--w);height:var(--h);padding:1.5px;border-radius:8px;
+    background:var(--gradient-border);box-shadow:0 7px 18px -4px rgba(0,0,0,.62);}
+  .tp-photo{position:relative;width:100%;height:100%;border-radius:6.5px;overflow:hidden;}
+  .tp-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .tp-photo::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.34), inset 0 0 0 .5px rgba(255,255,255,.12),
+               inset 0 -8px 14px -8px rgba(0,0,0,.5);}
+  .tp-thumb.main{padding:2px;box-shadow:0 16px 38px -8px rgba(0,0,0,.72);}
+  .tp-thumb.main::before{content:"";position:absolute;inset:-13px;border-radius:18px;z-index:-1;
+    background:var(--gradient-colorful);filter:blur(16px);opacity:.42;}
+  .tp-conn{display:none;}
+  .tp-pole{width:var(--pw,9px);height:var(--pl,40px);clip-path:polygon(50% 100%, 0 0, 100% 0);
+    background:linear-gradient(to bottom, rgba(255,255,255,.5) 0%, rgba(255,255,255,.78) 55%, #fff 100%);
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 4px rgba(180,210,255,.45));}
+  .tp-anchor{width:7px;height:7px;margin-top:-3.5px;border-radius:50%;
+    background:radial-gradient(circle, #fff 28%, rgba(190,220,255,.55) 58%, transparent 76%);
+    filter:drop-shadow(0 0 5px rgba(170,210,255,.8));z-index:2;}
+  .tp-contact{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+    width:calc(var(--w) * .9);height:11px;border-radius:50%;z-index:0;
+    background:radial-gradient(ellipse at center, rgba(120,170,235,.30) 0%, rgba(120,170,235,.10) 40%, transparent 72%);
+    filter:blur(2px);}
+  .tp-contact::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);
+    width:38%;height:46%;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(2px);}
+  .tp-badge{position:absolute;top:-9px;right:-9px;min-width:21px;height:21px;padding:0 2px;
+    display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
+    background:rgba(8,10,16,.62);backdrop-filter:blur(7px) saturate(150%);
+    -webkit-backdrop-filter:blur(7px) saturate(150%);
+    box-shadow:0 2px 8px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.28), inset 0 0 0 .8px rgba(255,255,255,.16);
+    font-family:var(--font-latin);font-weight:700;font-size:10.5px;line-height:1;
+    font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);}
+  .tp-badge.main-badge{top:-11px;right:-11px;min-width:28px;height:28px;font-size:13px;}
+
+  /* tap-target annotation (min 44pt) */
+  .tap{position:absolute;width:44px;height:44px;border-radius:50%;transform:translate(-50%,-50%);
+    border:1px dashed rgba(120,200,255,.55);z-index:5;pointer-events:none;}
+  .tap .t{position:absolute;left:50%;top:-7px;transform:translate(-50%,-100%);white-space:nowrap;
+    font-family:var(--font-latin);font-weight:600;font-size:8px;letter-spacing:.08em;
+    color:rgba(150,210,255,.85);text-shadow:0 1px 3px #000;}
+
+  /* status bar glyphs */
+  .statusbar .time{font-size:15px;}
+  .sb-sys{display:flex;align-items:center;gap:6px;}
+  .sb-sys svg{display:block;}
+
+  .scene-cap{font-family:var(--font-jp);font-size:11px;line-height:1.6;color:var(--text-3);
+    max-width:393px;text-align:center;margin-top:2px;}
+  .scene-cap b{color:var(--text-2);font-weight:700;}
+</style>
+</head>
+<body>
+
+  <div class="phone phone-legacy">
+    <div class="screen">
+      <div class="map">
+        <div class="streets"></div>
+        <div class="river"></div>
+        <div class="park"></div>
+        <div class="glow"></div>
+        <div class="vignette"></div>
+      </div>
+
+      <!-- minimal UniverseView chrome -->
+      <div class="uv-head">
+        <div class="uv-loc"><span class="dot"></span><span>渋谷コミュニティ</span></div>
+        <div class="uv-circ"><img src="../../assets/sample/reel/reel007.jpg" alt=""></div>
+      </div>
+
+      <!-- far NW · long pole -->
+      <div class="pin" style="left:42px;top:150px;">
+        <div class="tp-thumb" style="--w:42px;--h:74px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel001.jpg" alt=""></div></div>
+        <div class="tp-conn"></div><div class="tp-pole" style="--pw:8px;--pl:58px;"></div>
+        <div class="tp-anchor"></div><div class="tp-contact" style="--w:42px;"></div>
+      </div>
+
+      <!-- NE · badge 5 · medium pole -->
+      <div class="pin" style="left:286px;top:172px;">
+        <div class="tp-thumb" style="--w:50px;--h:88px;">
+          <div class="tp-photo"><img src="../../assets/sample/reel/reel009.jpg" alt=""></div>
+          <div class="tp-badge">5</div>
+        </div>
+        <div class="tp-conn"></div><div class="tp-pole" style="--pw:9px;--pl:42px;"></div>
+        <div class="tp-anchor"></div><div class="tp-contact" style="--w:50px;"></div>
+      </div>
+
+      <!-- MAIN center · short pole · front -->
+      <div class="pin main" style="left:122px;top:286px;">
+        <div class="tp-thumb main" style="--w:134px;--h:238px;">
+          <div class="tp-photo"><img src="../../assets/sample/reel/reel003.jpg" alt=""></div>
+          <div class="tp-badge main-badge">12</div>
+        </div>
+        <div class="tp-conn"></div><div class="tp-pole" style="--pw:13px;--pl:24px;"></div>
+        <div class="tp-anchor" style="width:9px;height:9px;"></div>
+        <div class="tp-contact" style="--w:140px;height:15px;"></div>
+      </div>
+
+      <!-- E mid · short pole -->
+      <div class="pin" style="left:308px;top:392px;">
+        <div class="tp-thumb" style="--w:44px;--h:78px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div></div>
+        <div class="tp-conn"></div><div class="tp-pole" style="--pw:8px;--pl:34px;"></div>
+        <div class="tp-anchor"></div><div class="tp-contact" style="--w:44px;"></div>
+      </div>
+
+      <!-- SW near · very short pole -->
+      <div class="pin" style="left:52px;top:512px;">
+        <div class="tp-thumb" style="--w:40px;--h:71px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel011.jpg" alt=""></div></div>
+        <div class="tp-conn"></div><div class="tp-pole" style="--pw:8px;--pl:22px;"></div>
+        <div class="tp-anchor"></div><div class="tp-contact" style="--w:40px;"></div>
+      </div>
+
+      <!-- tap-target annotations (min 44pt hit area on small pins) -->
+      <div class="tap" style="left:72px;top:548px;"><span class="t">tap ≥ 44pt</span></div>
+      <div class="tap" style="left:311px;top:216px;"></div>
+
+      <!-- status bar -->
+      <div class="statusbar">
+        <span class="time">9:41</span>
+        <span class="sb-sys">
+          <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+          <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l-1.4 1.5A6.6 6.6 0 0 0 8 4.3 6.6 6.6 0 0 0 3.4 6L2 4.6A8.6 8.6 0 0 1 8 2.2Zm0 3.5c1.3 0 2.5.5 3.4 1.4L8 10.7 4.6 7.1A4.8 4.8 0 0 1 8 5.7Z"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="1" y="1" width="20" height="10" rx="2.5" stroke="#fff" stroke-opacity=".5"/><rect x="2.5" y="2.5" width="15" height="7" rx="1.2" fill="#fff"/><rect x="22.5" y="4" width="1.5" height="4" rx=".75" fill="#fff" fill-opacity=".6"/></svg>
+        </span>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+  <div class="scene-cap"><b>配置シーン</b> — 各ピンは投稿の lat/lng 真上に浮き pole で地表へ溶接。中心セルの <b>main</b> が大きく前面・pole 短く、周縁は小さく pole 長く（遠 NW）/短く（近 SW）。発光 anchor＋接地 contact で曲面 globe に planted。タップ判定は最小 44pt。</div>
+
+</body></html>

@@ -1,0 +1,300 @@
+<!-- @dsCard group="Components" name="ThumbnailTerrestrialView" subtitle="地球儀上の投稿サムネピン再デザイン · 通常/件数/99+/メイン代表 · gradient枠 + 溶接anchor + ガラス件数バッジ · Before→After" viewport="1140x1020" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body{
+    background:
+      radial-gradient(140% 100% at 50% -10%, #15131f 0%, #0a0a10 48%, #060608 100%);
+    gap:20px; max-width:1140px;
+  }
+  .lead{display:flex;flex-direction:column;gap:6px;}
+  .lead h1{font-family:var(--font-jp);font-weight:700;font-size:19px;letter-spacing:.01em;color:var(--text-1);}
+  .lead p{font-family:var(--font-jp);font-weight:400;font-size:12px;line-height:1.7;color:var(--text-2);max-width:760px;}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .tag{
+    font-family:var(--font-latin);font-weight:600;font-size:10px;letter-spacing:.04em;
+    padding:5px 11px;border-radius:var(--radius-pill);color:var(--text-2);
+    background:var(--glass-fill);border:1px solid;
+    border-image:var(--lg-edge) 1;
+  }
+  .tag.accent{
+    color:#0c0c10;background:var(--gradient-colorful-linear);border:none;font-weight:700;
+  }
+
+  /* ===== STAGE — dark globe surface, pins at true relative scale ===== */
+  .stage{
+    position:relative;height:472px;border-radius:var(--radius-lg);overflow:hidden;
+    background:
+      radial-gradient(120% 78% at 50% 132%, #243a52 0%, #16202f 26%, #0a0d16 56%, #06070c 100%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06), var(--shadow-card);
+    border:1px solid rgba(255,255,255,.05);
+  }
+  /* faint graticule arcs — the globe curvature */
+  .stage .arc{position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;
+    border:1px solid rgba(150,180,220,.07);pointer-events:none;}
+  .stage .a1{width:1400px;height:760px;bottom:-470px;}
+  .stage .a2{width:1080px;height:600px;bottom:-360px;border-color:rgba(150,180,220,.05);}
+  .stage .a3{width:760px;height:430px;bottom:-250px;border-color:rgba(150,180,220,.04);}
+  /* lit horizon band where pins plant */
+  .stage .horizon{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);
+    width:1400px;height:760px;border-radius:50%;pointer-events:none;
+    box-shadow:0 -1px 0 rgba(140,180,230,.10), 0 -22px 60px -30px rgba(60,120,190,.30);}
+  .stage .label{position:absolute;bottom:18px;left:0;right:0;text-align:center;
+    font-family:var(--font-latin);font-weight:500;font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--text-3);}
+  .stage .cap{position:absolute;font-family:var(--font-latin);font-weight:600;font-size:9.5px;
+    letter-spacing:.10em;text-transform:uppercase;color:var(--text-3);text-align:center;
+    transform:translateX(-50%);white-space:nowrap;}
+  .stage .cap b{display:block;font-weight:600;color:var(--text-2);font-size:9.5px;}
+  .stage .cap .px{font-family:var(--font-latin);color:rgba(255,255,255,.34);font-weight:500;}
+
+  /* ===== PIN SYSTEM ===== */
+  .pin{position:absolute;display:flex;flex-direction:column;align-items:center;}
+
+  /* frame: signature gradient-border + floated shadow */
+  .tp-thumb{position:relative;width:var(--w);height:var(--h);padding:1.5px;
+    border-radius:8px;background:var(--gradient-border);
+    box-shadow:0 7px 18px -4px rgba(0,0,0,.62);}
+  .tp-photo{position:relative;width:100%;height:100%;border-radius:6.5px;overflow:hidden;}
+  .tp-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  /* refractive glass edge — single elevation effect on the frame */
+  .tp-photo::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.34), inset 0 0 0 .5px rgba(255,255,255,.12),
+               inset 0 -8px 14px -8px rgba(0,0,0,.5);}
+
+  /* main: subtle colorful glow halo = 主役感 */
+  .tp-thumb.main{padding:2px;box-shadow:0 14px 34px -8px rgba(0,0,0,.7);}
+  .tp-thumb.main::before{content:"";position:absolute;inset:-13px;border-radius:18px;z-index:-1;
+    background:var(--gradient-colorful);filter:blur(15px);opacity:.42;}
+
+  /* connector poleTip → thumb bottom */
+  .tp-conn{display:none;width:1px;height:5px;margin-top:-1px;
+    background:linear-gradient(to bottom, rgba(255,255,255,.0), rgba(255,255,255,.65));}
+
+  /* pole: luminous tapered shard (wide top → planted point) */
+  .tp-pole{width:var(--pw,9px);height:var(--pl,40px);
+    clip-path:polygon(50% 100%, 0 0, 100% 0);
+    background:linear-gradient(to bottom, rgba(255,255,255,.5) 0%, rgba(255,255,255,.78) 55%, #ffffff 100%);
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.5)) drop-shadow(0 0 4px rgba(180,210,255,.45));}
+
+  /* ground anchor: glowing planted dot */
+  .tp-anchor{width:7px;height:7px;margin-top:-3.5px;border-radius:50%;
+    background:radial-gradient(circle, #ffffff 28%, rgba(190,220,255,.55) 58%, transparent 76%);
+    filter:drop-shadow(0 0 5px rgba(170,210,255,.8));z-index:2;}
+  /* contact puddle on the curved surface (depth) */
+  .tp-contact{position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+    width:calc(var(--w) * .9);height:11px;border-radius:50%;z-index:0;
+    background:radial-gradient(ellipse at center, rgba(120,170,235,.30) 0%, rgba(120,170,235,.10) 40%, transparent 72%);
+    filter:blur(2px);}
+  .tp-contact::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-30%);
+    width:38%;height:46%;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(2px);}
+
+  /* count badge: dark glass disc, refined numerals */
+  .tp-badge{position:absolute;top:-9px;right:-9px;min-width:22px;height:22px;padding:0 2px;
+    display:flex;align-items:center;justify-content:center;border-radius:var(--radius-pill);
+    background:rgba(8,10,16,.62);backdrop-filter:blur(7px) saturate(150%);
+    -webkit-backdrop-filter:blur(7px) saturate(150%);
+    box-shadow:0 2px 8px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.28),
+               inset 0 0 0 .8px rgba(255,255,255,.16);
+    font-family:var(--font-latin);font-weight:700;font-size:11px;line-height:1;
+    font-variant-numeric:tabular-nums;letter-spacing:.01em;color:#fff;
+    text-shadow:0 1px 2px rgba(0,0,0,.6);}
+  .tp-badge.plus{min-width:30px;font-size:10.5px;}
+  .tp-badge.main-badge{top:-12px;right:-12px;min-width:30px;height:30px;font-size:14px;}
+
+  /* ===== BEFORE / AFTER COMPARISON ===== */
+  .compare{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .cmp{position:relative;border-radius:var(--radius-md);overflow:hidden;padding:18px 16px 16px;
+    background:linear-gradient(165deg, rgba(255,255,255,.04), rgba(255,255,255,.015));
+    border:1px solid rgba(255,255,255,.06);}
+  .cmp h3{font-family:var(--font-jp);font-weight:700;font-size:12.5px;color:var(--text-1);margin-bottom:3px;}
+  .cmp .sub{font-family:var(--font-latin);font-size:10px;color:var(--text-3);margin-bottom:14px;line-height:1.5;}
+  .duo{display:flex;align-items:flex-end;justify-content:center;gap:26px;height:188px;
+    background:radial-gradient(90% 70% at 50% 116%, #1a2636 0%, #0c1018 60%, #08090e 100%);
+    border-radius:var(--radius-sm);margin-bottom:13px;position:relative;}
+  .duo .slot{position:relative;display:flex;flex-direction:column;align-items:center;height:100%;
+    justify-content:flex-end;padding-bottom:30px;}
+  .duo .ba{position:absolute;top:9px;font-family:var(--font-latin);font-weight:600;font-size:8.5px;
+    letter-spacing:.13em;text-transform:uppercase;}
+  .duo .ba.b{color:rgba(255,255,255,.34);}
+  .duo .ba.a{color:#ff8db0;}
+  .spec{display:flex;flex-direction:column;gap:7px;}
+  .spec .r{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:start;}
+  .spec .k{font-family:var(--font-latin);font-weight:600;font-size:8.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--text-3);padding-top:1px;}
+  .spec .v{font-family:var(--font-jp);font-size:10.5px;line-height:1.5;color:var(--text-2);}
+  .spec .v code{font-family:var(--font-latin);font-size:9.5px;color:rgba(255,255,255,.5);
+    background:rgba(255,255,255,.06);padding:1px 4px;border-radius:4px;}
+  .spec .v .ar{color:#ff8db0;font-weight:700;}
+
+  /* before-style pin (plain / sticker) */
+  .before .tp-thumb{padding:0;border:1px solid rgba(255,255,255,.706);border-radius:6px;
+    background:transparent;box-shadow:0 0 8px rgba(0,0,0,.451);}
+  .before .tp-photo{border-radius:5px;}
+  .before .tp-photo::after{display:none;}
+  .before .tp-pole{background:#fff;filter:drop-shadow(1.5px 0 0 rgba(0,0,0,.5));}
+  .before .tp-anchor{background:#fff;filter:drop-shadow(1.5px 0 0 rgba(0,0,0,.5));}
+  .before .tp-contact{display:none;}
+  .before .tp-conn{display:block;background:rgba(255,255,255,.6);}
+  .before .tp-badge{background:#fff;color:#000;text-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;
+    border:1px solid #999;box-shadow:0 0 4px rgba(0,0,0,.451);font-weight:700;}
+
+  .footer-note{font-family:var(--font-jp);font-size:11px;line-height:1.7;color:var(--text-3);}
+  .footer-note b{color:var(--text-2);font-weight:700;}
+</style>
+</head>
+<body>
+
+  <div class="lead">
+    <h1>ThumbnailTerrestrialView — 地球儀上の投稿サムネピン</h1>
+    <p>投稿写真（9:16）が lat/lng の真上に浮き、pole で地表へ溶接される「その場所の 1 つの瞬間」。平凡な白ヘアライン枠＋ベタ三角棒＋白丸バッジを、署名 <code>--gradient-border</code> 枠・奥行きのある発光 anchor・ガラス件数バッジへ引き上げ。構造（9:16 / pole 溶接 / 右上件数バッジ / normal↔main スケール / 写真主役）は厳守。効果は 1 specimen あたり 1〜2 個。</p>
+  </div>
+  <div class="tags">
+    <span class="tag accent">After</span>
+    <span class="tag">枠 → --gradient-border + refractive edge</span>
+    <span class="tag">pole → 発光 anchor + 接地 contact</span>
+    <span class="tag">badge → dark glass + tabular numerals</span>
+    <span class="tag">main → colorful glow halo</span>
+  </div>
+
+  <!-- ===== STAGE: 4 states welded, true relative scale ===== -->
+  <div class="stage">
+    <div class="arc a1"></div><div class="arc a2"></div><div class="arc a3"></div>
+    <div class="horizon"></div>
+
+    <!-- normal 54×96 -->
+    <div class="pin" style="left:120px;bottom:120px;">
+      <div class="tp-thumb" style="--w:54px;--h:96px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel006.jpg" alt=""></div></div>
+      <div class="tp-conn"></div>
+      <div class="tp-pole" style="--pw:9px;--pl:46px;"></div>
+      <div class="tp-anchor"></div>
+      <div class="tp-contact" style="--w:54px;"></div>
+    </div>
+    <div class="cap" style="left:147px;bottom:78px;">通常 <span class="px">normal · 54×96</span></div>
+
+    <!-- count 5 — 63×112 -->
+    <div class="pin" style="left:268px;bottom:132px;">
+      <div class="tp-thumb" style="--w:63px;--h:112px;">
+        <div class="tp-photo"><img src="../../assets/sample/reel/reel009.jpg" alt=""></div>
+        <div class="tp-badge">5</div>
+      </div>
+      <div class="tp-conn"></div>
+      <div class="tp-pole" style="--pw:10px;--pl:40px;"></div>
+      <div class="tp-anchor"></div>
+      <div class="tp-contact" style="--w:63px;"></div>
+    </div>
+    <div class="cap" style="left:299px;bottom:90px;">件数 <span class="px">badge · 63×112</span></div>
+
+    <!-- count 99+ — 63×112 -->
+    <div class="pin" style="left:430px;bottom:124px;">
+      <div class="tp-thumb" style="--w:63px;--h:112px;">
+        <div class="tp-photo"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+        <div class="tp-badge plus">99+</div>
+      </div>
+      <div class="tp-conn"></div>
+      <div class="tp-pole" style="--pw:10px;--pl:48px;"></div>
+      <div class="tp-anchor"></div>
+      <div class="tp-contact" style="--w:63px;"></div>
+    </div>
+    <div class="cap" style="left:461px;bottom:82px;">99+ <span class="px">overflow · 63×112</span></div>
+
+    <!-- main 144×256 -->
+    <div class="pin" style="left:760px;bottom:96px;">
+      <div class="tp-thumb main" style="--w:144px;--h:256px;">
+        <div class="tp-photo"><img src="../../assets/sample/reel/reel003.jpg" alt=""></div>
+        <div class="tp-badge main-badge">5</div>
+      </div>
+      <div class="tp-conn"></div>
+      <div class="tp-pole" style="--pw:13px;--pl:26px;"></div>
+      <div class="tp-anchor" style="width:9px;height:9px;"></div>
+      <div class="tp-contact" style="--w:150px;height:15px;"></div>
+    </div>
+    <div class="cap" style="left:832px;bottom:54px;">メイン代表 <span class="px">main · 144×256 · 前面 / 主役</span></div>
+
+    <div class="label">After · 同一ステージ上で role による寸法・pole 長が連続変化（中心に近い main は大きく pole 短く前面）</div>
+  </div>
+
+  <!-- ===== BEFORE / AFTER per element ===== -->
+  <div class="compare">
+
+    <!-- FRAME -->
+    <div class="cmp">
+      <h3>枠 — フォトフレーム</h3>
+      <div class="sub">white hairline sticker → signature gradient-border + refractive glass edge</div>
+      <div class="duo">
+        <div class="slot before">
+          <span class="ba b">Before</span>
+          <div class="tp-thumb" style="--w:54px;--h:96px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel001.jpg" alt=""></div></div>
+        </div>
+        <div class="slot">
+          <span class="ba a">After</span>
+          <div class="tp-thumb" style="--w:54px;--h:96px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel001.jpg" alt=""></div></div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="r"><div class="k">Before</div><div class="v">角丸 <code>6px</code>（内clip 5）· border <code>1px rgba(255,255,255,.706)</code> · 影 <code>0 0 8px</code></div></div>
+        <div class="r"><div class="k">After</div><div class="v"><span class="ar">→</span> <code>--gradient-border</code> 1.5px 枠 + 上端 specular の refractive edge · 浮遊影 <code>0 7px 18px</code></div></div>
+      </div>
+    </div>
+
+    <!-- POLE -->
+    <div class="cmp">
+      <h3>溶接 — pole / anchor</h3>
+      <div class="sub">flat white triangle → luminous shard + glowing planted dot + contact puddle</div>
+      <div class="duo">
+        <div class="slot before">
+          <span class="ba b">Before</span>
+          <div class="tp-thumb" style="--w:48px;--h:85px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel004.jpg" alt=""></div></div>
+          <div class="tp-conn"></div><div class="tp-pole" style="--pw:9px;--pl:34px;"></div><div class="tp-anchor"></div>
+          <div class="tp-contact" style="--w:48px;"></div>
+        </div>
+        <div class="slot">
+          <span class="ba a">After</span>
+          <div class="tp-thumb" style="--w:48px;--h:85px;"><div class="tp-photo"><img src="../../assets/sample/reel/reel004.jpg" alt=""></div></div>
+          <div class="tp-conn"></div><div class="tp-pole" style="--pw:9px;--pl:34px;"></div><div class="tp-anchor"></div>
+          <div class="tp-contact" style="--w:48px;"></div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="r"><div class="k">Before</div><div class="v">ベタ白逆三角形 + 白丸 r2.4/1.8 · 影は右 <code>1.5px</code> オフセットのみ（平面的）</div></div>
+        <div class="r"><div class="k">After</div><div class="v"><span class="ar">→</span> 白→透明の発光シャード · 接地点に <code>glow dot</code> · 曲面へ <code>contact puddle</code> で planted な奥行き</div></div>
+      </div>
+    </div>
+
+    <!-- BADGE -->
+    <div class="cmp">
+      <h3>件数バッジ</h3>
+      <div class="sub">solid white + black text → dark glass + tabular numerals（視認性維持）</div>
+      <div class="duo">
+        <div class="slot before" style="padding-bottom:48px;">
+          <span class="ba b">Before</span>
+          <div class="tp-thumb" style="--w:60px;--h:106px;">
+            <div class="tp-photo"><img src="../../assets/sample/reel/reel011.jpg" alt=""></div>
+            <div class="tp-badge">5</div>
+          </div>
+        </div>
+        <div class="slot" style="padding-bottom:48px;">
+          <span class="ba a">After</span>
+          <div class="tp-thumb" style="--w:60px;--h:106px;">
+            <div class="tp-photo"><img src="../../assets/sample/reel/reel011.jpg" alt=""></div>
+            <div class="tp-badge">5</div>
+          </div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="r"><div class="k">Before</div><div class="v">白円 bg · border <code>1px #999</code> · 黒 bold · 右上角中心 · <code>14–32px</code> クランプ</div></div>
+        <div class="r"><div class="k">After</div><div class="v"><span class="ar">→</span> dark glass <code>rgba(8,10,16,.62)</code> + blur · 上端 specular · 白 tabular numerals · 99+ は pill 化</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-note">
+    <b>KEEP（構造厳守）:</b> 9:16 写真フルブリード / pole で地表へ溶接 / 右上の件数バッジ / normal↔main のスケール差 / ダーク globe 上で写真が主役。
+    タップ範囲は最小 44pt を確保（normal の thumb は浮遊だが pole + anchor 込みで判定）。色は <code>colors_and_type.css</code> の役割トークンのみ（直書きの白/グレー無し）。
+  </div>
+
+</body></html>
