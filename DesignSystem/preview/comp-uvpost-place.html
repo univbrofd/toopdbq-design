@@ -42,8 +42,12 @@
   .here .pulse { position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%); border-radius:50%; background:rgba(255,255,255,.10); }
   .here .dot { position:relative; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.6); }
 
-  /* cancel × — 44×44, 12px above the sheet top-right */
+  /* cancel × — 44×44, シート上・左 / create FAB — 右下（カラフルグラデ） */
   .cancel { position:absolute; }
+  .cc-fab { position:absolute; width:56px; height:56px; border:1px solid rgba(255,255,255,.18); border-radius:50%;
+    cursor:pointer; padding:0; background:var(--gradient-colorful); box-shadow:0 8px 22px rgba(0,0,0,.55);
+    display:flex; align-items:center; justify-content:center; }
+  .cc-fab img { width:26px; height:26px; }
 
   /* ---- bottom sheet (glass --lg-tint-dark over the map) ---- */
   .uv-sheet {
@@ -124,8 +128,11 @@
       </div>
 
       <div class="uv-sheet">
-        <button class="wd-icon-btn cancel" style="width:44px;height:44px;top:-56px;right:0;" aria-label="キャンセル">
+        <button class="wd-icon-btn cancel" style="width:44px;height:44px;top:-58px;left:0;" aria-label="キャンセル">
           <img src="../../assets/icons/icon_close.png" alt="">
+        </button>
+        <button class="cc-fab" style="top:-60px;right:0;" aria-label="サークルを作る">
+          <img src="../../assets/icons/icon_add.png" alt="">
         </button>
         <div class="grabber"></div>
         <div class="sheet-head">
