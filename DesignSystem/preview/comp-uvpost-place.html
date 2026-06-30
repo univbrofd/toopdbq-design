@@ -44,10 +44,15 @@
 
   /* cancel × — 44×44, シート上・左 / create FAB — 右下（カラフルグラデ） */
   .cancel { position:absolute; }
+  /* UniverseView 投稿ボタンと同設計（badgeColor）= カラフル円(main) ＋ 角に glass バッジ(badgeIcon) */
   .cc-fab { position:absolute; width:56px; height:56px; border:1px solid rgba(255,255,255,.18); border-radius:50%;
     cursor:pointer; padding:0; background:var(--gradient-colorful); box-shadow:0 8px 22px rgba(0,0,0,.55);
     display:flex; align-items:center; justify-content:center; }
-  .cc-fab img { width:26px; height:26px; }
+  .cc-fab > img { width:26px; height:26px; }
+  .cc-fab .badge { position:absolute; top:-3px; right:-3px; width:22px; height:22px; border-radius:50%;
+    background:var(--lg-tint-dark); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.35); display:flex; align-items:center; justify-content:center; }
+  .cc-fab .badge img { width:12px; height:12px; }
 
   /* ---- bottom sheet (glass --lg-tint-dark over the map) ---- */
   .uv-sheet {
@@ -132,7 +137,8 @@
           <img src="../../assets/icons/icon_close.png" alt="">
         </button>
         <button class="cc-fab" style="top:-60px;right:0;" aria-label="サークルを作る">
-          <img src="../../assets/icons/icon_add.png" alt="">
+          <img src="../../assets/icons/icon_group.png" alt="">
+          <span class="badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
         </button>
         <div class="grabber"></div>
         <div class="sheet-head">
