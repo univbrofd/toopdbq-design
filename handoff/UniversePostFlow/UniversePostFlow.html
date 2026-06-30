@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<style>
+  /* screen-only mode (?screen): strip studio + device chrome, render just the app screen full-bleed */
+  body.screen-only .studio { padding:0; gap:0; min-height:100dvh; align-items:center; justify-content:center; }
+  body.screen-only .specimen-cap,
+  body.screen-only .hint,
+  body.screen-only .panel,
+  body.screen-only .dynamic-island,
+  body.screen-only .home-ind,
+  body.screen-only .statusbar { display:none; }
+  body.screen-only .phone { width:min(100vw, calc(100dvh * 402 / 874)); height:100dvh; border-radius:0; box-shadow:none; }
+</style>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+</script>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&family=Pacifico&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+  <link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%; min-height: 100%;
+      background: radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0d0d0f 55%, #08080b 100%);
+      color: var(--text-1); font-family: var(--font-latin); -webkit-font-smoothing: antialiased;
+    }
+    .studio { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center;
+      gap: 40px; padding: 40px 36px 64px; flex-wrap: wrap; }
+    .stage { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .specimen-cap { text-align: center; max-width: 402px; }
+    .specimen-cap .eyebrow { font-weight: 600; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--fg-3); }
+    .specimen-cap h1 { font-family: var(--font-jp); font-weight: 700; font-size: 17px; margin-top: 6px; color: var(--text-1); }
+    .specimen-cap p { font-size: 11.5px; line-height: 1.55; color: var(--fg-2); margin-top: 7px; }
+
+    .phone { position: relative; width: 402px; height: 874px; flex: none; border-radius: 55px;
+      overflow: hidden; background: var(--bg);
+      box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039, 0 36px 90px rgba(0,0,0,.62);
+      isolation: isolate; }
+    .phone .screen { position: absolute; inset: 0; overflow: hidden; }
+
+    #map { position: absolute; inset: 0; z-index: 1; background: transparent; }
+    #map .maplibregl-canvas { outline: none; filter: grayscale(1) contrast(1.02); }
+    .maplibregl-ctrl-attrib { font-family: var(--font-latin); }
+    .maplibregl-ctrl-bottom-right { bottom: 150px; }
+    .maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(0,0,0,.35); }
+    .maplibregl-ctrl-attrib a { color: rgba(255,255,255,.6); }
+
+    .center-marker { position: relative; width: 0; height: 0; pointer-events: none; }
+    .center-marker .dot { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #111; box-shadow: 0 0 0 2.5px rgba(255,255,255,.95), 0 2px 8px rgba(0,0,0,.7); }
+
+    /* ---- サークル（グループ）pins ---- */
+    .grp-pin { position: relative; background: none; border: none; padding: 0; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .grp-label { display: none; font-family: var(--font-jp); font-weight: 700; font-size: 10px; color: #04222a;
+      background: #fff; padding: 2px 9px; border-radius: 9999px; white-space: nowrap; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
+    .grp-av { width: 30px; height: 30px; border-radius: 50%; background: #222 center/cover no-repeat;
+      box-shadow: 0 4px 10px rgba(0,0,0,.5); transition: width .18s var(--ease-out), height .18s var(--ease-out); }
+    .grp-pin.out .grp-av { opacity: .82; }
+    .grp-pin.sel { z-index: 10; }
+    .grp-pin.sel .grp-label { display: block; }
+    .grp-pin.sel .grp-av { width: 48px; height: 48px;       /* selected = larger, no ring */
+      box-shadow: 0 6px 16px rgba(0,0,0,.6); }
+
+    .scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 150px; z-index: 40; pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.28) 42%, transparent 100%); }
+    .scrim-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 230px; z-index: 40; pointer-events: none;
+      background: linear-gradient(0deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.12) 55%, transparent 100%); }
+
+    /* ---- 右下の投稿ボタン (globe → 投稿フロー の入口 · DS colorful gradient FAB) ---- */
+    .post-fab { position: absolute; right: 22px; bottom: 40px; z-index: 48; width: 66px; height: 66px;
+      border: none; border-radius: 50%; cursor: pointer; padding: 0; background: var(--gradient-colorful);
+      box-shadow: 0 14px 34px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s var(--ease-out), opacity .32s var(--ease-out); }
+    .post-fab::before { content: ""; position: absolute; inset: -7px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.16); animation: fabpulse 2.6s var(--ease-out) infinite; }
+    @keyframes fabpulse { 0% { transform: scale(.92); opacity: .55; } 70%, 100% { transform: scale(1.28); opacity: 0; } }
+    .post-fab img { width: 28px; height: 28px; position: relative; }
+    .post-fab:active { transform: scale(.93); }
+    .post-fab.hidden { opacity: 0; pointer-events: none; transform: scale(.55) translateY(14px); }
+    .fab-hint { position: absolute; right: 22px; bottom: 112px; z-index: 48; pointer-events: none;
+      font-family: var(--font-jp); font-weight: 700; font-size: 11px; color: #fff; letter-spacing: .02em;
+      padding: 5px 11px; border-radius: 9999px; background: rgba(0,0,0,.5);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); white-space: nowrap;
+      transition: opacity .32s var(--ease-out); }
+    .fab-hint.hidden { opacity: 0; }
+
+    /* ---- 入っているサークル一覧 — DS: .lg.lg-dark glass sheet + role tokens ---- */
+    .cc-panel { position: absolute; left: 14px; right: 14px; bottom: 26px; z-index: 50;
+      border-radius: var(--radius-lg); padding: 6px 8px 12px 14px;
+      transition: transform .46s cubic-bezier(.4,0,.2,1), opacity .34s var(--ease-out); }
+    .cc-panel.hidden { transform: translateY(140%); opacity: 0; pointer-events: none; }
+    .cc-panel .grabber { margin-top: 4px; }
+    .cc-cancel { position: absolute; top: -56px; right: 4px; z-index: 51; width: 44px; height: 44px; border-radius: 50%;
+      border: none; cursor: pointer; padding: 0; background: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+      box-shadow: 0 6px 18px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.14);
+      display: flex; align-items: center; justify-content: center; transition: transform .12s var(--ease-out); }
+    .cc-cancel:active { transform: scale(.92); }
+    .cc-cancel img { width: 18px; height: 18px; }
+    .cc-head { display: flex; align-items: center; justify-content: space-between; padding-right: 6px; margin: 9px 0 9px; }
+    .cc-head .t-title { font-size: 15px; }
+    .cc-head .t-title b { color: #fff; font-weight: 800; margin-left: 3px; }
+    .cc-loc { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-jp); font-weight: 500;
+      font-size: 10.5px; color: var(--text-3); }
+    .cc-loc::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.22); }
+    .cc-list { max-height: 222px; overflow-y: auto; padding-right: 6px; display: flex; flex-direction: column; gap: 6px; }
+    .cc-list::-webkit-scrollbar { width: 5px; }
+    .cc-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 6px; }
+    .cc-row { display: flex; align-items: center; gap: 11px; width: 100%; text-align: left; cursor: pointer;
+      padding: 9px 10px 9px 9px; border-radius: var(--radius-md); border: 1px solid transparent; background: rgba(255,255,255,.05);
+      transition: background .15s, border-color .15s; }
+    .cc-row:active { transform: scale(.99); }
+    .cc-row.sel { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.55); }   /* selected = white */
+    .cc-av { width: 44px; height: 44px; border-radius: 12px; flex: none; background: #333 center/cover no-repeat;
+      box-shadow: var(--shadow-avatar); }
+    .cc-info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .cc-name { display: flex; align-items: center; gap: 7px; font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: var(--text-1);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cc-pill { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px 1px 6px; border-radius: var(--radius-pill);
+      background: rgba(255,255,255,.16); color: rgba(255,255,255,.92); font-family: var(--font-jp); font-weight: 700; font-size: 9px; }
+    .cc-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; }  /* エリア内 */
+    .cc-meta { font-family: var(--font-latin); font-weight: 600; font-size: 10px; color: var(--text-2); margin-top: 3px; letter-spacing: .01em; }
+    .cc-chev { flex: none; width: 8px; height: 8px; margin-right: 4px; border-right: 2px solid var(--text-3);
+      border-bottom: 2px solid var(--text-3); transform: rotate(-45deg); }
+    .cc-row.sel .cc-chev { border-color: #fff; }
+
+    /* ---- 投稿ボタン (DS WdLoginButton式 — 枠だけカラーグラデーション) ---- */
+    .cc-post { position: relative; width: calc(100% - 6px); margin-top: 11px; height: 50px; border: none; cursor: pointer;
+      border-radius: var(--radius-md); background: rgba(255,255,255,.06); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      font-family: var(--font-jp); font-weight: 700; font-size: 15px; letter-spacing: .02em; color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: transform .12s var(--ease-out), filter .12s; }
+    .cc-post::after {            /* 1px colorful gradient rim (--gradient-auth) */
+      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+      background: var(--gradient-auth);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+    .cc-post:active { transform: scale(.97); filter: brightness(1.08); }
+    .cc-post img { width: 20px; height: 20px; }
+
+    /* ---- フルスクリーン 動画撮影 → 編集 (mock) ---- */
+    .cam-screen { position: absolute; inset: 0; z-index: 55; background: #000; overflow: hidden;
+      transform: translateY(100%); transition: transform .42s cubic-bezier(.4,0,.2,1); }
+    .cam-screen.open { transform: translateY(0); }
+    /* stage visibility (idle / recording = capture · edit = editor · thumb = サムネイル選択) */
+    .cam-screen .edit-only { display: none; }
+    .cam-screen .thumb-only { display: none; }
+    .cam-screen[data-stage="edit"] .cap-only { display: none; }
+    .cam-screen[data-stage="edit"] .edit-only { display: flex; }
+    .cam-screen[data-stage="thumb"] .cap-only { display: none; }
+    .cam-screen[data-stage="thumb"] .thumb-only { display: flex; }
+
+    .cam-feed { position: absolute; inset: 0; }
+    .cam-feed img, .cam-feed video { width: 100%; height: 100%; object-fit: cover; }
+    .cam-feed::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(120% 80% at 50% 40%, transparent 55%, rgba(0,0,0,.45) 100%); }
+    .cam-grad-top { position: absolute; top: 0; left: 0; right: 0; height: 160px; pointer-events: none;
+      background: linear-gradient(180deg, rgba(0,0,0,.55), transparent); }
+    .cam-grad-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 230px; pointer-events: none;
+      background: linear-gradient(0deg, rgba(0,0,0,.62), transparent); }
+    .cam-top { position: absolute; top: 70px; left: 16px; right: 16px; z-index: 3;
+      display: flex; align-items: center; justify-content: space-between; }
+    .cam-rec { display: none; align-items: center; gap: 7px; padding: 6px 13px; border-radius: 9999px;
+      background: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      font-family: var(--font-latin); font-weight: 600; font-size: 13px; color: #fff; letter-spacing: .04em;
+      font-variant-numeric: tabular-nums; }
+    .cam-screen[data-stage="recording"] .cam-rec { display: inline-flex; }
+    .cam-rec::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #ff4646;
+      box-shadow: 0 0 8px #ff4646; animation: recblink 1.2s steps(2, start) infinite; }
+    .cam-rec.over { color: #ff6b6b; }
+    @keyframes recblink { 50% { opacity: .2; } }
+    .cam-iconbtn { width: 42px; height: 42px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(0,0,0,.45); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; transition: transform .12s var(--ease-out); }
+    .cam-iconbtn:active { transform: scale(.92); }
+    .cam-iconbtn img { width: 19px; height: 19px; }
+    .cam-controls { position: absolute; bottom: 46px; left: 0; right: 0; z-index: 3;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 34px; }
+    .cam-thumb { width: 46px; height: 46px; border-radius: 12px; background: #333 center/cover no-repeat;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.85); }
+    .cam-shutter { width: 76px; height: 76px; border-radius: 50%; border: none; cursor: pointer; padding: 0;
+      background: transparent; position: relative; transition: transform .1s var(--ease-out); }
+    .cam-shutter:active { transform: scale(.94); }
+    .cam-shutter::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 4px solid #fff; }
+    .cam-shutter::after { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: #ff4646;
+      transition: inset .2s var(--ease-out), border-radius .2s var(--ease-out); }   /* red dot = record */
+    .cam-screen[data-stage="recording"] .cam-shutter::after { inset: 24px; border-radius: 6px; }  /* square = stop */
+    .cam-flip { width: 52px; height: 52px; border-radius: 50%; border: none; cursor: pointer;
+      background: rgba(0,0,0,.42); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; transition: transform .3s var(--ease-out); }
+    .cam-flip:active { transform: rotate(180deg); }
+    .cam-flip img { width: 22px; height: 22px; }
+
+    /* ---- edit stage ---- */
+    .cam-edit { position: absolute; inset: 0; flex-direction: column; background: #0a0a0c; }
+    .cam-edit-top { display: flex; align-items: center; justify-content: space-between; padding: 66px 16px 10px; }
+    .cam-edit-top .t { font-family: var(--font-jp); font-weight: 700; font-size: 16px; color: #fff; }
+    .cam-edit-preview { flex: 1; position: relative; margin: 4px 16px 0; border-radius: 18px; overflow: hidden;
+      background: #000; display: flex; align-items: center; justify-content: center; }
+    .cam-edit-preview > img, .cam-edit-preview > video { width: 100%; height: 100%; object-fit: cover; }
+    .cam-edit-preview .play { position: absolute; width: 58px; height: 58px; border-radius: 50%;
+      background: rgba(0,0,0,.42); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center; }
+    .cam-edit-preview .play::after { content: ""; margin-left: 4px; border-style: solid;
+      border-width: 11px 0 11px 18px; border-color: transparent transparent transparent #fff; }
+    .cam-dur { position: absolute; top: 10px; right: 10px; padding: 4px 10px; border-radius: 9999px;
+      background: rgba(0,0,0,.55); font-family: var(--font-latin); font-weight: 600; font-size: 12px; color: #fff;
+      font-variant-numeric: tabular-nums; }
+    .cam-trim-wrap { padding: 16px 16px 4px; }
+    .cam-trim-label { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .cam-trim-label .sel { font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff; }
+    .cam-trim-label .sel b { font-variant-numeric: tabular-nums; margin-left: 3px; }
+    .cam-trim-label .max { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: var(--text-3); }
+    .cam-trim { position: relative; height: 54px; border-radius: 10px; overflow: hidden;
+      display: flex; touch-action: none; user-select: none; -webkit-user-select: none; }
+    .cam-trim .frame { flex: 1; background: #222 center/cover no-repeat; }
+    .cam-trim .mask { position: absolute; top: 0; bottom: 0; background: rgba(0,0,0,.62); pointer-events: none; }
+    .cam-trim .window { position: absolute; top: 0; bottom: 0; border: 3px solid #fff; border-radius: 9px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.45); pointer-events: none; }
+    .cam-trim .handle { position: absolute; top: 0; bottom: 0; width: 18px; cursor: ew-resize; z-index: 4;
+      display: flex; align-items: center; justify-content: center; background: #fff; }
+    .cam-trim .handle.l { border-radius: 9px 0 0 9px; }
+    .cam-trim .handle.r { border-radius: 0 9px 9px 0; }
+    .cam-trim .handle::after { content: ""; width: 4px; height: 20px; border-radius: 3px; background: #0a0a0c; opacity: .5; }
+    .cam-upload { position: relative; margin: 14px 16px 34px; height: 52px; border: none; border-radius: var(--radius-md); cursor: pointer;
+      background: rgba(255,255,255,.06); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); color: #fff;
+      font-family: var(--font-jp); font-weight: 700; font-size: 15px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: transform .12s var(--ease-out), filter .12s; }
+    .cam-upload::after {            /* 1px colorful gradient rim (--gradient-auth) */
+      content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+      background: var(--gradient-auth);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+    .cam-upload:active { transform: scale(.98); filter: brightness(1.08); }
+    .cam-upload.disabled { color: var(--text-3); cursor: default; font-size: 13px; }
+    .cam-upload.disabled::after { background: rgba(255,255,255,.16); }   /* rim greys out when disabled */
+
+    /* ---- thumbnail-select stage ---- */
+    .thumb-strip { position: relative; height: 64px; border-radius: 10px; overflow: hidden;
+      display: flex; touch-action: none; user-select: none; -webkit-user-select: none; cursor: ew-resize; }
+    .thumb-strip .frame { flex: 1; background: #222 center/cover no-repeat; opacity: .5; }
+    .thumb-play { position: absolute; top: -3px; bottom: -3px; width: 36px; margin-left: -18px; border-radius: 8px;
+      border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.6); pointer-events: none; }
+    .thumb-play::after { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      width: 4px; height: 22px; border-radius: 3px; background: #fff; opacity: .85; }
+
+    /* ---- 投稿確認ダイアログ (bottom sheet) ---- */
+    .post-confirm { position: absolute; inset: 0; z-index: 60; display: none; }
+    .post-confirm.open { display: block; }
+    .pc-scrim { position: absolute; inset: 0; background: rgba(0,0,0,.7); opacity: 0; transition: opacity .3s; }
+    .post-confirm.open .pc-scrim { opacity: 1; }
+    .pc-sheet { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 18px 28px;
+      background: rgba(16,16,20,.97); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255,255,255,.1); border-radius: 24px 24px 0 0;
+      transform: translateY(100%); transition: transform .34s cubic-bezier(.4,0,.2,1); }
+    .post-confirm.open .pc-sheet { transform: translateY(0); }
+    .pc-grab { width: 38px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.25); margin: 0 auto 14px; }
+    .pc-title { font-family: var(--font-jp); font-weight: 700; font-size: 17px; color: #fff; margin-bottom: 6px; }
+    .pc-opt { display: flex; align-items: center; gap: 12px; padding: 15px 0; border-top: 1px solid rgba(255,255,255,.08); }
+    .pc-opt.first { border-top: none; }
+    .pc-opt-tx { flex: 1; min-width: 0; }
+    .pc-opt-h { display: flex; align-items: center; gap: 8px; font-family: var(--font-jp); font-weight: 700; font-size: 14.5px; color: #fff; }
+    .pc-opt-h img { width: 17px; height: 17px; }
+    .pc-opt-s { font-family: var(--font-jp); font-weight: 400; font-size: 11.5px; color: var(--text-3); margin-top: 3px; line-height: 1.4; }
+    .pc-opt.disabled .pc-opt-h, .pc-opt.disabled .pc-opt-s { opacity: .45; }
+    .pc-cancel { width: 100%; margin-top: 8px; height: 44px; border: none; background: none; cursor: pointer;
+      font-family: var(--font-jp); font-weight: 600; font-size: 14px; color: var(--text-2); }
+    #pcConfirm { margin: 18px 0 0; height: 58px; font-size: 16px; }
+
+    /* DS toggle (WdToggl) — OFF #555 · ON colorful gradient */
+    .tg { position: relative; flex: none; width: 48px; height: 28px; border-radius: 9999px; border: none; cursor: pointer;
+      padding: 0; background: #555; box-shadow: inset 0 1px 3px rgba(0,0,0,.45); transition: background .2s var(--ease-out); }
+    .tg[data-on="true"] { background: var(--gradient-colorful); }
+    .tg .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff;
+      box-shadow: 0 2px 5px rgba(0,0,0,.5); transition: left .2s var(--ease-out); }
+    .tg[data-on="true"] .knob { left: 23px; }
+    .tg.disabled { opacity: .38; pointer-events: none; }
+
+    /* ---- 上部 投稿プログレス ---- */
+    .post-progress { position: absolute; top: 58px; left: 14px; right: 14px; z-index: 72;
+      background: rgba(12,12,16,.84); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 12px 14px;
+      box-shadow: 0 14px 34px rgba(0,0,0,.5);
+      transform: translateY(-140%); opacity: 0; transition: transform .42s cubic-bezier(.4,0,.2,1), opacity .42s; }
+    .post-progress.show { transform: translateY(0); opacity: 1; }
+    .pp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+    .pp-label { display: flex; align-items: center; gap: 8px; font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff; }
+    .pp-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; animation: spin 1s linear infinite; }
+    .post-progress.done .pp-spin { display: none; }
+    .pp-pct { font-family: var(--font-latin); font-weight: 600; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+    .pp-track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.12); overflow: hidden; }
+    .pp-fill { height: 100%; width: 0%; border-radius: 99px; background: var(--gradient-colorful-linear); transition: width .3s var(--ease-out); }
+
+    .dynamic-island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+      width: 125px; height: 36px; border-radius: 20px; background: #000; z-index: 70; pointer-events: none; }
+    .statusbar { position: absolute; top: 0; left: 0; right: 0; height: 62px; z-index: 60;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 36px; pointer-events: none; color: #fff; }
+    .statusbar .time { font-weight: 600; font-size: 16px; letter-spacing: .02em; }
+    .statusbar .sys { display: flex; align-items: center; gap: 7px; }
+    .statusbar .sys svg { display: block; }
+    .home-ind { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+      width: 140px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.9); z-index: 60; pointer-events: none; }
+
+    .hint { font-size: 11px; color: var(--fg-3); letter-spacing: .02em; max-width: 402px; text-align: center; }
+
+    .panel { width: 312px; flex: none; align-self: stretch; background: rgba(20,20,26,.72);
+      border: 1px solid rgba(255,255,255,.09); border-radius: 18px; backdrop-filter: blur(18px) saturate(150%);
+      box-shadow: 0 18px 50px rgba(0,0,0,.5); overflow: hidden; position: sticky; top: 40px; }
+    .panel header { display: flex; align-items: baseline; justify-content: space-between;
+      padding: 16px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .panel header .t { font-family: var(--font-jp); font-weight: 700; font-size: 14px; }
+    .panel header .s { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--fg-3); }
+    .panel .body { padding: 6px 18px 18px; max-height: 78vh; overflow-y: auto; }
+    .panel .body::-webkit-scrollbar { width: 8px; }
+    .panel .body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 8px; }
+    .group { padding: 14px 0 6px; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .group:last-child { border-bottom: 0; }
+    .group > .gt { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--text-2);
+      font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 7px; }
+    .group > .gt .id { color: var(--fg-3); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: 10px; }
+    .ctrl { margin-bottom: 13px; }
+    .ctrl .lab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .ctrl .lab span { font-size: 11.5px; color: var(--text-2); }
+    .ctrl .lab b { font-size: 11px; color: var(--text-1); font-variant-numeric: tabular-nums; font-weight: 600; }
+    .ctrl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 3px;
+      border-radius: 3px; background: rgba(255,255,255,.18); outline: none; }
+    .ctrl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px;
+      height: 15px; border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.5); }
+    .ctrl input[type=range]::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: #fff; cursor: pointer; border: 0; }
+    .reset { width: 100%; margin-top: 14px; padding: 11px; cursor: pointer; background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12); border-radius: 10px; color: var(--text-2); font-family: var(--font-jp);
+      font-weight: 600; font-size: 12px; transition: all .18s; }
+    .reset:hover { background: rgba(255,255,255,.1); color: var(--text-1); }
+
+    #veil { position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+      background: var(--bg); transition: opacity .8s var(--ease-out); font-family: var(--font-display);
+      font-size: 26px; color: rgba(255,255,255,.85); }
+    #veil.gone { opacity: 0; pointer-events: none; }
+    #veil .spin { width: 42px; height: 42px; border-radius: 50%; margin-left: 14px;
+      border: 2px solid rgba(255,255,255,.18); border-top-color: #fff; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</helmet>
+
+<div class="studio">
+  <div class="stage">
+    <div class="specimen-cap">
+      <div class="eyebrow">Live specimen · 投稿フロー</div>
+      <h1>UniverseView — 地球から投稿</h1>
+      <p>地球（globe）表示から右下の<b>投稿ボタン</b>をタップ → 現在地（渋谷ハチ公前）へ降下し、入っているサークルが出現。サークルを選んで撮影・編集・投稿まで。完了すると地球に戻り、アップロードの進捗が上部に表示されます。</p>
+    </div>
+
+    <div class="phone" data-screen-label="UniverseView · サークルマップ">
+      <div class="screen">
+        <div id="map"></div>
+
+        <div class="scrim-top"></div>
+        <div class="scrim-bottom"></div>
+
+        <!-- 右下の投稿ボタン: globe から投稿フローを開始 -->
+        <div class="fab-hint" id="ccFabHint">いまここから投稿</div>
+        <button class="post-fab" id="ccFab" aria-label="投稿する">
+          <img src="../../assets/icons/icon_add.png" alt="">
+        </button>
+
+        <!-- 現在地で入っているサークル一覧 (DS liquid-glass sheet over the map) -->
+        <div class="cc-panel lg lg-dark hidden" id="ccPanel" data-screen-label="入っているサークル">
+          <button class="cc-cancel" id="ccCancel" aria-label="キャンセル">
+            <img src="../../assets/icons/icon_close.png" alt="">
+          </button>
+          <div class="grabber"></div>
+          <div class="cc-head">
+            <span class="t-title">入っているサークル<b id="ccCount">4</b></span>
+            <span class="cc-loc">渋谷ハチ公前</span>
+          </div>
+          <div class="cc-list" id="ccList"></div>
+          <button class="cc-post" onClick="{{ openCam }}">
+            <img src="../../assets/icons/icon_camera.png" alt="">ストーリーを投稿
+          </button>
+        </div>
+
+        <!-- フルスクリーン 動画撮影 → 編集 (mock) -->
+        <div class="cam-screen" id="camScreen" data-stage="idle" data-screen-label="動画撮影">
+          <!-- capture stage -->
+          <div class="cam-feed cap-only">
+            <video id="camFeed" src="../../assets/sample/3d/mqmbpk42_d6sz/video.mp4" poster="../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg" muted loop playsinline></video>
+          </div>
+          <div class="cam-grad-top cap-only"></div>
+          <div class="cam-grad-bot cap-only"></div>
+          <div class="cam-top cap-only">
+            <button class="cam-iconbtn" onClick="{{ closeCam }}" aria-label="閉じる">
+              <img src="../../assets/icons/icon_close.png" alt="">
+            </button>
+            <span class="cam-rec" id="camRec">0:00</span>
+          </div>
+          <div class="cam-controls cap-only">
+            <span class="cam-thumb" style="background-image:url(../../assets/sample/reel/reel003.jpg)"></span>
+            <button class="cam-shutter" id="camShutter" aria-label="録画"></button>
+            <button class="cam-flip" aria-label="カメラ切替">
+              <img src="../../assets/icons/icon_swap.png" alt="">
+            </button>
+          </div>
+
+          <!-- edit stage -->
+          <div class="cam-edit edit-only" data-screen-label="動画を編集">
+            <div class="cam-edit-top">
+              <button class="cam-iconbtn" onClick="{{ closeCam }}" aria-label="閉じる">
+                <img src="../../assets/icons/icon_close.png" alt="">
+              </button>
+              <span class="t">動画を編集</span>
+              <span style="width:42px"></span>
+            </div>
+            <div class="cam-edit-preview">
+              <video id="camVideo" src="../../assets/sample/3d/mqmbpk42_d6sz/video.mp4" muted loop playsinline></video>
+              <span class="cam-dur" id="camTotal">0:00</span>
+            </div>
+            <div class="cam-trim-wrap">
+              <div class="cam-trim-label">
+                <span class="sel">切り取り<b id="camSel">0:00</b></span>
+                <span class="max">上限 1:00</span>
+              </div>
+              <div class="cam-trim" id="camTrim">
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="mask l" id="camMaskL"></div>
+                <div class="mask r" id="camMaskR"></div>
+                <div class="window" id="camWindow"></div>
+                <div class="handle l" id="camHandleL"></div>
+                <div class="handle r" id="camHandleR"></div>
+              </div>
+            </div>
+            <button class="cam-upload" id="camUpload">次へ</button>
+          </div>
+
+          <!-- thumbnail-select stage -->
+          <div class="cam-edit thumb-only" data-screen-label="サムネイルを選択">
+            <div class="cam-edit-top">
+              <button class="cam-iconbtn" id="thumbBack" aria-label="戻る">
+                <img src="../../assets/icons/icon_back.png" alt="">
+              </button>
+              <span class="t">サムネイルを選択</span>
+              <span style="width:42px"></span>
+            </div>
+            <div class="cam-edit-preview">
+              <video id="camThumbVideo" src="../../assets/sample/3d/mqmbpk42_d6sz/video.mp4" muted playsinline></video>
+            </div>
+            <div class="cam-trim-wrap">
+              <div class="cam-trim-label">
+                <span class="sel">表紙にするフレームを選択</span>
+              </div>
+              <div class="thumb-strip" id="thumbStrip">
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="frame" style="background-image:url(../../assets/sample/3d/mqmbpk42_d6sz/thumbnail.jpg)"></div>
+                <div class="thumb-play" id="thumbPlay"></div>
+              </div>
+            </div>
+            <button class="cam-upload" id="camPost">投稿する</button>
+          </div>
+        </div>
+
+        <!-- 投稿確認ダイアログ -->
+        <div class="post-confirm" id="postConfirm" data-screen-label="投稿の設定">
+          <div class="pc-scrim" id="pcScrim"></div>
+          <div class="pc-sheet">
+            <div class="pc-grab"></div>
+            <div class="pc-title">投稿の設定</div>
+            <div class="pc-opt first">
+              <div class="pc-opt-tx">
+                <div class="pc-opt-h"><img src="../../assets/icons/icon_pin.png" alt="">位置情報を付ける</div>
+                <div class="pc-opt-s">現在地（渋谷ハチ公前）を投稿に紐付けます</div>
+              </div>
+              <button class="tg" id="tgLoc" data-on="true" role="switch" aria-label="位置情報"><span class="knob"></span></button>
+            </div>
+            <div class="pc-opt" id="opt3d">
+              <div class="pc-opt-tx">
+                <div class="pc-opt-h"><img src="../../assets/icons/icon_dashboard.png" alt="">3Dオブジェクトを生成</div>
+                <div class="pc-opt-s">サムネイルから3Dを生成します（位置情報オン時のみ）</div>
+              </div>
+              <button class="tg" id="tg3d" data-on="false" role="switch" aria-label="3D生成"><span class="knob"></span></button>
+            </div>
+            <button class="cam-upload" id="pcConfirm">投稿する</button>
+            <button class="pc-cancel" id="pcCancel">キャンセル</button>
+          </div>
+        </div>
+
+        <!-- 上部 投稿プログレス -->
+        <div class="post-progress" id="postProgress">
+          <div class="pp-row">
+            <span class="pp-label" id="ppLabel"><span class="pp-spin"></span>アップロード中…</span>
+            <span class="pp-pct" id="ppPct">0%</span>
+          </div>
+          <div class="pp-track"><div class="pp-fill" id="ppFill"></div></div>
+        </div>
+
+        <div class="statusbar">
+          <div class="time">9:41</div>
+          <div class="sys">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"></rect><rect x="5" y="4.5" width="3" height="7.5" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.4c2.1 0 4 .8 5.5 2.1l1.4-1.5C13.6 1.3 11.1.3 8.5.3 5.9.3 3.4 1.3 1.6 3l1.4 1.5C4.5 3.2 6.4 2.4 8.5 2.4z" opacity=".9"></path><path d="M8.5 6c1.1 0 2.2.4 3 1.2l1.4-1.5C11.7 4.6 10.2 4 8.5 4S5.3 4.6 4.1 5.7L5.5 7.2C6.3 6.4 7.4 6 8.5 6z"></path><circle cx="8.5" cy="10" r="1.7"></circle></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-opacity=".5"></rect><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="#fff"></rect><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" fill-opacity=".6"></rect></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+
+      <div id="veil">Toopdbq<div class="spin"></div></div>
+    </div>
+
+    <div class="hint">右下の投稿ボタン＝開始 · ピンをタップ＝サークル選択 · ドラッグ＝回転 · スクロール／ピンチ＝ズーム</div>
+  </div>
+
+  <aside class="panel">
+    <header>
+      <div class="t">カメラ</div>
+      <div class="s">Camera</div>
+    </header>
+    <div class="body" id="panelBody"></div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    if (window.__earthBooted) return;   // guard against double-mount
+    window.__earthBooted = true;
+
+    const load = (src) => new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = src; s.async = false; s.onload = res; s.onerror = rej;
+      document.body.appendChild(s);
+    });
+
+    const boot = async () => {
+      // wait for the MapLibre lib (loaded in <helmet>) to be ready
+      let tries = 0;
+      while (!window.maplibregl && tries < 200) { await new Promise(r => setTimeout(r, 50)); tries++; }
+      if (!window.maplibregl) { console.warn('maplibre-gl failed to load'); return; }
+      try {
+        // load order matters: overlay + groups must define their globals BEFORE
+        // map-core creates the map (its async style.load attaches both).
+        await load('earth/look.js');
+        await load('earth/overlay.js');
+        await load('earth/groups.js');
+        await load('earth/map-core.js');
+        await load('earth/bridge.js');
+      } catch (e) { console.warn('earth boot failed', e); }
+    };
+    boot();
+    this._setupCamera();
+    this._setupFlow();
+  }
+
+  // ----- post flow framing: globe (idle) ⇄ circles (posting) ---------------
+  _setupFlow() {
+    if (this._flowReady) return;
+    this._flowReady = true;
+    this.GLOBE   = { center: [139.70064, 35.65905], zoom: 2.6, pitch: 0, bearing: 0 };
+    this.CIRCLES = { center: [139.70064, 35.65905], zoom: 16, pitch: 0, bearing: 0 };
+    this._dived = false;
+    const fab = document.getElementById('ccFab');
+    if (fab) fab.onclick = () => this.enterCircles();
+    const cancel = document.getElementById('ccCancel');
+    if (cancel) cancel.onclick = () => this.enterGlobe();
+    // boot framing: whole-earth globe. look.apply() restores a persisted camera
+    // on map 'load' (could be a stale city zoom), so re-assert the globe through
+    // the loading-veil window (which blocks FAB taps) to win that race.
+    this._whenMap((m) => {
+      const frame = () => { if (!this._dived) { try { m.jumpTo(this.GLOBE); } catch (e) {} } };
+      frame();
+      if (m.once) m.once('load', frame);
+      [400, 900, 1500, 2300].forEach((d) => setTimeout(frame, d));
+    });
+  }
+
+  _whenMap(cb) {
+    let t = 0;
+    const tryit = () => {
+      if (window.EarthMap && window.EarthMap.map) {
+        cb(window.EarthMap.map);        // flyTo/jumpTo are safe even mid-render
+      } else if (t++ < 240) { setTimeout(tryit, 50); }
+    };
+    tryit();
+  }
+
+  // tap 投稿ボタン → dive from the globe into 渋谷, reveal the circles + panel
+  enterCircles() {
+    this._dived = true;        // stop the boot-time globe re-asserts
+    const fab = document.getElementById('ccFab'), hint = document.getElementById('ccFabHint'),
+          panel = document.getElementById('ccPanel');
+    if (fab) fab.classList.add('hidden');
+    if (hint) hint.classList.add('hidden');
+    this._whenMap((m) => m.flyTo(Object.assign({}, this.CIRCLES, { duration: 2300, essential: true })));
+    clearTimeout(this._revT);
+    this._revT = setTimeout(() => {        // reveal once the camera is most of the way down
+      if (window.EarthGroups && window.EarthGroups.setVisible) window.EarthGroups.setVisible(true);
+      if (window.EarthOverlay && window.EarthOverlay.setVisible) window.EarthOverlay.setVisible(true);
+      if (panel) panel.classList.remove('hidden');
+    }, 1150);
+  }
+
+  // post complete → fly back out to the globe; the progress bar runs up top
+  enterGlobe() {
+    const fab = document.getElementById('ccFab'), hint = document.getElementById('ccFabHint'),
+          panel = document.getElementById('ccPanel');
+    clearTimeout(this._revT);
+    if (panel) panel.classList.add('hidden');
+    if (window.EarthGroups && window.EarthGroups.setVisible) window.EarthGroups.setVisible(false);
+    if (window.EarthOverlay && window.EarthOverlay.setVisible) window.EarthOverlay.setVisible(false);
+    this._whenMap((m) => m.flyTo(Object.assign({}, this.GLOBE, { duration: 1900, essential: true })));
+    setTimeout(() => { if (fab) fab.classList.remove('hidden'); if (hint) hint.classList.remove('hidden'); }, 1400);
+  }
+
+  // ----- camera flow: idle → recording → edit(trim) -----------------------
+  _setupCamera() {
+    const $ = (id) => document.getElementById(id);
+    const screen = $('camScreen');
+    if (!screen || this._camReady) return;
+    this._camReady = true;
+
+    const recEl = $('camRec'), shutter = $('camShutter');
+    const trim = $('camTrim'), maskL = $('camMaskL'), maskR = $('camMaskR');
+    const winEl = $('camWindow'), hL = $('camHandleL'), hR = $('camHandleR');
+    const selEl = $('camSel'), totalEl = $('camTotal'), upload = $('camUpload'), video = $('camVideo'), feed = $('camFeed');
+    const thumbVideo = $('camThumbVideo'), thumbStrip = $('thumbStrip'), thumbPlay = $('thumbPlay');
+    const thumbBack = $('thumbBack'), post = $('camPost');
+    let thumbFrac = 0;
+    const MAX = 60;                 // 1分以上は投稿不可
+    let stage = 'idle', t0 = 0, timer = null, totalSec = 0, start = 0, end = 1;
+
+    const fmt = (s) => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+    const setStage = (s) => { stage = s; screen.dataset.stage = s; };
+
+    const tick = () => {
+      const el = (Date.now() - t0) / 1000;
+      recEl.textContent = fmt(el);
+      recEl.classList.toggle('over', el >= MAX);
+    };
+    const startRec = () => {
+      setStage('recording'); t0 = Date.now(); recEl.textContent = '0:00'; recEl.classList.remove('over');
+      if (feed) { try { feed.currentTime = 0; feed.play(); } catch (e) {} }   // 録画開始でループ再生
+      timer = setInterval(tick, 200);
+    };
+    const stopRec = () => { clearInterval(timer); if (feed) feed.pause(); totalSec = Math.max(1, (Date.now() - t0) / 1000); goEdit(); };
+
+    const layout = () => {
+      const W = trim.clientWidth, hw = 18;
+      maskL.style.width = (start * W) + 'px';
+      maskR.style.width = ((1 - end) * W) + 'px';
+      winEl.style.left = (start * W) + 'px';
+      winEl.style.width = ((end - start) * W) + 'px';
+      hL.style.left = (start * W) + 'px';
+      hR.style.left = (end * W - hw) + 'px';
+    };
+    const updateDur = () => {
+      const sel = (end - start) * totalSec;
+      selEl.textContent = fmt(sel);
+      totalEl.textContent = fmt(totalSec);
+      const over = sel >= MAX;
+      upload.classList.toggle('disabled', over);
+      upload.textContent = over ? '1分未満に切り取ってください' : 'アップロード';
+    };
+    const goEdit = () => {
+      start = 0; end = 1; setStage('edit');
+      if (video) { try { video.currentTime = 0; video.play(); } catch (e) {} }
+      requestAnimationFrame(() => { layout(); updateDur(); });
+    };
+
+    // ----- thumbnail-select stage -----
+    const applyThumbFrame = () => {
+      if (!thumbVideo) return;
+      const dur = thumbVideo.duration || 0;
+      try { thumbVideo.currentTime = (start + thumbFrac * (end - start)) * dur; } catch (e) {}
+    };
+    const goThumb = () => {
+      if (video) video.pause();
+      setStage('thumb');
+      thumbFrac = 0;
+      if (thumbPlay) thumbPlay.style.left = '0%';
+      applyThumbFrame();
+    };
+    const scrub = (clientX) => {
+      const r = thumbStrip.getBoundingClientRect();
+      let f = (clientX - r.left) / r.width; f = Math.max(0, Math.min(1, f));
+      thumbFrac = f;
+      thumbPlay.style.left = (f * 100) + '%';
+      applyThumbFrame();
+    };
+
+    shutter.onclick = () => { if (stage === 'idle') startRec(); else if (stage === 'recording') stopRec(); };
+    upload.onclick = () => { if (upload.classList.contains('disabled')) return; goThumb(); };   // 編集 → サムネイル選択
+    if (thumbBack) thumbBack.onclick = () => { setStage('edit'); if (video) { try { video.play(); } catch (e) {} } };
+
+    // ----- post-confirm dialog (位置情報 / 3D生成) -----
+    const confirmEl = $('postConfirm'), tgLoc = $('tgLoc'), tg3d = $('tg3d'), opt3d = $('opt3d');
+    const sync3d = () => {
+      const locOn = tgLoc.dataset.on === 'true';
+      // 3D生成は位置情報オン時のみ
+      opt3d.classList.toggle('disabled', !locOn);
+      if (!locOn) tg3d.dataset.on = 'false';
+    };
+    if (tgLoc) tgLoc.onclick = () => { tgLoc.dataset.on = tgLoc.dataset.on === 'true' ? 'false' : 'true'; sync3d(); };
+    if (tg3d) tg3d.onclick = () => { if (opt3d.classList.contains('disabled')) return; tg3d.dataset.on = tg3d.dataset.on === 'true' ? 'false' : 'true'; };
+    const closeConfirm = () => confirmEl.classList.remove('open');
+    if (post) post.onclick = () => { confirmEl.classList.add('open'); sync3d(); };   // 投稿する → 確認ダイアログ
+    if ($('pcCancel')) $('pcCancel').onclick = closeConfirm;
+    if ($('pcScrim')) $('pcScrim').onclick = closeConfirm;
+    if ($('pcConfirm')) $('pcConfirm').onclick = () => {
+      const use3d = tg3d.dataset.on === 'true';
+      closeConfirm();
+      this._cam.close();
+      this.enterGlobe();        // 完了 → この画面（地球）に戻る
+      runProgress(use3d);       // 投稿プロセスは画面上部に表示
+    };
+
+    // ----- 上部 投稿プログレス -----
+    const runProgress = (use3d) => {
+      const prog = $('postProgress'), fill = $('ppFill'), pct = $('ppPct'), label = $('ppLabel');
+      if (!prog) return;
+      clearInterval(this._ppTimer);
+      prog.classList.remove('done'); fill.style.width = '0%'; pct.textContent = '0%';
+      label.innerHTML = '<span class="pp-spin"></span>アップロード中…';
+      let ph2 = false; prog.classList.add('show');
+      let p = 0;
+      this._ppTimer = setInterval(() => {
+        p = Math.min(100, p + Math.random() * 7 + 3);
+        fill.style.width = p + '%'; pct.textContent = Math.round(p) + '%';
+        if (use3d && p >= 70 && !ph2) { ph2 = true; label.innerHTML = '<span class="pp-spin"></span>3Dオブジェクトを生成中…'; }
+        if (p >= 100) {
+          clearInterval(this._ppTimer);
+          prog.classList.add('done');
+          label.textContent = use3d ? '3D付きで投稿しました' : '投稿が完了しました';
+          setTimeout(() => prog.classList.remove('show'), 1800);
+        }
+      }, 280);
+    };
+    if (thumbStrip) {
+      thumbStrip.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); scrub(e.clientX);
+        const move = (ev) => scrub(ev.clientX);
+        const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+        window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+      });
+    }
+    if (thumbVideo) thumbVideo.addEventListener('loadedmetadata', () => { if (stage === 'thumb') applyThumbFrame(); });
+
+    // draggable trim handles (free trimming)
+    const bind = (handle, which) => {
+      handle.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const rect = trim.getBoundingClientRect(), gap = 0.05;
+        const move = (ev) => {
+          let f = (ev.clientX - rect.left) / rect.width; f = Math.max(0, Math.min(1, f));
+          if (which === 'l') start = Math.max(0, Math.min(f, end - gap));
+          else end = Math.min(1, Math.max(f, start + gap));
+          layout(); updateDur();
+        };
+        const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+        window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+      });
+    };
+    bind(hL, 'l'); bind(hR, 'r');
+
+    this._cam = {
+      open: () => { clearInterval(timer); setStage('idle'); recEl.textContent = '0:00'; recEl.classList.remove('over'); if (video) video.pause(); if (feed) feed.pause(); if (thumbVideo) thumbVideo.pause(); screen.classList.add('open'); },
+      close: () => { clearInterval(timer); setStage('idle'); if (video) video.pause(); if (feed) feed.pause(); if (thumbVideo) thumbVideo.pause(); screen.classList.remove('open'); },
+    };
+  }
+
+  renderVals() {
+    return {
+      openCam: () => { if (this._cam) this._cam.open(); },
+      closeCam: () => { if (this._cam) this._cam.close(); },
+    };
+  }
+}
+</script>
+</body>
+</html>
