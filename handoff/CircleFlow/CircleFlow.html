@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @dsCard group="Screens" tier="flow" name="CircleFlow — サークル作成・選択" subtitle="Before/After · select-grid / select-empty / select-confirm / edit-camera / edit-editing / edit-maptap / edit-range / edit-save-ready · iPhone17 402×874 · glass: yes (chrome only)" -->
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:#0a0a0e; -webkit-font-smoothing:antialiased; }
+  .board{ padding:64px 72px 100px; display:flex; flex-direction:column; gap:72px; font-family:var(--font-jp); width:max-content; }
+  .board-head{ max-width:940px; display:flex; flex-direction:column; gap:16px; }
+  .bh-kick{ font:700 11px/1 var(--font-latin); letter-spacing:.24em; text-transform:uppercase; color:var(--text-3); }
+  .bh-title{ font:700 36px/1.12 var(--font-jp); color:#fff; letter-spacing:.01em; }
+  .bh-sub{ font:400 15px/1.65 var(--font-jp); color:var(--text-2); max-width:780px; }
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin-top:4px; }
+
+  /* section */
+  .sec{ display:flex; flex-direction:column; gap:26px; }
+  .sec-head{ display:flex; flex-direction:column; gap:9px; position:relative; padding-left:20px; }
+  .sec-head::before{ content:""; position:absolute; left:0; top:3px; bottom:3px; width:4px; border-radius:4px; background:var(--gradient-colorful); }
+  .sec-id{ font:700 11px/1 var(--font-latin); letter-spacing:.18em; text-transform:uppercase; color:var(--text-3); }
+  .sec-title{ font:700 25px/1.2 var(--font-jp); color:#fff; }
+  .sec-desc{ font:400 14px/1.65 var(--font-jp); color:var(--text-2); max-width:880px; }
+  .sec-row{ display:flex; gap:40px; align-items:flex-start; }
+  .grp{ display:flex; flex-direction:column; gap:18px; padding:22px; border-radius:24px; }
+  .grp.before{ background:rgba(255,107,107,.05); box-shadow:inset 0 0 0 1px rgba(255,107,107,.14); }
+  .grp.after{ background:rgba(255,255,255,.025); box-shadow:inset 0 0 0 1px rgba(255,255,255,.07); }
+  .grp-hd{ display:flex; align-items:center; gap:10px; padding:0 2px; }
+  .grp-row{ display:flex; gap:32px; align-items:flex-start; }
+
+  .unit{ display:flex; flex-direction:column; gap:13px; width:402px; }
+  .cap{ display:flex; align-items:baseline; gap:9px; }
+  .cap .nm{ font:700 13.5px var(--font-jp); color:#fff; }
+  .cap .uc{ font:600 11px var(--font-latin); color:var(--text-3); letter-spacing:.02em; }
+  .notes{ display:flex; flex-direction:column; gap:8px; width:402px; padding-top:2px; }
+  .note{ display:flex; gap:9px; align-items:flex-start; font:400 12.5px/1.5 var(--font-jp); color:var(--text-2); }
+  .note .dot{ width:7px; height:7px; border-radius:50%; margin-top:6px; flex:none; }
+  .note.bad .dot{ background:#ff6b6b; }
+  .note.good .dot{ background:var(--gradient-colorful); }
+
+  /* status bar inner */
+  .sb-sys{ display:flex; align-items:center; gap:7px; }
+
+  /* dark map */
+  .map{ position:absolute; inset:0; background-color:#0e1117;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 56px, rgba(255,255,255,.055) 56px 58px),
+      repeating-linear-gradient(90deg, transparent 0 56px, rgba(255,255,255,.055) 56px 58px),
+      repeating-linear-gradient(57deg, transparent 0 116px, rgba(255,255,255,.04) 116px 119px),
+      radial-gradient(150% 120% at 72% 14%, rgba(46,92,120,.20), transparent 52%); }
+  .map .ave{ position:absolute; background:rgba(255,255,255,.085); }
+  .map .water{ position:absolute; border-radius:46% 54% 60% 40%/50% 46% 54% 50%; background:rgba(38,86,110,.45); filter:blur(.5px); }
+  .map .vig{ position:absolute; inset:0; background:radial-gradient(125% 100% at 50% 56%, transparent 42%, rgba(0,0,0,.5)); }
+  .me{ position:absolute; width:18px; height:18px; border-radius:50%; background:#2f7df6; box-shadow:0 0 0 4px rgba(47,125,246,.28), 0 1px 4px rgba(0,0,0,.6); }
+  .me::after{ content:""; position:absolute; inset:-9px; border-radius:50%; border:1.5px solid rgba(47,125,246,.35); animation:mePulse 2.4s var(--ease-out) infinite; }
+  @keyframes mePulse{ 0%{ transform:scale(.6); opacity:.9; } 100%{ transform:scale(1.5); opacity:0; } }
+  .range{ position:absolute; border-radius:50%; border:1.5px solid rgba(255,255,255,.6);
+    background:radial-gradient(circle, rgba(255,62,136,.13), rgba(0,95,103,.10) 70%, transparent);
+    box-shadow:0 0 0 9999px rgba(0,0,0,.20); }
+
+  /* old "before" mini card */
+  .bmini{ position:relative; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,.53); aspect-ratio:189/178; }
+  .bmini img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:16px; }
+  .bmini .g{ position:absolute; inset:0; background:linear-gradient(transparent 32%, rgba(0,0,0,.56)); }
+  .bmini .b{ position:absolute; left:5px; right:5px; bottom:6px; }
+  .bmini .n{ font:600 12px var(--font-latin); color:#fff; }
+  .bmini .d{ font:600 8px/1.28 var(--font-latin); color:rgba(255,255,255,.72); margin-top:2px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .bmini .m{ display:flex; justify-content:space-between; font:600 8px var(--font-latin); color:rgba(255,255,255,.88); margin-top:3px; }
+
+  /* selectable cell (after grid) */
+  .cell{ padding:2px; border-radius:14px; }
+  .cell.sel{ background:var(--gradient-colorful); }
+  .cell .wd-mini-card{ border-radius:12px; }
+  .selchk{ position:absolute; top:8px; right:8px; width:24px; height:24px; border-radius:50%; background:var(--gradient-colorful); display:flex; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,.55); }
+  .selchk img{ width:13px; height:13px; }
+
+  /* step indicator */
+  .steps{ display:flex; align-items:center; gap:9px; }
+  .steps .s{ display:flex; align-items:center; gap:7px; }
+  .steps .d{ width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font:700 11px var(--font-latin); flex:none; }
+  .steps .s.on .d{ background:var(--gradient-colorful); color:#1a1206; }
+  .steps .s.off .d{ background:rgba(255,255,255,.13); color:var(--text-3); }
+  .steps .s .t{ font:700 12px var(--font-jp); }
+  .steps .s.on .t{ color:#fff; }
+  .steps .s.off .t{ color:var(--text-3); }
+  .steps .bar{ width:24px; height:2px; background:rgba(255,255,255,.18); border-radius:2px; }
+
+  .ctx{ display:inline-flex; align-items:center; gap:7px; padding:7px 13px 7px 9px; border-radius:9999px; }
+  .ctx img{ width:15px; height:15px; }
+  .ctx span{ font:600 12px var(--font-latin); color:#fff; }
+</style>
+</helmet>
+
+<div class="board">
+
+  <div class="board-head">
+    <div class="bh-kick">Toopdbq · Reverse Handoff</div>
+    <div class="bh-title">CircleFlow — サークル作成・選択フローの再設計</div>
+    <div class="bh-sub">狙いは ①遷移・手数の簡素化 ②全体トーンの刷新。現状（Before）を単一の正として写し取り、ダーク＋カラフル放射グラデ＋ガラス＋写真フルブリードの世界観へ。既存の Wd* と colors_and_type.css のトークンのみを使用、新規発明なし。効果は 1 コンポーネント 1〜2 個。</div>
+    <div class="legend">
+      <span class="glass-tag no">Before · 現状実装</span>
+      <span class="glass-tag yes">After · 再設計</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ S1 -->
+  <section class="sec">
+    <div class="sec-head">
+      <div class="sec-id">01 · CircleSelect — select-grid / select-empty</div>
+      <div class="sec-title">サークルを選ぶ — グリッドと空状態</div>
+      <div class="sec-desc">Before：黒地のベタ塗り、白枠 .53 と角丸混在のミニカード、位置情報なしは完全な黒画面で案内ゼロ。After：scrim 1 枚のミニカードへ刷新し、選択は全画面オーバーレイをやめて「カードをタップ→下部の軽い確定バー」に。空状態は現在地つきの親切な CTA。</div>
+    </div>
+    <div class="sec-row">
+
+      <div class="grp before">
+        <div class="grp-hd"><span class="glass-tag no">Before</span></div>
+        <div class="grp-row">
+          <div class="unit">
+            <div class="cap"><span class="nm">グリッド（現状）</span><span class="uc">select-grid</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:#000;">
+                <div style="position:absolute; top:62px; left:0; right:0; height:46px; display:flex; align-items:center; justify-content:center;">
+                  <img src="../../assets/icons/icon_back.png" style="position:absolute; left:16px; width:22px; height:22px;">
+                  <span style="font:400 20px var(--font-latin); color:#fff;">サークル</span>
+                </div>
+                <div style="position:absolute; top:116px; left:8px; right:8px; display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                  <div class="bmini"><img src="../../assets/sample/reel/reel007.jpg" style="object-position:50% 38%;"><div class="g"></div><div class="b"><div class="n">渋谷コミュニティ</div><div class="d">渋谷駅周辺のコミュニティ。近くの人とつながろう。毎日たくさんの投稿。</div><div class="m"><span>＋128人</span><span>10.0m</span></div></div></div>
+                  <div class="bmini"><img src="../../assets/sample/reel/reel008.jpg" style="object-position:50% 30%;"><div class="g"></div><div class="b"><div class="n">新宿グループ</div><div class="d">新宿エリアの交流グループ。グルメや夜景の写真を共有しよう。</div><div class="m"><span>＋86人</span><span>1.2km</span></div></div></div>
+                  <div class="bmini"><img src="../../assets/sample/reel/reel009.jpg" style="object-position:50% 42%;"><div class="g"></div><div class="b"><div class="n">原宿コミュニティ</div><div class="d">原宿の最新スポット。ファッションとカフェの街から。</div><div class="m"><span>＋54人</span><span>2.0km</span></div></div></div>
+                  <div class="bmini"><img src="../../assets/sample/reel/reel010.jpg" style="object-position:50% 40%;"><div class="g"></div><div class="b"><div class="n">代官山サークル</div><div class="d">代官山の落ち着いた路地裏から。散歩好きのためのサークル。</div><div class="m"><span>＋31人</span><span>2.4km</span></div></div></div>
+                  <div class="bmini"><img src="../../assets/sample/reel/reel011.jpg" style="object-position:50% 40%;"><div class="g"></div><div class="b"><div class="n">恵比寿ナイト</div><div class="d">恵比寿の夜を楽しむ人たち。バーとレストランの情報。</div><div class="m"><span>＋47人</span><span>2.9km</span></div></div></div>
+                  <div class="bmini"><img src="../../assets/sample/reel/reel012.jpg" style="object-position:50% 40%;"><div class="g"></div><div class="b"><div class="n">表参道アート</div><div class="d">表参道のギャラリーと建築。アート好きが集まる場所。</div><div class="m"><span>＋22人</span><span>3.1km</span></div></div></div>
+                </div>
+                <button class="wd-icon-btn color has-badge" style="position:absolute; right:18px; bottom:46px; width:60px; height:60px;"><img src="../../assets/icons/icon_add.png" style="width:26px; height:26px;"><span class="wd-badge"><img src="../../assets/icons/icon_camera.png"></span></button>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+
+          <div class="unit">
+            <div class="cap"><span class="nm">空状態（現状）</span><span class="uc">select-empty</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:#000;">
+                <div style="position:absolute; top:62px; left:0; right:0; height:46px; display:flex; align-items:center; justify-content:center;">
+                  <img src="../../assets/icons/icon_back.png" style="position:absolute; left:16px; width:22px; height:22px;">
+                  <span style="font:400 20px var(--font-latin); color:#fff;">サークル</span>
+                </div>
+                <button class="wd-icon-btn color has-badge" style="position:absolute; right:18px; bottom:46px; width:60px; height:60px;"><img src="../../assets/icons/icon_add.png" style="width:26px; height:26px;"><span class="wd-badge"><img src="../../assets/icons/icon_camera.png"></span></button>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note bad"><span class="dot"></span>白枠 .53 ＋ 角丸 8/16 混在、説明 8px×3 行で密度過多・可読性低下</div>
+          <div class="note bad"><span class="dot"></span>位置情報なし＝本文が完全な黒画面。案内も CTA もなく行き止まり</div>
+          <div class="note bad"><span class="dot"></span>カード tap で全画面オーバーレイ確認が挟まる（次セクション）</div>
+        </div>
+      </div>
+
+      <div class="grp after">
+        <div class="grp-hd"><span class="glass-tag yes">After</span></div>
+        <div class="grp-row">
+          <div class="unit">
+            <div class="cap"><span class="nm">グリッド ＋ 軽い確定バー</span><span class="uc">select-grid</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:var(--bg);">
+                <div style="position:absolute; inset:0; background:radial-gradient(120% 80% at 50% 0%, rgba(40,30,60,.5), transparent 60%);"></div>
+                <div class="wd-nav" style="position:absolute; top:62px; left:0; right:0; padding:8px 12px;">
+                  <img src="../../assets/icons/icon_back.png" style="width:22px; height:22px;">
+                  <span class="ttl" style="font-family:var(--font-jp); font-weight:700; font-size:18px;">サークルを選択</span>
+                  <button class="wd-icon-btn" style="width:40px; height:40px;"><img src="../../assets/icons/icon_add.png"></button>
+                </div>
+                <div style="position:absolute; top:124px; left:16px; right:16px; display:flex; align-items:center; justify-content:space-between;">
+                  <span class="ctx lg lg-dark" style="position:relative;"><img src="../../assets/icons/icon_near.png"><span>渋谷ハチ公前</span></span>
+                  <span style="font:600 11px var(--font-latin); color:var(--text-3);">近い順</span>
+                </div>
+                <div style="position:absolute; top:166px; left:16px; right:16px; bottom:142px; overflow:hidden; display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start;">
+                  <div class="cell sel" style="position:relative;"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel007.jpg" style="object-position:50% 38%;"><div class="scrim"></div><div class="body"><div class="ttl">渋谷コミュニティ</div><div class="desc">渋谷駅周辺のコミュニティ</div><div class="meta"><span>＋128</span><span>10.0m</span></div></div></div><span class="selchk"><img src="../../assets/icons/icon_check.png"></span></div>
+                  <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel008.jpg" style="object-position:50% 30%;"><div class="scrim"></div><div class="body"><div class="ttl">新宿グループ</div><div class="desc">新宿エリアの交流グループ</div><div class="meta"><span>＋86</span><span>1.2km</span></div></div></div></div>
+                  <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel009.jpg" style="object-position:50% 42%;"><div class="scrim"></div><div class="body"><div class="ttl">原宿コミュニティ</div><div class="desc">原宿の最新スポット</div><div class="meta"><span>＋54</span><span>2.0km</span></div></div></div></div>
+                  <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel010.jpg" style="object-position:50% 40%;"><div class="scrim"></div><div class="body"><div class="ttl">代官山サークル</div><div class="desc">散歩好きのサークル</div><div class="meta"><span>＋31</span><span>2.4km</span></div></div></div></div>
+                  <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel011.jpg" style="object-position:50% 40%;"><div class="scrim"></div><div class="body"><div class="ttl">恵比寿ナイト</div><div class="desc">夜を楽しむ人たち</div><div class="meta"><span>＋47</span><span>2.9km</span></div></div></div></div>
+                  <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel012.jpg" style="object-position:50% 40%;"><div class="scrim"></div><div class="body"><div class="ttl">表参道アート</div><div class="desc">ギャラリーと建築</div><div class="meta"><span>＋22</span><span>3.1km</span></div></div></div></div>
+                </div>
+                <div style="position:absolute; left:0; right:0; bottom:0; height:150px; background:linear-gradient(transparent, var(--bg) 58%); pointer-events:none;"></div>
+                <div class="lg lg-dark" style="position:absolute; left:14px; right:14px; bottom:48px; display:flex; align-items:center; gap:11px; padding:9px 9px 9px 12px; border-radius:18px;">
+                  <img src="../../assets/sample/reel/reel007.jpg" style="width:42px; height:42px; border-radius:50%; object-fit:cover; object-position:50% 38%; box-shadow:0 0 0 1.5px rgba(255,255,255,.3);">
+                  <div style="flex:1; min-width:0;"><div style="font:700 14px var(--font-jp); color:#fff;">渋谷コミュニティ</div><div style="font:600 11px var(--font-latin); color:var(--text-2); margin-top:1px;">＋128人 · 10.0m</div></div>
+                  <button class="wd-text-btn" style="min-width:auto; height:46px; padding:0 24px; font-size:16px;">選択</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+
+          <div class="unit">
+            <div class="cap"><span class="nm">空状態 ＋ CTA</span><span class="uc">select-empty</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:var(--bg);">
+                <div style="position:absolute; inset:0; background:radial-gradient(120% 70% at 50% 36%, rgba(60,40,80,.42), transparent 60%);"></div>
+                <div class="wd-nav" style="position:absolute; top:62px; left:0; right:0; padding:8px 12px;">
+                  <img src="../../assets/icons/icon_back.png" style="width:22px; height:22px;">
+                  <span class="ttl" style="font-family:var(--font-jp); font-weight:700; font-size:18px;">サークルを選択</span>
+                  <span style="width:40px;"></span>
+                </div>
+                <div style="position:absolute; left:36px; right:36px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; align-items:center; text-align:center; gap:18px;">
+                  <div class="lg lg-dark" style="position:relative; width:78px; height:78px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><img src="../../assets/icons/icon_near.png" style="width:32px; height:32px; opacity:.85;"></div>
+                  <div>
+                    <div style="font:700 18px var(--font-jp); color:#fff;">近くにまだサークルが<br>ありません</div>
+                    <div style="font:400 13px/1.6 var(--font-jp); color:var(--text-3); margin-top:10px;">あなたが渋谷で最初の<br>サークルを作りましょう。</div>
+                  </div>
+                  <span class="ctx lg lg-dark" style="position:relative;"><img src="../../assets/icons/icon_near.png"><span>渋谷ハチ公前</span></span>
+                  <button class="wd-text-btn" style="min-width:236px; height:56px; margin-top:6px; gap:8px;"><img src="../../assets/icons/icon_add.png" style="width:20px; height:20px;">サークルを作る</button>
+                  <button style="background:none; border:none; font:600 13px var(--font-jp); color:var(--text-2); cursor:pointer;">別の場所を探す</button>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note good"><span class="dot"></span>scrim 1 枚のミニカード・角丸 12 統一・説明 1 行、選択カードはカラフルグラデのリングで明示</div>
+          <div class="note good"><span class="dot"></span>確定は下部の軽いガラスバー＝オーバーレイ廃止・1 タップで投稿へ戻る</div>
+          <div class="note good"><span class="dot"></span>空状態は現在地つきの案内＋「サークルを作る」CTA で行き止まりを解消</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ S2 -->
+  <section class="sec">
+    <div class="sec-head">
+      <div class="sec-id">02 · CircleSelectConfirm — select-confirm</div>
+      <div class="sec-title">選択の確認 — 全画面オーバーレイを軽量化</div>
+      <div class="sec-desc">Before：カード tap ごとに暗幕 64% の全画面オーバーレイが立ち上がり、確定すると overlay とグリッドの 2 画面を閉じて返す重い導線。After：グリッドを背後に残したまま短いガラスの確認シートがせり上がり、サマリを見て 1 タップで投稿へ。コンテキストが切れない。</div>
+    </div>
+    <div class="sec-row">
+
+      <div class="grp before">
+        <div class="grp-hd"><span class="glass-tag no">Before</span></div>
+        <div class="unit">
+          <div class="cap"><span class="nm">全画面オーバーレイ確認</span><span class="uc">select-confirm</span></div>
+          <div class="phone"><div class="dynamic-island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+            <div class="screen" style="background:#000;">
+              <div style="position:absolute; top:116px; left:8px; right:8px; display:grid; grid-template-columns:1fr 1fr; gap:8px; opacity:.5; filter:blur(1px);">
+                <div class="bmini"><img src="../../assets/sample/reel/reel007.jpg"><div class="g"></div></div>
+                <div class="bmini"><img src="../../assets/sample/reel/reel008.jpg"><div class="g"></div></div>
+                <div class="bmini"><img src="../../assets/sample/reel/reel009.jpg"><div class="g"></div></div>
+                <div class="bmini"><img src="../../assets/sample/reel/reel010.jpg"><div class="g"></div></div>
+              </div>
+              <div style="position:absolute; inset:0; background:rgba(0,0,0,.64);"></div>
+              <div style="position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); width:360px; max-width:90%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; box-shadow:0 0 0 1px #221C1C, 0 18px 50px rgba(0,0,0,.6);">
+                <img src="../../assets/sample/reel/reel007.jpg" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 38%;">
+                <div style="position:absolute; inset:0; background:linear-gradient(transparent 30%, rgba(0,0,0,.92) 92%);"></div>
+                <div style="position:absolute; left:15px; right:15px; bottom:15px;">
+                  <div style="font:600 24px var(--font-latin); color:#fff;">渋谷コミュニティ</div>
+                  <div style="font:600 11px var(--font-latin); color:rgba(255,255,255,.85); margin-top:6px;">＋128人 · 10.0m</div>
+                  <div style="font:600 12px var(--font-latin); color:rgba(255,255,255,.72); margin-top:6px;">渋谷駅周辺のコミュニティ</div>
+                </div>
+              </div>
+              <div style="position:absolute; left:0; right:0; bottom:0; height:125px; background:linear-gradient(transparent, #000);"></div>
+              <button class="wd-text-btn" style="position:absolute; left:50%; bottom:42px; transform:translateX(-50%); min-width:280px; height:56px;">このサークルを選択</button>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note bad"><span class="dot"></span>カード tap ごとに暗幕 64% の全画面 dialog が起動</div>
+          <div class="note bad"><span class="dot"></span>確定で overlay ＋ グリッドの 2 画面を閉じて返す（手数過多）</div>
+          <div class="note bad"><span class="dot"></span>一覧のコンテキストが完全に隠れ、隣の候補と比べられない</div>
+        </div>
+      </div>
+
+      <div class="grp after">
+        <div class="grp-hd"><span class="glass-tag yes">After</span></div>
+        <div class="unit">
+          <div class="cap"><span class="nm">確認シート（ピーク）</span><span class="uc">select-confirm</span></div>
+          <div class="phone"><div class="dynamic-island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+            <div class="screen" style="background:var(--bg);">
+              <div class="wd-nav" style="position:absolute; top:62px; left:0; right:0; padding:8px 12px; z-index:2;">
+                <img src="../../assets/icons/icon_back.png" style="width:22px; height:22px;">
+                <span class="ttl" style="font-family:var(--font-jp); font-weight:700; font-size:18px;">サークルを選択</span>
+                <span style="width:40px;"></span>
+              </div>
+              <div style="position:absolute; top:116px; left:16px; right:16px; display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start;">
+                <div class="cell sel" style="position:relative;"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel007.jpg" style="object-position:50% 38%;"><div class="scrim"></div><div class="body"><div class="ttl">渋谷コミュニティ</div><div class="meta"><span>＋128</span><span>10.0m</span></div></div></div><span class="selchk"><img src="../../assets/icons/icon_check.png"></span></div>
+                <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel008.jpg" style="object-position:50% 30%;"><div class="scrim"></div><div class="body"><div class="ttl">新宿グループ</div><div class="meta"><span>＋86</span><span>1.2km</span></div></div></div></div>
+                <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel009.jpg" style="object-position:50% 42%;"><div class="scrim"></div><div class="body"><div class="ttl">原宿コミュニティ</div><div class="meta"><span>＋54</span><span>2.0km</span></div></div></div></div>
+                <div class="cell"><div class="wd-mini-card"><img class="bg" src="../../assets/sample/reel/reel010.jpg" style="object-position:50% 40%;"><div class="scrim"></div><div class="body"><div class="ttl">代官山サークル</div><div class="meta"><span>＋31</span><span>2.4km</span></div></div></div></div>
+              </div>
+              <div style="position:absolute; left:0; right:0; bottom:296px; height:120px; background:linear-gradient(transparent, rgba(8,8,11,.55)); pointer-events:none;"></div>
+              <div class="wd-sheet" style="position:absolute; left:0; right:0; bottom:0; padding-bottom:42px;">
+                <div class="grabber"></div>
+                <div style="padding:16px 20px 0;">
+                  <div style="display:flex; align-items:center; gap:13px;">
+                    <img src="../../assets/sample/reel/reel007.jpg" style="width:60px; height:60px; border-radius:16px; object-fit:cover; object-position:50% 38%; box-shadow:0 0 0 1px rgba(255,255,255,.18);">
+                    <div style="flex:1; min-width:0;">
+                      <div style="font:700 19px var(--font-jp); color:#fff;">渋谷コミュニティ</div>
+                      <div style="font:600 11px var(--font-latin); color:var(--text-2); margin-top:3px;">＋128人が参加中 · 10.0m</div>
+                    </div>
+                  </div>
+                  <div style="font:400 13px/1.5 var(--font-jp); color:var(--text-3); margin-top:12px;">渋谷駅周辺のコミュニティ。近くの人とつながろう。</div>
+                  <div class="wd-member" style="margin-top:14px;"><span class="stack"><img src="../../assets/sample/user/user002.jpg"><img src="../../assets/sample/user/user009.jpg"><img src="../../assets/sample/user/user011.jpg"><img src="../../assets/sample/user/user004.jpg"></span><span class="ct"><b>＋128</b>人が参加中</span></div>
+                  <button class="wd-text-btn" style="width:100%; height:56px; margin-top:18px; gap:8px;"><img src="../../assets/icons/icon_check.png" style="width:18px; height:18px;">選択して投稿へ</button>
+                </div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note good"><span class="dot"></span>背後にグリッドを残した短いガラスシート（ピーク）＝コンテキスト保持</div>
+          <div class="note good"><span class="dot"></span>サマリ＋参加メンバーを見て「選択して投稿へ」の 1 タップで完了</div>
+          <div class="note good"><span class="dot"></span>下スワイプで取り消し＝別候補へすぐ戻れる（2 画面閉じ不要）</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ S3 -->
+  <section class="sec">
+    <div class="sec-head">
+      <div class="sec-id">03 · CircleEdit — edit-camera / editing / maptap / range / save-ready</div>
+      <div class="sec-title">サークルをつくる — 段階化して地図を主役に</div>
+      <div class="sec-desc">Before：1 画面に画像→基本情報→中心→範囲が混在し、footer 高さが 466 / 402 / 164px と乱高下して地図が隠れる。保存不可でも「作成」ボタンは出るが無反応。After：①写真＋名前 → ②場所＋範囲 の 2 ステップに分解。各シートは役割相応の一定高さで地図は常に主役（≥60% 可視）、現在ステップと次アクション・保存可否の理由を明示。</div>
+    </div>
+    <div class="sec-row">
+
+      <div class="grp before">
+        <div class="grp-hd"><span class="glass-tag no">Before</span></div>
+        <div class="unit">
+          <div class="cap"><span class="nm">footer 466px（写真未設定）</span><span class="uc">edit-camera</span></div>
+          <div class="phone"><div class="dynamic-island"></div>
+            <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+            <div class="screen" style="background:#000;">
+              <div class="map"><div class="ave" style="left:0; right:0; top:150px; height:7px;"></div><div class="ave" style="top:0; bottom:0; left:140px; width:7px;"></div><div class="water" style="right:-40px; top:120px; width:170px; height:150px;"></div><div class="vig"></div></div>
+              <div class="me" style="left:180px; top:120px;"></div>
+              <div style="position:absolute; top:74px; left:16px; right:16px; display:flex; justify-content:space-between;">
+                <button class="wd-icon-btn" style="width:44px; height:44px;"><img src="../../assets/icons/icon_back.png"></button>
+                <button class="wd-icon-btn" style="width:44px; height:44px;"><img src="../../assets/icons/icon_close.png"></button>
+              </div>
+              <div style="position:absolute; left:0; right:0; bottom:0; height:466px; background:#1A1A1A; border-radius:16px 16px 0 0; padding:26px 22px 34px; display:flex; flex-direction:column; align-items:center;">
+                <div style="width:50%; aspect-ratio:1/1; border-radius:12px; background:#2a2a2a; border:1px dashed rgba(255,255,255,.28); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;"><img src="../../assets/icons/icon_image.png" style="width:38px; height:38px; opacity:.5;"><span style="font:500 12px var(--font-jp); color:rgba(255,255,255,.5);">タップで画像を選択</span></div>
+                <div style="width:100%; margin-top:28px; border-bottom:1px solid rgba(255,255,255,.2); padding:12px 2px;"><span style="font:600 15px var(--font-latin); color:rgba(255,255,255,.4);">サークル名を入力…</span></div>
+                <div style="width:100%; margin-top:10px; border-bottom:1px solid rgba(255,255,255,.2); padding:12px 2px;"><span style="font:600 15px var(--font-latin); color:rgba(255,255,255,.4);">サークルの説明を入力…</span></div>
+              </div>
+            </div>
+            <div class="home-ind"></div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note bad"><span class="dot"></span>footer 466px が画面の半分超を占有し、地図がほぼ見えない</div>
+          <div class="note bad"><span class="dot"></span>状態で高さが 466 / 402 / 164px に乱高下し切替が唐突</div>
+          <div class="note bad"><span class="dot"></span>Material 風プレースホルダ＋ベタ塗り #1A1A1A で世界観が素</div>
+        </div>
+      </div>
+
+      <div class="grp after">
+        <div class="grp-hd"><span class="glass-tag yes">After</span></div>
+        <div class="grp-row">
+
+          <div class="unit">
+            <div class="cap"><span class="nm">ステップ① 写真・名前</span><span class="uc">edit-editing</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:#000;">
+                <div class="map"><div class="ave" style="left:0; right:0; top:170px; height:7px;"></div><div class="ave" style="top:0; bottom:0; left:150px; width:7px;"></div><div class="water" style="right:-40px; top:150px; width:160px; height:150px;"></div><div class="vig"></div></div>
+                <div class="me" style="left:190px; top:150px;"></div>
+                <div style="position:absolute; inset:0 0 376px 0; background:linear-gradient(transparent 55%, rgba(8,8,11,.55));"></div>
+                <div style="position:absolute; top:74px; left:16px; right:16px; display:flex; align-items:center; gap:12px;">
+                  <button class="wd-icon-btn" style="width:44px; height:44px;"><img src="../../assets/icons/icon_back.png"></button>
+                  <div class="steps lg lg-dark" style="position:relative; flex:1; justify-content:center; padding:9px 14px; border-radius:9999px;">
+                    <div class="s on"><span class="d">1</span><span class="t">写真・名前</span></div>
+                    <div class="bar"></div>
+                    <div class="s off"><span class="d">2</span><span class="t">場所・範囲</span></div>
+                  </div>
+                </div>
+                <div class="wd-sheet" style="position:absolute; left:0; right:0; bottom:0; height:376px; padding-bottom:40px;">
+                  <div class="grabber"></div>
+                  <div style="padding:14px 22px 0;">
+                    <div style="font:700 17px var(--font-jp); color:#fff;">サークルをつくる</div>
+                    <div style="font:600 11px var(--font-latin); color:var(--text-3); margin-top:2px; letter-spacing:.04em;">STEP 1 / 2 · 写真と名前</div>
+                    <div style="display:flex; align-items:center; gap:14px; margin-top:18px;">
+                      <div style="position:relative; width:74px; height:74px; flex:none;">
+                        <img src="../../assets/sample/reel/reel007.jpg" style="width:74px; height:74px; border-radius:50%; object-fit:cover; object-position:50% 38%; box-shadow:0 2px 8px rgba(0,0,0,.6);">
+                        <span class="wd-badge" style="bottom:-2px; right:-2px; top:auto; width:26px; height:26px;"><img src="../../assets/icons/icon_swap.png" style="width:13px; height:13px;"></span>
+                      </div>
+                      <div style="flex:1; min-width:0;">
+                        <div class="wd-field" style="width:100%; height:46px;"><span style="font:600 14px var(--font-jp); color:#fff;">渋谷の朝活</span></div>
+                        <div style="font:400 11px var(--font-latin); color:var(--text-3); margin-top:7px; padding-left:4px;">サークル名 · 必須</div>
+                      </div>
+                    </div>
+                    <div class="wd-field" style="width:100%; height:46px; margin-top:16px;"><span style="font:600 14px var(--font-jp); color:var(--text-2);">朝の渋谷を散歩する人のサークル</span></div>
+                    <button class="wd-text-btn" style="width:100%; height:56px; margin-top:18px; gap:8px;">次へ：場所を選ぶ<img src="../../assets/icons/icon_next.png" style="width:18px; height:18px;"></button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+
+          <div class="unit">
+            <div class="cap"><span class="nm">ステップ② 範囲・作成可</span><span class="uc">edit-range · save-ready</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:#000;">
+                <div class="map"><div class="ave" style="left:0; right:0; top:330px; height:8px;"></div><div class="ave" style="top:0; bottom:0; left:120px; width:8px;"></div><div class="water" style="left:-50px; top:430px; width:180px; height:160px;"></div><div class="vig"></div></div>
+                <div class="range" style="left:50%; top:330px; transform:translate(-50%,-50%); width:230px; height:230px;"></div>
+                <div style="position:absolute; left:50%; top:330px; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center;"><img src="../../assets/icons/icon_pin_location.png" style="width:34px; height:34px; filter:drop-shadow(0 3px 5px rgba(0,0,0,.7));"></div>
+                <div style="position:absolute; top:74px; left:16px; right:16px; display:flex; align-items:center; gap:12px;">
+                  <button class="wd-icon-btn" style="width:44px; height:44px;"><img src="../../assets/icons/icon_back.png"></button>
+                  <div class="steps lg lg-dark" style="position:relative; flex:1; justify-content:center; padding:9px 14px; border-radius:9999px;">
+                    <div class="s on"><span class="d"><img src="../../assets/icons/icon_check.png" style="width:11px; height:11px;"></span><span class="t">写真・名前</span></div>
+                    <div class="bar" style="background:var(--gradient-colorful);"></div>
+                    <div class="s on"><span class="d">2</span><span class="t">場所・範囲</span></div>
+                  </div>
+                </div>
+                <div class="wd-sheet" style="position:absolute; left:0; right:0; bottom:0; height:212px; padding-bottom:40px;">
+                  <div class="grabber"></div>
+                  <div style="padding:13px 22px 0;">
+                    <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                      <span style="font:700 14px var(--font-jp); color:#fff;">範囲をきめる</span>
+                      <span style="font:700 22px var(--font-latin); color:#fff;">1.7<span style="font-size:13px; color:var(--text-2);">km</span></span>
+                    </div>
+                    <div class="wd-slider" style="width:100%; margin-top:14px;">
+                      <div class="track"><div class="fill" style="width:70%;"></div><div class="thumb" style="left:70%;"></div></div>
+                      <div style="display:flex; justify-content:space-between; margin-top:8px; font:600 10px var(--font-latin); color:var(--text-3);"><span>100m</span><span>2000m</span></div>
+                    </div>
+                    <button class="wd-text-btn" style="width:100%; height:56px; margin-top:14px; gap:8px;"><img src="../../assets/icons/icon_check.png" style="width:18px; height:18px;">サークルを作成</button>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+
+          <div class="unit">
+            <div class="cap"><span class="nm">ステップ② 未配置 · 保存不可の理由</span><span class="uc">edit-maptap</span></div>
+            <div class="phone"><div class="dynamic-island"></div>
+              <div class="statusbar"><span class="time">9:41</span><span class="sb-sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="#fff"><path d="M8 11.5l2.2-2.7a3 3 0 00-4.4 0L8 11.5zM2.2 4.3a9 9 0 0111.6 0l-1.4 1.8a6.7 6.7 0 00-8.8 0L2.2 4.3z"/></svg><svg width="26" height="12" viewBox="0 0 26 12"><rect x="1" y="1" width="20" height="10" rx="2.5" fill="none" stroke="#fff" opacity=".5"/><rect x="3" y="3" width="14" height="6" rx="1" fill="#fff"/><rect x="22.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" opacity=".5"/></svg></span></div>
+              <div class="screen" style="background:#000;">
+                <div class="map"><div class="ave" style="left:0; right:0; top:300px; height:8px;"></div><div class="ave" style="top:0; bottom:0; left:230px; width:8px;"></div><div class="water" style="left:-50px; top:120px; width:170px; height:150px;"></div><div class="vig"></div></div>
+                <div class="me" style="left:191px; top:300px;"></div>
+                <div class="lg lg-dark" style="position:absolute; left:50%; top:210px; transform:translateX(-50%); display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:9999px; white-space:nowrap;"><img src="../../assets/icons/icon_pin.png" style="width:16px; height:16px;"><span style="font:600 13px var(--font-jp); color:#fff;">地図をタップして中心を決める</span></div>
+                <div style="position:absolute; top:74px; left:16px; right:16px; display:flex; align-items:center; gap:12px;">
+                  <button class="wd-icon-btn" style="width:44px; height:44px;"><img src="../../assets/icons/icon_back.png"></button>
+                  <div class="steps lg lg-dark" style="position:relative; flex:1; justify-content:center; padding:9px 14px; border-radius:9999px;">
+                    <div class="s on"><span class="d"><img src="../../assets/icons/icon_check.png" style="width:11px; height:11px;"></span><span class="t">写真・名前</span></div>
+                    <div class="bar"></div>
+                    <div class="s on"><span class="d">2</span><span class="t">場所・範囲</span></div>
+                  </div>
+                </div>
+                <div class="wd-sheet" style="position:absolute; left:0; right:0; bottom:0; height:212px; padding-bottom:40px;">
+                  <div class="grabber"></div>
+                  <div style="padding:13px 22px 0;">
+                    <div style="display:flex; align-items:baseline; justify-content:space-between;">
+                      <span style="font:700 14px var(--font-jp); color:var(--text-2);">範囲をきめる</span>
+                      <span style="font:700 22px var(--font-latin); color:var(--text-disabled);">— <span style="font-size:13px;">km</span></span>
+                    </div>
+                    <div class="wd-slider" style="width:100%; margin-top:14px; opacity:.4;">
+                      <div class="track"><div class="fill" style="width:0%;"></div><div class="thumb" style="left:0%;"></div></div>
+                    </div>
+                    <div style="width:100%; height:56px; margin-top:14px; border-radius:8px; background:rgba(255,255,255,.06); display:flex; align-items:center; justify-content:center; font:700 17px var(--font-jp); color:var(--text-disabled);">サークルを作成</div>
+                    <div style="display:flex; align-items:center; gap:8px; margin-top:10px; justify-content:center;"><span style="width:6px; height:6px; border-radius:50%; background:var(--state-error); flex:none;"></span><span style="font:500 12px var(--font-jp); color:var(--text-2);">地図をタップして中心を決めてください</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="home-ind"></div>
+            </div>
+          </div>
+
+        </div>
+        <div class="notes">
+          <div class="note good"><span class="dot"></span>①写真＋名前 → ②場所＋範囲 の 2 ステップ。ヘッダーのインジケータで現在地と次アクションを明示</div>
+          <div class="note good"><span class="dot"></span>シートは役割相応の一定高さ（① 376 / ② 212px）で、地図は常に主役として可視</div>
+          <div class="note good"><span class="dot"></span>保存不可は「作成」を無効表示にし、理由（中心未設定）をその場で提示</div>
+          <div class="note good"><span class="dot"></span>ガラスシート＋写真スロット＋カラフル CTA で DS の世界観に刷新（効果は 1〜2 個）</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="cf" cx="78%" cy="82%" r="95%">
+      <stop offset="5%" stop-color="#fff0a6"/><stop offset="45%" stop-color="#005f67"/>
+      <stop offset="80%" stop-color="#ff3e88"/><stop offset="100%" stop-color="#d0a052"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#0e1117"/>
+  <rect width="512" height="512" rx="96" fill="url(#cf)" opacity="0.92"/>
+  <rect x="186" y="150" width="140" height="248" rx="30" fill="#0b0e14" opacity="0.86"/>
+  <circle cx="256" cy="250" r="34" fill="none" stroke="#fff" stroke-width="6" opacity="0.95"/>
+  <path d="M256 232c-12 0-22 10-22 22 0 16 22 34 22 34s22-18 22-34c0-12-10-22-22-22z" fill="#fff"/>
+  <rect x="210" y="346" width="92" height="14" rx="7" fill="#fff" opacity="0.92"/>
+  <rect x="210" y="370" width="60" height="12" rx="6" fill="#fff" opacity="0.6"/>
+</svg>
+</template></x-dc>
+</body>
+</html>
