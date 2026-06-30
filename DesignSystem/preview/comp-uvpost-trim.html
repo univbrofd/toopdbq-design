@@ -1,0 +1,103 @@
+<!-- @dsCard group="UniversePost" tier="screen" name="UniversePostFlow — 動画トリム" subtitle="フルスクリーン動画編集。上限1:00。選択尺≥60sでCTA無効。iPhone17 402×874 full-bleed" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; }
+  .head { max-width:402px; margin:0 auto; }
+  .head .ttl { font-family:var(--font-jp); font-weight:700; font-size:14px; color:var(--text-1); }
+  .head .sub { font-family:var(--font-latin); font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.5; }
+
+  .uv-edit { position:absolute; inset:0; background:#0a0a0c; }
+
+  /* top bar */
+  .ebar { position:absolute; top:60px; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:0 14px; }
+  .ebar .ttl { font-family:var(--font-jp); font-weight:700; font-size:16px; color:#fff; }
+  .ebar .sp { width:44px; height:44px; flex:none; }
+
+  /* preview */
+  .preview { position:absolute; top:128px; left:16px; right:16px; height:472px; border-radius:18px; overflow:hidden; background:#000; }
+  .preview img { width:100%; height:100%; object-fit:cover; }
+
+  /* label row */
+  .lblrow { position:absolute; left:16px; right:16px; top:620px; display:flex; align-items:baseline; justify-content:space-between; }
+  .lblrow .cut { font-family:var(--font-jp); font-weight:700; font-size:13px; color:#fff; white-space:nowrap; }
+  .lblrow .cut.over { color:var(--state-error); }
+  .lblrow .lim { font-family:var(--font-latin); font-weight:600; font-size:11px; color:var(--text-3); white-space:nowrap; }
+
+  /* trim bar */
+  .trimbar { position:absolute; left:16px; right:16px; top:652px; height:54px; border-radius:10px; background:#222226; }
+  .trimbar .strip { position:absolute; inset:0; display:flex; border-radius:10px; overflow:hidden; }
+  .trimbar .strip .f { flex:1; background-size:cover; background-position:center; opacity:.9; }
+  .trimbar .mask { position:absolute; top:0; bottom:0; background:rgba(0,0,0,.62); }
+  .trimbar .mask.l { left:0; width:18%; border-radius:10px 0 0 10px; }
+  .trimbar .mask.r { right:0; width:22%; border-radius:0 10px 10px 0; }
+  .trimbar .window { position:absolute; top:0; bottom:0; left:18%; right:22%; border:3px solid #fff; border-radius:9px; box-shadow:0 0 0 1px rgba(0,0,0,.35); }
+  .trimbar .handle { position:absolute; top:-0px; bottom:0px; width:18px; background:#fff; display:flex; align-items:center; justify-content:center; }
+  .trimbar .handle.l { left:18%; border-radius:9px 0 0 9px; transform:translateX(-100%); }
+  .trimbar .handle.r { right:22%; border-radius:0 9px 9px 0; transform:translateX(100%); }
+  .trimbar .handle .grip { width:4px; height:20px; border-radius:2px; background:#0a0a0c; }
+
+  /* CTA */
+  .cta { position:absolute; left:16px; right:16px; bottom:calc(34px + 18px); display:flex; align-items:center; justify-content:center;
+    height:50px; border-radius:14px; background:#fff; cursor:pointer; }
+  .cta.disabled { opacity:.5; }
+  .cta span { font-family:var(--font-jp); font-weight:700; font-size:15px; color:#16161c; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="ttl">画面 2 — 動画トリム <span style="font-weight:500;color:var(--text-3)">comp-uvpost-trim</span></div>
+    <div class="sub">状態: 選択 0:42（≤1:00）→ CTA 有効 ／ 超過時 切り取りラベル <b style="color:var(--state-error)">#FF6B6B</b>・CTA opacity .5「1分未満に切り取ってください」</div>
+  </div>
+
+  <div class="phone">
+    <div class="dynamic-island"></div>
+    <div class="statusbar"><span class="time">9:41</span><span class="sys">
+      <svg width="18" height="12" viewBox="0 0 18 12"><g fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.5c2.6 0 5 1 6.8 2.6l1.5-1.6C14.7 1.4 11.7 0 8.5 0S2.3 1.4 0 3.5l1.5 1.6C3.3 3.5 5.7 2.5 8.5 2.5z"/><path d="M8.5 6c1.4 0 2.7.5 3.7 1.4l1.5-1.6C12.3 4.5 10.5 3.8 8.5 3.8s-3.8.7-5.2 2L4.8 7.4C5.8 6.5 7.1 6 8.5 6z"/><path d="M8.5 9.2l2.1-2.2c-.6-.5-1.3-.8-2.1-.8s-1.5.3-2.1.8L8.5 9.2z"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="19" height="9" rx="2" fill="#fff"/><rect x="24" y="4" width="1.5" height="5" rx="0.75" fill="#fff" fill-opacity=".4"/></svg>
+    </span></div>
+
+    <div class="screen">
+      <div class="uv-edit">
+        <div class="ebar">
+          <button class="wd-icon-btn" style="width:44px;height:44px;" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="ttl">動画を編集</div>
+          <div class="sp"></div>
+        </div>
+
+        <div class="preview"><img src="../../assets/sample/reel/reel002.jpg" alt=""></div>
+
+        <div class="lblrow">
+          <div class="cut">切り取り 0:42</div>
+          <div class="lim">上限 1:00</div>
+        </div>
+
+        <div class="trimbar">
+          <div class="strip">
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel002.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel005.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel002.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel005.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel002.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel005.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel002.jpg)"></div>
+            <div class="f" style="background-image:url(../../assets/sample/reel/reel005.jpg)"></div>
+          </div>
+          <div class="mask l"></div>
+          <div class="mask r"></div>
+          <div class="window"></div>
+          <div class="handle l"><div class="grip"></div></div>
+          <div class="handle r"><div class="grip"></div></div>
+        </div>
+
+        <div class="cta"><span>次へ</span></div>
+      </div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

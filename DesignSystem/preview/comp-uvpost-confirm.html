@@ -1,0 +1,96 @@
+<!-- @dsCard group="UniversePost" tier="screen" name="UniversePostFlow — 投稿設定シート" subtitle="編集の上の下シート。位置情報/3D生成トグル。トグルON=--gradient-colorful(as-built単色白→DS整合)。iPhone17 402×874 full-bleed" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; }
+  .head { max-width:402px; margin:0 auto; }
+  .head .ttl { font-family:var(--font-jp); font-weight:700; font-size:14px; color:var(--text-1); }
+  .head .sub { font-family:var(--font-latin); font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.5; }
+
+  /* dimmed editor behind */
+  .uv-edit { position:absolute; inset:0; background:#0a0a0c; }
+  .uv-edit .bg { position:absolute; top:128px; left:16px; right:16px; height:472px; border-radius:18px; overflow:hidden; }
+  .uv-edit .bg img { width:100%; height:100%; object-fit:cover; }
+  .scrim { position:absolute; inset:0; background:rgba(0,0,0,.70); }
+
+  /* sheet */
+  .uv-sheet { position:absolute; left:0; right:0; bottom:0; border-radius:24px 24px 0 0;
+    background:rgba(16,16,20,.96); box-shadow:inset 0 1px 0 rgba(255,255,255,.10), 0 -12px 36px rgba(0,0,0,.55);
+    border-top:1px solid rgba(255,255,255,.10); padding:0 28px calc(34px + 8px); }
+  .grabber { width:38px; height:4px; border-radius:99px; background:rgba(255,255,255,.30); margin:10px auto 18px; }
+  .sheet-ttl { font-family:var(--font-jp); font-weight:700; font-size:17px; color:#fff; margin-bottom:6px; }
+
+  .srow { display:flex; align-items:center; gap:14px; padding:14px 0; }
+  .srow.disabled { opacity:.45; }
+  .srow .ic { width:17px; height:17px; flex:none; object-fit:contain; }
+  .srow .mid { flex:1; min-width:0; }
+  .srow .t { font-family:var(--font-jp); font-weight:700; font-size:14.5px; color:#fff; }
+  .srow .s { font-family:var(--font-jp); font-weight:400; font-size:11.5px; color:var(--text-3); margin-top:3px; }
+
+  /* settings toggle 48×28 · knob 22 · ON = --gradient-colorful (DS) */
+  .tg { position:relative; width:48px; height:28px; border-radius:99px; flex:none; cursor:pointer;
+    background:var(--surface-toggle-off); transition:background .2s var(--ease-standard); }
+  .tg.on { background:var(--gradient-colorful); }
+  .tg .knob { position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4); transition:left .25s cubic-bezier(.3,1.3,.5,1); }
+  .tg.on .knob { left:calc(100% - 25px); }
+
+  .cta { display:flex; align-items:center; justify-content:center; height:50px; border-radius:14px; background:#fff; cursor:pointer; margin-top:18px; }
+  .cta span { font-family:var(--font-jp); font-weight:700; font-size:15px; color:#16161c; }
+  .cancel-tx { display:block; text-align:center; font-family:var(--font-jp); font-weight:600; font-size:14px; color:var(--text-2); margin-top:14px; cursor:pointer; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="ttl">画面 4 — 投稿設定シート <span style="font-weight:500;color:var(--text-3)">comp-uvpost-confirm</span></div>
+    <div class="sub">直した逸脱 ▸ トグル ON: 単色白 → <b style="color:var(--text-2)">--gradient-colorful</b>（DSの tg）。位置情報=既定ON ／ 3D生成=既定OFF・位置OFF時 不活性</div>
+  </div>
+
+  <div class="phone">
+    <div class="dynamic-island"></div>
+    <div class="statusbar"><span class="time">9:41</span><span class="sys">
+      <svg width="18" height="12" viewBox="0 0 18 12"><g fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.5c2.6 0 5 1 6.8 2.6l1.5-1.6C14.7 1.4 11.7 0 8.5 0S2.3 1.4 0 3.5l1.5 1.6C3.3 3.5 5.7 2.5 8.5 2.5z"/><path d="M8.5 6c1.4 0 2.7.5 3.7 1.4l1.5-1.6C12.3 4.5 10.5 3.8 8.5 3.8s-3.8.7-5.2 2L4.8 7.4C5.8 6.5 7.1 6 8.5 6z"/><path d="M8.5 9.2l2.1-2.2c-.6-.5-1.3-.8-2.1-.8s-1.5.3-2.1.8L8.5 9.2z"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="19" height="9" rx="2" fill="#fff"/><rect x="24" y="4" width="1.5" height="5" rx="0.75" fill="#fff" fill-opacity=".4"/></svg>
+    </span></div>
+
+    <div class="screen">
+      <div class="uv-edit">
+        <div class="bg"><img src="../../assets/sample/reel/reel005.jpg" alt=""></div>
+      </div>
+      <div class="scrim"></div>
+
+      <div class="uv-sheet">
+        <div class="grabber"></div>
+        <div class="sheet-ttl">投稿の設定</div>
+
+        <div class="srow">
+          <img class="ic" src="../../assets/icons/icon_pin.png" alt="">
+          <div class="mid">
+            <div class="t">位置情報を付ける</div>
+            <div class="s">投稿に現在地のサークルを紐づけます</div>
+          </div>
+          <div class="tg on" role="switch" aria-checked="true"><div class="knob"></div></div>
+        </div>
+
+        <div class="srow">
+          <img class="ic" src="../../assets/icons/icon_dashboard.png" alt="">
+          <div class="mid">
+            <div class="t">3Dオブジェクトを生成</div>
+            <div class="s">サムネイルから3Dを生成します（位置情報オン時のみ）</div>
+          </div>
+          <div class="tg" role="switch" aria-checked="false"><div class="knob"></div></div>
+        </div>
+
+        <div class="cta"><span>投稿する</span></div>
+        <span class="cancel-tx">キャンセル</span>
+      </div>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,170 @@
+<!-- @dsCard group="UniversePost" tier="screen" name="UniversePostFlow — サークル選択シート" subtitle="地図(角度0降下)上の下シート。域内サークルを選んで撮影へ。as-built→DS整合(ガラス化/シェブロン/役割トークン)。iPhone17 402×874 full-bleed" -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background:#0d0d0f; }
+  .head { max-width:402px; margin:0 auto; }
+  .head .ttl { font-family:var(--font-jp); font-weight:700; font-size:14px; color:var(--text-1); }
+  .head .sub { font-family:var(--font-latin); font-size:11px; color:var(--text-3); margin-top:3px; line-height:1.5; }
+
+  /* ---- screen 1 : map ---- */
+  .uv-map { position:absolute; inset:0; background:#11140f; overflow:hidden; }
+  /* stylised night-map tiles (placeholder for Google Maps) dimmed 0.8 */
+  .uv-map .tiles {
+    position:absolute; inset:-6%; opacity:.62;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.05) 0 2px, transparent 2px) 0 0/130px 130px,
+      linear-gradient(0deg, rgba(255,255,255,.05) 0 2px, transparent 2px) 0 0/130px 130px,
+      radial-gradient(60% 42% at 22% 30%, #1f2a22 0%, transparent 60%),
+      radial-gradient(50% 38% at 82% 70%, #25241a 0%, transparent 60%),
+      #161a14;
+  }
+  .uv-map .road {
+    position:absolute; background:rgba(170,176,150,.16);
+  }
+  .uv-map .road.r1 { left:-10%; right:-10%; top:38%; height:13px; transform:rotate(-9deg); }
+  .uv-map .road.r2 { top:-10%; bottom:-10%; left:46%; width:11px; transform:rotate(6deg); }
+  .uv-map .road.r3 { left:-10%; right:-10%; top:64%; height:8px; transform:rotate(4deg); }
+  .uv-map .dim { position:absolute; inset:0; background:rgba(0,0,0,.80); } /* タイル dim 0.8 */
+
+  /* area circles : in-area circles (white fill .08 / line .4) · selected (.22 / .95) */
+  .area { position:absolute; border-radius:50%; }
+  .area.a1 { width:230px; height:230px; left:16%;  top:20%;  background:rgba(255,255,255,.22); box-shadow:0 0 0 2px rgba(255,255,255,.95) inset; }
+  .area.a2 { width:170px; height:170px; left:54%;  top:50%;  background:rgba(255,255,255,.08); box-shadow:0 0 0 1.5px rgba(255,255,255,.40) inset; }
+  .area.a3 { width:150px; height:150px; left:8%;   top:58%;  background:rgba(255,255,255,.08); box-shadow:0 0 0 1.5px rgba(255,255,255,.40) inset; }
+
+  /* current location — angle-0 descent dot */
+  .here { position:absolute; left:calc(16% + 115px); top:calc(20% + 115px); transform:translate(-50%,-50%); }
+  .here .pulse { position:absolute; left:50%; top:50%; width:54px; height:54px; transform:translate(-50%,-50%); border-radius:50%; background:rgba(255,255,255,.10); }
+  .here .dot { position:relative; width:16px; height:16px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.6); }
+
+  /* cancel × — 44×44, 12px above the sheet top-right */
+  .cancel { position:absolute; }
+
+  /* ---- bottom sheet (glass --lg-tint-dark over the map) ---- */
+  .uv-sheet {
+    position:absolute; left:14px; right:14px; bottom:calc(26px + 34px);
+    border-radius:22px; padding:0 14px 16px;
+    background:var(--lg-tint-dark);
+    -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));
+    box-shadow:inset 0 1px 0 var(--lg-specular-top), 0 -10px 30px rgba(0,0,0,.5);
+  }
+  @supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+    .uv-sheet { background:rgba(8,8,12,.86); }
+  }
+  .uv-sheet::after {
+    content:""; position:absolute; inset:0; border-radius:22px; padding:1px;
+    background:var(--lg-edge);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
+  }
+  .grabber { width:40px; height:5px; border-radius:99px; background:rgba(255,255,255,.30); margin:10px auto 12px; }
+  .sheet-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .sheet-head .lhs { display:flex; align-items:baseline; gap:6px; }
+  .sheet-head .lhs .t { font-family:var(--font-jp); font-weight:700; font-size:15px; color:var(--text-1); }
+  .sheet-head .lhs .c { font-family:var(--font-latin); font-weight:800; font-size:15px; color:#fff; }
+  .sheet-head .rhs { display:flex; align-items:center; gap:7px; }
+  .sheet-head .rhs .pin { width:7px; height:7px; border-radius:50%; background:#fff; box-shadow:0 0 6px rgba(255,255,255,.7); }
+  .sheet-head .rhs .l { font-family:var(--font-jp); font-weight:500; font-size:10.5px; color:var(--text-3); }
+
+  .rows { display:flex; flex-direction:column; gap:6px; max-height:222px; overflow:auto; }
+  .crow { display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:14px;
+    background:rgba(255,255,255,.05); cursor:pointer; }
+  .crow.sel { background:rgba(255,255,255,.13); box-shadow:inset 0 0 0 1px rgba(255,255,255,.55); }
+  .crow .cover { width:44px; height:44px; border-radius:12px; object-fit:cover; flex:none; background:#333; }
+  .crow .mid { flex:1; min-width:0; }
+  .crow .nmrow { display:flex; align-items:center; gap:8px; }
+  .crow .nm { font-family:var(--font-jp); font-weight:700; font-size:14px; color:var(--text-1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pill-in { display:inline-flex; align-items:center; gap:5px; flex:none; padding:3px 8px; border-radius:99px;
+    background:rgba(255,255,255,.16); font-family:var(--font-jp); font-weight:700; font-size:9px; color:#fff; }
+  .pill-in .d { width:6px; height:6px; border-radius:50%; background:#fff; }
+  .crow .meta { font-family:var(--font-latin); font-weight:600; font-size:10px; color:var(--text-3); margin-top:3px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* DS chevron — CSS border rotate (Material 直書き廃止) */
+  .chev { width:9px; height:9px; flex:none; border-top:2px solid rgba(255,255,255,.47); border-right:2px solid rgba(255,255,255,.47);
+    transform:rotate(45deg); border-radius:1px; }
+  .crow.sel .chev { border-top-color:#fff; border-right-color:#fff; }
+
+  /* CTA — monochrome white (StoryPost flow) */
+  .cta { display:flex; align-items:center; justify-content:center; gap:9px; height:50px; border-radius:14px;
+    background:#fff; margin-top:14px; cursor:pointer; }
+  .cta.disabled { opacity:.5; }
+  .cta img { width:20px; height:20px; filter:brightness(0); }
+  .cta span { font-family:var(--font-jp); font-weight:700; font-size:15px; color:#16161c; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <div class="ttl">画面 1 — サークル選択シート <span style="font-weight:500;color:var(--text-3)">comp-uvpost-place</span></div>
+    <div class="sub">直した逸脱 ▸ 面: 不透明#0C0C10 → <b style="color:var(--text-2)">--lg-tint-dark + --lg-blur ガラス</b> ／ シェブロン: Material直書き → <b style="color:var(--text-2)">DS(CSS border)</b> ／ グレー: 場当たりhex → <b style="color:var(--text-2)">--text-1/2/3</b></div>
+  </div>
+
+  <div class="phone">
+    <div class="dynamic-island"></div>
+    <div class="statusbar"><span class="time">9:41</span><span class="sys">
+      <svg width="18" height="12" viewBox="0 0 18 12"><g fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></g></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.5c2.6 0 5 1 6.8 2.6l1.5-1.6C14.7 1.4 11.7 0 8.5 0S2.3 1.4 0 3.5l1.5 1.6C3.3 3.5 5.7 2.5 8.5 2.5z"/><path d="M8.5 6c1.4 0 2.7.5 3.7 1.4l1.5-1.6C12.3 4.5 10.5 3.8 8.5 3.8s-3.8.7-5.2 2L4.8 7.4C5.8 6.5 7.1 6 8.5 6z"/><path d="M8.5 9.2l2.1-2.2c-.6-.5-1.3-.8-2.1-.8s-1.5.3-2.1.8L8.5 9.2z"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".4"/><rect x="2" y="2" width="19" height="9" rx="2" fill="#fff"/><rect x="24" y="4" width="1.5" height="5" rx="0.75" fill="#fff" fill-opacity=".4"/></svg>
+    </span></div>
+
+    <div class="screen">
+      <div class="uv-map">
+        <div class="tiles"></div>
+        <div class="road r1"></div><div class="road r2"></div><div class="road r3"></div>
+        <div class="dim"></div>
+        <div class="area a1"></div>
+        <div class="area a2"></div>
+        <div class="area a3"></div>
+        <div class="here"><div class="pulse"></div><div class="dot"></div></div>
+      </div>
+
+      <div class="uv-sheet">
+        <button class="wd-icon-btn cancel" style="width:44px;height:44px;top:-56px;right:0;" aria-label="キャンセル">
+          <img src="../../assets/icons/icon_close.png" alt="">
+        </button>
+        <div class="grabber"></div>
+        <div class="sheet-head">
+          <div class="lhs"><span class="t">入っているサークル</span><span class="c">3</span></div>
+          <div class="rhs"><span class="pin"></span><span class="l">現在地</span></div>
+        </div>
+        <div class="rows">
+          <div class="crow sel">
+            <img class="cover" src="../../assets/sample/uv/circle-01.png" alt="">
+            <div class="mid">
+              <div class="nmrow"><span class="nm">渋谷コミュニティ</span><span class="pill-in"><span class="d"></span>エリア内</span></div>
+              <div class="meta">半径200m · 128人 · 中心まで40m</div>
+            </div>
+            <span class="chev"></span>
+          </div>
+          <div class="crow">
+            <img class="cover" src="../../assets/sample/uv/circle-02.png" alt="">
+            <div class="mid">
+              <div class="nmrow"><span class="nm">新宿グループ</span><span class="pill-in"><span class="d"></span>エリア内</span></div>
+              <div class="meta">半径150m · 86人 · 中心まで120m</div>
+            </div>
+            <span class="chev"></span>
+          </div>
+          <div class="crow">
+            <img class="cover" src="../../assets/sample/uv/circle-03.png" alt="">
+            <div class="mid">
+              <div class="nmrow"><span class="nm">原宿コミュニティ</span><span class="pill-in"><span class="d"></span>エリア内</span></div>
+              <div class="meta">半径120m · 54人 · 中心まで90m</div>
+            </div>
+            <span class="chev"></span>
+          </div>
+        </div>
+        <div class="cta">
+          <img src="../../assets/icons/icon_camera.png" alt="">
+          <span>ストーリーを投稿</span>
+        </div>
+      </div>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</body></html>
