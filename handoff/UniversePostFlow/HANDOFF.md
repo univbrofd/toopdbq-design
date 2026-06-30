@@ -6,6 +6,7 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 - repo: `univbrofd/toopdbq-design`（`main`）/ raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main`
 - 索引: `DesignSystem/_ds_manifest.json` / foundation: `DesignSystem/{USAGE_RULES.md,taste.md,colors_and_type.css,preview/}` / 共有アセット: `assets/icons/`・`assets/sample/`
 - 実装参考（別 repo `univbrofd/toopdbq`・リンクは渡さない）: `lib/feature/UniversePostFlow/`・`lib/feature/StoryVideoEdit/`
+- 現状スクショ: `handoff/UniversePostFlow/shots/current-thumb.png`（画面3 サムネ選択の as-built・**字幕トグル追加前**。字幕トグルはこれに足す）
 
 ## スマホ配置文脈（必須）
 
@@ -50,6 +51,18 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 - スクラブ帯: 高さ64・グラデ #2A2A30→#3A3A42 角丸10・プレイヘッド 36px 白 border3 角丸8 影（specimen は 8 フレーム strip で可）。
 - CTA: 単色白「投稿する」。
 
+### ★ 追加要望（NEW）— 字幕（キャプション）トグル
+
+この画面3に **字幕トグルを新設**したい（現状の as-built には無い。`shots/current-thumb.png` がトグル追加前の現状）。Claude Design に、現状を base に字幕トグルを足した案を起こさせる。
+
+- **機能**: ON にすると、トリムで切り取った尺ぶんの動画音声を Whisper で文字起こし→翻訳→**字幕として動画に焼き込む**。OFF が既定。対象は「カットした尺だけ」（コスト・処理時間を最小化）。
+- **配置**: 「サムネ選択画面のどこか」。最適位置は Claude Design に提案させる。第一候補は本画面下部、スクラブ帯と「投稿する」CTA の間に 1 行（既存 `_optRow` と同じ作り）。第二候補は画面4 投稿設定シート内（3D 行の下）。両案を Before/After で見せてよい。
+- **行の作り（既存 `_optRow`/`_toggle` に厳密に揃える）**: 左にアイコン17px白 + タイトル(白,14.5,700)、下にサブ(`--text-3`,11.5)。右にトグル 48×28（ON= `--gradient-colorful`〔DS の `tg`〕/ OFF #555、knob 22、角丸 pill）。アイコンは字幕（CC/吹き出し）。`assets/icons/` に該当が無ければ DS トーンで新規（`icon_caption` 想定）。
+- **コピー案**: タイトル「字幕を付ける」／サブ「話した言葉を文字起こし・翻訳して字幕にします」。
+- **ON 時のサブ表示（提案して欲しい）**: 翻訳先言語の選択（例: 日本語 / English のピル）を行の下に展開する案。最小は ON/OFF のみでも可。
+- **処理コストの示唆**: ON で投稿時に文字起こし処理が数秒走る（Whisper）。投稿後の上部進捗（`post-progress`）に「字幕生成中…」段を足す余地も検討（必須ではない）。
+- **プレビューへの反映（任意）**: ON 時、上のプレビュー枠の下部に字幕テキストの見え方（焼き込み位置・帯）をダミーで示す案。
+
 ## 画面 4 — 投稿設定シート（comp-uvpost-confirm）
 
 画面3の上に下シート。
@@ -72,3 +85,4 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 ## 成果物（Claude Design に作らせる）
 
 - `DesignSystem/preview/comp-uvpost-place.html` / `comp-uvpost-trim.html` / `comp-uvpost-thumb.html` / `comp-uvpost-confirm.html`。各先頭に `<!-- @dsCard group="UniversePost" -->`、`_ds_manifest.json` に登録。`.phone`(402×874) full-bleed で実配置描画。Before/After（as-built→DS整合）を併記。
+- **今回の主眼 = `comp-uvpost-thumb.html` に字幕トグルを追加**（上記「★ 追加要望」）。`shots/current-thumb.png` の現状を Before、字幕トグルを足した案を After で。配置を画面3本体に置く案／画面4シートに置く案の2バリアントを見せると判断しやすい。
