@@ -7,6 +7,7 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 - 索引: `DesignSystem/_ds_manifest.json` / foundation: `DesignSystem/{USAGE_RULES.md,taste.md,colors_and_type.css,preview/}` / 共有アセット: `assets/icons/`・`assets/sample/`
 - 実装参考（別 repo `univbrofd/toopdbq`・リンクは渡さない）: `lib/feature/UniversePostFlow/`・`lib/feature/StoryVideoEdit/`
 - 現状スクショ: `handoff/UniversePostFlow/shots/current-thumb.png`（画面3 サムネ選択の as-built・**字幕トグル追加前**。字幕トグルはこれに足す）
+- **字幕トグル案（Claude Design 取り込み済み）**: `handoff/UniversePostFlow/comp-uvpost-thumb.dc.html`（配置A・B × Before/After / render: `shots/comp-uvpost-thumb.png`）。Flutter 具現化はこれを一次情報に `design-to-flutter` で。
 
 ## スマホ配置文脈（必須）
 
@@ -85,4 +86,4 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 ## 成果物（Claude Design に作らせる）
 
 - `DesignSystem/preview/comp-uvpost-place.html` / `comp-uvpost-trim.html` / `comp-uvpost-thumb.html` / `comp-uvpost-confirm.html`。各先頭に `<!-- @dsCard group="UniversePost" -->`、`_ds_manifest.json` に登録。`.phone`(402×874) full-bleed で実配置描画。Before/After（as-built→DS整合）を併記。
-- **今回の主眼 = `comp-uvpost-thumb.html` に字幕トグルを追加**（上記「★ 追加要望」）。`shots/current-thumb.png` の現状を Before、字幕トグルを足した案を After で。配置を画面3本体に置く案／画面4シートに置く案の2バリアントを見せると判断しやすい。
+- **今回の主眼 = 字幕トグル**: Claude Design から **取り込み済み** → `comp-uvpost-thumb.dc.html`（render: `shots/comp-uvpost-thumb.png`）。配置A（画面3本体・スクラブ帯と CTA の間）＝**推奨**、配置B（画面4シート・3D 行の下）＝代替。ON でトグルが `--gradient-colorful` になり翻訳先言語ピル（日本語/English）が展開。次工程 = `design-to-flutter` で `StoryVideoEditView` の thumb ステージへ具現化。
