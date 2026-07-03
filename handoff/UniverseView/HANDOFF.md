@@ -1,141 +1,126 @@
-# HANDOFF — UniverseView：クラスタ ⇄ リール ⇄ メイン ⇄ フォーカス の連携リファクタ
+# HANDOFF — UniverseView 現行仕様（2D poster）specimen の新規作成
 
-`UniverseView` の live specimen（`UniverseView.html` ＋ `earth/*.js`）の、**実機（Flutter）の連携モデルに合わせた
-リファクタ**を定義する living spec。3D・下部リール・メイン選定・フォーカスを **1 投稿 = 1 エンティティ ＋ 単一の代表 id**
-で連動させる。**現 specimen はこの方針で実装済み**（データ単一化 `posts.js` / 固定クラスタ / リール=メインクラスタの
-メンバー / サムネ=生成元写真）。下表は方針と「やってはいけない逸脱」の記録。さらに直す時はこの値に従う。
+アプリ本体は **3D 表示・3D 投稿レーンを全撤去**した。現行の UniverseView = MapLibre globe ＋
+**2D poster サムネピン** ＋ 下部 poster ストリップ。この現行仕様の specimen
+**`UniverseView2D.html` を新規作成**する。既存の 3D specimen（`UniverseView.html` ＋ `earth/*.js`）は
+**デザイン探求として温存 — 変更・削除しない**（その spec は `HANDOFF-3D.md`）。
 
 > repo: `univbrofd/toopdbq-design` / branch `main` / raw base:
 > `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
-> DS 索引: `DesignSystem/_ds_manifest.json`（色トークンの canonical は `DesignSystem/colors_and_type.css`）
+> DS 索引: `DesignSystem/_ds_manifest.json`（色 canonical は `DesignSystem/colors_and_type.css`）
 > 実装の対応箇所は「別 repo `univbrofd/toopdbq`・参考」（Claude Design は読めない。値は本書に固定）。
 
-## 現 specimen のズレ（直す対象）
+## 成果物
 
-| 箇所 | 現 specimen（誤り） | 実機（正・本書で固定） |
-|---|---|---|
-| **下部リール** | 固定 4 行（渋谷コミュニティ等）の**無関係なサンプル画像**列。3D とは別データ | **メインクラスタのメンバー列**。中心クラスタの `allPins` を circle でグルーピングして出す |
-| **3D とサムネの同一性** | 3D = `real-NN.glb`（Firebase）、リール = `story-NN.png`。**別物で対応が無い** | **同一 story の二表現**。1 投稿 = `{id,lat,lng,circleId,glbUrl,thumbUrl}`。サンプルは `real-NN.glb`↔`real-NN.jpg`（**生成元の写真がサムネ**） |
-| **クラスタリング** | 動的タイル bin で密集地帯（渋谷中心）がタイル境界で割れ、クラスタされない | **固定クラスタ**（posts.js の `cluster` 値）で bin し、画面中心に最も近いクラスタを**メインクラスタ**に |
-| **リールのサムネ** | `gen-thumb.html` で **GLB を 3D レンダした jpg** を thumbUrl にしてしまい、リストに 3D レンダが出る | thumbUrl = **生成元の写真そのもの**（`real-NN.jpg`）。3D を焼いた画像は使わない |
-| **メイン選定** | 画面中心最寄り 1 個を 2× にするだけ（孤立した値） | メイン = **メインクラスタの代表**。リールの白枠・地図の main・フォーカス対象と**同一 id で連動** |
-| **リール↔地図↔フォーカス** | 一方通行（タップで地図 glide のみ）。リールと代表が無関係 | **双方向ループ**。リール cell タップ→代表ロック→地図再選定→リール白枠移動→（main かつ 3D なら）フォーカス |
+- `handoff/UniverseView/UniverseView2D.html` — 現行仕様の live specimen（1 ファイル、`.phone` 実配置）
+- 2D 固有の JS が要るなら `handoff/UniverseView/earth2d/*.js` に新設。
+  **既存 `earth/*.js` は 3D specimen 専用 — 変更禁止**（`map-core.js` / `posts.js` の読み取り流用は可）
+- データは `earth/posts.js` をそのまま読む（GENERATED・手編集禁止。`assets/mock` から再生成される）。
+  2D では `thumbUrl` / `videoUrl` / `lat,lng` / `circleId` / `cluster` を使い **`glbUrl` は無視**する
 
-## 目標の連携モデル（実機の値で固定）
+## 現行仕様（実装値で固定）
 
-### データモデル（最重要）
-- **1 投稿 = 1 エンティティ**。`{ id, lat, lng, circleId, glbUrl, thumbUrl }`。**3D とサムネは同じ id**。
-- サンプルの対応表（GLB＝現 POSTS の Firebase URL を継続使用、サムネ＝design repo 内のローカル写真）:
+### マップ / カメラ
 
-| post | story id | lat, lng | thumbUrl（生成元写真） | 見た目 |
-|---|---|---|---|---|
-| real-01 | 143a6501… | 35.6655, 139.7011 | `../../assets/sample/models/real-01.jpg` | しゃがむ人物 |
-| real-02 | 1e12abf7… | 35.6741, 139.6811 | `…/real-02.jpg` | しゃがむ男性 |
-| real-03 | 25eb1144… | 35.6754, 139.7051 | `…/real-03.jpg` | 飲み物を持つ男性 |
-| real-04 | 353711cd… | 35.6653, 139.7010 | `…/real-04.jpg` | 犬のぬいぐるみ |
-| real-05 | 7339918b… | 35.6753, 139.6970 | `…/real-05.jpg` | 男性バスト |
-| real-06 | 7fa30005… | 35.6958, 139.7662 | `…/real-06.jpg` | 立つ人物（横向き） |
-| real-07 | 97ef6494… | 35.6621, 139.7127 | `…/real-07.jpg` | 鉢／香炉状の器 |
-| real-08 | bf56f848… | 35.6677, 139.6933 | `…/real-08.jpg` | 立つ女性 |
-| real-09 | d91a62e2… | 35.6657, 139.6961 | `…/real-09.jpg` | 青髪の人物 |
-| **real-10** | e40ad36b… | **35.6592, 139.7006** | `…/real-10.jpg` | **ハチ公像（map CENTER）** |
-| real-11 | e42972fe… | 35.6657, 139.7010 | `…/real-11.jpg` | 顔／頭部 |
+- MapLibre GL JS 5・positron スタイル・globe projection。pitch は 2 段階 `{0, 55}`（既定 55）、bearing 0 固定
+- 中心マーカー: 青ドット `rx=10`・`rgba(66,133,244,0.80)`・白縁 1.2px・`ry = rx × cos(pitch)`（地面貼付き楕円）＋ blur(4px) glow
+- 球縁白線 8px ＋ 成層圏リング（3D specimen と同じ）。place 系ラベル text-size 8px 固定・road shield 非表示
 
-- GLB は現 specimen `POSTS[].url`（`firebasestorage.googleapis.com/.../story/{id}/{id}.glb`、CORS `*`）をそのまま使う。
-  **ユーザー投稿の GLB/写真は design repo に複製しない**（GLB は公開 URL 参照、サムネは上記サンプル写真で代用）。
-- circleId は全件 `seed_shibuya`（実機の渋谷シード）。デモ用に **2〜3 サークルに分けて**リールの複数行を見せてよい。
-- ⚠️ **サムネは生成元の写真そのもの**（`assets/sample/models/real-NN.jpg`・縦長 704×1530）。
-  **GLB を 3D レンダして焼いた画像をサムネにしない**（`tools/gen-thumb.html` で GLB を描画した jpg で `real-NN.jpg` を
-  上書きするのは誤り＝リールに 3D レンダが出る）。リール cell は `thumbUrl` だけを使い、3D ポートレート（`thumbFor`）へ
-  フォールバックさせない（3D の実レンダは edge-indicator chip 専用）。
+### ピン = 2D poster サムネ（3D オブジェクトは存在しない）
 
-### クラスタリングと代表（specimen = 固定クラスタ）
-1. **bucketing（固定）**: 各投稿が持つ **固定の `cluster` 値**（posts.js・地理ベースの手動グルーピング）で bin する。
-   **動的タイル bin は使わない**（密集地帯＝渋谷中心がタイル境界で割れてクラスタされないため。ユーザー指定で固定可）。
-   現状の固定グループ: `shibuya`(real-01/04/07/09/10/11) / `harajuku`(real-02/03/05/08) / `shinjuku`(real-06)。
-   投稿を足す/動かすときは `cluster` を手で振り直す。
-2. **メインクラスタ**: クラスタのうち**重心が画面中心に最も近い**ものを `role=main` に。これが `mainTerrestrial`（リールの供給元）。
-3. **代表選定（hysteresis）**: 毎フレ各クラスタの中心度 `repActiveT`(0–1, 中心=1) を見て、最大のピンを代表化。
-   ただし**現代表より厳密に上回る時だけ**入れ替え（タイ無効＝ちらつき防止）。
-4. **ユーザーロック**: リール cell タップで選んだ代表は **1500ms ロック**（自動選定より優先）。
-5. メインクラスタの「巨大 main＋小さい sub」は role でサイズ激変。current specimen の「中心最寄りを 2×」はこの一部。
+- 基本サイズ **36×64**（縦 poster）。地面 anchor から pole（支柱・最低 32px）で浮く
+- 中心接近で拡大: activeT = 八次 ease-in（`t⁸`）。範囲のほぼ全域は無反応、中心の最後 10〜15% で急拡大。
+  中心ジャストの最大幅 = **画面幅の 80%**
+- 役割: `main` ×1.0 固定（中心クラスタの代表・最前面）/ `sub`（NW/NE/SW/SE）×0.5 固定
+  （NW/NE は pole ×3.63 で高く、SW/SE は短 pole）/ `normal` は activeT 連動
+- 装飾（全ピン共通）:
+  - gradient-border 枠 1.5px（main 2px）: 135° `#211C1C → rgba(255,255,255,0.64)`、radius 外 8 / 内 6.5
+  - refractive glass edge: 上端 specular `rgba(255,255,255,0.34)→0`（14%）・内側ヘアライン
+    `rgba(255,255,255,0.12)` 0.5px・下端の沈み `rgba(0,0,0,0.5)`
+  - 浮遊影: main `blur34 offset(0,14) rgba(0,0,0,0.70)` ＋ colorful glow halo
+    （pink `rgba(255,62,136,0.26)` blur26 / teal `rgba(0,95,103,0.18)` blur30 / yellow `rgba(255,240,166,0.14)` blur22）。
+    非 main は `blur18 offset(0,7) rgba(0,0,0,0.62)`
+- main ＋ 複数メンバー時:
+  - サムネ上端に StoryViewer 風セグメント（高さ 2.5・gap 2・白 / `rgba(255,255,255,0.30)`・最大 6 本＋総数）
+  - サムネ下にメンバー avatar 列（径 = thumbW×0.42、clamp 14–36・白枠 1.2px・最大 5・溢れは白地黒字 `+N` chip）
+- クラスタ数バッジ: 右上角の dark glass pill `rgba(8,10,16,0.62)`・枠 `rgba(255,255,255,0.16)` 0.8px・
+  高さ main 30 / 他 22・白 bold 14/11・tabular numerals・`99+` clamp
+- **代表が動画投稿 → 動画ピン**: 縦長カード radius 6・muted loop 自動再生（poster=サムネ）・
+  下端に like/comment 数のみ（白 icon 13px ＋ Inter 11 bold・下端グラデ `rgba(0,0,0,0.70)→0`）・影 blur12 offset(0,6)
 
-### リール（= メインクラスタのメンバー列）
-- 供給元 = `mainTerrestrial.allPins`（メインクラスタの**全メンバー**。branches だけでなく隠れメンバーも含む）。
-- circleId でグルーピング → **1 サークル 1 行**（代表のサークルを先頭）。各行 = サークル名＋カバー＋メンバー横スクロール。
-- **cell の中身は画像（thumbUrl）のみ**。代表 = 白枠 **2.5px** / 他 = `rgba(255,255,255,0.2)` 1px。アバター/名前/出典は描かない。
-- cell タップ → **代表化**（`selectRepresentative`）。long press → story を開く。
+### タップ挙動（フォーカス = 3D 360°回覧は存在しない）
 
-### タップ挙動の出し分け（地図上の 3D）
-- **メイン（代表）3D タップ → フォーカス**（全画面 Hero 拡大・**320ms easeOutCubic**・背景の地図のみ scrim 暗転・360°回覧）。
-- **非メイン タップ → 地図がその位置へ glide**（約 800ms）して**その投稿が新しいメイン**になる（フォーカスしない）。
-- リール cell タップでフォーカス中に別 3D 投稿を選ぶと、**フォーカス対象を差し替え**（拡大は維持）。3D 無し投稿を選んだらフォーカスを閉じる。
-- フォーカス中の ✕ ボタンは**対象の左上角**に追従、scrim は地図だけを暗転、リール/サイドツール/投稿ボタンは前面で操作可（押してもフォーカス維持）。
+- **main 代表タップ → story 全画面**（Hero 拡大でその場から開く）
+- **main ＋ 複数メンバー → メンバー cycle**（タップごとに次メンバーへ代表差替）
+- **非 main タップ → 地図がそこへ flyTo（800ms）＋ 代表昇格**（ユーザー選択 1.5s ロック）
+- 3D フォーカス / focus dock / 弧カルーセルは無い
 
-### 連携の状態（同一 id で貫通）
-`代表 id` が、(a) リールの白枠 (b) 地図上の巨大 main (c) フォーカス対象 を**1 つの id**で結ぶ。現 specimen の
-`_mainId`（中心最寄り）を**この代表 id に統一**し、リール選択・地図 glide・フォーカスがすべて同じ id を更新するようにする。
+### 下部 poster ストリップ（旧リールの置換）
 
-## specimen の現況（最新イテレーション・objects3d.js が中核）
+- main クラスタの members（代表を先頭）を poster 横並び 1 行で表示。circle 別の複数行リールは**廃止**
+- card **92×122**（3:4）・radius 12・gap 10・左右 padding 16・画面下端から **46px**
+- 動画投稿は中央に ▶ 30px 白。エラー placeholder `#2A2A30`
+- cell タップ = **story 全画面を開く**（代表化ではない）
 
-連携モデル（上記）に加え、現 specimen は次を実装済み。実機反映時はこの挙動・値に合わせる:
+### edge indicator（画面外の近隣クラスタ）
 
-- **データ = Studio 3D サンプル**（`posts.js`）。1 投稿 = `{id,lat,lng,circleId,cluster,glbUrl,thumbUrl,videoUrl}`。
-  共有プール `../../assets/sample/3d/{id}/`（model.glb / thumbnail.jpg / video.mp4）と本番 GLB(real-NN) を id で参照。
-  10 クラスタ（shibuya / jingumae / yoyogi / dogenzaka / miyamasu / harajuku / omotesando / ebisu / nakameguro / shinjuku）。
-- **3D = 画面空間オーバーレイ**（`objects3d.js`）。地図ズームに依らず *固定 px サイズ*で描く（地表貼付の `models.js` とは別実装）。
-  `MARKER_PX=92` / `FOCUS_FRAC≈0.6` / `FOCUS_STEP≈0.052`(≈320ms easeOutCubic) / 非メインは `IDLE_SPIN` 自動回転・代表は静止。
-- **focus dock**（`.o3d-dock`）: フォーカス中、同クラスタの他メンバーを画面下部に弧カルーセルで 3D サムネ並置。頂点=最大強調・タップで対象切替。
-- **off-screen edge indicator**（`.o3d-edge`）: 画面外の近隣オブジェクトを淵にクランプしたグラスチップで *方向(矢印)+距離* 提示。中身は実 3D ポートレート。
-- **story fullscreen = 2D スワイプフィード**（`.story-fs` / `.sfs-scroller`）: 3D/リール cell タップ→ Hero 拡大後、クラスタ ≥2 で 2D グリッドフィードに展開（横=同サークルの他投稿 / 縦=近傍サークル〔重心距離順〕）。Instagram ストーリー型セグメント進捗・スワイプヒント・近傍ウィンドウだけ遅延実体化。長押し=3D フォーカス/回覧。
-- **動画 totem**（`.o3d-media-card`）: 投稿動画カードを 3D オブジェクト真下に積み、足元を溶接（weld 影）して「3D+動画=1 ピン」に。
-- **WdSideTool / playlist / preset-rail / tuning panel** は specimen 制御用チューニング面（`look.js`）。app chrome の値の出どころ。
+- 画面内縁にクランプした**円形 glass チップ 56px**（中身 = 代表サムネ・地 `rgba(8,8,12,0.55)`・
+  枠 `rgba(255,255,255,0.55)` 1.5px・影 blur18・pulse リング 2.8s・最大 6 個）。タップでそこへ寄せる
+- 3D 版の「矢印＋距離」チップより簡素（方向矢印・距離ラベルは無い）
+
+### app chrome
+
+- 上部スクリム 150px: `rgba(0,0,0,0.55) → rgba(0,0,0,0.28)`（42%）`→ 0`
+- 左上 AccountBadge（top 48 / left 8）、右上メッセージアイコン
+- 右下 投稿ボタン **58×58**（right 12 / bottom ≈ 画面高の 2.8%・カメラアイコン＋add バッジ・badgeColor variant）
+- **Universe home にサイドツール（like/comment/map 縦列）は出さない**（story 全画面時のみ）。
+  地図上は動画ピン下端の like/comment 数だけ
+
+### story 全画面
+
+- poster / 動画ピン / ストリップ cell から開く 2D フィード。既存 3D specimen の `.story-fs`
+  （2D スワイプフィード: 横=同サークル / 縦=近傍サークル・セグメント進捗）の方向で OK
 
 ## スマホ配置文脈
 
-画面 **402×874 + SafeArea**（iPhone 17 / iOS 最新・`DesignSystem/preview/card.css` `.phone`）。globe は full-bleed 背景。
-リール `left:0 right:0` 下端、投稿ボタン右下 55×55、WdSideTool 右端中央。タップ範囲 ≥44pt。
-
-## 直すべき逸脱
-
-- リールのデータを「固定サンプル」から「メインクラスタ `allPins`」に。3D とサムネを**同一 id のペア**に束ねる。
-- `_mainId`（中心最寄り）を**クラスタ代表**へ統一し、リール／地図／フォーカスが同じ id を相互更新する双方向ループにする。
-- サムネは `assets/sample/models/real-NN.jpg`（per-View に複製しない・共有プール参照）。色は役割トークン（`colors_and_type.css`）。
+画面 **402×874 ＋ SafeArea**（iPhone 17 / `DesignSystem/preview/card.css` の `.phone`・statusbar / Dynamic Island / home-ind chrome）。
+globe は full-bleed 背景。ストリップ `left:0 right:0` 下端、投稿ボタン右下、タップ範囲 ≥44pt。
 
 ## 実装の対応箇所（別 repo `univbrofd/toopdbq`・参考。本書の値が design 上の正）
 
-- `lib/component/ui/view/Earth/EarthClusterEngine.dart` / `EarthClusterModels.dart` — bucketing・cell 代表・`EarthClusterLayout{allPins, branches, role, main}`
-- `lib/component/ui/view/Earth/EarthRepresentativeElector.dart` — 代表選定（`repActiveT` 最大・hysteresis・ユーザーロック 1500ms）
-- `lib/component/ui/view/Planet/PlanetViewController.dart` — `mainTerrestrial`（Rxn）/ `selectRepresentative` / `enter3dFocus` / `exit3dFocus` / `focus3dPin` / `focus3dExpanded`
-- `lib/feature/Main/StoryOverlayView.dart` — `_buildClusterReel`（`mainTerrestrial.allPins` を読む）/ `_CirclePlaylist`（circle 別行・代表白枠）
-- `lib/component/ui/view/Earth/ThreeDTerrestrialView.dart` — フォーカスの AnimatedPositioned（320ms・main 判定）
-- `lib/model/Terrestrial.dart` — `id / lat / lng / has3D / threeDPath / thumbnailUrl / circleId`（3D とサムネは同一エンティティ）
+- `lib/component/ui/view/Earth/ThumbnailTerrestrialView.dart` / `VideoTerrestrialView.dart` — ピン装飾・動画ピン
+- `lib/component/ui/view/Earth/ClusterMediaStripView.dart` — 下部 poster ストリップ
+- `lib/component/ui/view/Earth/EarthEdgeIndicatorView.dart` — edge チップ
+- `lib/component/ui/view/Planet/PlanetViewController.dart` — タップ / 代表選定 / クラスタ
+- `lib/feature/Main/StoryOverlayView.dart` — スクリム / 投稿ボタン / chrome 出し分け
 
 ## Claude Design に貼るプロンプト
 
 ```
 to claude
 ------------------------------------------------------
-UniverseView の specimen を「実機の連携モデル」に合わせてリファクタして。
-現状は 3D・下部リール・メイン・フォーカスがバラバラのデータで、連動していない。
+UniverseView の「現行仕様（3D なし・2D poster）」specimen を新規作成して。
+既存の UniverseView.html（3D 版）はデザイン探求として温存 — 変更・削除しないこと。
 
 索引: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/DesignSystem/_ds_manifest.json
 HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/handoff/UniverseView/HANDOFF.md
-（specimen: handoff/UniverseView/UniverseView.html ＋ earth/*.js を直接リファクタしてよい）
 
-直す核（HANDOFF の表と「目標の連携モデル」のとおり）:
-1. データを 1 投稿 = 1 エンティティ {id,lat,lng,circleId,glbUrl,thumbUrl} に統一。
-   3D(glbUrl=現 POSTS の Firebase URL)とサムネ(thumbUrl=assets/sample/models/real-NN.jpg)を
-   同じ id のペアにする(real-NN.glb ↔ real-NN.jpg。生成元写真がサムネ)。
-2. クラスタリングを入れる: ピンをタイル cell で bin、画面中心に最も近い cell をメインクラスタに。
-3. 下部リール = メインクラスタの allPins を circle 別行で表示(代表=白2.5px枠/他=rgba(255,255,255,.2)1px、
-   cell は thumbUrl のみ)。固定4行サンプルはやめる。
-4. 代表 id を 1 本に統一して連動: リール白枠 / 地図の巨大 main / フォーカス対象 を同じ id に。
-   リール cell タップ→代表化(1500msロック)→地図再選定→白枠移動。
-   メイン 3D タップ→フォーカス(320ms easeOutCubic 全画面・360°)。非メイン タップ→地図がそこへ glide して新メイン。
+作るもの: handoff/UniverseView/UniverseView2D.html（新ファイル。2D 固有 JS は earth2d/ へ。
+既存 earth/*.js は 3D specimen 専用につき変更禁止・map-core.js / posts.js の読み取り流用は可）。
 
+核（HANDOFF の「現行仕様」の値で固定）:
+1. ピン = 2D poster サムネ（36×64 基準・gradient-border・glass edge・main は colorful glow halo）。
+   3D オブジェクト・フォーカス（360°回覧）・focus dock は存在しない。
+2. 代表が動画の main は縦長動画カード（muted loop・下端に like/comment 数のみ）。
+3. 下部 = main クラスタ members の poster ストリップ 1 行（92×122・radius12・gap10・bottom46・
+   動画は▶バッジ・タップで story 全画面）。circle 別複数行リールは廃止。
+4. タップ: main 代表 → story 全画面（Hero 拡大）/ main+複数 → メンバー cycle /
+   非 main → flyTo 800ms + 代表昇格（1.5s ロック）。
+5. 画面外クラスタは縁の円形 glass チップ 56px（代表サムネ・pulse）。矢印+距離は無し。
+6. chrome: 上部スクリム・左上バッジ・右下投稿ボタン 58×58。home にサイドツールは出さない。
+
+データは earth/posts.js をそのまま読む（thumbUrl/videoUrl を使い glbUrl は無視。手編集禁止）。
 土台は USAGE_RULES.md と taste.md。色は colors_and_type.css の役割トークン、
-サムネは共有プール assets/sample/models/real-NN.jpg を参照(per-View に複製しない)。
 新規発明はしない。最終はダウンロード可能な bundle で出力して。
 --------------------------------------------------
 ```
