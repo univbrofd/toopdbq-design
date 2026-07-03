@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UniverseView — Earth Globe (live specimen)</title>
+
+<!-- Toopdbq DS tokens (colors / type / fonts) -->
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css" />
+<!-- MapLibre GL JS — the real rendering engine (positron + globe projection) -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" />
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<!-- three.js — 地図上に乗る実 3D (real-NN.glb / EXT_meshopt_compression) を描く custom layer 用 -->
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/libs/meshopt_decoder.js"></script>
+<!-- RoomEnvironment — PBR の IBL 用 (発色契約: objects3d.js / models.js が PMREMGenerator で使用) -->
+<script src="https://unpkg.com/three@0.128.0/examples/js/environments/RoomEnvironment.js"></script>
+
+<style>
+/* ============================================================================
+   STUDIO  — neutral backdrop so the globe specimen reads as a placed surface
+   ========================================================================== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; min-height: 100%;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0d0d0f 55%, #08080b 100%);
+  color: var(--text-1);
+  font-family: var(--font-latin);
+  -webkit-font-smoothing: antialiased;
+}
+.studio {
+  min-height: 100vh;
+  display: flex; align-items: flex-start; justify-content: center;
+  gap: 40px; padding: 40px 36px 64px;
+  flex-wrap: wrap;
+}
+.stage { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+.specimen-cap { text-align: center; max-width: 402px; }
+.specimen-cap .eyebrow {
+  font-weight: 600; font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--fg-3);
+}
+.specimen-cap h1 {
+  font-family: var(--font-jp); font-weight: 700; font-size: 17px; margin-top: 6px;
+  color: var(--text-1);
+}
+.specimen-cap p { font-size: 11.5px; line-height: 1.55; color: var(--fg-2); margin-top: 7px; }
+
+/* ============================================================================
+   iPhone 17 frame  (402×874 · r55 · Dynamic Island)  — DS card.css canonical
+   ========================================================================== */
+.phone {
+  position: relative; width: 402px; height: 874px; flex: none;
+  border-radius: 55px; overflow: hidden; background: var(--bg);
+  box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
+              0 36px 90px rgba(0,0,0,.62);
+  isolation: isolate;
+}
+.phone .screen { position: absolute; inset: 0; overflow: hidden; }
+
+/* ---- L0  space backdrop  (#bg-white = the engine's space gradient) -------- */
+#bg-white {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(125% 120% at 50% 38%,
+      var(--space-core)  0%,
+      var(--space-mid)   46%,
+      var(--space-edge)  100%);
+  transition: opacity .6s var(--ease-out);
+}
+
+/* ---- L0  the MapLibre canvas (positron sphere) ---------------------------- */
+#map { position: absolute; inset: 0; z-index: 1; background: transparent;
+  filter: saturate(1.08); }
+#map .maplibregl-canvas { outline: none; }
+.maplibregl-ctrl-attrib { font-family: var(--font-latin); }
+.maplibregl-ctrl-bottom-right { bottom: 36px; }            /* clear home indicator */
+.maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(0,0,0,.35); }
+.maplibregl-ctrl-attrib a { color: rgba(255,255,255,.6); }
+
+/* ---- L0.5  atmosphere ring  (#strato-shadow) ------------------------------ */
+/* A soft stratospheric halo hugging the limb of the sphere. Sized & faded by
+   zoom from JS (only meaningful at globe scale). */
+#strato-shadow {
+  position: absolute; left: 50%; top: 50%; z-index: 2;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+      transparent calc(100% - var(--atmo-thickness) - var(--atmo-blur)),
+      var(--atmo-color) calc(100% - var(--atmo-thickness)),
+      transparent 100%);
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* ---- L0.6  globe edge  (#globe-frame = the crisp white silhouette line) ---- */
+#globe-frame {
+  position: absolute; left: 50%; top: 50%; z-index: 3;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  border: var(--frame-width) solid rgba(255,255,255,var(--frame-opacity));
+  filter: blur(var(--frame-blur));
+  box-shadow: 0 0 calc(var(--frame-blur) * 4) rgba(255,255,255,calc(var(--frame-opacity) * .5));
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* ---- center marker  (青ドット + グロー) — a MapLibre Marker DOM node -------- */
+.center-marker { position: relative; width: 0; height: 0; pointer-events: none; }
+.center-marker .glow {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: calc(var(--marker-size) * 3.6); height: calc(var(--marker-size) * 3.6);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--marker-color) 0%, transparent 72%);
+  opacity: var(--marker-glow);
+  filter: blur(1px);
+}
+.center-marker .ping {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--marker-size); height: var(--marker-size); border-radius: 50%;
+  border: 1.5px solid var(--marker-color);
+  animation: ping 2.6s var(--ease-out) infinite;
+}
+.center-marker .dot {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: var(--marker-size); height: var(--marker-size); border-radius: 50%;
+  background: var(--marker-color);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.7);
+}
+@keyframes ping {
+  0%   { transform: translate(-50%,-50%) scale(1);   opacity: .9; }
+  70%  { transform: translate(-50%,-50%) scale(3.2);  opacity: 0; }
+  100% { transform: translate(-50%,-50%) scale(3.2);  opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .center-marker .ping { animation: none; } }
+
+/* ---- protection scrims (top/bottom) so SafeArea chrome stays legible ------ */
+.scrim-top {
+  position: absolute; top: 0; left: 0; right: 0; height: 150px; z-index: 40;
+  background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.28) 42%, transparent 100%);
+  pointer-events: none;
+}
+.scrim-bottom {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 130px; z-index: 40;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ---- SafeArea chrome (status bar / island / home indicator only) ---------- */
+.dynamic-island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 125px; height: 36px; border-radius: 20px; background: #000; z-index: 70;
+  pointer-events: none;
+}
+.statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 62px; z-index: 60;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; pointer-events: none; color: #fff;
+}
+.statusbar .time { font-weight: 600; font-size: 16px; letter-spacing: .02em; }
+.statusbar .sys { display: flex; align-items: center; gap: 7px; }
+.statusbar .sys svg { display: block; }
+.home-ind {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 140px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.9);
+  z-index: 60; pointer-events: none;
+}
+
+/* ============================================================================
+   BOTTOM CHROME — circle playlist + post button (portable universe-list parts)
+   Tokens come from the DS colors_and_type.css already loaded above.
+   ========================================================================== */
+button.wd-icon-btn { border: none; -webkit-appearance: none; appearance: none; }
+.wd-icon-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--glass-fill); cursor: pointer;
+  transition: transform .12s var(--ease-out), opacity .12s var(--ease-out);
+}
+.wd-icon-btn::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
+.wd-icon-btn:active { transform: scale(.94); filter: brightness(.92); }
+.wd-icon-btn.color {
+  background: var(--lg-tint-dark);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+}
+.wd-icon-btn.color::before { display: none; }
+.wd-icon-btn.color::after { background: var(--gradient-colorful-linear); padding: 1.5px; }
+.wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wd-icon-btn.color { background: rgba(8,8,12,.72); }
+}
+.wd-badge {
+  position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  display: flex; align-items: center; justify-content: center;
+}
+.wd-badge::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.wd-badge img { width: 11px; height: 11px; }
+.wd-icon-btn.color.has-badge::before {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  -webkit-mask-composite: source-in;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+  mask-composite: intersect;
+}
+.wd-icon-btn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude;
+}
+.playlist-veil {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 368px; z-index: 31; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,.54) 40%, rgba(0,0,0,.14) 76%, rgba(0,0,0,0) 100%);
+}
+.playlist {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 240px; z-index: 46;
+  display: flex; flex-direction: column; justify-content: flex-start; gap: 16px;
+  overflow-y: auto; padding: 18px 0 74px; scrollbar-width: none;
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%);
+  mask: linear-gradient(to bottom, transparent 0%, #000 11%, #000 80%, transparent 96%);
+}
+.playlist::-webkit-scrollbar { display: none; }
+.crow { display: flex; flex-direction: column; gap: 8px; flex: none; }
+.chead { display: flex; align-items: center; gap: 9px; padding: 0 16px; }
+.chead .cthumb { width: 30px; height: 30px; border-radius: 50%; flex: none; overflow: hidden;
+  border: 1px solid rgba(255,255,255,.28); box-shadow: 0 1px 5px rgba(0,0,0,.5); }
+.chead .cthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chead .cname { font: 600 12.5px var(--font-jp); color: var(--text-2); letter-spacing: .01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 240px;
+  text-shadow: 0 1px 3px rgba(0,0,0,.85); }
+.cstrip { display: flex; gap: 8px; overflow-x: auto; padding: 0 76px 0 16px; scrollbar-width: none; }
+.cstrip::-webkit-scrollbar { display: none; }
+.cell { position: relative; width: 75px; height: 134px; flex: none; border-radius: 11px;
+  border: none; overflow: hidden; background: transparent; cursor: pointer;
+  transition: transform .22s var(--ease-out); }
+.cell .clip { position: absolute; inset: 1px; border-radius: 9px; overflow: hidden; }
+.cell .clip img, .cell .clip video { width: 100%; height: 100%; object-fit: contain; display: block; }
+.cell.rep { border: 2.5px solid #fff; }
+.cell.rep .clip { inset: 1.5px; border-radius: 8px; }
+.cell.noimg .clip { background: transparent; }
+.cell.noimg .clip img { display: none; }
+.cell:active { transform: scale(.97); }
+/* origin cell: while its media is borrowed up into fullscreen, the leftover frame + gray bg fade away */
+.cell.borrowed { opacity: 0; transition: opacity .34s var(--ease-out); }
+/* the reel's circle header hides while its icon+name fly into the fullscreen footer */
+.chead.borrowed { opacity: 0; transition: opacity .18s var(--ease-out); }
+/* ============================================================================
+   WdSideTool — 縦並びアクションレール（DS components.css 由来）
+   avatar(poster+follow) → like → comment → pin · 右端中央に配置
+   ========================================================================== */
+.wd-side-tool {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+  z-index: 50; display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.wd-side-tool .wd-icon-btn { width: 47px; height: 47px; }
+.wd-side-tool .act { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.wd-side-tool .act .ct {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); font-variant-numeric: tabular-nums;
+}
+/* poster avatar — a touch larger + extra gap to the actions */
+.wd-side-tool .wd-avatar { position: relative; width: 48px; height: 48px; flex: none; margin-bottom: 4px; }
+.wd-side-tool .wd-avatar > img {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,.7);
+}
+.wd-side-tool .wd-avatar .b {
+  position: absolute; right: -3px; bottom: -3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.6);
+}
+.wd-side-tool .wd-avatar .b img { width: 9px; height: 9px; filter: brightness(0); }
+/* liked — like button fills with --state-like (white heart on pink, soft glow) */
+.wd-side-tool .act.liked .wd-icon-btn {
+  background: var(--state-like); backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 2px 10px rgba(255,62,136,.45);
+}
+.wd-side-tool .act.liked .wd-icon-btn::after { display: none; }
+.wd-side-tool .act.liked .wd-icon-btn img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+.wd-side-tool .act.liked .ct { color: var(--state-like); }
+
+.post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 55; width: 56px; height: 56px;
+  transition: transform .4s var(--ease-out), opacity .15s var(--ease-out), filter .12s var(--ease-out); }
+.post-btn.wd-icon-btn.color > img { width: 25px; height: 25px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.post-btn:active { transform: scale(.94); }
+
+/* ── WdIdentityTool 右スタック下段（pen / 編集）─────────────────────────────
+   フルスクリーン時、画面下から滑り上がって投稿ボタンを押し上げ、camera(上)＋pen(下)の
+   縦2連スタックを作る。投稿ボタンと中心軸（右からの中心）を揃える。 */
+.edit-btn { position: absolute; right: 14px; bottom: 26px; z-index: 55; width: 52px; height: 52px;
+  opacity: 0; transform: translateY(88px); pointer-events: none;
+  transition: transform .44s var(--ease-out), opacity .3s var(--ease-out); }
+.edit-btn img { width: 42%; height: 42%;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+/* story-open の押し上げ／pen 表示は JS が openStory/closeStory でインライン駆動する
+   （.screen.story-open 子孫セレクタが一部効かない描画環境のため、確実なインライン制御に） */
+.specimen-tag {
+  position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 55; pointer-events: none;
+  font-family: var(--font-latin); font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,.8);
+}
+
+/* ============================================================================
+   PRESET RAIL  (specimen control — 🌍 Globe · 🗾 Region · 🏙 Street+3D)
+   Placed BELOW the phone (not over the globe) so no app-chrome is added.
+   ========================================================================== */
+.preset-rail {
+  display: flex; gap: 8px; padding: 6px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+.preset-rail button {
+  appearance: none; border: 0; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius-pill);
+  font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: var(--text-2);
+  background: transparent; transition: all .2s var(--ease-standard);
+}
+.preset-rail button .ico { font-size: 16px; line-height: 1; }
+.preset-rail button:hover { color: var(--text-1); }
+.preset-rail button.active {
+  color: #fff;
+  background:
+    linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+    var(--gradient-colorful);
+  box-shadow: 0 2px 12px rgba(255,62,136,.28);
+}
+.hint { font-size: 11px; color: var(--fg-3); letter-spacing: .02em; }
+
+/* ============================================================================
+   TUNING PANEL  (the "詰める" surface — refine the globe LOOK live)
+   ========================================================================== */
+.panel {
+  width: 312px; flex: none; align-self: stretch;
+  background: rgba(20,20,26,.72);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: 0 18px 50px rgba(0,0,0,.5);
+  overflow: hidden;
+  position: sticky; top: 40px;
+}
+.panel header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 16px 18px 12px; border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.panel header .t { font-family: var(--font-jp); font-weight: 700; font-size: 14px; }
+.panel header .s { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--fg-3); }
+.panel .body { padding: 6px 18px 18px; max-height: 78vh; overflow-y: auto; }
+.panel .body::-webkit-scrollbar { width: 8px; }
+.panel .body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 8px; }
+
+.group { padding: 14px 0 6px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.group:last-child { border-bottom: 0; }
+.group > .gt {
+  font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+  color: var(--text-2); font-weight: 700; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 7px;
+}
+.group > .gt .id { color: var(--fg-3); font-weight: 500; letter-spacing: 0; text-transform: none; font-size: 10px; }
+
+.ctrl { margin-bottom: 13px; }
+.ctrl .lab { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.ctrl .lab span { font-size: 11.5px; color: var(--text-2); }
+.ctrl .lab b { font-size: 11px; color: var(--text-1); font-variant-numeric: tabular-nums; font-weight: 600; }
+.ctrl input[type=range] {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 3px; border-radius: 3px;
+  background: rgba(255,255,255,.18); outline: none;
+}
+.ctrl input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 15px; height: 15px; border-radius: 50%;
+  background: #fff; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.5);
+}
+.ctrl input[type=range]::-moz-range-thumb {
+  width: 15px; height: 15px; border-radius: 50%; background: #fff; cursor: pointer; border: 0;
+}
+.swatches { display: flex; gap: 7px; flex-wrap: wrap; }
+.swatches button {
+  width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+  border: 2px solid transparent; background-clip: padding-box;
+  position: relative; transition: transform .12s var(--ease-standard);
+}
+.swatches button:hover { transform: scale(1.08); }
+.swatches button.sel { border-color: #fff; }
+.swatches button .none { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--fg-2); }
+
+.reset {
+  width: 100%; margin-top: 14px; padding: 11px; cursor: pointer;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px; color: var(--text-2); font-family: var(--font-jp);
+  font-weight: 600; font-size: 12px; transition: all .18s;
+}
+.reset:hover { background: rgba(255,255,255,.1); color: var(--text-1); }
+
+.note { font-size: 10.5px; line-height: 1.6; color: var(--fg-3); margin-top: 12px; }
+.note code { font-family: var(--font-latin); color: var(--text-2); background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 4px; font-size: 10px; }
+
+/* loading veil */
+#veil {
+  position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); transition: opacity .8s var(--ease-out);
+  font-family: var(--font-display); font-size: 26px; color: rgba(255,255,255,.85);
+}
+#veil.gone { opacity: 0; pointer-events: none; }
+#veil .spin {
+  width: 42px; height: 42px; border-radius: 50%; margin-left: 14px;
+  border: 2px solid rgba(255,255,255,.18); border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================================
+   3D MEDIA TOTEM  (objects3d.js) — per-post 動画カードを 3D オブジェクトの真下に
+   縦に積み、lat/lng に射影して "オブジェクト＋動画 = 一体の 1 ピン" としてマッピング。
+   z2: bg(0) < map(1) < MEDIA(2) < strato/frame(2/3) < o3d-edge(4) < scrim(5) < 3D(6)
+   → 3D オブジェクト本体(z6)はカード(z2)の上に描かれ、足元がカード上端へ重なる。
+   ========================================================================== */
+.o3d-media-card {
+  position: absolute; top: 0; left: 0; pointer-events: none;
+  will-change: transform, width, height;
+}
+.o3d-media-card .mclip {
+  position: absolute; inset: 0; border-radius: 13px; overflow: hidden;
+  background: #16161b;
+  box-shadow: 0 14px 30px rgba(0,0,0,.6), 0 3px 10px rgba(0,0,0,.45),
+              inset 0 1px 0 var(--lg-specular-top, rgba(255,255,255,.18));
+}
+.o3d-media-card .mclip::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border); pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.o3d-media-card .mclip video,
+.o3d-media-card .mclip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* soft contact shadow welding the object's head to the card's bottom edge */
+.o3d-media-card .weld {
+  position: absolute; left: 50%; bottom: 0; transform: translate(-50%,58%);
+  width: 64%; height: 16px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.55) 0%, transparent 75%);
+  pointer-events: none;
+}
+
+/* ============================================================================
+   3D OVERLAY  (objects3d.js) — screen-space markers + focus/orbit chrome
+   ========================================================================== */
+.o3d-scrim {
+  /* sits just ABOVE the map/globe but BELOW all floating app chrome
+     (playlist 31/46 · side-tool 50 · post 55 · statusbar 60), so focusing
+     an object darkens only the MAP — the UI stays lit and in front. */
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  background: var(--scrim); opacity: 0;
+}
+/* フォーカス背景グラデーションの波打つフロー：斜め方向に流れ、ゆっくり脈動する。 */
+@keyframes o3dGradFlow {
+  0%   { background-position: 0% 30%, 100% 0%, 80% 100%, 10% 90%, 0% 50%;
+         transform: scale(1) rotate(0deg); }
+  25%  { background-position: 30% 60%, 70% 30%, 100% 70%, 0% 60%, 35% 65%; }
+  50%  { background-position: 60% 100%, 40% 70%, 60% 30%, 40% 20%, 100% 50%;
+         transform: scale(1.06) rotate(1.5deg); }
+  75%  { background-position: 30% 60%, 20% 100%, 30% 60%, 70% 50%, 65% 35%; }
+  100% { background-position: 0% 30%, 100% 0%, 80% 100%, 10% 90%, 0% 50%;
+         transform: scale(1) rotate(0deg); }
+}
+.o3d-chrome { position: absolute; inset: 0; z-index: 58; pointer-events: none; opacity: 0; }
+
+/* While a 3D object is focused, lift the interactive app chrome ABOVE the
+   focused canvas (z57) + chrome (z58) so the circle list, side-tool rail and
+   post button stay tappable — and because their own handlers never close the
+   focus, tapping them leaves the focus open. (Status bar 60 / island 70 stay
+   on top.) Empty/object area still orbits & tap-to-closes via the canvas. */
+.screen.o3d-focus-active .playlist,
+.screen.o3d-focus-active .wd-side-tool,
+.screen.o3d-focus-active .post-btn { z-index: 59; }
+.o3d-close {
+  position: absolute; top: 72px; right: 18px; width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  border: 0; border-radius: 50%; pointer-events: auto;
+  background: var(--glass-fill);
+  backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .12s var(--ease-out);
+}
+.o3d-close::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.o3d-close:active { transform: scale(.92); }
+
+/* ============================================================================
+   FOCUS DOCK  (objects3d.js) — フォーカス中だけ、クラスタの裏に隠れたメンバーを
+   画面下部に 3D サムネで並べる。タップでフォーカス対象を切り替え。
+   ========================================================================== */
+/* 弧カルーセル：フォーカス対象の左下に、クラスタの他メンバーを「丘」状の弧へ並べる。
+   頂点(中心)のメンバーが最大＝強調。ドラッグ/ホイールでスライド、タップで切り替え。
+   マップ表示では非表示（フォーカス中のみ）。位置は JS が毎フレーム弧上に配置。 */
+.o3d-dock {
+  position: absolute; left: 0; bottom: 0; width: 72%; height: 232px; z-index: 59;
+  pointer-events: none; opacity: 0; overflow: visible; touch-action: none;
+  transition: opacity .3s var(--ease-out);
+}
+.o3d-dock-item {
+  position: absolute; top: 0; left: 0; width: 66px; height: 66px; margin: -33px 0 0 -33px;
+  border: 0; padding: 0; background: none; cursor: pointer; pointer-events: auto;
+  will-change: transform, opacity;
+}
+.o3d-dock-item .ring {
+  position: absolute; left: 50%; top: 50%; width: 156%; height: 156%;
+  transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255,255,255,.24) 0%, rgba(255,255,255,.07) 46%, transparent 72%);
+  opacity: 0; transition: opacity .25s var(--ease-out);
+}
+.o3d-dock-item.apex .ring { opacity: 1; }
+.o3d-dock-item .disc {
+  position: absolute; inset: 0; border-radius: 16px; overflow: visible; background: none;
+  transition: transform .12s var(--ease-out);
+}
+.o3d-dock-item .disc img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,.62));
+}
+.o3d-dock-item:active .disc { transform: scale(.9); }
+/* 頂点メンバーの名前ラベル（弧の頂点直下） */
+.o3d-dock-cap {
+  position: absolute; top: 0; left: 0; pointer-events: none; opacity: 0;
+  transition: opacity .25s var(--ease-out);
+  font-family: var(--font-jp); font-weight: 700; font-size: 12px; color: #fff;
+  letter-spacing: .02em; white-space: nowrap; text-shadow: 0 1px 5px rgba(0,0,0,.9);
+  padding: 5px 13px; border-radius: var(--radius-pill);
+  background: rgba(0,0,0,.34); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.o3d-hint {
+  position: absolute; left: 50%; bottom: 116px; transform: translateX(-50%);
+  font-family: var(--font-jp); font-weight: 600; font-size: 12px; color: var(--text-2);
+  letter-spacing: .02em; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  padding: 7px 15px; border-radius: var(--radius-pill);
+  background: rgba(0,0,0,.34); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: opacity .3s var(--ease-out);
+}
+
+/* ============================================================================
+   周辺オブジェクト指標 — off-screen neighbour edge indicators (objects3d.js)
+   画面の淵に沿ってクランプした小さなグラス・チップが、画面外にある近隣オブジェクトの
+   *方向*(矢印) と *距離* を提示する。チップの中身は対象 3D の実ポートレート。
+   z4: bg(0) < map(1) < EDGE(4) < o3d-scrim(5) < 3D markers(6) < scrim/chrome …
+   → 実 3D マーカーや app chrome（オーバーレイ）の「下の層」に潜り、淵で重なる時は
+     その後ろへ回り込む。
+   ========================================================================== */
+.o3d-edge { position: absolute; inset: 0; z-index: 4; pointer-events: none; --ei-size: 40px; }
+.o3d-edge-chip {
+  position: absolute; left: 0; top: 0; will-change: transform;
+  padding: 0; border: 0; background: none; cursor: pointer; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.o3d-edge-chip.on { opacity: 1; pointer-events: auto; }
+
+/* pulse ring (chip-level so it isn't clipped by the disc) */
+.o3d-edge-chip::before {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: var(--ei-size); height: var(--ei-size); border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,.55); transform: translate(-50%,-50%);
+  opacity: 0; pointer-events: none;
+}
+.o3d-edge--pulse .o3d-edge-chip.on::before { animation: ei-ping 2.8s var(--ease-out) infinite; }
+@keyframes ei-ping {
+  0%   { transform: translate(-50%,-50%) scale(1);   opacity: .55; }
+  70%  { transform: translate(-50%,-50%) scale(1.7); opacity: 0; }
+  100% { transform: translate(-50%,-50%) scale(1.7); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .o3d-edge--pulse .o3d-edge-chip.on::before { animation: none; } }
+
+/* the glass disc holding the object's portrait */
+.o3d-edge-chip .disc {
+  position: relative; display: block; width: var(--ei-size); height: var(--ei-size);
+  border-radius: 50%; overflow: hidden;
+  background: var(--lg-tint-dark, rgba(8,8,12,.55));
+  backdrop-filter: blur(10px) saturate(150%); -webkit-backdrop-filter: blur(10px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 6px 18px rgba(0,0,0,.5);
+  transition: transform .12s var(--ease-out);
+}
+.o3d-edge-chip:active .disc { transform: scale(.9); }
+.o3d-edge-chip .disc::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.o3d-edge-chip .disc img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+/* directional chevron — JS sets transform (rotate to true bearing, push outward) */
+.o3d-edge-chip .arrow {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+  border-left: 8px solid #fff; transform-origin: center;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.65));
+}
+/* distance readout (large value + small unit — DS numeral convention) */
+.o3d-edge-chip .dist {
+  position: absolute; left: 50%; top: calc(var(--ei-size) + 8px); transform: translateX(-50%);
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1; color: #fff;
+  letter-spacing: .01em; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,.85);
+  font-variant-numeric: tabular-nums;
+}
+.o3d-edge-chip .dist i { font-style: normal; font-size: 8px; font-weight: 600; opacity: .82; margin-left: 1px; }
+.o3d-edge--nodist .o3d-edge-chip .dist { display: none; }
+/* when a chip bleeds past the rim, push its distance label to the INNER side so it stays on-screen */
+.o3d-edge-chip.edge-l .dist { left: calc(var(--ei-size) + 7px); top: 50%; transform: translateY(-50%); }
+.o3d-edge-chip.edge-r .dist { left: auto; right: calc(var(--ei-size) + 7px); top: 50%; transform: translateY(-50%); }
+.o3d-edge-chip.edge-b .dist { top: auto; bottom: calc(var(--ei-size) + 8px); }
+
+/* style: arrow-only — drop the disc, enlarge the chevron, sit it on the border */
+.o3d-edge--arrow .o3d-edge-chip .disc,
+.o3d-edge--arrow .o3d-edge-chip::before { display: none; }
+.o3d-edge--arrow .o3d-edge-chip .arrow {
+  border-top-width: 8px; border-bottom-width: 8px; border-left-width: 13px;
+}
+/* style: dot — a small luminous point */
+.o3d-edge--dot .o3d-edge-chip .disc {
+  width: 13px; height: 13px; background: #fff;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.18), 0 0 10px rgba(255,255,255,.55), 0 2px 6px rgba(0,0,0,.6);
+  margin: calc((var(--ei-size) - 13px) / 2);
+}
+.o3d-edge--dot .o3d-edge-chip .disc img,
+.o3d-edge--dot .o3d-edge-chip .disc::after { display: none; }
+.o3d-edge--dot .o3d-edge-chip::before { width: 13px; height: 13px; }
+
+/* segmented control inside the tuning panel */
+.seg { display: flex; gap: 5px; }
+.seg button {
+  flex: 1; appearance: none; cursor: pointer; padding: 7px 4px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05);
+  font-family: var(--font-jp); font-weight: 600; font-size: 11px; color: var(--text-2);
+  transition: all .15s var(--ease-standard);
+}
+.seg button:hover { color: var(--text-1); }
+.seg button.sel { background: rgba(255,255,255,.16); color: #fff; border-color: rgba(255,255,255,.28); }
+
+/* ============================================================================
+   STORY FULLSCREEN  — tap a 3D object → its list photo opens full-bleed
+   (long-press the object = 3D focus/orbit; this is the quick-tap surface).
+   Sits above the floating app chrome (post 55 · side-tool 50) but below the
+   SafeArea status bar (60) / island (70) so system chrome stays legible.
+   ========================================================================== */
+.story-fs {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 58; opacity: 0; pointer-events: none; overflow: hidden;
+  background: #000; border-radius: 0;
+  transition: top .44s var(--ease-out), left .44s var(--ease-out),
+              width .44s var(--ease-out), height .44s var(--ease-out),
+              border-radius .44s var(--ease-out), opacity .18s var(--ease-out);
+}
+.story-fs.open { opacity: 1; pointer-events: auto; }
+/* chrome (progress / header / scrims) fades in once expanded — not while it's still a tiny thumbnail */
+.story-fs .sfs-scrim-top, .story-fs .sfs-scrim-bot, .story-fs .sfs-bar, .story-fs .sfs-head {
+  opacity: 0; transition: opacity .28s var(--ease-out);
+}
+.story-fs.expanded .sfs-scrim-top, .story-fs.expanded .sfs-scrim-bot,
+.story-fs.expanded .sfs-bar, .story-fs.expanded .sfs-head { opacity: 1; }
+/* 3D フォーカスと同じレイヤリング：外側のボタン群はフルスクリーンの上に常に見える。
+   (status bar 60 / island 70 はそのさらに上) */
+.screen.story-open .playlist,
+.screen.story-open .wd-side-tool,
+.screen.story-open .edit-btn,
+.screen.story-open .post-btn { z-index: 59; }
+.screen.story-open .o3d-chrome { display: none; }
+/* fullscreen: hide the poster user avatar on the side rail (keep like/comment/pin) */
+.screen.story-open .wd-side-tool .wd-avatar { display: none; }
+.story-fs .sfs-media { position: absolute; inset: 0; overflow: hidden; }
+/* ---- 2D cluster feed: rows = circles (vertical snap), columns = posts in a circle (horizontal snap) ---- */
+.story-fs .sfs-scroller { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+  scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-y;
+  background: #000; opacity: 0; pointer-events: none; overscroll-behavior: contain; }
+.story-fs .sfs-scroller.live { opacity: 1; pointer-events: auto; }
+.story-fs .sfs-scroller::-webkit-scrollbar { display: none; }
+.story-fs .sfs-row { position: relative; width: 100%; height: 100%; display: flex; flex: none;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-snap-align: start; scroll-snap-stop: always;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; overscroll-behavior-x: contain; touch-action: pan-x; background: #000; }
+.story-fs .sfs-row::-webkit-scrollbar { display: none; }
+.story-fs .sfs-page { position: relative; width: 100%; height: 100%; flex: none; overflow: hidden; background: #000;
+  scroll-snap-align: start; scroll-snap-stop: always; }
+.story-fs .sfs-page > video, .story-fs .sfs-page > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs.feed .sfs-bar .fill { animation: none !important; }
+/* swipe hint — only at the origin cell, points to the available direction (→ same circle / ↓ other circle) */
+.story-fs .sfs-hint { position: absolute; left: 50%; bottom: 118px; transform: translateX(-50%); z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 3px; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out);
+  font: 600 11.5px var(--font-jp); color: #fff; letter-spacing: .04em; text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+.story-fs.feed.expanded .sfs-hint.show { opacity: 1; }
+.story-fs .sfs-hint.gone { opacity: 0 !important; }
+.story-fs .sfs-hint .chev { animation: sfsHintBob 1.5s var(--ease-out) infinite; }
+@keyframes sfsHintBob { 0%,100% { transform: translateY(0); opacity:.55; } 50% { transform: translateY(5px); opacity:1; } }
+/* horizontal variant — sits at the right edge, arrow points right, bobs sideways */
+.story-fs .sfs-hint.horiz { left: auto; right: 16px; bottom: 50%; transform: translateY(50%); flex-direction: row; }
+.story-fs .sfs-hint.horiz .chev { animation: sfsHintBobX 1.5s var(--ease-out) infinite; }
+@keyframes sfsHintBobX { 0%,100% { transform: rotate(-90deg) translateY(0); opacity:.55; } 50% { transform: rotate(-90deg) translateY(5px); opacity:1; } }
+@media (prefers-reduced-motion: reduce) { .story-fs .sfs-hint .chev { animation: none; } }
+.story-fs .sfs-media > video, .story-fs .sfs-media > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs .sfs-scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 168px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.26) 46%, transparent 100%); }
+.story-fs .sfs-scrim-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%); }
+.story-fs .sfs-bar { position: absolute; top: 70px; left: 16px; right: 16px; height: 2.5px; border-radius: 2px;
+  background: rgba(255,255,255,.3); overflow: hidden; display: flex; gap: 0; }
+/* segmented (ストーリー型): 横のアイテム数だけミシン目に区切る */
+.story-fs.feed .sfs-bar { background: transparent; overflow: visible; gap: 4px; }
+.story-fs.feed .sfs-bar .fill { display: none; }
+.story-fs .sfs-bar .seg { flex: 1 1 0; min-width: 0; height: 100%; border-radius: 2px; background: rgba(255,255,255,.3); overflow: hidden; }
+.story-fs .sfs-bar .seg .sfill { display: block; height: 100%; width: 100%; background: #fff; transform-origin: left; transform: scaleX(0); transition: transform .08s linear; }
+.story-fs .sfs-bar .seg.done .sfill { transform: scaleX(1); }
+.story-fs .sfs-bar .fill { display: block; height: 100%; width: 100%; background: #fff; transform-origin: left; transform: scaleX(0); }
+.story-fs.open:not(.feed) .sfs-bar .fill { animation: sfs-fill 6s linear forwards; }
+.story-fs.is-video .sfs-bar .fill { animation: none !important; }
+@keyframes sfs-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.story-fs .sfs-head { position: absolute; top: 84px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; }
+.story-fs .sfs-av { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; flex: none;
+  border: 1.5px solid rgba(255,255,255,.85); box-shadow: 0 2px 8px rgba(0,0,0,.6); }
+.story-fs .sfs-av img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+.story-fs .sfs-meta { display: flex; flex-direction: column; line-height: 1.22; min-width: 0; }
+.story-fs .sfs-meta b { font: 700 13px var(--font-jp); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.85);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .sfs-meta i { font: 500 10.5px var(--font-latin); font-style: normal; color: rgba(255,255,255,.82);
+  text-shadow: 0 1px 3px rgba(0,0,0,.85); letter-spacing: .02em; }
+.story-fs .sfs-close { margin-left: auto; width: 34px; height: 34px; flex: none; display: flex; align-items: center;
+  justify-content: center; border: 0; border-radius: 50%; cursor: pointer; background: var(--glass-fill);
+  backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .12s var(--ease-out); }
+.story-fs .sfs-close:active { transform: scale(.92); }
+/* circle footer — WdIdentityTool 左バー（WdCircleBar glass pill）。リールの
+   circle icon+title がここへ降りてきて、ベタな見出しから glass の identity pill へ
+   形を変える（footFlyIn の FLIP がそのまま効く）。右側の camera/pen スタックと合わせて
+   全体が WdIdentityTool になる。 */
+.story-fs .sfs-foot { position: absolute; left: 18px; right: 78px; bottom: 26px; z-index: 2;
+  display: flex; align-items: center; gap: 10px; pointer-events: none;
+  padding: 6px 18px 6px 6px; border-radius: var(--radius-pill);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%),
+    var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .3s var(--ease-out), transform .42s var(--ease-out); }
+.story-fs .sfs-foot::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.story-fs.expanded .sfs-foot { opacity: 1; transform: translateY(0); }
+.story-fs .sfs-foot .ft { width: 44px; height: 44px; border-radius: 50%; flex: none; overflow: hidden;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+.story-fs .sfs-foot .ft img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs .sfs-foot .col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.story-fs .sfs-foot b { font: 700 14px var(--font-jp); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .sfs-foot .ds { font: 400 11px var(--font-latin); color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (prefers-reduced-motion: reduce) { .story-fs.open .sfs-bar .fill { animation: none; transform: scaleX(1); } }
+</style>
+</head>
+<body>
+
+<!-- screen-only mode: ?screen でアクセスすると studio chrome / 端末額縁を外し、app 画面だけを
+     縦フル(portrait アスペクト維持)で描画する。design-uc-test の screen-only 比較・実機プレビュー用。
+     CSS は <body> 直後に置き、map-core.js 起動前に #map を最終サイズにしておく(MapLibre が正しく初期化)。 -->
+<style>
+  body.screen-only { background: #000; }
+  body.screen-only .studio { padding: 0; gap: 0; min-height: 100dvh; align-items: center; justify-content: center; }
+  body.screen-only .stage  { gap: 0; }
+  body.screen-only .specimen-cap,
+  body.screen-only .preset-rail,
+  body.screen-only .hint,
+  body.screen-only .panel { display: none; }
+  body.screen-only .phone {
+    width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh;
+    border-radius: 0; box-shadow: none;
+  }
+  /* 端末 chrome(島/ホームインジケータ)はブラウザ全画面では浮くので隠す(app 実装ではない) */
+  body.screen-only .dynamic-island,
+  body.screen-only .home-ind { display: none; }
+</style>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) {
+    document.body.classList.add('screen-only');
+  }
+</script>
+
+<div class="studio">
+
+  <!-- ====================== STAGE: phone + presets ====================== -->
+  <div class="stage">
+    <div class="specimen-cap">
+      <div class="eyebrow">Live specimen · 実機の連携モデル</div>
+      <h1>UniverseView — クラスタ連動（3D · リール · メイン · フォーカス）</h1>
+      <p>1 投稿 = 1 エンティティ。ピンをタイル cell で bin し、中心に最も近い cell がメインクラスタ。代表 id を 1 本に統一し、<b>リール白枠 / 地図の巨大 main / フォーカス対象</b>を同じ id に揃える。リール cell タップ→代表化（地図再選定）、メイン 3D タップ→フォーカス、非メインタップ→glide して新メイン。</p>
+    </div>
+
+    <div class="phone" data-screen-label="UniverseView · Earth globe">
+      <div class="screen">
+        <div id="bg-white"></div>
+        <div id="map"></div>
+        <div id="strato-shadow"></div>
+        <div id="globe-frame"></div>
+
+        <div class="scrim-top"></div>
+
+        <!-- ===== WdSideTool: 縦並びアクションレール（右端中央） ===== -->
+        <div class="wd-side-tool" id="sideTool">
+          <div class="wd-avatar">
+            <img src="../../assets/sample/user/user007.jpg" style="object-position:50% 30%;" alt="poster">
+            <span class="b"><img src="../../assets/icons/icon_add.png" alt="follow"></span>
+          </div>
+          <div class="act" data-act="like">
+            <button class="wd-icon-btn" aria-label="いいね"><img src="../../assets/icons/icon_like.png" alt=""></button>
+            <span class="ct">1.2k</span>
+          </div>
+          <div class="act" data-act="comment">
+            <button class="wd-icon-btn" aria-label="コメント"><img src="../../assets/icons/icon_comment.png" alt=""></button>
+            <span class="ct">84</span>
+          </div>
+          <div class="act" data-act="pin">
+            <button class="wd-icon-btn" aria-label="ピン"><img src="../../assets/icons/icon_pin.png" alt=""></button>
+            <span class="ct">312</span>
+          </div>
+        </div>
+
+        <button class="post-btn wd-icon-btn color has-badge" aria-label="投稿">
+          <img src="../../assets/icons/icon_camera.png" alt="post">
+          <span class="wd-badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
+        </button>
+        <!-- WdIdentityTool 右スタック下段：pen（編集）。フルスクリーンで下から押し上がる -->
+        <button class="edit-btn wd-icon-btn" aria-label="編集">
+          <img src="../../assets/icons/icon_edit.png" alt="edit">
+        </button>
+
+        <!-- ===== story fullscreen: 3D タップ → リスト写真をフルスクリーン ===== -->
+        <div class="story-fs" id="storyFs" aria-hidden="true">
+          <div class="sfs-scroller" id="sfsScroller" aria-hidden="true"></div>
+          <div class="sfs-media" id="sfsMedia"></div>
+          <div class="sfs-scrim-top"></div>
+          <div class="sfs-scrim-bot"></div>
+          <div class="sfs-bar"><span class="fill"></span></div>
+          <div class="sfs-head">
+            <button class="sfs-close" id="sfsClose" aria-label="閉じる">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="sfs-foot">
+            <span class="ft"><img id="sfsFootImg" alt=""></span>
+            <div class="col">
+              <b id="sfsFootName">渋谷コミュニティ</b>
+              <span class="ds" id="sfsFootDesc">渋谷駅周辺のコミュニティ</span>
+            </div>
+          </div>
+          <div class="sfs-hint"><span class="ht">別のサークル</span>
+            <svg class="chev" width="18" height="18" viewBox="0 0 18 18"><path d="M4 7l5 5 5-5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          </div>
+        </div>
+
+        <!-- SafeArea chrome only (no app UI) -->
+        <div class="statusbar">
+          <div class="time">9:41</div>
+          <div class="sys">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.4c2.1 0 4 .8 5.5 2.1l1.4-1.5C13.6 1.3 11.1.3 8.5.3 5.9.3 3.4 1.3 1.6 3l1.4 1.5C4.5 3.2 6.4 2.4 8.5 2.4z" opacity=".9"/><path d="M8.5 6c1.1 0 2.2.4 3 1.2l1.4-1.5C11.7 4.6 10.2 4 8.5 4S5.3 4.6 4.1 5.7L5.5 7.2C6.3 6.4 7.4 6 8.5 6z"/><circle cx="8.5" cy="10" r="1.7"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-opacity=".5"/><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="#fff"/><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" fill-opacity=".6"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+
+      <div id="veil">Toopdbq<div class="spin"></div></div>
+    </div>
+
+    <div class="preset-rail" id="presetRail">
+      <button data-preset="globe"><span class="ico">🌍</span>Globe</button>
+      <button data-preset="region"><span class="ico">🗾</span>Region</button>
+      <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
+    </div>
+    <div class="hint">3D タップ＝フォーカス（360°回覧） · フォーカス中は左下のリストをスライドで切り替え · ドラッグ＝地図を回転</div>
+  </div>
+
+  <!-- ====================== TUNING PANEL ====================== -->
+  <aside class="panel">
+    <header>
+      <div class="t">Globe の見た目</div>
+      <div class="s">Tune</div>
+    </header>
+    <div class="body" id="panelBody"><!-- built by JS --></div>
+  </aside>
+
+</div>
+
+<!-- thumbnail for the offline bundler -->
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#08080b"/>
+    <circle cx="50" cy="50" r="26" fill="#e9ebee"/>
+    <circle cx="50" cy="50" r="26" fill="none" stroke="#fff" stroke-width="1.2"/>
+    <circle cx="50" cy="50" r="31" fill="none" stroke="#005f67" stroke-width="2" opacity=".5"/>
+    <circle cx="50" cy="50" r="3.4" fill="#2f7bff"/>
+  </svg>
+</template>
+
+<!-- single source of truth: 1 post = 1 entity {id,lat,lng,circleId,glbUrl,thumbUrl} -->
+<script src="earth/posts.js"></script>
+<script src="earth/look.js"></script>
+<script src="earth/map-core.js"></script>
+<script src="earth/overlay.js"></script>
+<script src="earth/bridge.js"></script>
+
+<!-- 3D overlay: 画面空間の 3D マーカー（ズーム不依存の一定サイズ）＋タップでフォーカス→360°回覧 -->
+<script src="earth/objects3d.js"></script>
+
+<!-- ============================================================================
+  UNIVERSE LINKAGE — the one wiring that makes 3D · reel · main · focus agree.
+
+  ・3D オーバーレイ(objects3d.js) には posts の glbUrl を渡す。
+  ・下端リールは「メインクラスタの allPins」を circle 別の行で描き、cell は thumbUrl のみ。
+  ・代表(repId) は objects3d.js が 1 本に保持し、地図の巨大 main / リール白枠 /
+    フォーカス対象 を貫く。Objects3D.onChange で reel を組み替え・白枠を移動する。
+  ・リール cell タップ → selectRepresentative(id,{lock:1500}) → 地図がそこへ glide →
+    再選定 → 白枠移動。 メイン 3D タップ → フォーカス。非メイン タップ → glide して新メイン。
+  ============================================================================ -->
+<script>
+  (async function () {
+    const D = window.UniverseData;
+    if (window.MeshoptDecoder && MeshoptDecoder.ready) await MeshoptDecoder.ready;
+
+    const screen = document.querySelector('.phone .screen');
+    const playlist = document.getElementById('playlist');
+
+    // ---- reel controller: render the main cluster's allPins as circle rows ----
+    let sig = '';   // signature of the currently-rendered cluster (rebuild only on change)
+    function reelSignature(ids) { return ids.slice().sort().join(','); }
+
+    function buildReel(ids, repId) {
+      playlist.innerHTML = '';
+      // group cluster pins by circle, preserving the data's circle order
+      const byCircle = new Map();
+      ids.forEach((id) => {
+        const p = D.byId[id]; if (!p) return;
+        if (!byCircle.has(p.circleId)) byCircle.set(p.circleId, []);
+        byCircle.get(p.circleId).push(p);
+      });
+      D.circleOrder.forEach((cid) => {
+        const pins = byCircle.get(cid); if (!pins || !pins.length) return;
+        const circle = D.circles[cid] || { name: cid, thumb: '' };
+        const row = document.createElement('div'); row.className = 'crow';
+        row.innerHTML =
+          '<div class="chead">' +
+            '<span class="cthumb"><img src="' + circle.thumb + '" alt=""></span>' +
+            '<span class="cname">' + circle.name + '</span>' +
+          '</div>' +
+          '<div class="cstrip"></div>';
+        const strip = row.querySelector('.cstrip');
+        pins.forEach((p) => {
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (p.id === repId ? ' rep' : '');
+          cell.setAttribute('data-id', p.id);
+          // リストは動画ではなく 3D オブジェクトのレンダ(thumbFor)を出す。
+          cell.innerHTML = '<div class="clip"><img alt=""></div>';
+          const img = cell.querySelector('img');
+          const obj = window.Objects3D && window.Objects3D.thumbFor && window.Objects3D.thumbFor(p.id);
+          img.src = obj || p.thumbUrl;                           // 3D ポートレート（無ければ写真フォールバック）
+          img.onerror = () => { cell.classList.add('noimg'); };
+          strip.appendChild(cell);
+        });
+        playlist.appendChild(row);
+      });
+    }
+
+    function highlightRep(repId) {
+      playlist.querySelectorAll('.cell').forEach((c) => {
+        c.classList.toggle('rep', c.getAttribute('data-id') === repId);
+      });
+    }
+
+    // tap a cell → that post becomes the representative (the on-map object swaps to it).
+    if (playlist) playlist.addEventListener('click', (e) => {
+      const cell = e.target.closest('.cell'); if (!cell) return;
+      const id = cell.getAttribute('data-id');
+      highlightRep(id);                                          // move the white frame at once
+      window.Objects3D.selectRepresentative(id, { glide: false, lock: 1500 });
+      cell.dispatchEvent(new CustomEvent('uv:select', { bubbles: true, detail: { id, circle: D.byId[id] && D.byId[id].circleId } }));
+    });
+
+    // リスト無し：地図のオブジェクトを タップ → フォーカス状態（objects3d.js で処理）。
+
+    // ---- boot the 3D overlay with the SAME entities (url = glbUrl) ----
+    function boot() {
+      if (!window.EarthMap || !window.EarthMap.map || !window.Objects3D) { setTimeout(boot, 100); return; }
+      window.Objects3D.init({
+        getMap: () => window.EarthMap.map,
+        container: screen,
+        models: D.posts.map((p) => ({ id: p.id, lat: p.lat, lng: p.lng, url: p.glbUrl, cluster: p.cluster })),
+      });
+      // the representative / main cluster drive the reel — keep them in lockstep.
+      window.Objects3D.onChange((payload, rebuild) => {
+        if (!playlist) return;
+        const s = reelSignature(payload.ids);
+        if (rebuild || s !== sig) { sig = s; buildReel(payload.ids, payload.repId); }
+        else highlightRep(payload.repId);
+      });
+      // 3D オブジェクトを タップ → フォーカス状態（objects3d.js が処理）。フォーカス中の
+      // 下部ドックで裏のメンバーをタップ → そのオブジェクトへ切り替え。
+      // GLB が焼けたら（非同期）リストのセルを 3D ポートレートへ差し替える。
+      window.Objects3D.onThumb((id, url) => {
+        if (!url || !playlist) return;
+        playlist.querySelectorAll('.cell[data-id="' + id + '"] .clip img').forEach((img) => { img.src = url; });
+      });
+      // NOTE: リールのサムネは投稿の thumbUrl(real-NN.jpg = 生成元写真)だけを使う。
+      // 3D の実レンダ(thumbFor)はリストに出さない（edge-indicator chip 専用）。
+    }
+    boot();
+
+    // ---- story fullscreen: open the tapped object's list photo full-bleed ----
+    const fsEl = document.getElementById('storyFs');
+    const fsMedia = document.getElementById('sfsMedia');
+    const scroller = document.getElementById('sfsScroller');
+    const hintEl2 = fsEl && fsEl.querySelector('.sfs-hint');
+    const fsFill = fsEl && fsEl.querySelector('.sfs-bar .fill');
+    const fsFootName = document.getElementById('sfsFootName');
+    const fsFootImg = document.getElementById('sfsFootImg');
+    const fsFootDesc = document.getElementById('sfsFootDesc');
+    let storyOrigin = null;                  // 拡大元のリール cell（位置・サイズはそのまま残る）
+    let movedNode = null, movedHome = null;  // サムネから借りているメディアと、その戻し先(.clip)
+    let closeTimer = null;
+    // ---- 2D クラスタフィード: 横=同じサークルの投稿、縦=サークル切替（行=サークル / 列=投稿）----
+    let feedRows = [];                       // [{ key, el(row), cells:[{id,el(cell),media,isVideo,built}] }]
+    let feedRow = -1, feedCol = -1, feedOriginRow = -1, feedOriginCol = -1;
+    let progressNode = null, scrollRaf = 0;
+    let barSegs = [];                        // ストーリー型シークバーのセグメント（横アイテム=投稿ごと）
+    // 横のアイテム数だけセグメントを作る（ミシン目）。
+    function buildBar(n) {
+      const bar = fsEl && fsEl.querySelector('.sfs-bar'); if (!bar) return;
+      barSegs.forEach((s) => { if (s.seg.parentNode) s.seg.parentNode.removeChild(s.seg); });
+      barSegs = [];
+      for (let i = 0; i < n; i++) {
+        const seg = document.createElement('span'); seg.className = 'seg';
+        const sfill = document.createElement('span'); sfill.className = 'sfill';
+        seg.appendChild(sfill); bar.appendChild(seg);
+        barSegs.push({ seg, sfill });
+      }
+    }
+    // 現在列(activeCol)より左=完了 / 右=未再生 / 現在=進捗(onProgress が騆動)。
+    function updateBar(activeCol) {
+      barSegs.forEach((s, i) => {
+        if (i < activeCol) { s.seg.classList.add('done'); s.sfill.style.transform = ''; }   // done → CSS scaleX(1)
+        else { s.seg.classList.remove('done'); if (i > activeCol) s.sfill.style.transform = 'scaleX(0)'; }
+      });
+    }
+    function setFoot(id) {
+      const p = D.byId[id]; if (!p) return;
+      const circle = D.circles[p.circleId];
+      if (circle) {
+        if (fsFootName) fsFootName.textContent = circle.name;
+        if (fsFootImg) fsFootImg.src = circle.thumb || '';
+        if (fsFootDesc) fsFootDesc.textContent = circle.desc || '';
+      }
+    }
+    function onProgress() {
+      if (!progressNode || !progressNode.duration) return;
+      const p = progressNode.currentTime / progressNode.duration;
+      if (barSegs.length && barSegs[feedCol]) barSegs[feedCol].sfill.style.transform = 'scaleX(' + p + ')';
+      else if (fsFill) fsFill.style.transform = 'scaleX(' + p + ')';   // 単体表示フォールバック
+    }
+    function bindProgress(cell) {
+      if (progressNode) { progressNode.removeEventListener('timeupdate', onProgress); progressNode = null; }
+      if (cell && cell.isVideo && cell.media) { fsEl.classList.add('is-video'); progressNode = cell.media; progressNode.addEventListener('timeupdate', onProgress); onProgress(); }
+      else {
+        fsEl.classList.remove('is-video');
+        if (barSegs.length && barSegs[feedCol]) barSegs[feedCol].sfill.style.transform = 'scaleX(1)';  // 画像：現在セグを満たす
+        else if (fsFill) fsFill.style.transform = 'scaleX(1)';
+      }
+    }
+    function clampN(v, a, b) { return Math.max(a, Math.min(b, v)); }
+    // セルのメディアを遅延生成（近傍ウィンドウだけ実体化）。
+    function ensureCell(r, c) {
+      const row = feedRows[r]; const cell = row && row.cells[c]; if (!cell || cell.built) return;
+      const p = D.byId[cell.id]; if (!p) return;
+      let m;
+      if (cell.isVideo) {
+        m = document.createElement('video');
+        m.muted = true; m.loop = true; m.playsInline = true; m.setAttribute('playsinline', '');
+        m.preload = 'auto'; m.src = p.videoUrl;
+      } else {
+        m = document.createElement('img'); m.src = p.thumbUrl || '';
+      }
+      cell.el.appendChild(m); cell.media = m; cell.built = true;
+    }
+    function unloadCell(r, c) {
+      const row = feedRows[r]; const cell = row && row.cells[c]; if (!cell || !cell.built) return;
+      if (r === feedOriginRow && c === feedOriginCol) return;   // 原点=借用ノードは常に保持
+      if (cell.media === movedNode) return;
+      if (cell.isVideo && cell.media) { try { cell.media.pause(); } catch (_) {} cell.media.removeAttribute('src'); try { cell.media.load(); } catch (_) {} }
+      if (cell.media && cell.media.parentNode) cell.media.parentNode.removeChild(cell.media);
+      cell.media = null; cell.built = false;
+    }
+    function rowCurrentCol(row) {
+      const w = row.el.clientWidth || 1;
+      return clampN(Math.round(row.el.scrollLeft / w), 0, row.cells.length - 1);
+    }
+    // 横=同じサークル、縦=別サークル。スワイプ可能な方向のヒントを出す（原点でのみ）。
+    function updateHint(r, c) {
+      if (!hintEl2) return;
+      if (r !== feedOriginRow || c !== feedOriginCol) { hintEl2.classList.remove('show'); hintEl2.classList.add('gone'); return; }
+      const row = feedRows[r];
+      const moreRight = c < row.cells.length - 1;          // 同じサークルに右の投稿がある
+      const moreDown = r < feedRows.length - 1;            // 下に別のサークルがある
+      const ht = hintEl2.querySelector('.ht');
+      hintEl2.classList.remove('gone');
+      if (moreRight) { hintEl2.classList.add('horiz', 'show'); if (ht) ht.textContent = '同じサークル'; }
+      else if (moreDown) { hintEl2.classList.remove('horiz'); hintEl2.classList.add('show'); if (ht) ht.textContent = '別のサークル'; }
+      else { hintEl2.classList.remove('show'); }
+    }
+    // (r,c) をアクティブ化：近傍を実体化、その動画だけ再生、フッター/プログレス/ヒントを差し替え。
+    function setActive(r, c) {
+      if (!feedRows.length) return;
+      r = clampN(r, 0, feedRows.length - 1);
+      c = clampN(c, 0, feedRows[r].cells.length - 1);
+      if (r === feedRow && c === feedCol) return;
+      feedRow = r; feedCol = c;
+      feedRows.forEach((row, ri) => {
+        const dr = Math.abs(ri - r);
+        const curCol = (ri === r) ? c : rowCurrentCol(row);
+        row.cells.forEach((cell, ci) => {
+          if (ri === r) { if (Math.abs(ci - c) <= 1) ensureCell(ri, ci); else if (Math.abs(ci - c) >= 3) unloadCell(ri, ci); }
+          else if (dr === 1) { if (ci === curCol) ensureCell(ri, ci); else unloadCell(ri, ci); }
+          else unloadCell(ri, ci);
+        });
+      });
+      feedRows.forEach((row, ri) => row.cells.forEach((cell, ci) => {
+        if (!cell.isVideo || !cell.media) return;
+        if (ri === r && ci === c) { cell.media.play().catch(() => {}); }
+        else { try { cell.media.pause(); } catch (_) {} }
+      }));
+      const active = feedRows[r].cells[c];
+      const row = feedRows[r];
+      if (barSegs.length !== row.cells.length) buildBar(row.cells.length);   // 横アイテム数だけセグメント
+      updateBar(c);
+      bindProgress(active);
+      setFoot(active.id);
+      updateHint(r, c);
+    }
+    // スクロール（縦=行 / 横=アクティブ行の列）を読んでアクティブセルを更新。
+    function recompute() {
+      if (scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        if (!feedRows.length) return;
+        const h = scroller.clientHeight || 1;
+        const r = clampN(Math.round(scroller.scrollTop / h), 0, feedRows.length - 1);
+        const c = rowCurrentCol(feedRows[r]);
+        setActive(r, c);
+      });
+    }
+    // クラスタ重心 + 簡易距離（近傍サークルの並び順用）。
+    function clusterCentroid(ids) {
+      let la = 0, ln = 0, n = 0;
+      ids.forEach((id) => { const p = D.byId[id]; if (!p) return; la += p.lat; ln += p.lng; n++; });
+      return n ? { lat: la / n, lng: ln / n } : null;
+    }
+    function geoDist(a, b) { const dx = a.lng - b.lng, dy = a.lat - b.lat; return dx * dx + dy * dy; }
+    // 行モデル：アクティブのサークル → その近傍サークル（近い順）。各行 = そのサークルの投稿列。
+    function buildFeedModel(activeId) {
+      const groups = new Map();   // cluster -> [ids]（posts 順）
+      D.posts.forEach((p) => { const k = p.cluster || ('solo:' + p.id); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p.id); });
+      const actKey = (D.byId[activeId] && D.byId[activeId].cluster) || ('solo:' + activeId);
+      const actCen = clusterCentroid(groups.get(actKey) || [activeId]);
+      const others = [...groups.keys()].filter((k) => k !== actKey).sort((a, b) => {
+        const ca = clusterCentroid(groups.get(a)), cb = clusterCentroid(groups.get(b));
+        return ((ca && actCen) ? geoDist(actCen, ca) : Infinity) - ((cb && actCen) ? geoDist(actCen, cb) : Infinity);
+      });
+      return [actKey, ...others].map((k) => ({ key: k, ids: (groups.get(k) || []).slice() }));
+    }
+    // 2 件以上あれば 2D グリッドに展開（タップした 1 件を初期スナップ位置に）。
+    function buildFeed(activeId) {
+      if (!scroller) return;
+      const model = buildFeedModel(activeId);
+      const total = model.reduce((n, g) => n + g.ids.length, 0);
+      if (total <= 1) return;                                // 1 件だけ → 従来のズーム表示のまま
+      let oRow = 0, oCol = 0;
+      model.forEach((g, ri) => { const ci = g.ids.indexOf(activeId); if (ci >= 0) { oRow = ri; oCol = ci; } });
+      feedOriginRow = oRow; feedOriginCol = oCol;
+      if (movedNode && movedNode.removeEventListener) movedNode.removeEventListener('timeupdate', onVidTime);
+      scroller.innerHTML = ''; feedRows = [];
+      model.forEach((g, ri) => {
+        const rowEl = document.createElement('div'); rowEl.className = 'sfs-row'; rowEl.setAttribute('data-row', ri);
+        const cells = g.ids.map((pid, ci) => {
+          const p = D.byId[pid];
+          const cell = document.createElement('div'); cell.className = 'sfs-page'; cell.setAttribute('data-id', pid);
+          rowEl.appendChild(cell);
+          let media = null, built = false;
+          if (ri === oRow && ci === oCol && movedNode) { media = movedNode; cell.appendChild(media); built = true; }
+          return { id: pid, el: cell, media, isVideo: media ? (media.tagName === 'VIDEO') : !!(p && p.videoUrl), built };
+        });
+        rowEl.addEventListener('scroll', recompute, { passive: true });
+        scroller.appendChild(rowEl);
+        feedRows.push({ key: g.key, el: rowEl, cells });
+      });
+      fsEl.classList.add('feed');
+      fsMedia.style.display = 'none';                        // ズーム面を隠し、フィードへバトンタッチ
+      scroller.classList.add('live');
+      scroller.style.overflowY = 'auto';
+      scroller.scrollTop = oRow * scroller.clientHeight;
+      feedRows[oRow].el.scrollLeft = oCol * feedRows[oRow].el.clientWidth;
+      feedRow = -1; feedCol = -1;
+      setActive(oRow, oCol);
+      scroller.addEventListener('scroll', recompute, { passive: true });
+    }
+    function teardownFeed() {
+      if (!feedRows.length) { fsEl.classList.remove('feed'); return; }
+      if (scroller) scroller.removeEventListener('scroll', recompute);
+      if (progressNode) { progressNode.removeEventListener('timeupdate', onProgress); progressNode = null; }
+      feedRows.forEach((row) => {
+        row.el.removeEventListener('scroll', recompute);
+        row.cells.forEach((cell) => {
+          if (!cell.media || cell.media === movedNode) return;   // 借用ノードは returnMedia が戻す / 未生成はスキップ
+          if (cell.isVideo) { try { cell.media.pause(); } catch (_) {} cell.media.removeAttribute('src'); try { cell.media.load(); } catch (_) {} }
+          if (cell.media.parentNode) cell.media.parentNode.removeChild(cell.media);
+        });
+      });
+      if (movedNode && movedNode.parentNode) movedNode.parentNode.removeChild(movedNode);  // detach → returnMedia が再配置
+      buildBar(0);                                            // セグメントを破棄（単体パスの .fill は残る）
+      feedRows = []; feedRow = -1; feedCol = -1; feedOriginRow = -1; feedOriginCol = -1;
+      if (scroller) { scroller.classList.remove('live'); scroller.style.overflowY = ''; scroller.innerHTML = ''; scroller.scrollTop = 0; }
+      if (hintEl2) hintEl2.classList.remove('show', 'horiz', 'gone');
+      fsEl.classList.remove('feed');
+      fsMedia.style.display = '';
+    }
+    const idPostBtn = document.querySelector('.post-btn');   // WdIdentityTool 右スタック上段(camera)
+    const idEditBtn = document.querySelector('.edit-btn');   // 〃 下段(pen)
+    function raiseIdentityStack() {                          // pen を下から押し上げ、post を 12px ギャップ上へ
+      if (idPostBtn) idPostBtn.style.transform = 'translateY(-66px)';
+      if (idEditBtn) { idEditBtn.style.opacity = '1'; idEditBtn.style.transform = 'translateY(0)'; idEditBtn.style.pointerEvents = 'auto'; }
+    }
+    function lowerIdentityStack() {                          // 元に戻す（pen は下へ・post は定位置へ）
+      if (idPostBtn) idPostBtn.style.transform = '';
+      if (idEditBtn) { idEditBtn.style.opacity = ''; idEditBtn.style.transform = ''; idEditBtn.style.pointerEvents = ''; }
+    }
+
+    function rectIn(parent, el) {
+      const pr = parent.getBoundingClientRect(), r = el.getBoundingClientRect();
+      return { top: r.top - pr.top, left: r.left - pr.left, width: r.width, height: r.height };
+    }
+    function setGeom(top, left, width, height, radius) {
+      fsEl.style.top = top; fsEl.style.left = left;
+      fsEl.style.width = width; fsEl.style.height = height;
+      fsEl.style.borderRadius = radius;
+    }
+    function onVidTime() {
+      if (!fsFill || !movedNode || !movedNode.duration) return;
+      fsFill.style.transform = 'scaleX(' + (movedNode.currentTime / movedNode.duration) + ')';
+    }
+
+    // ---- circle footer FLIP: the reel's circle icon+title fly down into the footer ----
+    function cheadFor(originEl) {
+      const crow = originEl && originEl.closest('.crow');
+      return crow ? crow.querySelector('.chead') : null;
+    }
+    function footOverlay(chead) {
+      const foot = fsEl.querySelector('.sfs-foot');
+      const fIcon = foot.querySelector('.ft'), hIcon = chead.querySelector('.cthumb');
+      const fr = rectIn(screen, foot), fi = rectIn(screen, fIcon), hi = rectIn(screen, hIcon);
+      const ox = (fi.left + fi.width / 2) - fr.left, oy = (fi.top + fi.height / 2) - fr.top;
+      const dx = (hi.left + hi.width / 2) - (fi.left + fi.width / 2);
+      const dy = (hi.top + hi.height / 2) - (fi.top + fi.height / 2);
+      return { origin: ox + 'px ' + oy + 'px',
+               transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + (hi.width / fi.width) + ')' };
+    }
+    function footFlyIn() {
+      const foot = fsEl.querySelector('.sfs-foot'), chead = cheadFor(storyOrigin);
+      if (!foot || !chead) return;                       // 元 chead が無い(3D タップ等) → CSS フォールバック
+      chead.classList.add('borrowed');                   // 元のアイコン+名前を隠し、同じものが飛んだように見せる
+      const o = footOverlay(chead);
+      foot.style.transition = 'none';
+      foot.style.transformOrigin = o.origin;
+      foot.style.transform = o.transform; foot.style.opacity = '1';
+      void foot.offsetWidth;
+      foot.style.transition = 'transform .46s var(--ease-out), opacity .26s var(--ease-out)';
+      foot.style.transform = 'translate(0px,0px) scale(1)';
+    }
+    function footFlyOut() {
+      const foot = fsEl.querySelector('.sfs-foot'), chead = cheadFor(storyOrigin);
+      if (!foot || !chead) return;
+      const o = footOverlay(chead);                      // chead は borrowed(opacity0)だがレイアウトは生きている
+      foot.style.transition = 'transform .42s var(--ease-out), opacity .3s var(--ease-out)';
+      foot.style.transformOrigin = o.origin;
+      foot.style.transform = o.transform;
+    }
+    function footReset() {
+      const foot = fsEl.querySelector('.sfs-foot');
+      if (foot) { foot.style.transition = 'none'; foot.style.transform = ''; foot.style.transformOrigin = ''; foot.style.opacity = ''; }
+      const chead = cheadFor(storyOrigin);
+      if (chead) chead.classList.remove('borrowed');
+    }
+
+    // open: borrow the thumbnail's OWN media (no duplicate fullscreen media) and zoom it up.
+    function openStory(id, originEl) {
+      const p = D.byId[id]; if (!p || !fsEl) return;
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      if (movedNode) return;                                   // already showing one
+      const circle = D.circles[p.circleId];
+      if (circle) {                                            // サークルのアイコン+タイトルをフッターへ
+        if (fsFootName) fsFootName.textContent = circle.name;
+        if (fsFootImg) fsFootImg.src = circle.thumb || '';
+        if (fsFootDesc) fsFootDesc.textContent = circle.desc || '';
+      }
+
+      originEl = originEl || (playlist && playlist.querySelector('.cell[data-id="' + id + '"]'));
+      storyOrigin = originEl || null;
+      if (storyOrigin) storyOrigin.classList.add('borrowed');  // 残った枠＋グレー背景をフェードで消す
+
+      // 借用：サムネ内の動画/画像ノードをフルスクリーン面へ移す。セル自体は同位置・同サイズのまま。
+      const clip = originEl && originEl.querySelector('.clip, .mclip');
+      const node = clip && clip.querySelector('video, img');
+      if (node) {
+        movedNode = node; movedHome = clip;
+        fsMedia.appendChild(node);                             // reparent in same document → 再生継続
+        const isVid = node.tagName === 'VIDEO';
+        fsEl.classList.toggle('is-video', isVid);
+        if (isVid) { node.muted = true; node.play().catch(() => {}); node.addEventListener('timeupdate', onVidTime); }
+        else if (fsFill) { fsFill.style.transform = 'scaleX(0)'; }
+      } else if (p.videoUrl) {
+        // origin カードが無い（フォーカス中の再生ボタン）→ 新規 video を生成して全画面再生。
+        const v = document.createElement('video');
+        v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.src = p.videoUrl;
+        fsMedia.appendChild(v);
+        movedNode = v; movedHome = null;                       // 生成物 → クローズ時に削除
+        fsEl.classList.add('is-video');
+        v.play().catch(() => {});
+        v.addEventListener('timeupdate', onVidTime);
+      }
+
+      const sw = screen.clientWidth, sh = screen.clientHeight;
+      fsEl.classList.add('open');
+      if (screen) screen.classList.add('story-open');          // raise the outer buttons above the fullscreen
+      raiseIdentityStack();                                    // pen が下から現れ post を押し上げ → WdIdentityTool
+      fsEl.setAttribute('aria-hidden', 'false');
+
+      if (originEl) {
+        // start exactly over the thumbnail
+        const r = rectIn(screen, originEl);
+        fsEl.style.transition = 'none';
+        setGeom(r.top + 'px', r.left + 'px', r.width + 'px', r.height + 'px', '11px');
+      } else {
+        fsEl.style.transition = 'none';
+        setGeom('0px', '0px', sw + 'px', sh + 'px', '0px');
+      }
+      void fsEl.offsetWidth;                                   // commit the start frame (transition still off)
+      // next frame: restore the transition, set the fullscreen target so the geometry transition fires,
+      // then run the footer FLIP in a SECOND frame so its forced reflow can't re-commit the start frame.
+      requestAnimationFrame(() => {
+        fsEl.style.transition = '';
+        setGeom('0px', '0px', sw + 'px', sh + 'px', '0px');    // → fullscreen
+        fsEl.classList.add('expanded');
+        requestAnimationFrame(() => { footFlyIn(); buildFeed(id); });   // 展開後にクラスタを縦フィード化
+      });
+    }
+
+    function returnMedia() {
+      if (movedNode && movedHome) {
+        if (movedNode.tagName === 'VIDEO') { movedNode.removeEventListener('timeupdate', onVidTime); movedNode.pause(); movedNode.currentTime = 0; }  // フォーカスを抜けたら停止
+        movedHome.appendChild(movedNode);                      // サムネへ戻す → リストはそのまま
+      } else if (movedNode && !movedHome) {
+        if (movedNode.tagName === 'VIDEO') { movedNode.removeEventListener('timeupdate', onVidTime); movedNode.pause(); }
+        movedNode.remove();                                    // 生成した video は削除
+      }
+      movedNode = null; movedHome = null;
+    }
+    function finalizeClose() {
+      fsEl.classList.remove('open', 'expanded');
+      if (screen) screen.classList.remove('story-open');
+      fsEl.setAttribute('aria-hidden', 'true');
+      fsEl.style.transition = 'none';
+      setGeom('', '', '', '', '');
+      void fsEl.offsetWidth; fsEl.style.transition = '';
+      teardownFeed();                                         // フィードを破棄（借用ノードは下の returnMedia が戻す）
+      returnMedia();
+      footReset();                                             // フッターのインライン transform を解除し chead を再表示
+      if (hintEl2) hintEl2.classList.remove('gone');
+      if (storyOrigin) storyOrigin.classList.remove('borrowed'); // メディアを戻してからセルを再表示
+      storyOrigin = null;
+    }
+    // close: shrink back into the thumbnail, then return the media + hide
+    function closeStory() {
+      if (!fsEl || !fsEl.classList.contains('open')) return;
+      fsEl.classList.remove('expanded');                       // fade chrome out
+      lowerIdentityStack();                                    // pen を下へ戻し post を定位置へ降ろす
+      footFlyOut();                                            // サークルのアイコン+名前を元のリスト位置へ戻す
+      if (scroller) scroller.style.overflowY = 'hidden';       // 縮小中はフィードのスクロールを凍結
+      if (feedRows[feedRow]) feedRows[feedRow].el.style.overflowX = 'hidden';
+      const atOrigin = feedRows.length ? (feedRow === feedOriginRow && feedCol === feedOriginCol) : true;
+      if (atOrigin && storyOrigin && screen.contains(storyOrigin)) {
+        const r = rectIn(screen, storyOrigin);
+        setGeom(r.top + 'px', r.left + 'px', r.width + 'px', r.height + 'px', '11px');
+        if (closeTimer) clearTimeout(closeTimer);
+        closeTimer = setTimeout(() => { closeTimer = null; finalizeClose(); }, 460);
+      } else {
+        finalizeClose();
+      }
+    }
+    if (fsEl) {
+      fsEl.addEventListener('click', closeStory);              // tap anywhere (incl. ×) closes
+      const fill = fsEl.querySelector('.sfs-bar .fill');
+      if (fill) fill.addEventListener('animationend', closeStory);  // 画像：progress 完了 → auto-close
+    }
+
+    // ---- WdSideTool: like toggle (unchanged) ----
+    const likeAct = document.querySelector('.wd-side-tool .act[data-act="like"]');
+    if (likeAct) {
+      const ct = likeAct.querySelector('.ct');
+      likeAct.querySelector('.wd-icon-btn').addEventListener('click', () => {
+        const liked = likeAct.classList.toggle('liked');
+        ct.textContent = liked ? '1.3k' : '1.2k';
+        likeAct.dispatchEvent(new CustomEvent('uv:like', { bubbles: true, detail: { liked } }));
+      });
+    }
+    const postBtn = document.querySelector('.post-btn');
+    if (postBtn) postBtn.addEventListener('click', () => postBtn.dispatchEvent(new CustomEvent('uv:post', { bubbles: true })));
+    const editBtn = document.querySelector('.edit-btn');
+    if (editBtn) editBtn.addEventListener('click', (e) => { e.stopPropagation(); editBtn.dispatchEvent(new CustomEvent('uv:edit', { bubbles: true })); });
+
+    // 地図にマッピングされた動画をタップ → そのままフルスクリーン表示
+    if (window.Objects3D && window.Objects3D.onMediaTap) {
+      window.Objects3D.onMediaTap((id, card) => openStory(id, card));
+    }
+  })();
+</script>
+</body>
+</html>

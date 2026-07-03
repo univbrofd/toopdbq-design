@@ -35,7 +35,7 @@
     FOCUS_STEP: 0.052,  // フォーカス進捗/フレーム → ≈320ms easeOutCubic
     FACE_DEG: -90,      // 基準ヤウ：GLB 既定は右(+X)向き → -90°でカメラ(手前)向き
     JITTER_DEG: 26,     // 投稿ごとの向き揺らぎ
-    IDLE_SPIN: 0.01,    // メインじゃないオブジェクトの自動回転(rad/フレーム)。代表(main)は静止。
+    IDLE_SPIN: 0.0025,  // メインじゃないオブジェクトの自動回転(rad/フレーム)。代表(main)は静止。
     CULL_MARGIN: 140,   // 画面外カリングの余白(px)
     CENTER_Y_FRAC: 0.62,// 「中心」と見なす画面上の縦位置 = h × これ（下にずらすほど下寄り判定）
     MAIN_SCALE: 3.4,    // 代表(repId)マーカーの拡大率＝地図の「巨大 main」
@@ -47,6 +47,9 @@
     REP_LOCK_MS: 1500,  // 代表を手動選択した後、自動再選定を抑止する時間
     LONG_PRESS_MS: 420, // 長押し判定の閾値(ms)。これ以上で 3D フォーカス、未満のタップは写真フルスクリーン。
     PRESS_MOVE_TOL: 10, // 長押し/タップを無効化する移動量(px)。これ以上動かしたらドラッグ扱い。
+    CLUSTER_PX: 76,     // ズーム連動クラスタ：投影ピクセル距離がこの値未満のピンを 1 クラスタに束ねる。
+                        //  ズームアウト→ピンが近づく→併合 / ズームイン→離れる→分裂（単一リンク法）。
+    CLUSTER_HYST: 1.35, // ヒステリシス：前フレームで同じクラスタだったペアは閾値を ×この値まで許容（境界での点滅防止）。
   };
 
   let map, container, renderer, scene, camera;
@@ -59,6 +62,10 @@
   let mediaEl = null;
   const mediaCards = new Map();   // id -> { el, node }
 
+  // ----- non-main cluster reps: flat mini-thumbnail markers (no 3D) ----------
+  let thumbEl = null;
+  const thumbCards = new Map();   // id -> { el, img }
+
   // ----- focus-state dock: hidden cluster members shown bottom-left as an arc --
   let dockEl = null;
   let dockCapEl = null;
@@ -69,6 +76,7 @@
   let dockSig = '';
   // ----- non-focus bottom carousel (scrollable horizontal row of 3D objects) --
   let carStripEl = null;
+  let carScrimEl = null;
   let carPos = 0, carTarget = 0, carInit = false;
   let carClusterKey = null;          // which cluster the carousel currently represents
   const clusterSel = new Map();      // clusterKey -> 그 cluster で最後に選んだ代表 id（クラスタ別に記憶）
@@ -213,6 +221,15 @@
   function buildCarStrip() {
     carStripEl = document.createElement('div');
     carStripEl.className = 'o3d-carstrip';
+    // 背景の透過グラデーションスクリムは別レイヤーで敷く（インタラクト領域は拡大しない）。
+    // 上端透過→下端濃めで背後の地図を徐々に遮り、リストの視認性を上げる。pointer-events:none でタップは透す。
+    carScrimEl = document.createElement('div');
+    carScrimEl.className = 'o3d-carstrip-scrim';
+    // z-index は 3D キャンバス(o3d-canvas=6)より下げる。こうすると地図(=1)は暗く沈むが、
+    // クラスタの 3D リスト(キャンバス=6)とメディアカードはスクリムの上に乗って見える。
+    carScrimEl.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:236px;z-index:5;pointer-events:none;' +
+      'background:linear-gradient(to bottom, rgba(8,11,18,0) 0%, rgba(8,11,18,0.26) 30%, rgba(8,11,18,0.6) 60%, rgba(8,11,18,0.85) 100%);';
+    container.appendChild(carScrimEl);
     carStripEl.style.cssText = 'position:absolute;left:0;right:0;bottom:0;height:172px;z-index:8;touch-action:none;cursor:grab;';
     container.appendChild(carStripEl);
     carStripEl.addEventListener('pointerdown', onCarDown);
@@ -286,6 +303,7 @@
     buildChrome();
     buildEdgeLayer();
     buildMediaLayer();
+    buildThumbLayer();
     buildFocusDock();
     buildCarStrip();
 
@@ -387,11 +405,48 @@
   // WHY 固定: 動的タイル bin だと密集地帯(渋谷中心)がタイル境界で割れてクラスタされない。
   // ==========================================================================
 
-  // bin every entry by its fixed `cluster` value; return the cluster nearest screen-center.
+  // ----- ズーム連動クラスタ（毎フレーム再計算）------------------------------
+  // WebMercator タイルで bin する (flutter EarthClusterEngine / Studio schematic と同一)。
+  // 代表マーカーの表示位置はタイルセルの幾何中心 (= タイル中心) に一律に置く。
+  let effCluster = new Map();   // id -> タイルキー "z/x/y"
+  let effGroups = new Map();    // タイルキー -> [ids]
+  let effCentroid = new Map();  // タイルキー -> { lat, lng }（= タイル中心。代表の表示位置は一律ここ）
+
+  // flutter WebMercatorTile.fromLatLng と同一式。tileZ = floor(mapZoom)+1 (WebMercatorTileZoom.tileZForMapZoom)。
+  function _tileZ() { return Math.floor(map.getZoom()) + 1; }
+  function _tileXY(lat, lng, z) {
+    const n = Math.pow(2, z); let r = lat * Math.PI / 180; const lim = Math.PI / 2 * 0.999;
+    r = Math.max(-lim, Math.min(lim, r));
+    return { x: Math.floor((lng + 180) / 360 * n), y: Math.floor((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2 * n) };
+  }
+  function _tileCenter(x, y, z) {
+    const n = Math.pow(2, z);
+    const lat = (yy) => 180 / Math.PI * Math.atan(Math.sinh(Math.PI * (1 - 2 * yy / n)));
+    return { lat: (lat(y) + lat(y + 1)) / 2, lng: (x + 0.5) / n * 360 - 180 };
+  }
+
+  function recomputeEffectiveClusters() {
+    const z = _tileZ();
+    const nextCluster = new Map(), nextGroups = new Map(), nextCentroid = new Map();
+    entries.forEach((en, id) => {
+      if (typeof en.lat !== 'number' || typeof en.lng !== 'number') return;
+      const t = _tileXY(en.lat, en.lng, z);
+      const key = z + '/' + t.x + '/' + t.y;   // タイルキー（flutter と同一）
+      if (!nextGroups.has(key)) { nextGroups.set(key, []); nextCentroid.set(key, _tileCenter(t.x, t.y, z)); }
+      nextGroups.get(key).push(id);
+      nextCluster.set(id, key);
+    });
+    effCluster = nextCluster; effGroups = nextGroups; effCentroid = nextCentroid;
+  }
+  function clusterKeyOf(en) { return effCluster.get(en.id) || ('solo:' + en.id); }
+  // 代表の表示位置＝そのクラスタの重心座標（クラスタ未確定なら自身の座標にフォールバック）。
+  function centroidOf(en) { return effCentroid.get(clusterKeyOf(en)) || { lat: en.lat, lng: en.lng }; }
+
+  // bin every entry by its ZOOM-aware effective cluster; return the cluster nearest screen-center.
   function computeMainCluster() {
     const cells = new Map();   // cluster -> { ids, sumLat, sumLng, n }
     entries.forEach((en) => {
-      const k = en.cluster || ('solo:' + en.id);   // fallback: ungrouped pin is its own cluster
+      const k = clusterKeyOf(en);                  // ズーム連動の有効クラスタキー
       let c = cells.get(k);
       if (!c) { c = { ids: [], sumLat: 0, sumLng: 0, n: 0 }; cells.set(k, c); }
       c.ids.push(en.id); c.sumLat += en.lat; c.sumLng += en.lng; c.n++;
@@ -400,7 +455,8 @@
     const cx = w / 2, cy = h * cfg.CENTER_Y_FRAC;
     let bestK = null, best = Infinity;
     cells.forEach((c, k) => {
-      const p = map.project([c.sumLng / c.n, c.sumLat / c.n]);
+      const cc = effCentroid.get(k) || { lat: c.sumLat / c.n, lng: c.sumLng / c.n };  // タイル中心で中心最近傍を判定
+      const p = map.project([cc.lng, cc.lat]);
       const d = (p.x - cx) * (p.x - cx) + (p.y - cy) * (p.y - cy);
       if (d < best) { best = d; bestK = k; }
     });
@@ -454,7 +510,8 @@
     if (mainClusterIds.indexOf(id) === -1) mainClusterIds.push(id);
     _mainId = repId;
     if (opts.glide !== false) {
-      map.easeTo({ center: [en.lng, en.lat], duration: 650, easing: easeOutCubic });
+      const cc = centroidOf(en);   // 代表はクラスタ重心(tile center)に描画されるので glide 先も重心へ → コンテンツが画面中心に来る
+      map.easeTo({ center: [cc.lng, cc.lat], duration: 650, easing: easeOutCubic });
     }
     fireChange(false);          // move the white frame now; cluster rebuild follows the glide
   }
@@ -533,6 +590,43 @@
     c.el.style.pointerEvents = 'auto';
     c.el.style.cursor = 'pointer';
     const weld = c.el.querySelector('.weld'); if (weld) weld.style.display = 'none';
+  }
+
+  // ----- non-main cluster reps: flat mini-thumbnail markers ------------------
+  // 新仕様「メイン=動画 / メインクラスタのメンバー=3D / それ以外の画面内=ミニサムネ」を満たすため、
+  // 非メインクラスタの代表は 3D でなく静止画サムネを地図に立てる軽量 DOM 層。
+  function buildThumbLayer() {
+    thumbEl = document.createElement('div');
+    thumbEl.className = 'o3d-thumbs';
+    thumbEl.style.cssText = 'position:absolute;inset:0;z-index:44;pointer-events:none;';
+    container.appendChild(thumbEl);
+  }
+  function ensureThumbCard(en) {
+    let c = thumbCards.get(en.id);
+    if (c) return c;
+    const post = (window.UniverseData && window.UniverseData.byId[en.id]) || {};
+    const el = document.createElement('div');
+    el.className = 'o3d-thumb-card';
+    el.style.cssText = 'position:absolute;border-radius:7px;overflow:hidden;border:1.5px solid rgba(255,255,255,.85);box-shadow:0 4px 12px rgba(0,0,0,.5);background:#222;will-change:transform;';
+    el.innerHTML = '<img alt="" style="width:100%;height:100%;object-fit:cover;display:block;">';
+    el.querySelector('img').src = post.thumbUrl || en.thumb || '';
+    el.addEventListener('click', (e) => { e.stopPropagation(); selectRepresentative(en.id, { glide: true }); });
+    thumbEl.appendChild(el);
+    c = { el, img: el.querySelector('img') };
+    thumbCards.set(en.id, c);
+    return c;
+  }
+  // 地図の投影点 p に縦長ミニサムネを立てる（足元を点に合わせる）。sizePx=画面高(px)。
+  function positionThumb(en, p, sizePx, vis) {
+    const c = ensureThumbCard(en);
+    if (!vis || !p) { c.el.style.display = 'none'; return; }
+    c.el.style.display = '';
+    const wpx = sizePx * 0.78, hpx = sizePx;
+    c.el.style.width = wpx + 'px';
+    c.el.style.height = hpx + 'px';
+    c.el.style.transform = 'translate(' + (p.x - wpx / 2) + 'px,' + (p.y - hpx) + 'px)';
+    c.el.style.pointerEvents = 'auto';
+    c.el.style.cursor = 'pointer';
   }
 
   // ----- focus-state member dock --------------------------------------------
@@ -694,7 +788,7 @@
     const nonMainRep = {};   // clusterKey -> 代表 id
     const nonMainBest = {};  // clusterKey -> 中心からの距離^2
     entries.forEach((en) => {
-      const k = en.cluster || ('solo:' + en.id);
+      const k = clusterKeyOf(en);
       if (k === mainClusterKey) return;            // メインクラスタはドック＋メディアで別扱い
       const pp = map.project([en.lng, en.lat]);
       const d2 = (pp.x - ccx) * (pp.x - ccx) + (pp.y - ccy) * (pp.y - ccy);
@@ -730,6 +824,7 @@
         g.renderOrder = 10;
         if (en.shadow) en.shadow.visible = false;
         positionMedia(en, null, 0, false);          // フォーカス中は左下カードを出さない（背景の動画で十分）
+        positionThumb(en, null, 0, false);
       } else {
         // 反転：メインクラスタの全オブジェクトを画面下に横並び、代表の動画だけを地図にマッピング。
         const p = map.project([en.lng, en.lat]);
@@ -756,29 +851,26 @@
             g.renderOrder = isCenter ? 4 : 3;
           }
           if (en.shadow) en.shadow.visible = false;   // ドックしたオブジェクトは地図の接地影なし
-          // 動画カードは代表の lat/lng 点に立つマーカーとして表示。
-          if (isRep && onScreen && !hidden) positionMedia(en, p, markerScaled, true);
+          // 動画カードは代表をクラスタ重心点に立てるマーカーとして表示（一律中心）。
+          if (isRep && onScreen && !hidden) { const cc = centroidOf(en); positionMedia(en, map.project([cc.lng, cc.lat]), markerScaled, true); }
           else positionMedia(en, null, 0, false);
+          positionThumb(en, null, 0, false);            // メインクラスタのメンバーは 3D（カルーセル）。サムネは出さない
         } else {
-          // 中心にないクラスタ：動画カードは出さず、3D オブジェクトそのものを lat/lng 点に
-          // 立つマーカーとして地図に表示する。ただし *クラスタの代表 1 つだけ*（メンバー全部は
-          // 出さない）。タップ → glide で中心へ来て新メイン（動画表示）。
+          // 中心にないクラスタ：動画も 3D も出さず、代表 1 つを「ミニサムネ」で地図に立てる。
+          // 新仕様: メイン=動画 / メインクラスタのメンバー=3D / それ以外の画面内=ミニサムネ。
+          // タップ → glide で中心へ来て新メイン（動画表示）。
           positionMedia(en, null, 0, false);
-          const clusterKey = en.cluster || ('solo:' + en.id);
+          g.visible = false;                                 // 3D は出さない（サムネのみ）
+          if (en.shadow) en.shadow.visible = false;
+          const clusterKey = clusterKeyOf(en);
           const isClusterRep = nonMainRep[clusterKey] === en.id;
           if (isClusterRep && onScreen && !hidden) {
-            const objHpx = markerWorld / pxToWorld();        // marker height on screen (px)
-            const floatPx = objHpx * cfg.FLOAT_FRAC;         // 接地点の上に少し浮かせる
-            const mk = screenToPlane(p.x, p.y - floatPx - objHpx / 2);  // 足元を点に合わせて中央へ
-            g.visible = true;
-            g.scale.setScalar(markerWorld);
-            g.position.set(mk.x, mk.y, -cfg.DIST);
-            g.rotation.set(0, en.faceY + en.spin, 0);
-            g.renderOrder = 3;
-            placeShadow(en, p, markerWorld);            // クラスタの位置に接地影をつける
+            const cc = centroidOf(en);                       // 代表はクラスタ重心に置く（個々の投稿位置ではなく）
+            const pc = map.project([cc.lng, cc.lat]);
+            const objHpx = markerWorld / pxToWorld();        // 3D マーカー相当の画面高(px)
+            positionThumb(en, pc, objHpx * 0.72, true);      // ミニサムネ（3D より一回り小さく）
           } else {
-            g.visible = false;
-            if (en.shadow) en.shadow.visible = false;
+            positionThumb(en, null, 0, false);
           }
         }
       }
@@ -786,6 +878,8 @@
   }
 
   function step() {
+    // ズーム連動クラスタを先に再計算（投影ピクセル距離 → 併合/分裂）。
+    recomputeEffectiveClusters();
     // recompute main cluster + representative (the single linkage source)
     updateMainAndRep();
     // 各オブジェクトの自動回転は、その GLB のロード完了(group 生成)後から個別に進める。
@@ -977,8 +1071,9 @@
 
   function panToEntry(en) {
     if (!en) return;
+    const cc = centroidOf(en);     // 投稿実位置ではなくクラスタ重心(tile center)へ寄せる(代表サムネの描画位置と一致)
     map.easeTo({
-      center: [en.lng, en.lat],
+      center: [cc.lng, cc.lat],
       duration: 650,
       easing: easeOutCubic,
     });
@@ -1189,9 +1284,10 @@
     entries.forEach((en) => {
       if (!en.group) return;
       if (en.id !== repId && mapMarkerIds.indexOf(en.id) === -1) { hideChip(en.id); return; }   // 地図に出る各クラスタ代表のみ縁指標
-      const p = map.project([en.lng, en.lat]);
+      const cc = centroidOf(en);                     // 縁指標もクラスタ重心を指す
+      const p = map.project([cc.lng, cc.lat]);
       if (p.x >= rc.l && p.x <= rc.r && p.y >= rc.t && p.y <= rc.b) { insidePts.push(p); hideChip(en.id); return; }
-      off.push({ en, p, dm: haversine(ctr.lat, ctr.lng, en.lat, en.lng) });
+      off.push({ en, p, dm: haversine(ctr.lat, ctr.lng, cc.lat, cc.lng) });
     });
 
     // 出現条件: 画面内の「別々の」オブジェクト数が多い時は出さない。
@@ -1208,9 +1304,10 @@
     const perim = 2 * ((rc.r - rc.l) + (rc.b - rc.t));
     const mb = ((map.getBearing && map.getBearing()) || 0) * Math.PI / 180;   // 地図の回転
     const placed = shown.map(({ en, dm }) => {
-      // 方向は GEO 方位（ビュー中心 → 対象）から決める。配置辺と矢印を同じ値から導くので必ず一致。
+      // 方向は GEO 方位（ビュー中心 → クラスタ重心）から決める。配置辺と矢印を同じ値から導くので必ず一致。
       // screen: 北=上(dy=-1) 東=右(dx=+1)、地図回転 mb を引く。
-      const sb = bearingRad(ctr.lat, ctr.lng, en.lat, en.lng) - mb;
+      const cc = centroidOf(en);
+      const sb = bearingRad(ctr.lat, ctr.lng, cc.lat, cc.lng) - mb;
       const dx = Math.sin(sb), dy = -Math.cos(sb);
       const tx = dx > 0 ? (rc.r - ocx) / dx : dx < 0 ? (rc.l - ocx) / dx : Infinity;
       const ty = dy > 0 ? (rc.b - ocy) / dy : dy < 0 ? (rc.t - ocy) / dy : Infinity;
@@ -1318,6 +1415,7 @@
     const gt = document.createElement('div'); gt.className = 'gt';
     gt.innerHTML = '連携モデル <span class="id">posts.js ↔ objects3d.js</span>';
     g.appendChild(gt);
+    g.appendChild(_cfgRange('クラスタ距離(ズーム連動)', 'CLUSTER_PX', 30, 160, 2, 'px'));
     g.appendChild(_cfgRange('巨大 main 拡大率', 'MAIN_SCALE', 1.4, 3.4, 0.1, '×'));
     g.appendChild(_cfgRange('フォーカスサイズ', 'FOCUS_FRAC', 0.6, 0.95, 0.01, ''));
     body.insertBefore(g, body.firstChild);

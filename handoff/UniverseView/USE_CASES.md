@@ -1,12 +1,12 @@
 # UniverseView 操作ユースケース カタログ
 
-Earth Globe specimen（`Earth Globe.html` ＋ `earth/objects3d.js` ＋ reel controller）から抽出した
+UniverseView specimen（`UniverseView.html` ＋ `earth/objects3d.js` ＋ reel controller）から抽出した
 **ユーザー操作のユースケース**。デザイン側ハーネス（screen-only / iPhone 17）と Flutter 実装の
 **UC 別スナップショット比較**の基盤。specimen 制御（tuning panel / preset-rail / 説明文 / 端末フレーム）は
 アプリ挙動でないので**除外**。
 
 検証済み公開 API（`window.Objects3D`）: `init / onChange / onThumb / selectRepresentative(id,{glide,lock}) /
-focus(id) / exitFocus() / switchFocus(id) / rep / debug()`。reel/story-fs は `Earth Globe.html` の
+focus(id) / exitFocus() / switchFocus(id) / rep / debug()`。reel/story-fs は `UniverseView.html` の
 `buildReel / highlightRep / openStory / closeStory`、DOM は `.playlist .cell[data-id] / #storyFs / .o3d-dock / .o3d-edge`。
 
 ## A. map/main 状態（地図主体・フォーカスなし）

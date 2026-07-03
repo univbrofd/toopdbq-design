@@ -51,7 +51,7 @@
     // continuity (zoom / pitch / padding) ----------------------------------
     globeZoom:  1.4,
     regionZoom: 9,
-    streetZoom: 16.0,
+    streetZoom: 14.0, // Flutter defaultInitialZoom=14 に一致 (street preset=初期 goPreset('street') の安定 zoom)
     streetPitch: 55,
     streetPadTop: 300,   // padding.top px → flattens the apparent tilt
   };

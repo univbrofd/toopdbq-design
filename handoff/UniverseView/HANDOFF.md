@@ -1,6 +1,6 @@
 # HANDOFF — UniverseView：クラスタ ⇄ リール ⇄ メイン ⇄ フォーカス の連携リファクタ
 
-`UniverseView` の live specimen（`Earth Globe.html` ＋ `earth/*.js`）の、**実機（Flutter）の連携モデルに合わせた
+`UniverseView` の live specimen（`UniverseView.html` ＋ `earth/*.js`）の、**実機（Flutter）の連携モデルに合わせた
 リファクタ**を定義する living spec。3D・下部リール・メイン選定・フォーカスを **1 投稿 = 1 エンティティ ＋ 単一の代表 id**
 で連動させる。**現 specimen はこの方針で実装済み**（データ単一化 `posts.js` / 固定クラスタ / リール=メインクラスタの
 メンバー / サムネ=生成元写真）。下表は方針と「やってはいけない逸脱」の記録。さらに直す時はこの値に従う。
@@ -116,12 +116,12 @@
 ```
 to claude
 ------------------------------------------------------
-UniverseView の Earth Globe specimen を「実機の連携モデル」に合わせてリファクタして。
+UniverseView の specimen を「実機の連携モデル」に合わせてリファクタして。
 現状は 3D・下部リール・メイン・フォーカスがバラバラのデータで、連動していない。
 
 索引: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/DesignSystem/_ds_manifest.json
 HANDOFF: https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/handoff/UniverseView/HANDOFF.md
-（specimen: handoff/UniverseView/Earth Globe.html ＋ earth/*.js を直接リファクタしてよい）
+（specimen: handoff/UniverseView/UniverseView.html ＋ earth/*.js を直接リファクタしてよい）
 
 直す核（HANDOFF の表と「目標の連携モデル」のとおり）:
 1. データを 1 投稿 = 1 エンティティ {id,lat,lng,circleId,glbUrl,thumbUrl} に統一。
