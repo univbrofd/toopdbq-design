@@ -849,9 +849,12 @@ html, body {
     areaMove(EM.map, c.center, c.radiusM);
     if (window.EarthOverlay && EarthOverlay.setCenter) EarthOverlay.setCenter(c.center);
     if (EM.setCenter) EM.setCenter(c.center);
-    // zoom changes the instant you tap — jump straight to the fitted camera
+    // zoom changes the instant you tap — jump straight to the fitted camera.
+    // padding is pinned to the street preset value: stop() can freeze the boot
+    // flyTo mid-flight, which would leave a nondeterministic padding behind
     EM.map.stop();
-    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0 });
+    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0,
+                    padding: { top: (window.EarthLook ? window.EarthLook.get().streetPadTop : 300), bottom: 0, left: 0, right: 0 } });
     refitZoom(EM.map, i);
     pin();
   }
