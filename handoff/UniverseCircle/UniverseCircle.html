@@ -137,6 +137,18 @@ html, body {
   pointer-events: none;
 }
 
+/* WdNavigationHeader — selected circle title, centered glass pill */
+.nav-header {
+  position: absolute; top: 66px; left: 50%; transform: translateX(-50%); z-index: 55;
+  display: inline-flex; align-items: center; justify-content: center;
+  max-width: 82%; padding: 9px 6px;
+  pointer-events: none;
+}
+.nav-header .nh-title {
+  font: 300 24px var(--font-jp); color: #fff; letter-spacing: .01em; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 6px rgba(0,0,0,.7);
+}
+
 /* SafeArea chrome */
 .dynamic-island {
   position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
@@ -266,31 +278,44 @@ html, body {
   text-shadow: 0 1px 4px rgba(0,0,0,.85); }
 
 /* ============================================================
-   WdCircleBar — glass identity pill below the list (DS comp-10).
-   Shows the circle of the card currently at the front of the deck.
+   WdIconButton (variant: badge) — main icon = camera, badge = add.
+   Dark liquid-glass face + colorful gradient rim; glass badge notch
+   top-right carries the add icon. Floats over the active area,
+   following the front card of the deck.
    ============================================================ */
-.wd-circle-bar {
-  position: absolute; left: 50%; top: 0; transform: translateX(-50%); z-index: 47;
-  display: inline-flex; align-items: center; gap: 11px; padding: 6px 22px 6px 6px;
-  width: 300px; max-width: 88%;
-  border-radius: var(--radius-pill); will-change: left, top;
-  background: linear-gradient(90deg, rgba(0,0,0,.05) 0%, rgba(0,0,0,.34) 62%), var(--lg-tint);
+.wd-cam-btn {
+  position: absolute; left: 12px; top: 68px; z-index: 47;
+  width: 58px; height: 58px; border-radius: 50%; flex: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  appearance: none; -webkit-appearance: none; border: 0;
+  background: var(--lg-tint-dark);
   backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
   -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
-  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+  transition: transform .12s var(--ease-standard), filter .12s var(--ease-standard);
 }
-.wd-circle-bar::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-  background: var(--lg-edge);
+.wd-cam-btn::after {                 /* colorful theme rim (badgeColor) */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: var(--gradient-colorful-linear);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
-.wd-circle-bar .cover { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
-.wd-circle-bar .col { display: flex; flex-direction: column; gap: 2px; }
-.wd-circle-bar .nm { font: 700 14px var(--font-jp); color: #fff; letter-spacing: .01em;
-  white-space: nowrap; text-shadow: 0 0 8px rgba(0,0,0,.6); }
-.wd-circle-bar .ds { font: 500 11px var(--font-jp); color: var(--text-2); white-space: nowrap; }
+.wd-cam-btn:active { transform: scale(.94); filter: brightness(.94); }
+.wd-cam-btn .mi { width: 46%; height: 46%; object-fit: contain; position: relative;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.wd-cam-btn .badge {                 /* glass badge — cut out from host with a 2px ring gap */
+  position: absolute; top: -3px; right: -3px; width: 23px; height: 23px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass-fill); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  box-shadow: 0 0 0 2px var(--lg-tint-dark);
+}
+.wd-cam-btn .badge::after {          /* hairline rim on the badge */
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.wd-cam-btn .badge img { width: 11px; height: 11px; object-fit: contain; }
 
 /* ============================================================
    CIRCLE LIST — bottom sheet of nearby circles you can focus.
@@ -405,6 +430,122 @@ html, body {
 }
 .wd-add-fab .badge img { width: 11px; height: 11px; object-fit: contain; }
 
+/* ============================================================
+   DS COMPONENTS — WdCircleBar · WdIconButton · WdIdentityTool
+   (lifted from the Toopdbq design system components.css so the
+   identity cluster reads as the real DS component)
+   ============================================================ */
+.wd-icon-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--glass-fill);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  width: 47px; height: 47px; flex: none; cursor: pointer; border: none; -webkit-appearance: none; appearance: none;
+  transition: transform .12s var(--ease-standard), opacity .12s var(--ease-standard);
+}
+.wd-icon-btn::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
+.wd-icon-btn:active { transform: scale(0.94); }
+/* legacy glass surfaces re-pointed to the liquid-glass recipe */
+.wd-icon-btn:not(.color) {
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.wd-icon-btn:not(.color)::after { background: var(--lg-edge); }
+/* colorful variant (badgeColor) */
+.wd-icon-btn.color {
+  background: var(--lg-tint-dark);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+}
+.wd-icon-btn.color::after { background: var(--gradient-colorful-linear); padding: 1.5px; }
+.wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+
+/* badge dot (glass) */
+.wd-badge {
+  position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--glass-fill); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+}
+.wd-badge::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.wd-badge img { width: 11px; height: 11px; }
+/* badge notch — cut the host circle behind the badge so the rim never shows through */
+.wd-icon-btn.color.has-badge::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+  -webkit-mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+  mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+}
+.wd-icon-btn.color.has-badge { background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.wd-icon-btn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude;
+}
+
+/* WdCircleBar — glass identity pill */
+.wd-circle-bar {
+  position: relative; display: flex; align-items: center; gap: 8px; padding: 7px 16px 7px 7px;
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%),
+    var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.wd-circle-bar::after {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-pill); padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-circle-bar .cover { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+.wd-circle-bar .col { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wd-circle-bar .nm { font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: #fff;
+  text-shadow: 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-circle-bar .ds { font-family: var(--font-jp); font-weight: 500; font-size: 11px; color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* WdIdentityTool — identity pill + camera/pen action stack.
+   Docked just above the circle sheet; z-index sits BELOW the sheet (50)
+   so an expanded sheet slides up and hides it. */
+.wd-identity-tool {
+  position: absolute; left: 50%; transform: translateX(-50%); z-index: 48;
+  display: flex; align-items: flex-end; gap: 14px;
+  width: calc(100% - 32px); max-width: 344px;
+  transition: opacity .2s var(--ease-standard);
+}
+.wd-identity-tool .wd-circle-bar { flex: 1 1 auto; min-width: 0; padding-top: 2px; padding-bottom: 2px; }
+.wd-identity-tool .stack { display: flex; flex-direction: column; gap: 12px; flex: none; }
+.wd-identity-tool .stack .wd-icon-btn { width: 48px; height: 48px; }
+
+/* サークル作成 FAB — WdIconButton standart (icon: add) */
+#addCircleBtn { position: absolute; right: 16px; bottom: 20px; z-index: 6; width: 52px; height: 52px; }
+
 /* loading veil */
 #veil {
   position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
@@ -446,7 +587,7 @@ html, body {
       <p>エリアの<b>上空</b>にカバーフローが浮上する。中心のカードだけが正面を向いて拡大され、左右は傾いて畳まれ、端にはみ出す分は<b>自然にフェード</b>して消える。ドラッグ／ホイールでスクロール、回転・ズームしてもエリアに追従する。</p>
     </div>
 
-    <div class="phone" data-screen-label="UniverseCircle · Earth globe">
+    <div class="phone" data-screen-label="MapOnly · Earth globe">
       <div class="screen">
         <div id="bg-white"></div>
         <div id="map"></div>
@@ -459,12 +600,23 @@ html, body {
         <!-- coverflow deck: floats over the area -->
         <div class="reel" id="reel"></div>
 
-        <!-- WdCircleBar: current circle (follows the front card) -->
-        <div class="wd-circle-bar" id="circleBar">
-          <img class="cover" id="cbCover" alt="">
-          <div class="col">
-            <span class="nm" id="cbName"></span>
-            <span class="ds" id="cbDesc"></span>
+        <!-- WdIdentityTool — active circle identity + camera/pen actions, beside the reel -->
+        <div class="wd-identity-tool" id="identityTool">
+          <div class="wd-circle-bar">
+            <img class="cover" id="itCover" alt="">
+            <div class="col">
+              <span class="nm" id="itName"></span>
+              <span class="ds" id="itDesc"></span>
+            </div>
+          </div>
+          <div class="stack">
+            <button class="wd-icon-btn color has-badge" id="itPost" aria-label="ストーリーを投稿">
+              <img src="../../assets/icons/icon_camera.png" alt="">
+              <span class="wd-badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
+            </button>
+            <button class="wd-icon-btn" id="itEdit" aria-label="編集">
+              <img src="../../assets/icons/icon_edit.png" alt="">
+            </button>
           </div>
         </div>
 
@@ -472,9 +624,8 @@ html, body {
         <div class="circle-sheet" id="circleSheet">
           <div class="cs-grip"></div>
           <div class="cs-rows" id="csRows"></div>
-          <button class="wd-add-fab" id="addCircleBtn" aria-label="サークルを追加">
-            <img class="mi" src="../../assets/icons/icon_diversity.png" alt="">
-            <span class="badge"><img src="../../assets/icons/icon_add.png" alt=""></span>
+          <button class="wd-icon-btn" id="addCircleBtn" aria-label="サークルを追加">
+            <img src="../../assets/icons/icon_add.png" alt="">
           </button>
         </div>
 
@@ -532,78 +683,78 @@ html, body {
 (function () {
   // ---- communities --------------------------------------------------------
   const COMMUNITIES = [
-    { name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ', cover: '../../assets/sample/uv/circle-01.png', thumb: '../../assets/sample/uv/story-01.png',
+    { name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ', cover: '../../assets/images/circle-01.png', thumb: '../../assets/images/story-01.png',
       dist: 120, radius: 150, members: 248, inside: true,
       center: [139.70064, 35.65905], radiusM: 520,
       photos: [
-        { img: '../../assets/sample/uv/story-01.png', title: '渋谷スクランブル' },
-        { img: '../../assets/sample/uv/story-02.png', title: 'ハチ公前広場' },
-        { img: '../../assets/sample/uv/story-03.png', title: 'センター街' },
-        { img: '../../assets/sample/uv/story-04.png', title: '宮下パーク' },
+        { img: '../../assets/images/story-01.png', title: '渋谷スクランブル' },
+        { img: '../../assets/images/story-02.png', title: 'ハチ公前広場' },
+        { img: '../../assets/images/story-03.png', title: 'センター街' },
+        { img: '../../assets/images/story-04.png', title: '宮下パーク' },
       ] },
-    { name: 'センター街グルメ', desc: '食べ歩きスポットをシェア', cover: '../../assets/sample/uv/story-03.png', thumb: '../../assets/sample/uv/story-03.png',
+    { name: 'センター街グルメ', desc: '食べ歩きスポットをシェア', cover: '../../assets/images/story-03.png', thumb: '../../assets/images/story-03.png',
       dist: 60, radius: 90, members: 132, inside: true,
       center: [139.69850, 35.65980], radiusM: 300,
       photos: [
-        { img: '../../assets/sample/uv/story-03.png', title: 'センター街入口' },
-        { img: '../../assets/sample/uv/story-06.png', title: '路地の名店' },
-        { img: '../../assets/sample/uv/story-02.png', title: 'ランチ探訪' },
+        { img: '../../assets/images/story-03.png', title: 'センター街入口' },
+        { img: '../../assets/images/story-06.png', title: '路地の名店' },
+        { img: '../../assets/images/story-02.png', title: 'ランチ探訪' },
       ] },
-    { name: '宮益坂フォト', desc: '街角のワンショット', cover: '../../assets/sample/uv/story-02.png', thumb: '../../assets/sample/uv/story-02.png',
+    { name: '宮益坂フォト', desc: '街角のワンショット', cover: '../../assets/images/story-02.png', thumb: '../../assets/images/story-02.png',
       dist: 110, radius: 120, members: 88, inside: true,
       center: [139.70250, 35.65950], radiusM: 320,
       photos: [
-        { img: '../../assets/sample/uv/story-02.png', title: '宮益坂の朝' },
-        { img: '../../assets/sample/uv/story-07.png', title: '坂上の眺め' },
-        { img: '../../assets/sample/uv/story-10.png', title: '夕暮れの坂' },
+        { img: '../../assets/images/story-02.png', title: '宮益坂の朝' },
+        { img: '../../assets/images/story-07.png', title: '坂上の眺め' },
+        { img: '../../assets/images/story-10.png', title: '夕暮れの坂' },
       ] },
-    { name: '道玄坂ナイト', desc: '夜の道玄坂で集まろう', cover: '../../assets/sample/uv/story-05.png', thumb: '../../assets/sample/uv/story-05.png',
+    { name: '道玄坂ナイト', desc: '夜の道玄坂で集まろう', cover: '../../assets/images/story-05.png', thumb: '../../assets/images/story-05.png',
       dist: 80, radius: 110, members: 96, inside: true,
       center: [139.69720, 35.65780], radiusM: 340,
       photos: [
-        { img: '../../assets/sample/uv/story-05.png', title: '道玄坂の夜' },
-        { img: '../../assets/sample/uv/story-08.png', title: 'ネオン街' },
-        { img: '../../assets/sample/uv/story-01.png', title: '坂の下から' },
+        { img: '../../assets/images/story-05.png', title: '道玄坂の夜' },
+        { img: '../../assets/images/story-08.png', title: 'ネオン街' },
+        { img: '../../assets/images/story-01.png', title: '坂の下から' },
       ] },
-    { name: '新宿グループ', desc: '新宿駅周辺のグループ', cover: '../../assets/sample/uv/circle-02.png', thumb: '../../assets/sample/uv/story-05.png',
+    { name: '新宿グループ', desc: '新宿駅周辺のグループ', cover: '../../assets/images/circle-02.png', thumb: '../../assets/images/story-05.png',
       dist: 1600, radius: 200, members: 173, inside: false,
       center: [139.70050, 35.68960], radiusM: 640,
       photos: [
-        { img: '../../assets/sample/uv/story-05.png', title: '歌舞伎町一番街' },
-        { img: '../../assets/sample/uv/story-06.png', title: '新宿御苑' },
-        { img: '../../assets/sample/uv/story-07.png', title: '思い出横丁' },
+        { img: '../../assets/images/story-05.png', title: '歌舞伎町一番街' },
+        { img: '../../assets/images/story-06.png', title: '新宿御苑' },
+        { img: '../../assets/images/story-07.png', title: '思い出横丁' },
       ] },
-    { name: '原宿コミュニティ', desc: '原宿・表参道エリア', cover: '../../assets/sample/uv/circle-03.png', thumb: '../../assets/sample/uv/story-08.png',
+    { name: '原宿コミュニティ', desc: '原宿・表参道エリア', cover: '../../assets/images/circle-03.png', thumb: '../../assets/images/story-08.png',
       dist: 1300, radius: 120, members: 132, inside: false,
       center: [139.70270, 35.67020], radiusM: 480,
       photos: [
-        { img: '../../assets/sample/uv/story-08.png', title: '竹下通り' },
-        { img: '../../assets/sample/uv/story-09.png', title: '表参道けやき並木' },
-        { img: '../../assets/sample/uv/story-10.png', title: 'キャットストリート' },
+        { img: '../../assets/images/story-08.png', title: '竹下通り' },
+        { img: '../../assets/images/story-09.png', title: '表参道けやき並木' },
+        { img: '../../assets/images/story-10.png', title: 'キャットストリート' },
       ] },
-    { name: '恵比寿サークル', desc: '恵比寿・代官山エリア', cover: '../../assets/sample/uv/circle-04.png', thumb: '../../assets/sample/uv/story-06.png',
+    { name: '恵比寿サークル', desc: '恵比寿・代官山エリア', cover: '../../assets/images/circle-04.png', thumb: '../../assets/images/story-06.png',
       dist: 1400, radius: 150, members: 96, inside: false,
       center: [139.71000, 35.64670], radiusM: 520,
       photos: [
-        { img: '../../assets/sample/uv/story-01.png', title: '恵比寿横丁' },
-        { img: '../../assets/sample/uv/story-06.png', title: 'ガーデンプレイス' },
-        { img: '../../assets/sample/uv/story-03.png', title: '代官山T-SITE' },
+        { img: '../../assets/images/story-01.png', title: '恵比寿横丁' },
+        { img: '../../assets/images/story-06.png', title: 'ガーデンプレイス' },
+        { img: '../../assets/images/story-03.png', title: '代官山T-SITE' },
       ] },
-    { name: '代々木サークル', desc: '代々木公園エリア', cover: '../../assets/sample/uv/story-10.png', thumb: '../../assets/sample/uv/story-10.png',
+    { name: '代々木サークル', desc: '代々木公園エリア', cover: '../../assets/images/story-10.png', thumb: '../../assets/images/story-10.png',
       dist: 900, radius: 220, members: 64, inside: false,
       center: [139.69490, 35.67200], radiusM: 620,
       photos: [
-        { img: '../../assets/sample/uv/story-10.png', title: '代々木公園' },
-        { img: '../../assets/sample/uv/story-04.png', title: 'イベント広場' },
-        { img: '../../assets/sample/uv/story-02.png', title: 'サイクリング' },
+        { img: '../../assets/images/story-10.png', title: '代々木公園' },
+        { img: '../../assets/images/story-04.png', title: 'イベント広場' },
+        { img: '../../assets/images/story-02.png', title: 'サイクリング' },
       ] },
-    { name: '表参道フォト', desc: '表参道・青山エリア', cover: '../../assets/sample/uv/story-09.png', thumb: '../../assets/sample/uv/story-09.png',
+    { name: '表参道フォト', desc: '表参道・青山エリア', cover: '../../assets/images/story-09.png', thumb: '../../assets/images/story-09.png',
       dist: 1200, radius: 120, members: 88, inside: false,
       center: [139.71240, 35.66560], radiusM: 460,
       photos: [
-        { img: '../../assets/sample/uv/story-09.png', title: 'けやき並木' },
-        { img: '../../assets/sample/uv/story-07.png', title: '青山通り' },
-        { img: '../../assets/sample/uv/story-05.png', title: 'スパイラル' },
+        { img: '../../assets/images/story-09.png', title: 'けやき並木' },
+        { img: '../../assets/images/story-07.png', title: '青山通り' },
+        { img: '../../assets/images/story-05.png', title: 'スパイラル' },
       ] },
   ];
 
@@ -745,56 +896,63 @@ html, body {
 
   requestAnimationFrame(tick);
 
-  // ---- circle bar + community list ----------------------------------------
-  const cbName = document.getElementById('cbName');
-  const cbDesc = document.getElementById('cbDesc');
-  const cbCover = document.getElementById('cbCover');
-  function setCircleBar(c) {
-    if (cbName) cbName.textContent = c.name;
-    if (cbDesc) cbDesc.textContent = c.desc;
-    if (cbCover) cbCover.src = c.cover;
-  }
-
+  // ---- community list ------------------------------------------------------
   const csRows = document.getElementById('csRows');
   const sheet = document.getElementById('circleSheet');
-  COMMUNITIES.forEach((c, i) => {
-    const row = document.createElement('button');
-    row.className = 'cs-row' + (i === 0 ? ' sel' : '');
-    row.dataset.i = i;
-    row.innerHTML =
-      '<span class="cs-thumb-wrap">' +
-        '<img class="cs-thumb" src="' + c.thumb + '" alt="">' +
-        (c.inside ? '<span class="cs-badge">エリア内</span>' : '') +
-      '</span>' +
-      '<span class="cs-mid"><span class="cs-nameline">' +
-        '<span class="cs-name">' + c.name + '</span>' +
-        '<span class="cs-dist">' + (c.dist / 1000).toFixed(1) + 'km</span>' +
-      '</span><span class="cs-desc">' + c.desc + '</span></span>';
-    row.addEventListener('click', () => focus(i));
-    csRows.appendChild(row);
-  });
+  // identity tool refs
+  const itCover = document.getElementById('itCover');
+  const itName = document.getElementById('itName');
+  const itDesc = document.getElementById('itDesc');
+
+  // rebuild the list, EXCLUDING the active community (it now lives in the
+  // WdIdentityTool / circle bar, so it drops out of the list).
+  function renderList() {
+    csRows.innerHTML = '';
+    COMMUNITIES.forEach((c, i) => {
+      if (i === activeIndex) return;
+      const row = document.createElement('button');
+      row.className = 'cs-row';
+      row.dataset.i = i;
+      row.innerHTML =
+        '<span class="cs-thumb-wrap">' +
+          '<img class="cs-thumb" src="' + c.thumb + '" alt="">' +
+          (c.inside ? '<span class="cs-badge">エリア内</span>' : '') +
+        '</span>' +
+        '<span class="cs-mid"><span class="cs-nameline">' +
+          '<span class="cs-name">' + c.name + '</span>' +
+          '<span class="cs-dist">' + (c.dist / 1000).toFixed(1) + 'km</span>' +
+        '</span><span class="cs-desc">' + c.desc + '</span></span>';
+      row.addEventListener('click', () => focus(i));
+      csRows.appendChild(row);
+    });
+  }
 
   // expandable bottom sheet: scroll grows it; picking a row or tapping
   // outside snaps it back to the compact ~3-row height.
-  function expandSheet() { sheet.classList.add('expanded'); }
-  function collapseSheet() { sheet.classList.remove('expanded'); csRows.scrollTop = 0; }
+  function expandSheet() { sheet.classList.add('expanded'); if (identityTool) identityTool.style.opacity = '0'; }
+  function collapseSheet() { sheet.classList.remove('expanded'); csRows.scrollTop = 0; if (identityTool) identityTool.style.opacity = '1'; dockIdentity(); }
   csRows.addEventListener('scroll', () => { if (csRows.scrollTop > 4) expandSheet(); });
   document.addEventListener('pointerdown', (e) => { if (!sheet.contains(e.target)) collapseSheet(); }, true);
 
-  // ---- deck / circle-bar pin (float over the active area) -----------------
+  // ---- deck pin (float over the active area) ------------------------------
+  const identityTool = document.getElementById('identityTool');
+  // dock the WdIdentityTool just above the collapsed circle sheet
+  function dockIdentity() {
+    if (!identityTool || !sheet) return;
+    const wrap = sheet.offsetParent || sheet.parentElement;
+    const h = sheet.classList.contains('expanded') ? sheet.dataset.collapsedH : sheet.offsetHeight;
+    if (!sheet.classList.contains('expanded')) sheet.dataset.collapsedH = sheet.offsetHeight;
+    const base = parseFloat(sheet.dataset.collapsedH || sheet.offsetHeight);
+    identityTool.style.top = 'auto';
+    identityTool.style.bottom = (base + 14) + 'px';
+  }
   const LIFT = 150;
-  const cb = document.getElementById('circleBar');
   function pin() {
     const EM = window.EarthMap;
     if (!EM || !EM.map) return;
     const p = EM.map.project(activeCenter);
     const cy = p.y - LIFT;
     reel.style.top = (cy - reel.offsetHeight / 2 - 64) + 'px';
-    if (cb) {
-      const cardHalf = 235 * 1.12 / 2;
-      cb.style.left = p.x + 'px';
-      cb.style.top = (cy + cardHalf + 16) + 'px';
-    }
   }
 
   // ---- fit the community area to ≈90% of screen width --------------------
@@ -839,9 +997,12 @@ html, body {
     const c = COMMUNITIES[i];
     activeCenter = c.center;
 
-    [...csRows.children].forEach((el, k) => el.classList.toggle('sel', k === i));
+    // active community moves into the WdIdentityTool; list rebuilds without it
+    if (itCover) itCover.src = c.cover;
+    if (itName) itName.textContent = c.name;
+    if (itDesc) itDesc.textContent = c.desc;
+    renderList();
     collapseSheet();
-    setCircleBar(c);
     renderReel(c.photos);
 
     const EM = window.EarthMap;
@@ -849,12 +1010,9 @@ html, body {
     areaMove(EM.map, c.center, c.radiusM);
     if (window.EarthOverlay && EarthOverlay.setCenter) EarthOverlay.setCenter(c.center);
     if (EM.setCenter) EM.setCenter(c.center);
-    // zoom changes the instant you tap — jump straight to the fitted camera.
-    // padding is pinned to the street preset value: stop() can freeze the boot
-    // flyTo mid-flight, which would leave a nondeterministic padding behind
+    // zoom changes the instant you tap — jump straight to the fitted camera
     EM.map.stop();
-    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0,
-                    padding: { top: (window.EarthLook ? window.EarthLook.get().streetPadTop : 300), bottom: 0, left: 0, right: 0 } });
+    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0 });
     refitZoom(EM.map, i);
     pin();
   }
