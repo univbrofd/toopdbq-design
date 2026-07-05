@@ -6,7 +6,9 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 - repo: `univbrofd/toopdbq-design`（`main`）/ raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main`
 - 索引: `DesignSystem/_ds_manifest.json` / foundation: `DesignSystem/{USAGE_RULES.md,taste.md,colors_and_type.css,preview/}` / 共有アセット: `assets/icons/`・`assets/sample/`
 - 実装参考（別 repo `univbrofd/toopdbq`・リンクは渡さない）: `lib/feature/UniversePostFlow/`・`lib/feature/StoryVideoEdit/`
-- 現状スクショ: `handoff/UniversePostFlow/shots/current-thumb.png`（画面3 サムネ選択の as-built・**字幕トグル追加前**。字幕トグルはこれに足す）
+- 現状スクショ（as-built・iPhone 17 sim 実機撮影）:
+  - `shots/current-circle-select.png` — 画面1 サークル選択（円形ステージ＋緑グロー＋浮遊する投稿カード＋サークルピル＋カメラボタン＋「エリア内」下シート）
+  - `shots/current-thumb.png` — 画面3 サムネ選択（**字幕トグル追加前**。字幕トグルはこれに足す）
 - **字幕トグル案（Claude Design 取り込み済み）**: `handoff/UniversePostFlow/comp-uvpost-thumb.dc.html`（配置A・B × Before/After / render: `shots/comp-uvpost-thumb.png`）。Flutter 具現化はこれを一次情報に `design-to-flutter` で。
 
 ## スマホ配置文脈（必須）
@@ -23,6 +25,8 @@ Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→
 - 絵文字なし・効果は 1 コンポーネント 1〜2 個。
 
 ## 画面 1 — サークル選択シート（comp-uvpost-place）
+
+> **現状 Before**: `shots/current-circle-select.png`（実機撮影）。記述と差異があればスクショを正とする（例: 下シートは grabber＋リストのみでヘッダテキストは無い / 選択中サークルの投稿カードが円形ステージ上に浮遊）。
 
 地図（角度0・現在地へ降下・**域内サークルのエリア円**=白 fill .08/選択 .22・line .4/.95、地図タイル dim 0.8）の上に下シート。
 
