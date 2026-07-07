@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Universe-Circle</title>
+<title>Universe-Circle-Grid</title>
 
 <!-- Toopdbq DS tokens (colors / type / fonts) -->
 <link rel="stylesheet" href="../../DesignSystem/colors_and_type.css" />
@@ -345,49 +345,84 @@ html, body {
 .circle-sheet .cs-head i::before {
   content: ""; width: 5px; height: 5px; border-radius: 50%; background: #00c6d8; box-shadow: 0 0 6px #00c6d8;
 }
+/* 2-column grid of square-photo community cards */
 .cs-rows {
-  max-height: 214px; overflow-y: auto; padding: 8px 14px 34px;
-  display: flex; flex-direction: column; gap: 4px;
+  max-height: 214px; overflow-y: auto; padding: 10px 14px 34px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 11px;
   -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none;
   transition: max-height .34s var(--ease-standard);
 }
 .cs-rows::-webkit-scrollbar { display: none; }
-.circle-sheet.expanded .cs-rows { max-height: 560px; }
-.cs-row {
-  display: flex; align-items: center; gap: 13px; width: 100%; text-align: left; cursor: pointer;
-  padding: 8px 10px; border-radius: 15px; border: 1px solid transparent; background: rgba(255,255,255,0.05);
-  transition: background .15s var(--ease-standard), border-color .15s var(--ease-standard), transform .15s var(--ease-standard);
+.circle-sheet.expanded .cs-rows { max-height: 640px; }
+.cs-card {
+  position: relative; display: flex; flex-direction: column; text-align: left; cursor: pointer;
+  border-radius: 16px; overflow: hidden; border: 1px solid transparent; padding: 0;
+  background: rgba(255,255,255,0.05);
+  transition: border-color .15s var(--ease-standard), transform .15s var(--ease-standard);
   -webkit-tap-highlight-color: transparent; appearance: none;
 }
-.cs-row:active { transform: scale(.99); }
-.cs-row.sel {
+.cs-card:active { transform: scale(.98); }
+.cs-card.sel {
   border-color: rgba(255,255,255,0.95);
   box-shadow: 0 0 0 1px rgba(255,255,255,0.9), 0 0 16px rgba(255,255,255,0.55);
 }
-.cs-row .cs-thumb-wrap { position: relative; flex: none; }
-.cs-row .cs-thumb {
-  width: 46px; height: 46px; border-radius: 12px; object-fit: cover; display: block;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.7);
+.cs-card .cs-img-wrap { position: relative; width: 100%; aspect-ratio: 1 / 1; }
+.cs-card .cs-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cs-card .cs-topscrim {
+  position: absolute; top: 0; left: 0; right: 0; height: 62%; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.74) 0%, rgba(0,0,0,.34) 50%, transparent 100%);
 }
-.cs-row .cs-badge {
-  position: absolute; top: -5px; left: -5px; z-index: 2;
-  padding: 1.5px 6px; border-radius: 9999px; background: #ffffff;
+.cs-card .cs-nametop {
+  position: absolute; top: 8px; left: 9px; right: 9px; z-index: 3;
+  display: flex; align-items: center; gap: 8px;
+}
+.cs-card .cs-avatar {
+  width: 30px; height: 30px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.55), 0 1px 4px rgba(0,0,0,.6);
+}
+.cs-card .cs-namecol { min-width: 0; flex: 1; display: flex; flex-direction: column; }
+.cs-card .cs-dist {
+  display: flex; align-items: center; gap: 5px;
+  font: 600 9px var(--font-latin); color: rgba(255,255,255,0.72); letter-spacing: .02em;
+  text-shadow: 0 1px 4px rgba(0,0,0,.85); line-height: 1.1;
+}
+.cs-card .cs-inarea {
+  padding: 1px 5px; border-radius: 9999px; background: #ffffff;
+  font: 700 8px var(--font-jp); color: #0c0c10; white-space: nowrap; text-shadow: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.cs-card .cs-name {
+  font: 700 13px var(--font-jp); color: #fff; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; text-shadow: 0 1px 5px rgba(0,0,0,.85); line-height: 1.2;
+}
+.cs-card .cs-badge {
+  position: absolute; bottom: 8px; left: 8px; z-index: 2;
+  padding: 2px 7px; border-radius: 9999px; background: #ffffff;
   font: 700 8.5px var(--font-jp); color: #0c0c10; white-space: nowrap;
   box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
-.cs-row .cs-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.cs-row .cs-nameline { display: flex; align-items: baseline; gap: 9px; }
-.cs-row .cs-name {
-  font: 700 16px var(--font-jp); color: #fff; white-space: nowrap; flex: 0 1 auto;
-  overflow: hidden; text-overflow: ellipsis;
+.cs-card .cs-dist-pill { display: none; }
+.cs-card .cs-desc {
+  position: absolute; top: 46px; left: 11px; right: 11px; z-index: 3;
+  font: 500 11px var(--font-jp); color: rgba(255,255,255,0.82); line-height: 1.35;
+  text-shadow: 0 1px 4px rgba(0,0,0,.85);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
-.cs-row .cs-dist {
-  flex: none; margin-left: auto; padding-left: 10px;
-  font: 600 12px var(--font-latin); color: rgba(255,255,255,0.55); letter-spacing: .01em;
+
+/* Hero flight — tapped grid photo expands to the focused circle's center card */
+.hero-fly {
+  position: absolute; z-index: 58; overflow: hidden; border-radius: 16px;
+  transform-origin: center center; will-change: transform, opacity;
+  transition: transform .52s var(--ease-out), opacity .2s var(--ease-out);
+  box-shadow: 0 24px 70px rgba(0,0,0,.62);
+  pointer-events: none;
 }
-.cs-row .cs-desc {
-  font: 500 12px var(--font-jp); color: rgba(255,255,255,0.66); margin-top: 2px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.hero-fly img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero-fly::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(150deg, rgba(255,255,255,.5), rgba(255,255,255,.08) 46%, rgba(255,255,255,.18));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
 }
 
 /* ============================================================
@@ -582,9 +617,9 @@ html, body {
 
   <div class="stage">
     <div class="specimen-cap">
-      <div class="eyebrow">Live specimen · エリア上空のカバーフロー</div>
-      <h1>Floating Story — エリアから浮き上がる写真デッキ</h1>
-      <p>エリアの<b>上空</b>にカバーフローが浮上する。中心のカードだけが正面を向いて拡大され、左右は傾いて畳まれ、端にはみ出す分は<b>自然にフェード</b>して消える。ドラッグ／ホイールでスクロール、回転・ズームしてもエリアに追従する。</p>
+      <div class="eyebrow">Live specimen · グリッド版コミュニティリスト</div>
+      <h1>Floating Story — 2列グリッドのサークルリスト</h1>
+      <p>上空にカバーフローが浮かび、画面下部のサークル一覧は<b>正方形画像の2列グリッド</b>に。各カードはサムネイル上にバッジと距離、下に名前と説明。タップでカメラが飛んでフォーカス切り替え。</p>
     </div>
 
     <div class="phone" data-screen-label="MapOnly · Earth globe">
@@ -825,7 +860,7 @@ html, body {
   let pos = 0, target = 0;
   let dragging = false, moved = false, startX = 0, startPos = 0, lastX = 0, vel = 0;
 
-  function renderReel(photos) {
+  function renderReel(photos, centerFirst) {
     reel.innerHTML = '';
     cards = photos.map((p, i) => {
       const el = document.createElement('div');
@@ -836,7 +871,7 @@ html, body {
       reel.appendChild(el);
       return { el };
     });
-    pos = Math.floor((photos.length - 1) / 2);
+    pos = centerFirst ? 0 : Math.floor((photos.length - 1) / 2);
     target = pos;
     layout();
   }
@@ -896,6 +931,48 @@ html, body {
 
   requestAnimationFrame(tick);
 
+  // ---- hero flight: tapped grid photo flies to the center card ------------
+  function heroFly(imgSrc, srcRect) {
+    const screen = document.querySelector('.screen');
+    const sr = screen.getBoundingClientRect();
+    const clone = document.createElement('div');
+    clone.className = 'hero-fly';
+    const im = document.createElement('img');
+    im.src = imgSrc; clone.appendChild(im);
+    const x0 = srcRect.left - sr.left, y0 = srcRect.top - sr.top;
+    clone.style.left = x0 + 'px';
+    clone.style.top = y0 + 'px';
+    clone.style.width = srcRect.width + 'px';
+    clone.style.height = srcRect.height + 'px';
+    clone.style.borderRadius = '16px';
+    screen.appendChild(clone);
+    // target = the front reel card (scale 1.344 of 164×292), centered on reel
+    const reelRect = reel.getBoundingClientRect();
+    const tW = 164 * 1.344;
+    const tCx = reelRect.left - sr.left + reelRect.width / 2;
+    const tCy = reelRect.top - sr.top + reelRect.height / 2;
+    const sCx = x0 + srcRect.width / 2;
+    const sCy = y0 + srcRect.height / 2;
+    const scale = tW / srcRect.width;
+    requestAnimationFrame(() => {
+      clone.style.transform =
+        'translate(' + (tCx - sCx) + 'px,' + (tCy - sCy) + 'px) scale(' + scale + ')';
+    });
+    setTimeout(() => { clone.style.opacity = '0'; }, 440);
+    setTimeout(() => { clone.remove(); }, 660);
+  }
+
+  // tap a grid card: fade the grid, then refocus (refreshes the list)
+  function onPick(i, imgEl) {
+    csRows.style.transition = 'opacity .2s var(--ease-out)';
+    csRows.style.opacity = '0';
+    setTimeout(() => {
+      focus(i, { centerFirst: true });
+      csRows.style.opacity = '0';
+      requestAnimationFrame(() => { csRows.style.opacity = '1'; });
+    }, 210);
+  }
+
   // ---- community list ------------------------------------------------------
   const csRows = document.getElementById('csRows');
   const sheet = document.getElementById('circleSheet');
@@ -910,20 +987,27 @@ html, body {
     csRows.innerHTML = '';
     COMMUNITIES.forEach((c, i) => {
       if (i === activeIndex) return;
-      const row = document.createElement('button');
-      row.className = 'cs-row';
-      row.dataset.i = i;
-      row.innerHTML =
-        '<span class="cs-thumb-wrap">' +
-          '<img class="cs-thumb" src="' + c.thumb + '" alt="">' +
-          (c.inside ? '<span class="cs-badge">エリア内</span>' : '') +
-        '</span>' +
-        '<span class="cs-mid"><span class="cs-nameline">' +
-          '<span class="cs-name">' + c.name + '</span>' +
-          '<span class="cs-dist">' + (c.dist / 1000).toFixed(1) + 'km</span>' +
-        '</span><span class="cs-desc">' + c.desc + '</span></span>';
-      row.addEventListener('click', () => focus(i));
-      csRows.appendChild(row);
+      const card = document.createElement('button');
+      card.className = 'cs-card';
+      card.dataset.i = i;
+      card.innerHTML =
+        '<span class="cs-img-wrap">' +
+          '<img class="cs-img" src="' + ((c.photos && c.photos[0] && c.photos[0].img) || c.thumb) + '" alt="">' +
+          '<span class="cs-topscrim"></span>' +
+          '<span class="cs-nametop">' +
+            '<img class="cs-avatar" src="' + c.cover + '" alt="">' +
+            '<span class="cs-namecol">' +
+              '<span class="cs-name">' + c.name + '</span>' +
+              '<span class="cs-dist">' +
+                '<span>' + (c.dist / 1000).toFixed(1) + 'km</span>' +
+                (c.inside ? '<span class="cs-inarea">エリア内</span>' : '') +
+              '</span>' +
+            '</span>' +
+          '</span>' +
+          '<span class="cs-desc">' + c.desc + '</span>' +
+        '</span>';
+      card.addEventListener('click', () => onPick(i, card.querySelector('.cs-img')));
+      csRows.appendChild(card);
     });
   }
 
@@ -1003,19 +1087,16 @@ html, body {
     if (itDesc) itDesc.textContent = c.desc;
     renderList();
     collapseSheet();
-    renderReel(c.photos);
+    renderReel(c.photos, opts.centerFirst);
 
     const EM = window.EarthMap;
     if (!EM || !EM.map) return;
     areaMove(EM.map, c.center, c.radiusM);
     if (window.EarthOverlay && EarthOverlay.setCenter) EarthOverlay.setCenter(c.center);
     if (EM.setCenter) EM.setCenter(c.center);
-    // zoom changes the instant you tap — jump straight to the fitted camera.
-    // padding is pinned: stop() can freeze the boot flyTo mid-flight, which
-    // would leave a nondeterministic padding behind (measured 189-221 → pin 200)
+    // zoom changes the instant you tap — jump straight to the fitted camera
     EM.map.stop();
-    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0,
-                    padding: { top: 200, bottom: 0, left: 0, right: 0 } });
+    EM.map.jumpTo({ center: c.center, zoom: estimateZoom(c), pitch: 60, bearing: 0 });
     refitZoom(EM.map, i);
     pin();
   }
