@@ -25,17 +25,24 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
 .wd-icon-btn:active { transform: scale(0.94); }
 
-/* Colorful gradient circle (standartColor / badgeColor) — the gradient is a
-   rim that fades to TRANSPARENT toward the centre (中心から透過), so the
-   backdrop shows through behind the icon. */
-.wd-icon-btn.color { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
-.wd-icon-btn.color::before {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: var(--gradient-colorful);
-  -webkit-mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
-  mask: radial-gradient(farthest-side, rgba(0,0,0,0) 4%, rgba(0,0,0,.62) 56%, #000 94%);
+/* Colorful variant (standartColor / badgeColor).
+   HANDOFF: colorful masked FILL → DARK TRANSLUCENT GLASS face (faint black,
+   backdrop shows through); the colorful THEME accent moves to the rim (2px
+   frame), matching WdTextButton. */
+.wd-icon-btn.color {
+  background: var(--lg-tint-dark);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
 }
+.wd-icon-btn.color::before { display: none; }   /* drop the old colorful fill */
+.wd-icon-btn.color::after {                       /* theme color = a fine, stylish rim */
+  background: var(--gradient-colorful-linear); padding: 1.5px;   /* slim ring; linear so all hues read */
+}
+.wd-icon-btn.color { box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow); }
 .wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wd-icon-btn.color { background: rgba(8,8,12,.72); }
+}
 
 /* Badge dot on a button (camera/add). Badges are ALWAYS glass — never the
    colorful gradient (the colour lives on the host circle, variant badgeColor). */
@@ -52,28 +59,50 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 }
 .wd-badge img { width: 11px; height: 11px; }
 
-/* Primary colorful text button (WdTextButton). */
+/* Notification badges (overlay the host circle, no notch).
+   .notify = solid single-colour dot (presence of unread). .count = number pill. */
+.wd-badge.notify, .wd-badge.count {
+  background: var(--state-like); backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 0 0 2px var(--gray-950), 0 1px 3px rgba(0,0,0,.5);
+}
+.wd-badge.notify::after, .wd-badge.count::after { display: none; }   /* no gradient rim */
+.wd-badge.notify { top: -1px; right: -1px; width: 13px; height: 13px; }
+.wd-badge.count {
+  top: -4px; right: -4px; width: auto; min-width: 19px; height: 19px; padding: 0 5px;
+  border-radius: 999px; font-family: var(--font-latin); font-weight: 700; font-size: 11px;
+  line-height: 1; color: #fff; font-variant-numeric: tabular-nums;
+}
+
+/* Primary text button (WdTextButton).
+   HANDOFF: solid colorful fill → DARK TRANSLUCENT GLASS. The face is mostly
+   see-through (faint black tint + backdrop blur); the colorful THEME accent
+   lives in the rim, not the fill. */
 .wd-text-btn {
-  /* PRO: one effect group = colorful gradient + a centred legibility scrim
-     (darker where the label sits, colourful at the rim). No text-shadow. */
   position: relative; min-width: 200px; height: 56px; border-radius: var(--radius-xs); padding: 0 24px;
   border: none; cursor: pointer;
-  background:
-    radial-gradient(78% 130% at 50% 52%, rgba(0,0,0,.55), rgba(0,0,0,0) 72%),
-    var(--gradient-colorful);
+  background: var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
   color: #fff; font-family: var(--font-jp); font-weight: 700; font-size: 17px; letter-spacing: .01em;
   display: inline-flex; align-items: center; justify-content: center;
   transition: transform .12s var(--ease-standard), filter .12s var(--ease-standard);
 }
+/* colorful theme accent = the visible frame (2px ring of --gradient-colorful) */
 .wd-text-btn::after {
-  content: ""; position: absolute; inset: 0; border-radius: var(--radius-xs); padding: 1px;
-  background: var(--gradient-border);
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-xs); padding: 2px;
+  background: var(--gradient-colorful);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
-.wd-text-btn:active { transform: scale(0.985); filter: brightness(.95); }
+.wd-text-btn:active { transform: scale(0.985); filter: brightness(1.06); }
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wd-text-btn { background: rgba(8,8,12,.72); }
+}
 
-/* Login buttons (gradient border + dark/light interior). */
+/* Login buttons (WdLoginButton) — separate from WdTextButton. The FRAME is the
+   identity: Google = colorful --gradient-auth rim over a dark multi-hue interior;
+   Apple = white→black gradient rim over a black↔white interior. */
 .wd-login {
   position: relative; width: 284px; max-width: 100%; border-radius: var(--radius-xs); padding: 1px;
   cursor: pointer;
@@ -90,14 +119,24 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .wd-login.apple .inner { background: linear-gradient(135deg, #050505, #fafafa); }
 .wd-login img { width: 22px; height: 22px; object-fit: contain; }
 
-/* Rounded text field (WdTextField). */
+/* Rounded text field (WdTextField).
+   HANDOFF: opaque --surface-input → dark translucent glass (matches the glass:yes
+   intent). Backdrop blur + faint black tint; inner hairline keeps the pill
+   legible over busy photos. */
 .wd-field {
+  position: relative;
   display: flex; align-items: center; gap: 8px; height: 48px; width: 360px; max-width: 100%;
-  background: var(--surface-input); border-radius: var(--radius-pill); padding: 0 16px;
+  background: var(--lg-tint-dark); border-radius: var(--radius-pill); padding: 0 16px;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), inset 0 1px 0 var(--lg-specular-top);
   font-family: var(--font-latin); font-weight: 600; font-size: 14px; color: #fff;
   transition: background .15s var(--ease-standard), box-shadow .15s var(--ease-standard);
 }
-.wd-field:focus-within { background: #333; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.45); }
+.wd-field:focus-within { background: rgba(8,8,12,.62); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.55); }
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .wd-field { background: var(--surface-input); }
+}
 .wd-field.with-btn { padding-right: 4px; height: 48px; }
 .wd-field input {
   flex: 1; background: none; border: none; outline: none; color: #fff;
@@ -139,10 +178,19 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
-.wd-circle-bar .cover { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; flex: none;
+.wd-circle-bar .cover { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
   box-shadow: 0 0 0 1.5px rgba(255,255,255,.35); }
+/* Content Bars — leading media variants: .cover (circle photo) · .wd-avatar
+   (user + optional relation badge) · .ic (icon tile). nm = title/name, ds = description. */
+.wd-circle-bar .ic { width: 44px; height: 44px; border-radius: 50%; flex: none;
+  background: var(--surface-input); display: flex; align-items: center; justify-content: center; }
+.wd-circle-bar .ic img { width: 22px; height: 22px; object-fit: contain; }
 .wd-circle-bar .nm { font-family: var(--font-latin); font-weight: 500; font-size: 12px; color: #fff; text-shadow: 0 0 8px #000; }
 .wd-circle-bar .ds { font-family: var(--font-latin); font-weight: 400; font-size: 11px; color: var(--text-2); }
+/* bare variant — no glass pill / no rim: just leading media + text inline */
+.wd-circle-bar.bare { background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: none; padding: 0; }
+.wd-circle-bar.bare::after { display: none; }
 
 /* Avatar with relation badge — badge is small (14px on 40px avatar) and its
    centre sits ON the avatar's edge (45°), so it barely covers the photo. */
@@ -477,6 +525,97 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .chat-empty .sub { font-family: var(--font-jp); font-weight: 400; font-size: 13px; color: var(--text-3); max-width: 220px; line-height: 1.5; }
 
 /* ========================================================================
+   CHAT BUBBLE — WdChatBubble · ChatRoomView messenger + comment-view replies
+   The single text bubble used inside a chat thread AND threaded comments.
+   A per-message CELL → glass: no(perf). Surface = raised fill / scrim, NOT
+   liquid glass. Effects budget: surface + gradient hairline = 1 group.
+   Anatomy: [avatar 32] · column( name?(group) · row( bubble · time ) ).
+   Variants: .in (received, left · 白の面/黒文字) / .out (sent/me, right · 黒めの面/白文字).
+   Modifiers: .grouped (consecutive — tighten tail, hide avatar+name),
+   .on-photo (comment view over imagery — solid scrim fill).
+   ======================================================================== */
+.wd-chat-bubble {
+  display: flex; align-items: flex-start; gap: 8px;
+  max-width: 320px; margin-top: 12px;
+}
+.wd-chat-bubble.out { flex-direction: row-reverse; margin-left: auto; }
+/* consecutive message from same sender — tuck up under the previous */
+.wd-chat-bubble.grouped { margin-top: 3px; }
+
+/* avatar rail (incoming, group threads) — 32 circle, one elevation.
+   Hidden on grouped runs; an invisible spacer keeps bubbles aligned. */
+.wd-chat-bubble .av {
+  width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+  flex: none; background: var(--gray-800); box-shadow: var(--shadow-avatar);
+}
+.wd-chat-bubble.out .av { display: none; }
+.wd-chat-bubble.grouped .av { visibility: hidden; box-shadow: none; }
+
+.wd-chat-bubble .col { display: flex; flex-direction: column; min-width: 0; }
+.wd-chat-bubble.out .col { align-items: flex-end; }
+
+/* sender name — group threads only, above the first bubble of a run.
+   Demoted to --text-2 so the message body (white) stays the hero. */
+.wd-chat-bubble .nm {
+  font-family: var(--font-jp); font-weight: 700; font-size: 12px;
+  line-height: 1; color: var(--text-2); margin: 0 0 5px 12px;
+}
+.wd-chat-bubble.grouped .nm { display: none; }
+
+/* the bubble — solid raised surface + diagonal gradient hairline (1 group).
+   Asymmetric radius forms the tail toward the sender's side. */
+.wd-chat-bubble .bub {
+  position: relative; padding: 9px 13px; border-radius: 18px;
+  font-family: var(--font-jp); font-weight: 400; font-size: 14px;
+  line-height: 1.4; color: var(--text-1);
+  text-wrap: pretty; word-break: break-word;
+}
+/* incoming (相手) — slightly translucent WHITE fill, dark ink text */
+.wd-chat-bubble.in  .bub { background: rgba(255,255,255,.88); color: var(--ink-1); border-bottom-left-radius: 6px; }
+.wd-chat-bubble.out .bub { border-bottom-right-radius: 6px; }
+/* grouped bubbles: square off the near corner so the run reads as one block */
+.wd-chat-bubble.in.grouped  .bub { border-top-left-radius: 6px; }
+.wd-chat-bubble.out.grouped .bub { border-top-right-radius: 6px; }
+/* matching hairline frame on BOTH bubbles, tuned per fill (枠がマッチ) */
+.wd-chat-bubble .bub::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-chat-bubble.in  .bub::after { background: linear-gradient(135deg, rgba(0,0,0,.10), rgba(0,0,0,.04)); }
+.wd-chat-bubble.out .bub::after { background: var(--gradient-border); }
+/* outgoing (自分) — darker, slightly translucent fill + white text */
+.wd-chat-bubble.out .bub { background: rgba(0,0,0,.55); color: var(--text-1); }
+
+/* time — BESIDE the bubble (not below), demoted, bottom-aligned.
+   .out reverses the row so the time sits on the bubble's left. */
+.wd-chat-bubble .brow { display: flex; align-items: flex-end; gap: 6px; }
+.wd-chat-bubble.out .brow { flex-direction: row-reverse; }
+.wd-chat-bubble .tm {
+  flex: none; padding-bottom: 2px; white-space: nowrap;
+  font-family: var(--font-latin); font-weight: 400; font-size: 10px;
+  color: var(--text-3); font-variant-numeric: tabular-nums;
+}
+
+/* COMMENT VIEW over photography — keep the same swapped scheme; both fills
+   are already opaque enough for AA over imagery (white bubble / dark bubble). */
+.wd-chat-bubble.on-photo.in  .bub { background: rgba(255,255,255,.92); }
+.wd-chat-bubble.on-photo.out .bub { background: rgba(0,0,0,.62); }
+.wd-chat-bubble.on-photo .tm   { color: rgba(255,255,255,.72); text-shadow: 0 0 6px rgba(0,0,0,.9); }
+.wd-chat-bubble.on-photo .nm   { text-shadow: 0 0 6px rgba(0,0,0,.9); }
+
+/* day divider — centred chip, gradient hairline both sides (no flat line) */
+.chat-day {
+  display: flex; align-items: center; gap: 12px; margin: 22px 0 4px;
+  font-family: var(--font-latin); font-weight: 600; font-size: 11px;
+  letter-spacing: .04em; color: var(--text-3);
+}
+.chat-day::before, .chat-day::after {
+  content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,.02), rgba(255,255,255,.14), rgba(255,255,255,.02));
+}
+
+/* ========================================================================
    LIQUID GLASS — canonical surface (LiquidGlassRefresh)
    iOS 26 refractive glass = the DS standard for translucent CHROME.
    ONE recipe, referenced everywhere. Driven entirely by --lg-* tokens
@@ -511,6 +650,35 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
    photos). Same recipe, dark tint, so white text stays AA. */
 .lg.dark, .lg-dark { background: var(--lg-tint-dark); }
 
+/* ========================================================================
+   WdSideTool — vertical action rail (right edge of a Reel / Story screen).
+   Anatomy top→bottom: WdAvatar(poster + follow badge) → like → comment → pin.
+   Composes existing parts: .wd-avatar + WdIconButton (standard glass circle).
+   Each button carries a white under-count (text-shadow carries contrast over
+   the photo). Active like = the like button fills with --state-like.
+   ======================================================================== */
+.wd-side-tool { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.wd-side-tool .act { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wd-side-tool .act .ct {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); font-variant-numeric: tabular-nums;
+}
+/* the poster avatar sits a touch larger than the app default; it carries no
+   under-count, so it needs a bigger margin than the rail gap to keep the rhythm
+   even with the count-bearing actions below it. */
+.wd-side-tool .wd-avatar { width: 48px; height: 48px; margin-bottom: 16px; }
+/* liked — the like button fills with the --state-like accent (white heart on a
+   solid pink circle, soft glow). No gradient rim in this state; the colour IS
+   the signal. Matches the notify-badge use of --state-like elsewhere. */
+.wd-side-tool .act.liked .wd-icon-btn {
+  background: var(--state-like);
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 2px 10px rgba(255,62,136,.45);
+}
+.wd-side-tool .act.liked .wd-icon-btn::after { display: none; }
+.wd-side-tool .act.liked .wd-icon-btn img { filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+.wd-side-tool .act.liked .ct { color: var(--state-like); }
+
 /* canonical chrome shells (all = .lg + a role radius) */
 .lg-bar   { border-radius: var(--radius-pill); }              /* footer / header pill bar */
 .lg-rail  { border-radius: var(--radius-pill); }              /* vertical side rail        */
@@ -524,7 +692,7 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .wd-icon-btn:not(.simple):not(.color),
 .wd-it-btn.fat,
 .wd-post-btn .badge,
-.wd-badge:not(.color) {
+.wd-badge:not(.color):not(.notify):not(.count) {
   background: var(--lg-tint);
   -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
   backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
@@ -534,7 +702,7 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .wd-icon-btn:not(.simple):not(.color)::after,
 .wd-it-btn.fat::after,
 .wd-post-btn .badge::after,
-.wd-badge:not(.color)::after { background: var(--lg-edge); }
+.wd-badge:not(.color):not(.notify):not(.count)::after { background: var(--lg-edge); }
 
 /* WdCircleBar — footer identity chip is glass chrome. Keep the L→R darkening
    for text contrast, layered over the liquid-glass body. */
@@ -691,3 +859,19 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
     linear-gradient(#000 0 0);
   mask-composite: intersect, exclude;
 }
+
+/* ========================================================================
+   WdIdentityTool — identity ＋ quick-actions クラスター。
+   左：Content Bars（circle cover）が行を埋める identity チップ。
+   右：WdIconButton を縦に2つ重ねた ひとまとまり —
+       camera（badgeColor＝写真を変更・主アクション）の下に pen（standart＝編集）。
+   既存パーツの合成のみ（新スタイルなし）。stack の2ボタンは同サイズで縦軸を揃える。
+   ======================================================================== */
+.wd-identity-tool { display: flex; align-items: flex-end; gap: 16px; }
+.wd-identity-tool .wd-circle-bar { flex: 1 1 auto; min-width: 0;
+  /* hug the avatar so the circle's bottom (and the pill's) sits flush with the
+     bottom WdIconButton — pill height matches the 48px button, all bottoms align */
+  padding-top: 2px; padding-bottom: 2px; }
+.wd-identity-tool .stack { display: flex; flex-direction: column; gap: 12px; flex: none; }
+.wd-identity-tool .stack .wd-icon-btn { width: 48px; height: 48px; }
+

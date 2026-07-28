@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<style>
+  /* screen-only mode (?screen): strip studio + device chrome, render just the app screen full-bleed.
+     !important: the specimen styles everything inline, so overrides must beat inline styles. */
+  body.screen-only .studio { padding:0 !important; gap:0 !important; min-height:100dvh !important; align-items:center !important; justify-content:center !important; }
+  body.screen-only .specimen-cap,
+  body.screen-only .hint,
+  body.screen-only .dynamic-island,
+  body.screen-only .home-ind,
+  body.screen-only .statusbar { display:none !important; }
+  body.screen-only .phone { width:min(100vw, calc(100dvh * 402 / 874)) !important; height:100dvh !important; border-radius:0 !important; box-shadow:none !important; }
+</style>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+</script>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { -webkit-font-smoothing: antialiased; }
+  .ev-scroll::-webkit-scrollbar { display:none; }
+  @keyframes evPop { 0% { transform:scale(.72); opacity:0; } 60% { transform:scale(1.04); opacity:1; } 100% { transform:scale(1); opacity:1; } }
+  @keyframes evRing { 0% { transform:scale(.9); opacity:.8; } 100% { transform:scale(2.1); opacity:0; } }
+  @keyframes evRise { from { transform:translateY(14px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  @keyframes evSpin { to { transform:rotate(360deg); } }
+</style>
+</helmet>
+
+<div class="studio" style="min-height:100vh; display:flex; flex-direction:column; align-items:center; gap:22px; padding:40px 32px 64px; background:radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0b0b0e 60%, #070709 100%); font-family:var(--font-jp);">
+
+  <div class="specimen-cap" style="text-align:center; max-width:520px;">
+    <div style="font:600 10px var(--font-latin); letter-spacing:.16em; text-transform:uppercase; color:var(--fg-3);">Event post · join flow</div>
+    <div style="margin-top:6px; font:700 17px var(--font-jp); color:var(--text-1);">イベント投稿 — 参加表明からグループ参加まで</div>
+    <div style="margin-top:7px; font:400 11.5px/1.55 var(--font-jp); color:var(--fg-2);">フルスクリーンのコンテンツにイベント属性が付くと、写真の上にイベント概要と参加ボタンが乗る。参加 → 詳細シート → 参加確定 → 専用グループへ。</div>
+  </div>
+
+  <div class="phone" data-screen-label="Event post · fullscreen" style="position:relative; width:402px; height:874px; flex:none; border-radius:55px; overflow:hidden; background:var(--bg); box-shadow:0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039, 0 36px 90px rgba(0,0,0,.62);">
+    <div style="position:absolute; inset:0; overflow:hidden;">
+
+      <!-- ============ L0 story media ============ -->
+      <img src="../../assets/sample/reel/reel006.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; z-index:0;">
+      <div style="position:absolute; top:0; left:0; right:0; height:196px; z-index:2; pointer-events:none; background:linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.26) 46%, transparent 100%);"></div>
+      <div style="position:absolute; bottom:0; left:0; right:0; height:420px; z-index:2; pointer-events:none; background:linear-gradient(0deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.45) 34%, transparent 100%);"></div>
+
+      <!-- progress -->
+      <div style="position:absolute; top:70px; left:16px; right:16px; z-index:6; display:flex; gap:4px; height:2.5px;">
+        <span style="flex:1; border-radius:2px; background:#fff;"></span>
+        <span style="flex:1; border-radius:2px; background:rgba(255,255,255,.3); overflow:hidden;"><span style="display:block; height:100%; width:46%; background:#fff;"></span></span>
+        <span style="flex:1; border-radius:2px; background:rgba(255,255,255,.3);"></span>
+      </div>
+
+      <!-- story header -->
+      <div style="position:absolute; top:84px; left:16px; right:16px; z-index:6; display:flex; align-items:center; gap:10px;">
+        <span style="width:34px; height:34px; border-radius:50%; overflow:hidden; flex:none; border:1.5px solid rgba(255,255,255,.85); box-shadow:0 2px 8px rgba(0,0,0,.6);">
+          <img src="../../assets/sample/user/user003.jpg" alt="" style="width:100%; height:100%; object-fit:cover; object-position:50% 30%; display:block;">
+        </span>
+        <div style="display:flex; flex-direction:column; line-height:1.22; min-width:0;">
+          <b style="font:700 13px var(--font-jp); color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.85);">SunnyVi</b>
+          <i style="font:500 10.5px var(--font-latin); font-style:normal; color:rgba(255,255,255,.82); text-shadow:0 1px 3px rgba(0,0,0,.85);">2h · 渋谷</i>
+        </div>
+        <button aria-label="閉じる" class="wd-icon-btn" style="margin-left:auto; width:34px; height:34px; border:0; cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
+
+      <!-- side rail -->
+      <div class="wd-side-tool" style="position:absolute; right:14px; top:44%; z-index:6; display:flex; flex-direction:column; align-items:center; gap:18px;">
+        <div class="act">
+          <button class="wd-icon-btn" aria-label="いいね" style="width:44px; height:44px; border:0; cursor:pointer;"><img src="../../assets/icons/icon_like.png" alt=""></button>
+          <span class="ct" style="display:block; margin-top:4px; text-align:center; font:600 10.5px var(--font-latin); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);">1.2k</span>
+        </div>
+        <div class="act">
+          <button class="wd-icon-btn" aria-label="コメント" style="width:44px; height:44px; border:0; cursor:pointer;"><img src="../../assets/icons/icon_comment.png" alt=""></button>
+          <span class="ct" style="display:block; margin-top:4px; text-align:center; font:600 10.5px var(--font-latin); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);">84</span>
+        </div>
+        <div class="act">
+          <button class="wd-icon-btn" aria-label="ピン" style="width:44px; height:44px; border:0; cursor:pointer;"><img src="../../assets/icons/icon_pin.png" alt=""></button>
+          <span class="ct" style="display:block; margin-top:4px; text-align:center; font:600 10.5px var(--font-latin); color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.8);">312</span>
+        </div>
+      </div>
+
+      <!-- ============ L6 EVENT SUMMARY — card variant ============ -->
+      <sc-if value="{{ isCard }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; left:16px; right:16px; top:132px; z-index:7; padding:11px 12px; border-radius:var(--radius-sm); background:var(--lg-tint-dark); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); box-shadow:inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow); animation:evRise .5s var(--ease-out) both;">
+        <div style="position:absolute; inset:0; border-radius:inherit; padding:1px; background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;"></div>
+
+        <div style="min-width:0;">
+          <div style="font:700 15px var(--font-jp); color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">屋上サンセットピクニック</div>
+          <div style="margin-top:3px; display:flex; align-items:center; gap:6px; min-width:0;">
+            <span style="font:600 11.5px var(--font-latin); color:#fff; letter-spacing:.01em; flex:none;">08/02 17:30 ~ 20:00</span>
+            <span style="font:500 11px var(--font-jp); color:rgba(255,255,255,.7); flex:none;">·</span>
+            <span style="display:flex; align-items:center; gap:4px; min-width:0;">
+              <img src="../../assets/icons/icon_pin_location.png" alt="" style="width:11px; height:11px; flex:none; opacity:.85;">
+              <span style="font:500 11px var(--font-jp); color:rgba(255,255,255,.78); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">渋谷スカイ 屋上展望空間</span>
+            </span>
+          </div>
+        </div>
+
+        <div style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+          <sc-if value="{{ showParticipants }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; align-items:center; min-width:0;">
+            <img src="../../assets/sample/user/user001.jpg" alt="" style="width:21px; height:21px; border-radius:50%; object-fit:cover; object-position:50% 30%; box-shadow:0 0 0 1.5px rgba(255,255,255,.55);">
+            <img src="../../assets/sample/user/user005.jpg" alt="" style="width:21px; height:21px; border-radius:50%; object-fit:cover; object-position:50% 30%; margin-left:-7px; box-shadow:0 0 0 1.5px rgba(255,255,255,.55);">
+            <img src="../../assets/sample/user/user009.jpg" alt="" style="width:21px; height:21px; border-radius:50%; object-fit:cover; object-position:50% 30%; margin-left:-7px; box-shadow:0 0 0 1.5px rgba(255,255,255,.55);">
+            <span style="margin-left:7px; font:500 10.5px var(--font-jp); color:rgba(255,255,255,.72); white-space:nowrap;">＋{{ othersCount }}人が参加中</span>
+          </div>
+          </sc-if>
+          <button onClick="{{ onJoinTap }}" style="{{ joinBtnStyle }}">
+            <span style="position:absolute; inset:0; border-radius:inherit; padding:2px; background:var(--gradient-colorful); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; opacity:{{ joinRimOpacity }};"></span>
+            <span style="position:relative; font:700 12.5px var(--font-jp); color:#fff;">{{ joinLabel }}</span>
+          </button>
+        </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ L6 EVENT SUMMARY — slim bar variant ============ -->
+      <sc-if value="{{ isBar }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; left:16px; right:16px; top:132px; z-index:7; display:flex; align-items:center; gap:11px; padding:9px 9px 9px 12px; border-radius:var(--radius-pill); background:var(--lg-tint-dark); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); box-shadow:inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow); animation:evRise .5s var(--ease-out) both;">
+        <div style="position:absolute; inset:0; border-radius:inherit; padding:1px; background:var(--lg-edge); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;"></div>
+        <div style="min-width:0; flex:1 1 auto;">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <img src="../../assets/icons/icon_group.png" alt="" style="width:11px; height:11px;">
+            <span style="font:700 9.5px var(--font-jp); letter-spacing:.06em; color:rgba(255,255,255,.72);">イベント</span>
+          </div>
+          <div style="margin-top:2px; font:700 14px var(--font-jp); color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">屋上サンセットピクニック</div>
+          <div style="margin-top:2px; font:500 11px var(--font-jp); color:rgba(255,255,255,.72); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">08/02 17:30 ~ 20:00 · 渋谷スカイ</div>
+        </div>
+        <button onClick="{{ onJoinTap }}" style="{{ joinBtnStyle }}">
+          <span style="position:absolute; inset:0; border-radius:inherit; padding:2px; background:var(--gradient-colorful); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none; opacity:{{ joinRimOpacity }};"></span>
+          <span style="position:relative; font:700 13.5px var(--font-jp); color:#fff;">{{ joinLabel }}</span>
+        </button>
+      </div>
+      </sc-if>
+
+      <!-- post button (camera + add badge) -->
+      <button class="wd-icon-btn color" aria-label="投稿" style="position:absolute; right:16px; bottom:31px; z-index:5; width:52px; height:52px; border:0; cursor:pointer;">
+        <img src="../../assets/icons/icon_camera.png" alt="" style="width:22px; height:22px;">
+        <span class="wd-badge" style="position:absolute; right:-2px; top:-2px;"><img src="../../assets/icons/icon_add.png" alt=""></span>
+      </button>
+      <!-- circle footer -->
+      <div style="position:absolute; left:18px; right:78px; bottom:26px; z-index:6; display:flex; align-items:center; gap:10px; padding:6px 18px 6px 6px; border-radius:var(--radius-pill); background:linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%), var(--lg-tint); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); box-shadow:inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);">
+        <span style="width:40px; height:40px; border-radius:50%; overflow:hidden; flex:none; box-shadow:0 0 0 1.5px rgba(255,255,255,.35);">
+          <img src="../../assets/sample/uv/circle-01.png" alt="" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </span>
+        <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+          <b style="font:700 14px var(--font-jp); color:#fff; text-shadow:0 0 8px #000;">渋谷コミュニティ</b>
+          <span style="font:400 11px var(--font-latin); color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">渋谷駅周辺のコミュニティ</span>
+        </div>
+      </div>
+
+      <!-- ============ L20 sheet scrim ============ -->
+      <div onClick="{{ closeSheet }}" style="position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.66); transition:opacity .3s var(--ease-out); opacity:{{ scrimOpacity }}; pointer-events:{{ scrimPointer }};"></div>
+
+      <!-- ============ L21 EVENT DETAIL SHEET ============ -->
+      <div style="position:absolute; left:0; right:0; bottom:0; z-index:21; border-radius:var(--radius-lg) var(--radius-lg) 0 0; overflow:hidden; background:rgba(12,12,15,.86); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); box-shadow:0 -16px 48px rgba(0,0,0,.6); transition:transform .42s var(--ease-out); transform:{{ sheetTransform }};">
+        <div style="position:absolute; top:0; left:0; right:0; height:1px; background:var(--lg-edge);"></div>
+        <div style="display:flex; justify-content:center; padding:9px 0 2px;"><span style="width:38px; height:4px; border-radius:99px; background:rgba(255,255,255,.28);"></span></div>
+
+        <div class="ev-scroll" style="max-height:640px; overflow-y:auto; padding:8px 20px 0; scrollbar-width:none;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="position:relative; display:inline-flex; align-items:center; gap:5px; padding:4px 10px 4px 7px; border-radius:var(--radius-pill); background:rgba(255,255,255,.06);">
+              <span style="position:absolute; inset:0; border-radius:inherit; padding:1.2px; background:var(--gradient-colorful-linear); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;"></span>
+              <img src="../../assets/icons/icon_group.png" alt="" style="width:12px; height:12px;">
+              <span style="font:700 10px var(--font-jp); color:#fff; letter-spacing:.04em;">イベント</span>
+            </span>
+            <span style="font:600 10.5px var(--font-latin); color:var(--text-3); letter-spacing:.03em;">渋谷コミュニティ</span>
+          </div>
+
+          <div style="margin-top:10px; font:700 22px/1.28 var(--font-jp); color:#fff; text-wrap:pretty;">屋上サンセットピクニック</div>
+          <div style="margin-top:8px; font:400 12.5px/1.65 var(--font-jp); color:var(--text-2); text-wrap:pretty;">渋谷の夕景を見ながら、軽food とドリンクを持ち寄ってゆるく集まります。カメラ好きの方も大歓迎。雨天の場合は翌週に順延します。</div>
+
+          <div style="margin-top:16px; display:grid; grid-template-columns:44px 1fr; gap:12px 12px; align-items:center;">
+            <span style="width:44px; height:44px; border-radius:var(--radius-sm); background:rgba(255,255,255,.07); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1px;">
+              <span style="font:600 7.5px var(--font-latin); letter-spacing:.1em; color:var(--text-3);">AUG</span>
+              <span style="font:700 17px var(--font-latin); color:#fff; line-height:1;">2</span>
+            </span>
+            <div>
+              <div style="font:700 13.5px var(--font-jp); color:#fff;">8月2日(土) 17:30 – 20:00</div>
+              <div style="margin-top:2px; font:400 11.5px var(--font-jp); color:var(--text-3);">開始1時間前に通知が届きます</div>
+            </div>
+            <span style="width:44px; height:44px; border-radius:var(--radius-sm); background:rgba(255,255,255,.07); display:flex; align-items:center; justify-content:center;">
+              <img src="../../assets/icons/icon_pin_location.png" alt="" style="width:19px; height:19px;">
+            </span>
+            <div>
+              <div style="font:700 13.5px var(--font-jp); color:#fff;">渋谷スカイ 屋上展望空間</div>
+              <div style="margin-top:2px; font:400 11.5px var(--font-jp); color:var(--text-3);">東京都渋谷区渋谷2-24-12 · サークル中心から 320m</div>
+            </div>
+          </div>
+
+          <!-- map preview -->
+          <div style="position:relative; margin-top:14px; height:112px; border-radius:var(--radius-sm); overflow:hidden; background:linear-gradient(150deg, #14161c 0%, #0d0f13 60%, #0a0b0e 100%); box-shadow:inset 0 0 0 1px var(--border-hairline);">
+            <div style="position:absolute; inset:0; opacity:.5; background-image:linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px); background-size:34px 34px;"></div>
+            <div style="position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:132px; height:132px; border-radius:50%; background:radial-gradient(closest-side, rgba(0,95,103,.42), rgba(0,95,103,0) 78%); box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);"></div>
+            <div style="position:absolute; left:50%; top:52%; transform:translate(-50%,-50%); width:11px; height:11px; border-radius:50%; background:#fff; box-shadow:0 0 0 3px rgba(255,255,255,.22), 0 2px 8px rgba(0,0,0,.7);"></div>
+            <div style="position:absolute; left:12px; bottom:11px; display:flex; align-items:center; gap:6px; padding:5px 11px; border-radius:var(--radius-pill); background:rgba(0,0,0,.5); backdrop-filter:blur(6px);">
+              <img src="../../assets/icons/icon_map.png" alt="" style="width:12px; height:12px;">
+              <span style="font:600 11px var(--font-jp); color:#fff;">地図で見る</span>
+            </div>
+          </div>
+
+          <!-- attendees -->
+          <div style="margin-top:18px; display:flex; align-items:center; justify-content:space-between;">
+            <span style="font:700 12.5px var(--font-jp); color:#fff;">参加者 {{ attendeeCount }}人</span>
+            <span style="font:500 11px var(--font-jp); color:var(--text-3);">主催 SunnyVi</span>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:12px; overflow:hidden;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:48px;">
+              <img src="../../assets/sample/user/user003.jpg" alt="" style="width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 30%; box-shadow:0 0 0 1.5px var(--grad-teal);">
+              <span style="font:500 10px var(--font-latin); color:var(--text-3); white-space:nowrap;">SunnyVi</span>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:48px;">
+              <img src="../../assets/sample/user/user001.jpg" alt="" style="width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 30%;">
+              <span style="font:500 10px var(--font-latin); color:var(--text-3); white-space:nowrap;">Kawaii</span>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:48px;">
+              <img src="../../assets/sample/user/user005.jpg" alt="" style="width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 30%;">
+              <span style="font:500 10px var(--font-latin); color:var(--text-3); white-space:nowrap;">Dreamy</span>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:48px;">
+              <img src="../../assets/sample/user/user009.jpg" alt="" style="width:44px; height:44px; border-radius:50%; object-fit:cover; object-position:50% 30%;">
+              <span style="font:500 10px var(--font-latin); color:var(--text-3); white-space:nowrap;">o_cean</span>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:5px; width:48px;">
+              <span style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.08); display:flex; align-items:center; justify-content:center; font:700 12px var(--font-latin); color:var(--text-2);">+8</span>
+              <span style="font:500 10px var(--font-latin); color:var(--text-3);">others</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- sheet CTA -->
+        <div style="padding:16px 20px 30px; background:linear-gradient(0deg, rgba(10,10,13,.96) 62%, rgba(10,10,13,0) 100%);">
+          <button onClick="{{ confirmJoin }}" style="position:relative; width:100%; height:54px; border:0; border-radius:var(--radius-xs); cursor:pointer; background:var(--lg-tint-dark); backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); display:flex; align-items:center; justify-content:center; gap:9px;">
+            <span style="position:absolute; inset:0; border-radius:inherit; padding:2px; background:var(--gradient-colorful); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;"></span>
+            <sc-if value="{{ joining }}" hint-placeholder-val="{{ false }}">
+              <span style="width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; animation:evSpin .8s linear infinite;"></span>
+            </sc-if>
+            <span style="position:relative; font:700 15.5px var(--font-jp); color:#fff;">{{ ctaLabel }}</span>
+          </button>
+          <div style="margin-top:10px; text-align:center; font:400 11px var(--font-jp); color:var(--text-3);">参加するとイベント専用グループに追加されます</div>
+        </div>
+      </div>
+
+      <!-- ============ L30 SUCCESS ============ -->
+      <div style="position:absolute; inset:0; z-index:30; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; padding:0 34px; background:rgba(6,6,9,.86); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); transition:opacity .3s var(--ease-out); opacity:{{ successOpacity }}; pointer-events:{{ successPointer }};">
+        <div style="position:relative; width:96px; height:96px; display:flex; align-items:center; justify-content:center;">
+          <span style="position:absolute; inset:0; border-radius:50%; background:var(--gradient-colorful); opacity:.22; animation:evRing 1.6s var(--ease-out) infinite;"></span>
+          <span style="position:relative; width:80px; height:80px; border-radius:50%; background:rgba(255,255,255,.07); display:flex; align-items:center; justify-content:center; animation:evPop .5s var(--ease-out) both;">
+            <span style="position:absolute; inset:0; border-radius:50%; padding:2px; background:var(--gradient-colorful); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;"></span>
+            <img src="../../assets/icons/icon_check.png" alt="" style="width:34px; height:34px;">
+          </span>
+        </div>
+        <div style="margin-top:22px; font:700 20px var(--font-jp); color:#fff;">参加を表明しました</div>
+        <div style="margin-top:9px; text-align:center; font:400 12.5px/1.7 var(--font-jp); color:var(--text-2); text-wrap:pretty;">「屋上サンセットピクニック」の専用グループに追加されました。当日の集合場所はグループで共有されます。</div>
+
+        <div style="margin-top:26px; display:flex; align-items:center; gap:10px; width:100%; padding:11px 14px 11px 11px; border-radius:var(--radius-md); background:rgba(255,255,255,.06); box-shadow:inset 0 0 0 1px var(--border-hairline);">
+          <img src="../../assets/sample/reel/reel006.jpg" alt="" style="width:42px; height:42px; border-radius:var(--radius-sm); object-fit:cover; flex:none;">
+          <div style="min-width:0; flex:1 1 auto;">
+            <div style="font:700 13px var(--font-jp); color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">屋上サンセットピクニック</div>
+            <div style="margin-top:2px; font:400 11px var(--font-latin); color:var(--text-3);">{{ groupCount }} members · 8/2 17:30</div>
+          </div>
+        </div>
+
+        <button onClick="{{ openChat }}" style="position:relative; margin-top:20px; width:100%; height:54px; border:0; border-radius:var(--radius-xs); cursor:pointer; background:var(--lg-tint-dark); display:flex; align-items:center; justify-content:center;">
+          <span style="position:absolute; inset:0; border-radius:inherit; padding:2px; background:var(--gradient-colorful); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude;"></span>
+          <span style="position:relative; font:700 15.5px var(--font-jp); color:#fff;">グループを開く</span>
+        </button>
+        <button onClick="{{ dismissSuccess }}" style="margin-top:12px; background:none; border:0; cursor:pointer; font:600 13px var(--font-jp); color:var(--text-3);">あとで</button>
+      </div>
+
+      <!-- ============ L40 EVENT GROUP CHAT ============ -->
+      <div data-screen-label="Event group chat" style="position:absolute; inset:0; z-index:40; background:var(--bg); transition:transform .4s var(--ease-out); transform:{{ chatTransform }};">
+        <div style="position:absolute; inset:0; background:radial-gradient(125% 120% at 50% 30%, #16161d 0%, #0d0d0f 55%, #08080b 100%);"></div>
+
+        <div class="ev-scroll" ref="{{ scrollerRef }}" style="position:absolute; inset:0; z-index:10; overflow-y:auto; padding:186px 16px 96px; scrollbar-width:none;">
+          <div class="chat-day">今日</div>
+
+          <div style="margin:6px 0 14px; text-align:center; font:500 11px var(--font-jp); color:var(--text-3);">あなたがイベントに参加しました</div>
+
+          <div class="wd-chat-bubble in">
+            <img class="av" src="../../assets/sample/user/user003.jpg" style="object-position:50% 30%;" alt="">
+            <div class="col"><div class="brow"><div class="bub">ようこそ！当日は17:15に14Fのチケットカウンター前に集合します。</div><span class="tm">14:22</span></div></div>
+          </div>
+          <div class="wd-chat-bubble in grouped">
+            <img class="av" src="../../assets/sample/user/user003.jpg" alt="">
+            <div class="col"><div class="brow"><div class="bub">飲みものは各自持参でお願いします。こちらでも少し用意します。</div><span class="tm">14:22</span></div></div>
+          </div>
+          <div class="wd-chat-bubble in">
+            <img class="av" src="../../assets/sample/user/user005.jpg" style="object-position:50% 30%;" alt="">
+            <div class="col"><div class="brow"><div class="bub">はじめまして！カメラ持っていきます。</div><span class="tm">14:26</span></div></div>
+          </div>
+          <div class="wd-chat-bubble out">
+            <div class="col"><div class="brow"><div class="bub">参加します！よろしくお願いします。</div><span class="tm">14:31</span></div></div>
+          </div>
+        </div>
+
+        <!-- header -->
+        <div class="wd-nav lg lg-dark" style="position:absolute; top:0; left:0; right:0; z-index:40; padding:48px 12px 12px; display:flex; align-items:center; gap:10px; border-radius:0;">
+          <button class="wd-icon-btn simple" aria-label="戻る" onClick="{{ backFromChat }}" style="width:38px; height:38px; border:0; cursor:pointer;">
+            <svg width="19" height="19" viewBox="0 0 18 18"><path d="M11 3L5 9l6 6" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" fill="none"></path></svg>
+          </button>
+          <div style="display:flex; align-items:center; gap:10px; flex:1 1 auto; min-width:0;">
+            <img src="../../assets/sample/reel/reel006.jpg" alt="" style="width:38px; height:38px; border-radius:50%; object-fit:cover; flex:none; box-shadow:0 0 0 1.5px rgba(255,255,255,.28);">
+            <div style="min-width:0;">
+              <div style="font:700 14px var(--font-jp); color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">屋上サンセットピクニック</div>
+              <div style="margin-top:1px; font:400 11px var(--font-latin); color:var(--text-3);">{{ groupCount }} members · event group</div>
+            </div>
+          </div>
+          <button class="wd-icon-btn" aria-label="メンバー" style="width:36px; height:36px; border:0; cursor:pointer; flex:none;"><img src="../../assets/icons/icon_group.png" alt=""></button>
+        </div>
+
+        <!-- pinned event strip -->
+        <div style="position:absolute; top:112px; left:12px; right:12px; z-index:41; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:var(--radius-sm); background:rgba(255,255,255,.06); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); box-shadow:inset 0 0 0 1px var(--border-hairline);">
+          <span style="width:34px; height:34px; border-radius:var(--radius-xs); background:rgba(255,255,255,.07); display:flex; flex-direction:column; align-items:center; justify-content:center; flex:none;">
+            <span style="font:600 7px var(--font-latin); letter-spacing:.1em; color:var(--text-3);">AUG</span>
+            <span style="font:700 13px var(--font-latin); color:#fff; line-height:1;">2</span>
+          </span>
+          <div style="min-width:0; flex:1 1 auto;">
+            <div style="font:600 11.5px var(--font-jp); color:#fff;">17:30 – 20:00 · 渋谷スカイ</div>
+            <div style="margin-top:1px; font:400 10.5px var(--font-jp); color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">14F チケットカウンター前に 17:15 集合</div>
+          </div>
+          <span style="font:600 10.5px var(--font-jp); color:var(--text-2); flex:none;">詳細</span>
+        </div>
+
+        <!-- composer -->
+        <div style="position:absolute; left:0; right:0; bottom:0; z-index:45; padding:10px 12px 26px; display:flex; align-items:center; gap:8px; background:linear-gradient(0deg, rgba(8,8,12,.78) 0%, rgba(8,8,12,.5) 76%, transparent 100%);">
+          <div class="wd-composer" style="flex:1 1 auto;">
+            <input type="text" placeholder="メッセージを送信">
+            <button class="wd-icon-btn" aria-label="送信" style="width:36px; height:36px; flex:none; border:0; cursor:pointer;">
+              <svg width="17" height="17" viewBox="0 0 24 24"><path d="M3.2 11.3 21 3l-7.8 18-2.7-7.4-7.3-2.3Z" fill="#fff"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SafeArea chrome -->
+      <div class="statusbar" style="position:absolute; top:0; left:0; right:0; height:62px; z-index:60; display:flex; align-items:center; justify-content:space-between; padding:0 36px; pointer-events:none; color:#fff;">
+        <div style="font:600 16px var(--font-latin); letter-spacing:.02em;">9:41</div>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"></rect><rect x="5" y="4.5" width="3" height="7.5" rx="1"></rect><rect x="10" y="2" width="3" height="10" rx="1"></rect><rect x="15" y="0" width="3" height="12" rx="1"></rect></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-opacity=".5"></rect><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="#fff"></rect><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" fill-opacity=".6"></rect></svg>
+        </div>
+      </div>
+      <div class="dynamic-island" style="position:absolute; top:11px; left:50%; transform:translateX(-50%); width:125px; height:36px; border-radius:20px; background:#000; z-index:70; pointer-events:none;"></div>
+      <div class="home-ind" style="position:absolute; left:50%; bottom:8px; transform:translateX(-50%); width:140px; height:5px; border-radius:99px; background:rgba(255,255,255,.9); z-index:62; pointer-events:none;"></div>
+
+    </div>
+  </div>
+
+  <!-- step rail -->
+  <div class="hint" style="display:flex; align-items:center; gap:10px;">
+    <span style="font:500 11px var(--font-jp); color:var(--fg-3);">{{ stepLabel }}</span>
+    <button onClick="{{ reset }}" style="padding:7px 14px; border:0; border-radius:var(--radius-pill); cursor:pointer; background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px var(--border-hairline); font:600 11px var(--font-jp); color:var(--text-2);">最初から</button>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:1080},&quot;summaryVariant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;card&quot;,&quot;bar&quot;],&quot;default&quot;:&quot;card&quot;,&quot;tsType&quot;:&quot;'card'|'bar'&quot;,&quot;section&quot;:&quot;Event summary&quot;},&quot;showCountdown&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Event summary&quot;},&quot;showParticipants&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Event summary&quot;},&quot;attendeeCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:12,&quot;min&quot;:2,&quot;max&quot;:99,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Event summary&quot;}}">
+class Component extends DCLogic {
+  state = { sheet: false, joining: false, joined: false, success: false, chat: false };
+
+  componentDidUpdate(_, prev) {
+    if (this.state.chat && !prev.chat && this.scroller) {
+      this.scroller.scrollTop = this.scroller.scrollHeight;
+    }
+  }
+
+  renderVals() {
+    const s = this.state;
+    const variant = this.props.summaryVariant ?? 'card';
+    const attendees = this.props.attendeeCount ?? 12;
+    const joinedCount = attendees + (s.joined ? 1 : 0);
+    return {
+      isCard: variant === 'card',
+      isBar: variant === 'bar',
+      showCountdown: this.props.showCountdown ?? true,
+      showParticipants: this.props.showParticipants ?? true,
+      attendeeCount: joinedCount,
+      othersCount: joinedCount - 3,
+      groupCount: joinedCount,
+
+      joining: s.joining,
+      joinLabel: s.joined ? '参加済み' : '参加する',
+      ctaLabel: s.joining ? '参加処理中…' : 'このイベントに参加する',
+      joinRimOpacity: s.joined ? 0 : 1,
+      joinBtnStyle: 'position:relative; flex:none; margin-left:auto; height:34px; padding:0 16px; border:0; border-radius:var(--radius-pill); cursor:pointer; display:flex; align-items:center; justify-content:center; background:' +
+        (s.joined ? 'rgba(255,255,255,.10)' : 'var(--lg-tint-dark)') +
+        '; box-shadow:' + (s.joined ? 'inset 0 0 0 1px rgba(255,255,255,.22)' : 'inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow)') +
+        '; backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate)); transition:background .2s var(--ease-out);',
+
+      sheetTransform: s.sheet ? 'translateY(0)' : 'translateY(102%)',
+      scrimOpacity: s.sheet ? 1 : 0,
+      scrimPointer: s.sheet ? 'auto' : 'none',
+      successOpacity: s.success ? 1 : 0,
+      successPointer: s.success ? 'auto' : 'none',
+      chatTransform: s.chat ? 'translateX(0)' : 'translateX(100%)',
+      stepLabel: s.chat ? '④ イベントグループ' : (s.success ? '③ 参加完了' : (s.sheet ? '② イベント詳細シート' : (s.joined ? '① 参加済みのイベント投稿' : '① イベント投稿（フルスクリーン）'))),
+
+      scrollerRef: (el) => { this.scroller = el; },
+      onJoinTap: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      confirmJoin: () => {
+        if (this.state.joining || this.state.joined) { this.setState({ sheet: false, success: true }); return; }
+        this.setState({ joining: true });
+        setTimeout(() => this.setState({ joining: false, joined: true, sheet: false, success: true }), 900);
+      },
+      openChat: () => this.setState({ success: false, chat: true }),
+      dismissSuccess: () => this.setState({ success: false }),
+      backFromChat: () => this.setState({ chat: false }),
+      reset: () => this.setState({ sheet: false, joining: false, joined: false, success: false, chat: false })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
