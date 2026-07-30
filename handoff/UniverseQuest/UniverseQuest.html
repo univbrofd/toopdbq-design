@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Universe-Quest — クエスト &amp; 投稿フィード</title>
+
+<!-- Toopdbq DS tokens (colors / type / fonts) -->
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css" />
+<!-- MapLibre GL JS — the real rendering engine (positron + globe projection) -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" />
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; min-height: 100%;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #16161d 0%, #0d0d0f 55%, #08080b 100%);
+  color: var(--text-1);
+  font-family: var(--font-latin);
+  -webkit-font-smoothing: antialiased;
+}
+.studio {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20px; padding: 40px 36px 64px;
+}
+.stage { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+
+.specimen-cap { text-align: center; max-width: 402px; }
+.specimen-cap .eyebrow {
+  font-weight: 600; font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--fg-3);
+}
+.specimen-cap h1 {
+  font-family: var(--font-jp); font-weight: 700; font-size: 17px; margin-top: 6px;
+  color: var(--text-1);
+}
+.specimen-cap p { font-size: 11.5px; line-height: 1.55; color: var(--fg-2); margin-top: 7px; }
+
+/* iPhone 17 frame  (402×874 · r55 · Dynamic Island) */
+.phone {
+  position: relative; width: 402px; height: 874px; flex: none;
+  border-radius: 55px; overflow: hidden; background: var(--bg);
+  box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
+              0 36px 90px rgba(0,0,0,.62);
+  isolation: isolate;
+}
+.phone .screen { position: absolute; inset: 0; overflow: hidden; }
+
+/* L0  space backdrop */
+#bg-white {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(125% 120% at 50% 38%,
+      var(--space-core)  0%,
+      var(--space-mid)   46%,
+      var(--space-edge)  100%);
+  transition: opacity .6s var(--ease-out);
+}
+
+/* L0  the MapLibre canvas (positron sphere) */
+#map { position: absolute; inset: 0; z-index: 1; background: transparent;
+  filter: saturate(1.08); }
+#map .maplibregl-canvas { outline: none; }
+.maplibregl-ctrl-attrib { font-family: var(--font-latin); }
+.maplibregl-ctrl-bottom-right { bottom: 36px; }
+.maplibregl-ctrl-attrib.maplibregl-compact { background: rgba(0,0,0,.35); }
+.maplibregl-ctrl-attrib a { color: rgba(255,255,255,.6); }
+a { color: var(--text-1); } a:hover { color: #fff; }
+
+/* L0.5  atmosphere ring */
+#strato-shadow {
+  position: absolute; left: 50%; top: 50%; z-index: 2;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(closest-side,
+      transparent calc(100% - var(--atmo-thickness) - var(--atmo-blur)),
+      var(--atmo-color) calc(100% - var(--atmo-thickness)),
+      transparent 100%);
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* L0.6  globe edge */
+#globe-frame {
+  position: absolute; left: 50%; top: 50%; z-index: 3;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  pointer-events: none;
+  border: var(--frame-width) solid rgba(255,255,255,var(--frame-opacity));
+  filter: blur(var(--frame-blur));
+  box-shadow: 0 0 calc(var(--frame-blur) * 4) rgba(255,255,255,calc(var(--frame-opacity) * .5));
+  opacity: 0;
+  will-change: width, height, opacity;
+}
+
+/* protection scrims */
+.scrim-top {
+  position: absolute; top: 0; left: 0; right: 0; height: 150px; z-index: 40;
+  background: linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.28) 42%, transparent 100%);
+  pointer-events: none;
+}
+
+/* SafeArea chrome */
+.dynamic-island {
+  position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  width: 125px; height: 36px; border-radius: 20px; background: #000; z-index: 70;
+  pointer-events: none;
+}
+.statusbar {
+  position: absolute; top: 0; left: 0; right: 0; height: 62px; z-index: 60;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 36px; pointer-events: none; color: #fff;
+}
+.statusbar .time { font-weight: 600; font-size: 16px; letter-spacing: .02em; }
+.statusbar .sys { display: flex; align-items: center; gap: 7px; }
+.statusbar .sys svg { display: block; }
+.home-ind {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  width: 140px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.9);
+  z-index: 60; pointer-events: none;
+}
+
+/* PRESET RAIL (studio chrome) */
+.preset-rail {
+  display: flex; gap: 8px; padding: 6px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(14px) saturate(160%);
+}
+.preset-rail button {
+  appearance: none; border: 0; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: var(--radius-pill);
+  font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: var(--text-2);
+  background: transparent; transition: all .2s var(--ease-standard);
+}
+.preset-rail button .ico { font-size: 16px; line-height: 1; }
+.preset-rail button:hover { color: var(--text-1); }
+.preset-rail button.active {
+  color: #fff;
+  background:
+    linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+    var(--gradient-colorful);
+  box-shadow: 0 2px 12px rgba(255,62,136,.28);
+}
+.hint { font-size: 11px; color: var(--fg-3); letter-spacing: .02em; }
+
+/* ============================================================
+   WdCircleBar — the circle identity pill, now in the HEADER.
+   cover → name/description → circle-timeline post button.
+   ============================================================ */
+.wd-circle-tool {
+  position: absolute; top: 196px; left: 50%; transform: translateX(-50%); z-index: 55;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  width: calc(100% - 32px); max-width: 344px;
+}
+.wd-circle-bar {
+  position: relative; flex: 0 1 auto; min-width: 0;
+  display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px;
+  border-radius: var(--radius-pill);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.34) 60%),
+    var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.wd-circle-bar::after {
+  content: ""; position: absolute; inset: 0; border-radius: var(--radius-pill); padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-circle-bar .cover {
+  position: relative; width: 42px; height: 42px; border-radius: 50%; flex: none;
+  overflow: hidden; box-shadow: 0 0 0 1.5px rgba(255,255,255,.35);
+}
+.wd-circle-bar .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wd-circle-bar .col { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.wd-circle-bar .nm { font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: #fff;
+  text-shadow: 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wd-circle-bar .ds { font-family: var(--font-jp); font-weight: 500; font-size: 10.5px; color: var(--text-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* WdIconButton (colorful, badge) */
+.wd-icon-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--glass-fill);
+  backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  width: 52px; height: 52px; flex: none; cursor: pointer; border: none; -webkit-appearance: none; appearance: none;
+  transition: transform .12s var(--ease-standard), opacity .12s var(--ease-standard);
+}
+.wd-icon-btn::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.wd-icon-btn img { width: 44%; height: 44%; object-fit: contain; }
+.wd-icon-btn:active { transform: scale(0.94); }
+.wd-icon-btn.color {
+  background: var(--lg-tint-dark);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+}
+.wd-icon-btn.color::after { background: var(--gradient-colorful-linear); padding: 1.5px; }
+.wd-icon-btn.color img { position: relative; filter: drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.wd-badge {
+  position: absolute; top: -2px; right: -2px; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--glass-fill); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center;
+}
+.wd-badge::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.wd-badge img { width: 11px; height: 11px; }
+.wd-icon-btn.color.has-badge::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+  -webkit-mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+  mask: radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px);
+}
+.wd-icon-btn.color.has-badge { background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.wd-icon-btn.has-badge::after {
+  -webkit-mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: source-in, xor;
+  mask:
+    radial-gradient(circle at calc(100% - 8px) 8px, rgba(0,0,0,0) 12px, #000 12.6px),
+    linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: intersect, exclude;
+}
+.wd-icon-btn.done { pointer-events: none; }
+.wd-icon-btn.done::after { background: linear-gradient(135deg, #4be3b0, #3fd0e0); }
+
+/* ============================================================
+   QUEST BOARD (看板) — lives INSIDE the sheet, one per circle
+   section. Date/time · title · overview · post dots.
+   ============================================================ */
+.strip-board {
+  position: absolute; left: 14px; right: 14px; z-index: 6;
+  top: 50%; transform: translateY(-50%);
+  border-radius: 20px; padding: 12px 16px 11px;
+  background:
+    linear-gradient(120deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.38) 70%),
+    var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top),
+              inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+}
+.strip-board::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+  background: var(--gradient-colorful-linear);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.strip-board.cleared::after { background: linear-gradient(135deg, #4be3b0, #3fd0e0); }
+/* cleared: the board tucks to the bottom of the post area */
+.strip-board.cleared { top: auto; bottom: 12px; transform: none; }
+.strip-board .qb-row1 { display: flex; align-items: center; gap: 8px; }
+.strip-board .ql {
+  display: flex; align-items: center; gap: 6px;
+  font: 700 9px var(--font-latin); letter-spacing: .14em; color: rgba(255,255,255,.66);
+}
+.strip-board .ql .qdot { width: 5px; height: 5px; border-radius: 50%; flex: none;
+  background: #ff3e88; box-shadow: 0 0 7px #ff3e88;
+  animation: pinpulse-dot 2.2s var(--ease-out) infinite; }
+.strip-board.cleared .ql .qdot { background: #4be3b0; box-shadow: 0 0 7px #4be3b0; animation: none; }
+@keyframes pinpulse-dot { 0% { opacity: 1; } 60% { opacity: .3; } 100% { opacity: 1; } }
+.strip-board:not(.cleared) { animation: boardpulse 2.2s var(--ease-out) infinite; }
+@keyframes boardpulse {
+  0% { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow), 0 0 0 0 rgba(255,62,136,.42); }
+  100% { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow), 0 0 0 16px rgba(255,62,136,0); }
+}
+.strip-board .qb-date {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.09);
+  font: 600 10px var(--font-latin); letter-spacing: .04em; color: rgba(255,255,255,.85);
+  white-space: nowrap;
+}
+.strip-board .qb-date img { width: 10px; height: 10px; object-fit: contain; opacity: .8; }
+.strip-board .qb-title {
+  margin-top: 6px; font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: #fff;
+  text-shadow: 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.strip-board .qb-desc {
+  margin-top: 2px; font: 500 10.5px/1.5 var(--font-jp); color: var(--text-2);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.strip-board .qb-dots { display: flex; gap: 5px; justify-content: center; margin-top: 8px; }
+.strip-board .qb-dots i {
+  width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,.28);
+  transition: all .25s var(--ease-standard);
+}
+.strip-board .qb-dots i.on { background: #fff; width: 14px; border-radius: 99px; }
+.strip-board { cursor: pointer; }
+.strip-board:active { transform: translateY(-50%) scale(.97); }
+.strip-board.cleared:active { transform: scale(.97); }
+.strip-board .qb-cam {
+  position: absolute; right: 12px; bottom: 10px; width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center; pointer-events: none;
+}
+.strip-board .qb-cam img { width: 16px; height: 16px; object-fit: contain; opacity: .85;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.strip-board.cleared .qb-cam { display: none; }
+
+/* ============================================================
+   POST FEED SHEET — fixed height. Vertical snap of circle
+   sections (board + 9:16 post rail); the next circle peeks 20%.
+   ============================================================ */
+.feed-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
+  border-radius: 26px 26px 0 0; overflow: hidden;
+  background: rgba(10,10,14,0.82);
+  -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 0 1px rgba(255,255,255,0.07);
+  padding-top: 22px;
+}
+.feed-sheet .cs-grip {
+  position: absolute; top: 9px; left: 50%; transform: translateX(-50%); z-index: 4;
+  width: 38px; height: 5px; border-radius: 9999px; background: rgba(255,255,255,0.55);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+/* vertical circle pager — fixed height; each section is 80% so
+   the next circle's posts stay 20% visible below */
+.feed-col {
+  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  height: 540px;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none;
+}
+.feed-col::-webkit-scrollbar { display: none; }
+.circle-strip {
+  position: relative; width: 100%; height: 80%; flex: none;
+  display: flex; flex-direction: column;
+  scroll-snap-align: start; scroll-snap-stop: always;
+}
+/* posts of that quest — horizontal, gapless, 9:16 portrait */
+.rail-wrap { position: relative; flex: 1; min-height: 0; }
+.strip-rail {
+  position: relative; height: 100%; width: 100%;
+  display: flex; gap: 0; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none;
+}
+.strip-rail::-webkit-scrollbar { display: none; }
+
+/* one post = a 9:16 portrait video — centered full, neighbors peeking */
+.post-cell {
+  position: relative; height: 100%; aspect-ratio: 9 / 16; flex: none;
+  scroll-snap-align: center;
+  overflow: hidden; background: #101014; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  opacity: .68; transform: scale(.94);
+  transition: opacity .28s var(--ease-standard), transform .28s var(--ease-standard);
+}
+.post-cell.focus { opacity: 1; transform: scale(1); }
+.post-cell video, .post-cell img.media {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.post-cell .cell-scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.42) 0%, transparent 34%),
+    radial-gradient(80% 70% at 50% 52%, rgba(0,0,0,.30) 0%, transparent 100%);
+}
+.post-cell .u-ava {
+  position: absolute; top: 10px; left: 12px; z-index: 3;
+  width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 1px 5px rgba(0,0,0,.6);
+}
+.post-cell .u-text {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+  padding: 18px 16px; pointer-events: none; text-align: center;
+  font: 700 13px/1.55 var(--font-jp); color: #fff; letter-spacing: .015em;
+  text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6);
+  text-wrap: pretty;
+}
+
+/* ---- LOCKED STATE — quest not cleared yet ------------------- */
+.strip-rail.locked { overflow: hidden; }
+.strip-rail.locked .post-cell video, .strip-rail.locked .post-cell img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
+.strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-ava { visibility: hidden; }
+/* ---- UPLOAD MODAL — quest clear flow ------------------------ */
+.up-veil {
+  position: absolute; inset: 0; z-index: 66; display: flex; align-items: center; justify-content: center;
+  background: rgba(4,4,8,.55);
+  -webkit-backdrop-filter: blur(10px) saturate(140%); backdrop-filter: blur(10px) saturate(140%);
+  opacity: 0; pointer-events: none; transition: opacity .3s var(--ease-out);
+}
+.up-veil.on { opacity: 1; pointer-events: auto; }
+.up-card {
+  width: 300px; border-radius: 24px; overflow: hidden; position: relative;
+  background: rgba(14,14,20,.88);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 24px 70px rgba(0,0,0,.6);
+}
+.up-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: var(--gradient-colorful-linear);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.up-card .up-vid { position: relative; width: 100%; aspect-ratio: 2 / 1; background: #000; }
+.up-card .up-vid video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.up-card .up-body { padding: 16px 18px 18px; text-align: center; }
+.up-card .up-title { font: 700 14px var(--font-jp); color: #fff; }
+.up-card .up-sub { font: 500 11px/1.6 var(--font-jp); color: rgba(255,255,255,.66); margin-top: 5px; }
+.up-card .up-bar {
+  margin-top: 14px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.12); overflow: hidden;
+}
+.up-card .up-bar i {
+  display: block; height: 100%; width: 0%; border-radius: inherit;
+  background: var(--gradient-colorful-linear);
+  transition: width .24s var(--ease-standard);
+}
+.up-card .up-state { font: 600 10px var(--font-latin); letter-spacing: .1em; color: rgba(255,255,255,.55); margin-top: 9px; }
+.up-card.cleared .up-bar i { background: linear-gradient(90deg, #4be3b0, #3fd0e0); }
+
+/* quest-clear toast */
+.clear-toast {
+  position: absolute; left: 50%; top: 118px; transform: translateX(-50%) translateY(-8px); z-index: 65;
+  display: flex; align-items: center; gap: 9px; padding: 10px 18px; border-radius: var(--radius-pill);
+  background: rgba(10,10,14,.8);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 12px 34px rgba(0,0,0,.55);
+  font: 700 13px var(--font-jp); color: #fff; white-space: nowrap;
+  opacity: 0; pointer-events: none; transition: all .4s var(--ease-out);
+}
+.clear-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.clear-toast::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: linear-gradient(135deg, #4be3b0, #3fd0e0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+.clear-toast img { width: 16px; height: 16px; object-fit: contain; }
+
+/* quest spot marker (map) */
+.quest-pin { position: relative; width: 34px; height: 34px; cursor: pointer; }
+.quest-pin .pin-core {
+  position: absolute; inset: 0; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gradient-colorful-linear);
+  box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 4px 14px rgba(0,0,0,.55);
+}
+.quest-pin .pin-core img { width: 15px; height: 15px; object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+.quest-pin .pin-halo {
+  position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  border-radius: 50%; border: 2px solid #ff3e88; pointer-events: none;
+  animation: pinpulse 2.2s var(--ease-out) infinite;
+}
+@keyframes pinpulse {
+  0% { transform: scale(1); opacity: .75; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+.quest-pin .pin-stem {
+  position: absolute; left: 50%; top: 100%; width: 2px; height: 14px; margin-left: -1px;
+  background: linear-gradient(180deg, rgba(255,62,136,.9), rgba(255,62,136,0));
+}
+
+/* loading veil */
+#veil {
+  position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); transition: opacity .8s var(--ease-out);
+  font-family: var(--font-display); font-size: 26px; color: rgba(255,255,255,.85);
+}
+#veil.gone { opacity: 0; pointer-events: none; }
+#veil .spin {
+  width: 42px; height: 42px; border-radius: 50%; margin-left: 14px;
+  border: 2px solid rgba(255,255,255,.18); border-top-color: #fff;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<style>
+  body.screen-only .studio { padding: 0; gap: 0; min-height: 100dvh; align-items: center; justify-content: center; }
+  body.screen-only .specimen-cap,
+  body.screen-only .preset-rail,
+  body.screen-only .hint,
+  body.screen-only .dynamic-island,
+  body.screen-only .home-ind { display: none; }
+  body.screen-only .phone { width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh; border-radius: 0; box-shadow: none; }
+</style>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+</script>
+<div class="studio">
+
+  <div class="stage">
+    <div class="specimen-cap">
+      <div class="eyebrow">Live specimen · クエスト版 v2</div>
+      <h1>Quest Feed — サークルバー × クエスト看板</h1>
+      <p>サークルに対して<b>クエストは1つ</b>。<b>縦スクロールでサークルが切り替わり</b>、<b>横スワイプでそのクエストの縦向き投稿</b>を順に見る。ヘッダーのサークルバー・クエスト看板はシート内に。次のサークルが下に20%見える。地図も連動。</p>
+    </div>
+
+    <div class="phone" data-screen-label="QuestFeed · Earth globe">
+      <div class="screen">
+        <div id="bg-white"></div>
+        <div id="map"></div>
+        <div id="strato-shadow"></div>
+        <div id="globe-frame"></div>
+
+        <div class="scrim-top"></div>
+
+        <!-- WdCircleBar in the header — follows the vertically-active circle -->
+        <div class="wd-circle-tool">
+          <div class="wd-circle-bar">
+            <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
+            <div class="col">
+              <span class="nm" id="cbName">渋谷コミュニティ</span>
+              <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- POST FEED — quest pager × 16:8 landscape videos -->
+        <div class="feed-sheet" id="feedSheet">
+          <div class="cs-grip"></div>
+          <div class="feed-col" id="feedCol"></div>
+        </div>
+
+        <!-- upload modal -->
+        <div class="up-veil" id="upVeil">
+          <div class="up-card" id="upCard">
+            <div class="up-vid"><video id="upVideo" src="../../assets/sample/3d/mqmav1c7_wnam/video.mp4" muted playsinline loop></video></div>
+            <div class="up-body">
+              <div class="up-title" id="upTitle">クエスト動画をアップロード</div>
+              <div class="up-sub" id="upSub">現在地で撮影された動画</div>
+              <div class="up-bar"><i id="upBar"></i></div>
+              <div class="up-state" id="upState">CHECKING LOCATION…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="clear-toast" id="clearToast">
+          <img src="../../assets/icons/icon_check.png" alt="">クエストクリア！投稿が解錠されました
+        </div>
+
+        <!-- SafeArea chrome -->
+        <div class="statusbar">
+          <div class="time">9:41</div>
+          <div class="sys">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="#fff"><path d="M8.5 2.4c2.1 0 4 .8 5.5 2.1l1.4-1.5C13.6 1.3 11.1.3 8.5.3 5.9.3 3.4 1.3 1.6 3l1.4 1.5C4.5 3.2 6.4 2.4 8.5 2.4z" opacity=".9"/><path d="M8.5 6c1.1 0 2.2.4 3 1.2l1.4-1.5C11.7 4.6 10.2 4 8.5 4S5.3 4.6 4.1 5.7L5.5 7.2C6.3 6.4 7.4 6 8.5 6z"/><circle cx="8.5" cy="10" r="1.7"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="#fff" stroke-opacity=".5"/><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="#fff"/><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="#fff" fill-opacity=".6"/></svg>
+          </div>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+
+      <div id="veil">Toopdbq<div class="spin"></div></div>
+    </div>
+
+    <div class="preset-rail" id="presetRail">
+      <button data-preset="globe"><span class="ico">🌍</span>Globe</button>
+      <button data-preset="region"><span class="ico">🗾</span>Region</button>
+      <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
+    </div>
+    <div class="hint">縦スクロール＝サークル切替 · 横スワイプ＝投稿 · 看板タップ＝動画を投稿してクリア</div>
+  </div>
+
+</div>
+
+<!-- thumbnail for the offline bundler -->
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#08080b"/>
+    <circle cx="50" cy="50" r="26" fill="#e9ebee"/>
+    <circle cx="50" cy="50" r="31" fill="none" stroke="#ff3e88" stroke-width="2" opacity=".6"/>
+    <rect x="36" y="42" width="28" height="16" rx="3" fill="#ff3e88"/>
+  </svg>
+</template>
+
+<!-- map engine only: look → core → overlay(center marker + atmosphere) → bridge(presets + veil) -->
+<script src="earth/look.js"></script>
+<script src="earth/map-core.js"></script>
+<script src="earth/overlay.js"></script>
+<script src="earth/bridge.js"></script>
+
+<script>
+(function () {
+  // ---- circles: one circle = one quest -------------------------------------
+  const CIRCLES = [
+    {
+      name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
+      cover: '../../assets/sample/uv/story-05.png',
+      center: [139.70064, 35.65905], radius: 520,
+      quest: {
+        title: 'とぅーぷどぅっくバーで乾杯', date: '7/31(金) 19:00–23:00',
+        venue: 'とぅーぷどぅっくバー', spot: [139.70142, 35.65962],
+        desc: '指定のバーで乾杯している動画をアップロードするとクリア。クリアするとこのクエストの投稿が見られる。',
+      },
+      cleared: false,
+      posts: [
+        { ava: '../../assets/sample/user/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: '../../assets/sample/3d/mqmav1c7_wnam/video.mp4' },
+        { ava: '../../assets/sample/user/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: '../../assets/sample/user/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/sample/reel/reel005.jpg' },
+        { ava: '../../assets/sample/user/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/sample/reel/reel007.jpg' },
+        { ava: '../../assets/sample/user/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/sample/reel/reel009.jpg' },
+        { ava: '../../assets/sample/user/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/sample/reel/reel011.jpg' },
+      ],
+    },
+    {
+      name: '原宿コミュニティ', desc: '原宿・キャットストリート周辺',
+      cover: '../../assets/sample/uv/story-02.png',
+      center: [139.70290, 35.66880], radius: 460,
+      quest: {
+        title: '宮下パークで朝ヨガ', date: '8/2(日) 7:00–9:00',
+        venue: 'MIYASHITA PARK', spot: [139.70352, 35.66812],
+        desc: '朝のセッションに参加して、ヨガ中の動画をアップロードするとクリア。早起き組の投稿が解錠される。',
+      },
+      cleared: false,
+      posts: [
+        { ava: '../../assets/sample/user/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/sample/reel/reel002.jpg' },
+        { ava: '../../assets/sample/user/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/sample/reel/reel004.jpg' },
+        { ava: '../../assets/sample/user/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/sample/reel/reel006.jpg' },
+        { ava: '../../assets/sample/user/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/sample/reel/reel008.jpg' },
+        { ava: '../../assets/sample/user/user013.jpg', text: '来週も参加します', img: '../../assets/sample/reel/reel010.jpg' },
+      ],
+    },
+    {
+      name: '道玄坂グループ', desc: '道玄坂・円山町のごはん好き',
+      cover: '../../assets/sample/uv/story-08.png',
+      center: [139.69820, 35.65740], radius: 400,
+      quest: {
+        title: '道玄坂ラーメン食べ歩き', date: '8/5(水) 18:00–21:00',
+        venue: '道玄坂', spot: [139.69906, 35.65788],
+        desc: '指定の3店舗のうち1杯を食べている動画をアップロードするとクリア。みんなの一杯が見られる。',
+      },
+      cleared: false,
+      posts: [
+        { ava: '../../assets/sample/user/user014.jpg', text: '一軒目から優勝した', img: '../../assets/sample/reel/reel012.jpg' },
+        { ava: '../../assets/sample/user/user015.jpg', text: '替え玉は文化です', img: '../../assets/sample/reel/reel014.jpg' },
+        { ava: '../../assets/sample/user/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/sample/reel/reel001.jpg' },
+        { ava: '../../assets/sample/user/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: '../../assets/sample/user/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/sample/reel/reel005.jpg' },
+      ],
+    },
+  ];
+  let active = 0;
+
+  const col = document.getElementById('feedCol');
+  const sheet = document.getElementById('feedSheet');
+  const cbName = document.getElementById('cbName');
+  const cbDesc = document.getElementById('cbDesc');
+  const cbCover = document.getElementById('cbCover');
+
+  // ---- cells ----------------------------------------------------------------
+  function makeCell(p) {
+    const cell = document.createElement('div');
+    cell.className = 'post-cell';
+    if (p.vid) {
+      const v = document.createElement('video');
+      v.src = p.vid; v.muted = true; v.loop = true; v.playsInline = true;
+      cell.appendChild(v);
+    } else {
+      const im = document.createElement('img');
+      im.className = 'media'; im.src = p.img; im.alt = '';
+      cell.appendChild(im);
+    }
+    const scrim = document.createElement('span');
+    scrim.className = 'cell-scrim'; cell.appendChild(scrim);
+    const txt = document.createElement('span');
+    txt.className = 'u-text'; txt.textContent = p.text; cell.appendChild(txt);
+    const ava = document.createElement('img');
+    ava.className = 'u-ava'; ava.src = p.ava; ava.alt = ''; cell.appendChild(ava);
+    return cell;
+  }
+
+  // ---- one section per circle: quest board + 9:16 post rail -----------------
+  CIRCLES.forEach((c) => {
+    const strip = document.createElement('div');
+    strip.className = 'circle-strip';
+    // quest board (看板) inside the sheet
+    const bd = document.createElement('div');
+    bd.className = 'strip-board';
+    bd.innerHTML = '<div class="qb-row1"><span class="ql"><span class="qdot"></span><span class="qlbl">QUEST</span></span>'
+      + '<span class="qb-date"><img src="../../assets/icons/icon_pin_location.png" alt=""><span>' + c.quest.date + '</span></span></div>'
+      + '<div class="qb-title">' + c.quest.title + '</div>'
+      + '<div class="qb-desc">' + c.quest.desc + '</div>'
+      + '<div class="qb-dots"></div>'
+      + '<span class="qb-cam"><img src="../../assets/icons/icon_camera.png" alt=""></span>';
+    const wrap = document.createElement('div');
+    wrap.className = 'rail-wrap';
+    const rail = document.createElement('div');
+    rail.className = 'strip-rail locked';
+    c.posts.forEach((p) => rail.appendChild(makeCell(p)));
+    c.rail = rail; c.board = bd;
+    c.setFocus = () => {
+      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 1;
+      const pad = Math.max(0, (rail.clientWidth - cellW) / 2);
+      rail.style.paddingLeft = pad + 'px'; rail.style.paddingRight = pad + 'px';
+      const i = Math.round(rail.scrollLeft / cellW);
+      Array.from(rail.children).forEach((el, k) => {
+        el.classList.toggle('focus', k === i);
+        const v = el.querySelector('video');
+        if (v) { if (k === i && !c.rail.classList.contains('locked')) v.play().catch(() => {}); else v.pause(); }
+      });
+    };
+    c.dots = bd.querySelector('.qb-dots');
+    c.qlbl = bd.querySelector('.qlbl');
+    c.qdesc = bd.querySelector('.qb-desc');
+    wrap.appendChild(rail);
+    strip.appendChild(wrap);
+    strip.appendChild(bd);
+    col.appendChild(strip);
+    bd.addEventListener('click', () => { if (CIRCLES[active] === c && !c.cleared) runUpload(); });
+    renderDots(c);
+    requestAnimationFrame(c.setFocus);
+    rail.addEventListener('scroll', () => c.setFocus(), { passive: true });
+    let rt = null;
+    rail.addEventListener('scroll', () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => renderDots(c), 70);
+    });
+    window.addEventListener('resize', c.setFocus);
+  });
+
+  // ---- board / circle bar sync ---------------------------------------------
+  function renderDots(c) {
+    const cellW = c.rail.firstChild ? c.rail.firstChild.offsetWidth : 1;
+    const i = Math.round(c.rail.scrollLeft / cellW);
+    c.dots.innerHTML = '';
+    c.posts.forEach((_, k) => {
+      const d = document.createElement('i');
+      if (k === i) d.className = 'on';
+      c.dots.appendChild(d);
+    });
+  }
+
+  function renderBoard() {
+    const c = CIRCLES[active];
+    cbName.textContent = c.name;
+    cbDesc.textContent = c.desc;
+    cbCover.src = c.cover;
+    c.board.classList.toggle('cleared', c.cleared);
+    c.qlbl.textContent = c.cleared ? 'QUEST CLEARED' : 'QUEST';
+    c.qdesc.textContent = c.cleared ? 'クリア済み · このクエストの投稿が解錠されています' : c.quest.desc;
+    syncPulse();
+  }
+
+  let scrollT = null;
+  col.addEventListener('scroll', () => {
+    clearTimeout(scrollT);
+    scrollT = setTimeout(() => {
+      const stripH = col.clientHeight * 0.8;
+      const i = Math.round(col.scrollTop / stripH);
+      if (i !== active && CIRCLES[i]) {
+        active = i;
+        renderBoard();
+        focusCircle();
+      }
+    }, 80);
+  });
+
+  // ---- quest clear flow (FAB) ----------------------------------------------
+  const upVeil = document.getElementById('upVeil');
+  const upCard = document.getElementById('upCard');
+  const upVideo = document.getElementById('upVideo');
+  const upBar = document.getElementById('upBar');
+  const upState = document.getElementById('upState');
+  const upTitle = document.getElementById('upTitle');
+  const upSub = document.getElementById('upSub');
+  const clearToast = document.getElementById('clearToast');
+
+  function runUpload() {
+    const c = CIRCLES[active];
+    if (c.cleared) return;
+    upCard.classList.remove('cleared');
+    upTitle.textContent = 'クエスト動画をアップロード';
+    upSub.textContent = c.quest.venue + ' · 現在地で撮影された動画';
+    upVeil.classList.add('on');
+    upVideo.currentTime = 0;
+    upVideo.play().catch(() => {});
+    const STAGES = [
+      [12, 'CHECKING LOCATION…'],
+      [38, c.quest.venue + ' · エリア内を確認'],
+      [72, 'UPLOADING VIDEO…'],
+      [100, 'VERIFYING…'],
+    ];
+    let i = 0;
+    upBar.style.width = '0%';
+    upState.textContent = STAGES[0][1];
+    const step = () => {
+      if (i >= STAGES.length) { finish(c); return; }
+      upBar.style.width = STAGES[i][0] + '%';
+      upState.textContent = STAGES[i][1];
+      i++;
+      setTimeout(step, 620);
+    };
+    setTimeout(step, 250);
+  }
+
+  function finish(c) {
+    upCard.classList.add('cleared');
+    upTitle.textContent = 'クエストクリア！';
+    upSub.textContent = '動画を確認しました';
+    upState.textContent = 'QUEST CLEARED';
+    setTimeout(() => {
+      upVeil.classList.remove('on');
+      upVideo.pause();
+      unlock(c);
+    }, 900);
+  }
+
+  function unlock(c) {
+    c.cleared = true;
+    c.rail.classList.remove('locked');
+    renderBoard();
+    clearToast.classList.add('on');
+    setTimeout(() => clearToast.classList.remove('on'), 2600);
+    c.setFocus();
+  }
+
+  upVeil.addEventListener('click', (e) => { if (e.target === upVeil) upVeil.classList.remove('on'); });
+
+  // ---- aurora area (quest venue) --------------------------------------------
+  function dest(lng, lat, rM, a) {
+    const dLat = rM / 111320, dLng = rM / (111320 * Math.cos(lat * Math.PI / 180));
+    return [lng + dLng * Math.cos(a), lat + dLat * Math.sin(a)];
+  }
+  function ring(center, rM, n) {
+    const out = [];
+    for (let i = 0; i <= n; i++) out.push(dest(center[0], center[1], rM, i / n * 2 * Math.PI));
+    return out;
+  }
+  function disk(center, rM) { return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring(center, rM, 128)] } }; }
+  function lineF(center, rM) { return { type: 'Feature', geometry: { type: 'LineString', coordinates: ring(center, rM, 128) } }; }
+  function annulus(center, rOut, rIn) {
+    return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring(center, rOut, 160), ring(center, rIn, 160).reverse()] } };
+  }
+  // zoom at which the circle area spans 80% of the screen width
+  function questZoom(C, R) {
+    const w = document.querySelector('.phone').clientWidth || 402;
+    const mpp = (R * 2) / (w * 0.8);
+    return Math.log2(78271.51696 * Math.cos(C[1] * Math.PI / 180) / mpp);
+  }
+
+  function areaAdd(map, C, R) {
+    if (map.getSource('area-disk')) return;
+    const firstSymbol = (map.getStyle().layers.find(l => l.type === 'symbol') || {}).id;
+    map.addSource('area-disk', { type: 'geojson', data: disk(C, R) });
+    map.addSource('area-line', { type: 'geojson', data: lineF(C, R) });
+    map.addSource('area-wall-core', { type: 'geojson', data: annulus(C, R + 6, R - 6) });
+    map.addLayer({ id: 'area-fill', type: 'fill', source: 'area-disk',
+      paint: { 'fill-color': '#4be3b0', 'fill-opacity': 0.08 } }, firstSymbol);
+    map.addLayer({ id: 'area-glow-wide', type: 'line', source: 'area-line',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#5effc7', 'line-width': 26, 'line-blur': 28, 'line-opacity': 0.7 } });
+    map.addLayer({ id: 'area-glow-mid', type: 'line', source: 'area-line',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#7bffe0', 'line-width': 9, 'line-blur': 6, 'line-opacity': 0.85 } });
+    map.addLayer({ id: 'area-glow', type: 'line', source: 'area-line',
+      layout: { 'line-cap': 'round', 'line-join': 'round' },
+      paint: { 'line-color': '#ffffff', 'line-width': 2.6, 'line-blur': 0.5, 'line-opacity': 1 } });
+    map.addLayer({ id: 'area-wall-core', type: 'fill-extrusion', source: 'area-wall-core',
+      paint: { 'fill-extrusion-color': '#c3c8d1', 'fill-extrusion-height': 220,
+        'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.7, 'fill-extrusion-vertical-gradient': true } });
+  }
+
+  function areaMove(map, C, R) {
+    if (!map.getSource('area-disk')) return;
+    map.getSource('area-disk').setData(disk(C, R));
+    map.getSource('area-line').setData(lineF(C, R));
+    map.getSource('area-wall-core').setData(annulus(C, R + 6, R - 6));
+  }
+
+  // restart board + marker pulses together so they beat in sync
+  function syncPulse() {
+    const b = CIRCLES[active].board;
+    const els = b ? [b, b.querySelector('.qdot')] : [];
+    if (spotMarker) els.push(spotMarker.getElement().querySelector('.pin-halo'));
+    const anims = [];
+    els.forEach((el) => {
+      if (!el) return;
+      el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+      if (el.getAnimations) anims.push.apply(anims, el.getAnimations());
+    });
+    const t0 = document.timeline.currentTime;
+    anims.forEach((a) => { try { a.startTime = t0; a.currentTime = 0; } catch (e) {} });
+  }
+
+  // ---- quest spot marker ----------------------------------------------------
+  let spotMarker = null;
+  function placeSpot(map) {
+    const c = CIRCLES[active];
+    const at = c.quest.spot || c.center;
+    if (!spotMarker) {
+      const el = document.createElement('div');
+      el.className = 'quest-pin';
+      el.innerHTML = '<span class="pin-stem"></span><span class="pin-halo"></span>'
+        + '<span class="pin-core"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>';
+      el.title = c.quest.venue;
+      spotMarker = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -14] })
+        .setLngLat(at).addTo(map);
+      syncPulse();
+    } else {
+      spotMarker.setLngLat(at);
+      spotMarker.getElement().title = c.quest.venue;
+    }
+  }
+
+  // ---- focus the map on the active circle -----------------------------------
+  function focusCircle(instant) {
+    const EM = window.EarthMap;
+    if (!EM || !EM.map) return;
+    const map = EM.map;
+    const c = CIRCLES[active], C = c.center;
+    try {
+      areaMove(map, C, c.radius);
+      placeSpot(map);
+      if (window.EarthOverlay && EarthOverlay.setCenter) EarthOverlay.setCenter(C);
+      if (EM.setCenter) EM.setCenter(C);
+      map.stop();
+      const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
+        padding: { top: 62, bottom: 600 } };
+      if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
+    } catch (err) { console.warn('circle focus:', err); }
+  }
+
+  // ---- boot -----------------------------------------------------------------
+  let built = false;
+  function build(force) {
+    if (built) return;
+    const EM = window.EarthMap;
+    if (!EM || !EM.map) { setTimeout(build, 120); return; }
+    const map = EM.map;
+    if (!map.isStyleLoaded() && !force) {
+      map.once('idle', () => build(true));
+      setTimeout(() => build(true), 4000);
+      setTimeout(build, 150);
+      return;
+    }
+    built = true;
+    const c = CIRCLES[active];
+    try {
+      areaAdd(map, c.center, c.radius);
+      focusCircle(true);
+    } catch (err) { built = false; console.warn('circle focus:', err); }
+  }
+  renderBoard();
+  build();
+})();
+</script>
+
+</body>
+</html>
