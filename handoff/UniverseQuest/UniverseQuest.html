@@ -155,7 +155,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    cover → name/description → circle-timeline post button.
    ============================================================ */
 .wd-circle-tool {
-  position: absolute; top: 196px; left: 50%; transform: translateX(-50%); z-index: 55;
+  position: absolute; bottom: 564px; left: 50%; transform: translateX(-50%); z-index: 55;
   display: flex; align-items: center; justify-content: center; gap: 12px;
   width: calc(100% - 32px); max-width: 344px;
 }
@@ -326,17 +326,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    ============================================================ */
 .feed-sheet {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
-  border-radius: 26px 26px 0 0; overflow: hidden;
-  background: rgba(10,10,14,0.82);
-  -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), inset 0 0 0 1px rgba(255,255,255,0.07);
-  padding-top: 22px;
+  overflow: hidden;
+  background: #fff;
+  padding-top: 8px;
 }
-.feed-sheet .cs-grip {
-  position: absolute; top: 9px; left: 50%; transform: translateX(-50%); z-index: 4;
-  width: 38px; height: 5px; border-radius: 9999px; background: rgba(255,255,255,0.55);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.6);
-}
+
 /* vertical circle pager — fixed height; each section is 80% so
    the next circle's posts stay 20% visible below */
 .feed-col {
@@ -350,12 +344,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   position: relative; width: 100%; height: 80%; flex: none;
   display: flex; flex-direction: column;
   scroll-snap-align: start; scroll-snap-stop: always;
+  margin-bottom: 8px;
 }
 /* posts of that quest — horizontal, gapless, 9:16 portrait */
 .rail-wrap { position: relative; flex: 1; min-height: 0; }
 .strip-rail {
   position: relative; height: 100%; width: 100%;
   display: flex; gap: 0; overflow-x: auto; overflow-y: hidden;
+  overflow-anchor: none;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none;
 }
@@ -397,6 +393,58 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .strip-rail.locked { overflow: hidden; }
 .strip-rail.locked .post-cell video, .strip-rail.locked .post-cell img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
 .strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-ava { visibility: hidden; }
+/* past / recommend tag chip */
+.post-cell .u-tag {
+  position: absolute; top: 10px; right: 10px; z-index: 3;
+  padding: 3px 9px; border-radius: var(--radius-pill);
+  background: rgba(0,0,0,.45); -webkit-backdrop-filter: blur(6px) saturate(140%); backdrop-filter: blur(6px) saturate(140%);
+  font: 600 9px var(--font-jp); letter-spacing: .06em; color: rgba(255,255,255,.85);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+}
+
+/* ---- FULLSCREEN POST VIEWER --------------------------------- */
+.fs-viewer {
+  position: absolute; inset: 0; z-index: 64; background: #000;
+  opacity: 0; pointer-events: none; transition: opacity .28s var(--ease-out);
+}
+.fs-viewer.on { opacity: 1; pointer-events: auto; }
+.fs-viewer video, .fs-viewer img.media {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.fs-viewer .cell-scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 30%),
+    linear-gradient(0deg, rgba(0,0,0,.4) 0%, transparent 26%);
+}
+.fs-viewer .u-ava {
+  position: absolute; top: 74px; left: 18px; z-index: 3;
+  width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 1px 5px rgba(0,0,0,.6);
+}
+.fs-viewer .u-text {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+  padding: 24px 30px; pointer-events: none; text-align: center;
+  font: 700 18px/1.6 var(--font-jp); color: #fff; letter-spacing: .015em;
+  text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6);
+  text-wrap: pretty;
+}
+.fs-viewer .fs-close {
+  position: absolute; top: 70px; right: 16px; z-index: 4;
+  width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--glass-fill); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+  -webkit-appearance: none; appearance: none;
+}
+.fs-viewer .fs-close::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.fs-viewer .fs-close img { width: 15px; height: 15px; object-fit: contain; }
+.fs-viewer .fs-close:active { transform: scale(.94); }
+
 /* ---- UPLOAD MODAL — quest clear flow ------------------------ */
 .up-veil {
   position: absolute; inset: 0; z-index: 66; display: flex; align-items: center; justify-content: center;
@@ -534,8 +582,16 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
         <!-- POST FEED — quest pager × 16:8 landscape videos -->
         <div class="feed-sheet" id="feedSheet">
-          <div class="cs-grip"></div>
           <div class="feed-col" id="feedCol"></div>
+        </div>
+
+        <!-- fullscreen post viewer -->
+        <div class="fs-viewer" id="fsViewer">
+          <div id="fsMedia"></div>
+          <span class="cell-scrim"></span>
+          <span class="u-text" id="fsText"></span>
+          <img class="u-ava" id="fsAva" alt="" style="display:none">
+          <button class="fs-close" id="fsClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
         </div>
 
         <!-- upload modal -->
@@ -666,7 +722,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   const cbCover = document.getElementById('cbCover');
 
   // ---- cells ----------------------------------------------------------------
-  function makeCell(p) {
+  function makeCell(p, tag) {
     const cell = document.createElement('div');
     cell.className = 'post-cell';
     if (p.vid) {
@@ -684,6 +740,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     txt.className = 'u-text'; txt.textContent = p.text; cell.appendChild(txt);
     const ava = document.createElement('img');
     ava.className = 'u-ava'; ava.src = p.ava; ava.alt = ''; cell.appendChild(ava);
+    if (tag) {
+      const t = document.createElement('span');
+      t.className = 'u-tag'; t.textContent = tag; cell.appendChild(t);
+    }
+    cell.dataset.postRef = ''; cell._post = p;
     return cell;
   }
 
@@ -725,8 +786,51 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     strip.appendChild(bd);
     col.appendChild(strip);
     bd.addEventListener('click', () => { if (CIRCLES[active] === c && !c.cleared) runUpload(); });
+    // infinite horizontal: left = past posts, right = recommendations
+    c.pastCursor = 0; c.recCursor = 0; c.growing = false;
+    function prependPast(n) {
+      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 0;
+      if (!cellW) return;
+      for (let k = 0; k < n; k++) {
+        c.pastCursor++;
+        const src = c.posts[(c.posts.length * 100 - c.pastCursor) % c.posts.length];
+        const days = c.pastCursor + 1;
+        rail.insertBefore(makeCell(src, days + '日前'), rail.firstChild);
+      }
+      rail.scrollLeft += n * cellW;
+    }
+    function appendRec(n) {
+      for (let k = 0; k < n; k++) {
+        const src = c.posts[c.recCursor % c.posts.length];
+        c.recCursor++;
+        rail.appendChild(makeCell(src, 'おすすめ'));
+      }
+    }
+    rail.addEventListener('scroll', () => {
+      if (c.rail.classList.contains('locked') || c.growing) return;
+      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 1;
+      c.growing = true;
+      if (rail.scrollLeft < cellW * 1.5) prependPast(3);
+      else if (rail.scrollLeft > rail.scrollWidth - rail.clientWidth - cellW * 1.5) appendRec(3);
+      c.growing = false;
+    }, { passive: true });
+    rail.addEventListener('click', (ev) => {
+      if (c.rail.classList.contains('locked')) return;
+      const cell = ev.target.closest('.post-cell');
+      if (!cell) return;
+      const cells = Array.from(rail.children);
+      const k = cells.indexOf(cell);
+      if (cell.classList.contains('focus')) { openFs(cell._post, c); }
+      else { rail.scrollTo({ left: k * cell.offsetWidth, behavior: 'smooth' }); }
+    });
     renderDots(c);
     requestAnimationFrame(c.setFocus);
+    requestAnimationFrame(() => {
+      prependPast(3);
+      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 0;
+      rail.scrollLeft = c.pastCursor * cellW;
+      requestAnimationFrame(() => { c.setFocus(); renderDots(c); });
+    });
     rail.addEventListener('scroll', () => c.setFocus(), { passive: true });
     let rt = null;
     rail.addEventListener('scroll', () => {
@@ -736,10 +840,39 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     window.addEventListener('resize', c.setFocus);
   });
 
+  // ---- fullscreen viewer -----------------------------------------------------
+  const fsViewer = document.getElementById('fsViewer');
+  const fsMedia = document.getElementById('fsMedia');
+  const fsText = document.getElementById('fsText');
+  const fsAva = document.getElementById('fsAva');
+  document.getElementById('fsClose').addEventListener('click', closeFs);
+  function openFs(p, c) {
+    fsMedia.innerHTML = '';
+    if (p.vid) {
+      const v = document.createElement('video');
+      v.src = p.vid; v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+      fsMedia.appendChild(v);
+    } else {
+      const im = document.createElement('img');
+      im.className = 'media'; im.src = p.img; im.alt = '';
+      fsMedia.appendChild(im);
+    }
+    fsText.textContent = p.text;
+    fsAva.src = p.ava; fsAva.style.display = '';
+    fsViewer.classList.add('on');
+  }
+  function closeFs() {
+    fsViewer.classList.remove('on');
+    const v = fsMedia.querySelector('video');
+    if (v) v.pause();
+  }
+
   // ---- board / circle bar sync ---------------------------------------------
   function renderDots(c) {
     const cellW = c.rail.firstChild ? c.rail.firstChild.offsetWidth : 1;
-    const i = Math.round(c.rail.scrollLeft / cellW);
+    const raw = Math.round(c.rail.scrollLeft / cellW);
+    const len = c.posts.length;
+    const i = (((raw - (c.pastCursor || 0)) % len) + len) % len;
     c.dots.innerHTML = '';
     c.posts.forEach((_, k) => {
       const d = document.createElement('i');
@@ -763,7 +896,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   col.addEventListener('scroll', () => {
     clearTimeout(scrollT);
     scrollT = setTimeout(() => {
-      const stripH = col.clientHeight * 0.8;
+      const stripH = col.clientHeight * 0.8 + 8;
       const i = Math.round(col.scrollTop / stripH);
       if (i !== active && CIRCLES[i]) {
         active = i;
@@ -933,7 +1066,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       if (EM.setCenter) EM.setCenter(C);
       map.stop();
       const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
-        padding: { top: 62, bottom: 600 } };
+        padding: { top: 102, bottom: 560 } };
       if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
     } catch (err) { console.warn('circle focus:', err); }
   }
