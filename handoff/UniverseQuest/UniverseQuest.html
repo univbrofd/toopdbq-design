@@ -336,6 +336,42 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   filter: blur(.5px) saturate(1.05); image-rendering: pixelated; transform: scale(1.05); }
 .strip-title .qmine:active { transform: scale(.92); }
 
+/* ---- PAST QUEST（過去のお題） — 日付フッター / 日の区切り / 状態 ---- */
+.strip-title.past .qcam,
+.strip-title.past .qedit,
+.strip-title.past .qmine { display: none; }
+.strip-title.past .qt { color: rgba(0,0,0,.34); }
+.strip-title .qday {
+  flex: none; margin-left: auto; display: none;
+  font: 700 11px/1 var(--font-latin); letter-spacing: .07em; color: rgba(0,0,0,.42);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.strip-title.past .qday { display: block; }
+
+/* 前日へ戻る — セクション下端の余白に置く日付 */
+.strip-foot {
+  position: absolute; left: 18px; bottom: 8px; z-index: 7;
+  display: flex; align-items: center; gap: 7px;
+  padding: 4px 2px; border: 0; background: transparent; cursor: pointer;
+  -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent;
+  font: 700 12px/1 var(--font-latin); letter-spacing: .09em; color: rgba(0,0,0,.56);
+  font-variant-numeric: tabular-nums;
+  transition: opacity .12s var(--ease-out), transform .16s var(--ease-out);
+}
+.strip-foot:active { opacity: .5; transform: translateX(-3px); }
+.strip-foot .sf-arw { font: 700 14px/1 var(--font-latin); color: rgba(0,0,0,.42); }
+
+/* 日ごとの区切り — ボード上の縦組み日付 */
+.day-sep {
+  position: absolute; top: 0; bottom: 0; width: 40px; z-index: 1;
+  display: flex; align-items: center; justify-content: center; pointer-events: none;
+}
+.day-sep .dsl {
+  writing-mode: vertical-rl; text-orientation: mixed;
+  font: 700 10px/1 var(--font-latin); letter-spacing: .16em; color: rgba(0,0,0,.33);
+  font-variant-numeric: tabular-nums;
+}
+
 .quest-foot { display: none; }
 .quest-foot .qf-date {
   pointer-events: auto; display: flex; align-items: center; gap: 7px;
@@ -469,7 +505,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .feed-col::-webkit-scrollbar { display: none; }
 .circle-strip {
   position: relative; width: 100%; height: var(--quest-h); flex: none;
-  padding-bottom: 16px; box-sizing: border-box;
+  padding-bottom: 38px; box-sizing: border-box;
   display: flex; flex-direction: column;
   scroll-snap-align: start; scroll-snap-stop: always;
 }
@@ -546,15 +582,39 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   font: 700 15px/1.5 var(--font-jp); color: var(--text-1); letter-spacing: .02em;
 }
 .lock-note .lmeta {
-  margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
 }
 .lock-note .ldist {
-  display: flex; align-items: baseline; gap: 3px;
-  font: 700 18px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums;
+  display: flex; align-items: baseline; gap: 5px;
+  font: 700 44px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em; text-shadow: 0 2px 14px rgba(0,0,0,.6);
 }
-.lock-note .ldist .u { font: 700 9px/1 var(--font-latin); color: var(--text-2); }
+.lock-note .ldist .u { font: 700 15px/1 var(--font-latin); color: var(--text-2); }
 .lock-note .ldir {
   width: 24px; height: 24px; display: grid; place-items: center;
+}
+/* マップで経路を開く — 距離の下の唯一の行動 */
+.lock-note .lroute, .story-fs .fs-lock .lroute {
+  pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; border: 0; border-radius: var(--radius-pill); position: relative;
+  background: var(--lg-tint-strong, rgba(255,255,255,.10));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  font: 700 12.5px/1 var(--font-latin); letter-spacing: .04em; color: #fff; white-space: nowrap;
+  transition: transform .12s var(--ease-out), opacity .12s var(--ease-out);
+}
+.lock-note .lroute::after, .story-fs .fs-lock .lroute::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.lock-note .lroute:active, .story-fs .fs-lock .lroute:active { transform: scale(.97); opacity: .82; }
+.lock-note .lroute img, .story-fs .fs-lock .lroute img {
+  width: 15px; height: 15px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45));
 }
 .lock-note .ldir img { width: 20px; height: 20px; object-fit: contain;
   filter: brightness(0) invert(1) opacity(.8); }
@@ -631,7 +691,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .route-card .rc-acts button:active { background: rgba(255,255,255,.08); }
 
 /* ---- LOCKED STATE — quest not cleared yet ------------------- */
-.strip-rail.locked { overflow: hidden; }
+.strip-rail.locked { overflow-x: auto; overflow-y: hidden; }
 .strip-rail.locked .post-cell video, .strip-rail.locked .post-cell img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
 .strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-name { visibility: hidden; }
 /* past / recommend tag chip */
@@ -732,6 +792,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   text-shadow: 0 0 8px rgba(0,0,0,.6);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .story-fs .wd-quest-footer.no-quest .slot { display: none; }
+.story-fs.past-quest .fs-post { display: none; }
 /* QuestBoard（.qb） — DS canonical */
 .story-fs .wd-quest-footer .qb {
   position: relative; padding: 12px 16px; border-radius: var(--radius-md);
@@ -801,10 +862,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 }
 .story-fs .fs-lock > *:not(.lscrim) { position: relative; z-index: 1; }
 .story-fs .fs-lock .lt { font: 700 15px/1.5 var(--font-jp); color: var(--text-1); letter-spacing: .02em; }
-.story-fs .fs-lock .lmeta { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.story-fs .fs-lock .ldist { display: flex; align-items: baseline; gap: 3px;
-  font: 700 18px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums; }
-.story-fs .fs-lock .ldist .u { font: 700 9px/1 var(--font-latin); color: var(--text-2); }
+.story-fs .fs-lock .lmeta { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.story-fs .fs-lock .ldist { display: flex; align-items: baseline; gap: 5px;
+  font: 700 44px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums;
+  letter-spacing: -.01em; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+.story-fs .fs-lock .ldist .u { font: 700 15px/1 var(--font-latin); color: var(--text-2); }
 .story-fs .fs-lock .ldir { width: 24px; height: 24px; display: grid; place-items: center; }
 .story-fs .fs-lock .ldir img { width: 20px; height: 20px; object-fit: contain;
   filter: brightness(0) invert(1) opacity(.8); }
@@ -874,6 +936,15 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   filter: blur(.6px) saturate(1.1) contrast(.96); image-rendering: pixelated; }
 .story-fs.cleared-quest .fs-qp .fs-post { display: none; }
 .story-fs.cleared-quest .fs-qp .fs-mine { display: block; }
+/* 過去のお題 — 投稿ボタンの代わりに同じ 40px 枠でその日の日付。中央のクエスト名は動かない */
+.story-fs .fs-qp .fs-date {
+  flex: none; width: 40px; height: 40px; display: none;
+  align-items: center; justify-content: center; text-align: center;
+  font: 700 12.5px/1 var(--font-latin); letter-spacing: .02em; color: var(--text-1);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(0,0,0,.85), 0 0 16px rgba(0,0,0,.5);
+}
+.story-fs.past-quest .fs-qp .fs-date { display: flex; }
 
 /* タップゾーン: 左＝前 / 右＝次 */
 .story-fs .sfs-tap { position: absolute; top: 120px; bottom: 96px; width: 34%; z-index: 3; cursor: pointer;
@@ -1002,6 +1073,135 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   background: linear-gradient(180deg, rgba(255,62,136,.9), rgba(255,62,136,0));
 }
 
+/* ============================================================
+   WdCircleTimeline — サークルフッターをタップして開くモーダルシート。
+   リストをスクロールするとフルスクリーンへ昇格。中身は WdTimelinePost。
+   ============================================================ */
+.statusbar { z-index: 92; }
+.dynamic-island { z-index: 93; }
+.home-ind { z-index: 92; }
+.phone.light-status .statusbar { color: #08080b; }
+.phone.light-status .statusbar .sys svg { filter: invert(1); }
+.phone.light-status .home-ind { background: rgba(8,8,11,.85); }
+.wd-circle-bar { cursor: pointer; }
+
+.tl-scrim {
+  position: absolute; inset: 0; z-index: 74; background: rgba(0,0,0,.55);
+  opacity: 0; pointer-events: none; transition: opacity .3s var(--ease-out);
+}
+.tl-scrim.on { opacity: 1; pointer-events: auto; }
+
+.tl-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; top: 36%; z-index: 76;
+  display: flex; flex-direction: column; background: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0; overflow: hidden;
+  box-shadow: 0 -14px 44px rgba(0,0,0,.5);
+  transform: translateY(101%); will-change: transform;
+  transition: transform .34s var(--ease-out), top .34s var(--ease-out),
+              border-radius .34s var(--ease-out);
+}
+.tl-sheet.on { transform: translateY(0); }
+.tl-sheet.full { top: 0; border-radius: 0; }
+.tl-sheet.dragging { transition: none; }
+
+.tl-grab { flex: none; height: 22px; display: flex; align-items: center; justify-content: center;
+  touch-action: none; cursor: grab; }
+.tl-grab span { width: 38px; height: 4px; border-radius: var(--radius-pill); background: rgba(8,8,11,.18); }
+.tl-sheet.full .tl-grab { height: 66px; align-items: flex-end; padding-bottom: 8px; }
+
+.tl-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 2px 16px 12px;
+  border-bottom: 1px solid rgba(8,8,11,.08); touch-action: none; }
+.tl-cover { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; }
+.tl-hcol { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tl-nm { font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: #08080b;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-ds { font-family: var(--font-jp); font-size: 11px; color: rgba(8,8,11,.56);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-close { appearance: none; border: 0; width: 32px; height: 32px; border-radius: 50%; flex: none;
+  background: rgba(8,8,11,.06); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.tl-close img { width: 12px; height: 12px; filter: invert(1); opacity: .55; }
+
+.tl-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; background: #fff;
+  padding-bottom: 104px; -webkit-overflow-scrolling: touch; }
+
+/* WdTimelinePost — ライトのリスト行セル */
+.tlp { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 20px 24px;
+  border-bottom: 1px solid rgba(8,8,11,.08); font-family: var(--font-jp); color: #08080b; background: #fff; }
+.tlp-av { width: 44px; height: 44px; border-radius: var(--radius-pill); object-fit: cover; display: block; }
+.tlp-col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.tlp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tlp-name { font-weight: 700; font-size: 15px; line-height: 1.3; }
+.tlp-meta { font-family: var(--font-latin); font-size: 13px; color: rgba(8,8,11,.56); }
+.tlp-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 24px;
+  padding: 0 10px; border-radius: var(--radius-pill); background: rgba(0,95,103,.10); }
+.tlp-chip img { width: 12px; height: 12px; filter: invert(1); opacity: .55; display: block; }
+.tlp-chip span { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: #0d5f67;
+  white-space: nowrap; }
+.tlp-body { margin: 0; font-size: 15px; line-height: 1.75; text-wrap: pretty; }
+.tlp-m1 { border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(8,8,11,.08); }
+.tlp-m1 img, .tlp-m1 video { width: 100%; height: 240px; object-fit: cover; display: block; }
+.tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-radius: var(--radius-md);
+  overflow: hidden; border: 1px solid rgba(8,8,11,.08); }
+.tlp-m2 img { width: 100%; height: 164px; object-fit: cover; display: block; }
+.tlp-acts { display: flex; align-items: center; gap: 28px; padding-top: 2px; }
+.tlp-act { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0;
+  cursor: pointer; min-height: 44px; }
+.tlp-act img { width: 18px; height: 18px; filter: invert(1); opacity: .5; display: block; }
+.tlp-act span { font-family: var(--font-latin); font-size: 13px; color: rgba(8,8,11,.56); }
+.tlp-act.liked img { opacity: 1;
+  filter: invert(29%) sepia(93%) saturate(4000%) hue-rotate(320deg) brightness(102%); }
+.tlp-act.liked span { font-weight: 600; color: var(--state-like); }
+.tlp.fresh { animation: tlpIn .48s var(--ease-out) both; }
+@keyframes tlpIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+
+/* FAB — WdIconButton special(colorful) variant · pen */
+.tl-fab { position: absolute; right: 18px; bottom: 30px; z-index: 6;
+  width: 58px; height: 58px; cursor: pointer; }
+.tl-fab img { width: 38%; height: 38%; }
+
+/* 投稿画面 */
+.tl-compose { position: absolute; inset: 0; z-index: 86; background: #fff;
+  display: flex; flex-direction: column; transform: translateY(101%); pointer-events: none;
+  transition: transform .3s var(--ease-out); }
+.tl-compose.on { transform: translateY(0); pointer-events: auto; }
+.tlc-head { flex: none; display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; padding: 68px 16px 12px; border-bottom: 1px solid rgba(8,8,11,.08); }
+.tlc-cancel { appearance: none; border: 0; background: none; cursor: pointer; padding: 8px 4px;
+  font-family: var(--font-jp); font-size: 14px; color: rgba(8,8,11,.56); }
+.tlc-title { font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: #08080b; }
+.tlc-send { appearance: none; border: 0; cursor: pointer; height: 34px; padding: 0 18px;
+  border-radius: var(--radius-pill); color: #fff; font-family: var(--font-jp); font-weight: 700;
+  font-size: 13px; background: var(--gradient-colorful-linear);
+  box-shadow: 0 2px 10px rgba(255,62,136,.3); transition: opacity .15s var(--ease-standard); }
+.tlc-send:disabled { opacity: .3; box-shadow: none; cursor: default; }
+.tlc-body { flex: 1; display: grid; grid-template-columns: 44px 1fr; gap: 12px;
+  padding: 18px 20px; overflow-y: auto; align-content: start; }
+.tlc-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+.tlc-col { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.tlc-ta { width: 100%; min-height: 116px; border: 0; outline: none; resize: none; background: none;
+  font-family: var(--font-jp); font-size: 16px; line-height: 1.7; color: #08080b; }
+.tlc-ta::placeholder { color: rgba(8,8,11,.32); }
+.tlc-prev { display: none; border-radius: var(--radius-md); overflow: hidden;
+  border: 1px solid rgba(8,8,11,.08); grid-template-columns: 1fr; gap: 4px; }
+.tlc-prev.on { display: grid; }
+.tlc-prev.two { grid-template-columns: 1fr 1fr; }
+.tlc-prev img { width: 100%; height: 172px; object-fit: cover; display: block; }
+.tlc-where { display: flex; align-items: center; gap: 6px; align-self: flex-start; height: 26px;
+  padding: 0 10px; border-radius: var(--radius-pill); background: rgba(0,95,103,.10); }
+.tlc-where img { width: 12px; height: 12px; filter: invert(1); opacity: .55; }
+.tlc-where span { font-family: var(--font-jp); font-weight: 600; font-size: 11px; color: #0d5f67;
+  white-space: nowrap; }
+.tlc-strip { flex: none; display: flex; gap: 8px; overflow-x: auto; padding: 12px 20px;
+  border-top: 1px solid rgba(8,8,11,.08); }
+.tlc-thumb { position: relative; width: 62px; height: 62px; border-radius: var(--radius-sm);
+  overflow: hidden; flex: none; cursor: pointer; box-shadow: 0 0 0 2px transparent; padding: 0; border: 0;
+  background: none; transition: box-shadow .14s var(--ease-standard); }
+.tlc-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tlc-thumb.sel { box-shadow: 0 0 0 2px var(--state-like); }
+.tlc-foot { flex: none; display: flex; align-items: center; gap: 10px; padding: 4px 20px 30px;
+  font-family: var(--font-jp); font-size: 11px; color: rgba(8,8,11,.44); }
+.tlc-foot img { width: 14px; height: 14px; filter: invert(1); opacity: .4; }
+
 /* loading veil */
 #veil {
   position: absolute; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center;
@@ -1030,6 +1230,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 <script>
   if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
 </script>
+
 <div class="studio">
 
   <div class="stage">
@@ -1051,7 +1252,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         <!-- WdCircleBar in the header — follows the vertically-active circle -->
         <div class="wd-circle-tool">
           <div class="wd-circle-bar">
-            <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
+            <span class="cover"><img id="cbCover" src="../../assets/images/story-05.png" alt=""></span>
             <div class="col">
               <span class="nm" id="cbName">渋谷コミュニティ</span>
               <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
@@ -1112,6 +1313,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
             <button class="fs-post wd-icon-btn color" id="fsPost" aria-label="投稿">
               <img src="../../assets/icons/icon_camera.png" alt="">
             </button>
+            <span class="fs-date" id="fsDate"></span>
             <img class="fs-mine" id="fsMine" alt="">
           </div>
           <div class="wd-side-tool">
@@ -1130,6 +1332,43 @@ a { color: var(--text-1); } a:hover { color: #fff; }
           </div>
           <div class="fs-lock" id="fsLock"></div>
         </div>
+
+        <!-- WdCircleTimeline — モーダルシート -->
+        <div class="tl-scrim" id="tlScrim"></div>
+        <section class="tl-sheet" id="tlSheet" aria-hidden="true">
+          <div class="tl-grab" id="tlGrab"><span></span></div>
+          <header class="tl-head" id="tlHead">
+            <img class="tl-cover" id="tlCover" src="../../assets/images/story-05.png" alt="">
+            <div class="tl-hcol">
+              <span class="tl-nm" id="tlName">渋谷コミュニティ</span>
+              <span class="tl-ds" id="tlDesc">タイムライン</span>
+            </div>
+            <button class="tl-close" id="tlClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          </header>
+          <div class="tl-list" id="tlList"></div>
+          <button class="tl-fab wd-icon-btn color" id="tlFab" aria-label="投稿する">
+            <img src="../../assets/icons/icon_edit.png" alt="">
+          </button>
+        </section>
+
+        <!-- タイムラインへの投稿画面 -->
+        <section class="tl-compose" id="tlCompose" aria-hidden="true">
+          <div class="tlc-head">
+            <button class="tlc-cancel" id="tlcCancel">キャンセル</button>
+            <span class="tlc-title">投稿</span>
+            <button class="tlc-send" id="tlcSend" disabled>ポストする</button>
+          </div>
+          <div class="tlc-body">
+            <img class="tlc-av" src="uploads/user007.jpg" alt="">
+            <div class="tlc-col">
+              <textarea class="tlc-ta" id="tlcText" placeholder="いまこのエリアで起きていることは？"></textarea>
+              <div class="tlc-prev" id="tlcPrev"></div>
+              <span class="tlc-where"><img src="../../assets/icons/icon_pin.png" alt=""><span id="tlcWhere">渋谷コミュニティ</span></span>
+            </div>
+          </div>
+          <div class="tlc-strip" id="tlcStrip"></div>
+          <div class="tlc-foot"><img src="../../assets/icons/icon_near.png" alt="">エリア内にいるので投稿できます</div>
+        </section>
 
         <!-- upload modal -->
         <div class="up-veil" id="upVeil">
@@ -1196,7 +1435,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   const CIRCLES = [
     {
       name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
-      cover: '../../assets/sample/uv/story-05.png',
+      cover: '../../assets/images/story-05.png',
       admin: true,
       center: [139.70064, 35.65905], radius: 520,
       quest: {
@@ -1207,16 +1446,16 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       cleared: false, inside: false,
       posts: [
         { ava: 'uploads/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: 'uploads/video.mp4' },
-        { ava: 'uploads/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/sample/reel/reel003.jpg' },
-        { ava: 'uploads/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/sample/reel/reel005.jpg' },
-        { ava: 'uploads/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/sample/reel/reel007.jpg' },
-        { ava: 'uploads/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/sample/reel/reel009.jpg' },
-        { ava: 'uploads/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/sample/reel/reel011.jpg' },
+        { ava: 'uploads/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/reel/reel003.jpg' },
+        { ava: 'uploads/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/reel/reel005.jpg' },
+        { ava: 'uploads/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/reel/reel007.jpg' },
+        { ava: 'uploads/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/reel/reel009.jpg' },
+        { ava: 'uploads/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/reel/reel011.jpg' },
       ],
     },
     {
       name: '原宿コミュニティ', desc: '原宿・キャットストリート周辺',
-      cover: '../../assets/sample/uv/story-02.png',
+      cover: '../../assets/images/story-02.png',
       center: [139.70290, 35.66880], radius: 460,
       quest: {
         title: '宮下パークで朝ヨガ', date: '8/2(日) 7:00–9:00',
@@ -1225,16 +1464,16 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       },
       cleared: false, inside: true,
       posts: [
-        { ava: 'uploads/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/sample/reel/reel002.jpg' },
-        { ava: 'uploads/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/sample/reel/reel004.jpg' },
-        { ava: 'uploads/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/sample/reel/reel006.jpg' },
-        { ava: 'uploads/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/sample/reel/reel008.jpg' },
-        { ava: 'uploads/user013.jpg', text: '来週も参加します', img: '../../assets/sample/reel/reel010.jpg' },
+        { ava: 'uploads/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/reel/reel002.jpg' },
+        { ava: 'uploads/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/reel/reel004.jpg' },
+        { ava: 'uploads/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/reel/reel006.jpg' },
+        { ava: 'uploads/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/reel/reel008.jpg' },
+        { ava: 'uploads/user013.jpg', text: '来週も参加します', img: '../../assets/reel/reel010.jpg' },
       ],
     },
     {
       name: '道玄坂グループ', desc: '道玄坂・円山町のごはん好き',
-      cover: '../../assets/sample/uv/story-08.png',
+      cover: '../../assets/images/story-08.png',
       center: [139.69820, 35.65740], radius: 400,
       quest: {
         title: '道玄坂ラーメン食べ歩き', date: '8/5(水) 18:00–21:00',
@@ -1243,11 +1482,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       },
       cleared: false, inside: false,
       posts: [
-        { ava: 'uploads/user014.jpg', text: '一軒目から優勝した', img: '../../assets/sample/reel/reel012.jpg' },
-        { ava: 'uploads/user015.jpg', text: '替え玉は文化です', img: '../../assets/sample/reel/reel014.jpg' },
-        { ava: 'uploads/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/sample/reel/reel001.jpg' },
-        { ava: 'uploads/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/sample/reel/reel003.jpg' },
-        { ava: 'uploads/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/sample/reel/reel005.jpg' },
+        { ava: 'uploads/user014.jpg', text: '一軒目から優勝した', img: '../../assets/reel/reel012.jpg' },
+        { ava: 'uploads/user015.jpg', text: '替え玉は文化です', img: '../../assets/reel/reel014.jpg' },
+        { ava: 'uploads/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/reel/reel001.jpg' },
+        { ava: 'uploads/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/reel/reel003.jpg' },
+        { ava: 'uploads/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/reel/reel005.jpg' },
       ],
     },
   ];
@@ -1271,6 +1510,52 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
   const NAMES = ['SunnyVi', 'Kawaii', 'Dreamy', 'foodie', 'Pixel', 'ZenGarden', 'Starry', 'o_cean', 'Mocha'];
   CIRCLES.forEach((c, ci) => c.posts.forEach((p, pi) => { p.name = NAMES[(ci * 3 + pi) % NAMES.length]; }));
+
+  /* ---- QUEST DAYS — お題は 1 日 1 つ。過去のお題を左に並べる -------------
+     days = [古い … 新しい]。末尾が今日のお題。
+     過去のお題の投稿は選りすぐり 16 件に固定（無限スクロールなし）。 */
+  const PAST_N = 5, POSTS_PER_PAST = 16, DAY_MS = 86400e3;
+  const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+  const WD = '日月火水木金土';
+  const md = (d) => (d.getMonth() + 1) + ' / ' + d.getDate();
+  const jpDate = (d) => (d.getMonth() + 1) + '/' + d.getDate() + '(' + WD[d.getDay()] + ')';
+  const PAST_TITLES = [
+    ['朝の渋谷川さんぽ', 'スクランブル交差点を渡る', '渋谷横丁でひとり乾杯', '道玄坂の夜景を撮る', 'ハチ公前でハイタッチ'],
+    ['裏原のコーヒースタンド', '明治神宮の朝参り', '原宿の古着屋めぐり', '竹下通りのクレープ', 'キャットストリートで一枚'],
+    ['ランチの定食屋めぐり', '朝までカラオケ', '道玖坂を登りきる', '深夜の立ち食いそば', '円山町の路地裏めし'],
+  ];
+  const PAST_LINES = [
+    'この日は最高だった', 'ぎりぎり間に合った', 'はじめて参加しました', '写真だと伝わらないやつ',
+    'また来ます', '近所なのに知らなかった', '夕方の光がきれい', '友だちと一緒に',
+    'あっという間だった', '思ったより人が多かった', 'リピート確定', '静かで落ち着く',
+    '偶然通りかかって', '今日の一枚', '並んだ甸斐あった', '帰り道で撮った',
+  ];
+  const REEL = (i) => '../../assets/reel/reel' + String((((i % 15) + 15) % 15) + 1).padStart(3, '0') + '.jpg';
+
+  CIRCLES.forEach((c, ci) => {
+    const days = [];
+    for (let k = PAST_N; k >= 1; k--) {
+      const dt = new Date(TODAY.getTime() - k * DAY_MS);
+      const posts = [];
+      for (let i = 0; i < POSTS_PER_PAST; i++) {
+        const s = ci * 37 + k * 13 + i * 7;
+        posts.push({
+          img: REEL(s), text: PAST_LINES[(ci * 5 + k * 3 + i) % PAST_LINES.length],
+          name: NAMES[s % NAMES.length],
+        });
+      }
+      days.push({
+        date: dt, past: true, posts,
+        quest: {
+          past: true, title: PAST_TITLES[ci][PAST_N - k], venue: c.quest.venue,
+          spot: c.quest.spot, date: jpDate(dt) + ' 19:00–23:00', desc: '',
+        },
+      });
+    }
+    days.push({ date: new Date(TODAY), past: false, posts: c.posts, quest: c.quest });
+    c.days = days;
+    c.today = days[days.length - 1];
+  });
 
   const col = document.getElementById('feedCol');
   const sheet = document.getElementById('feedSheet');
@@ -1315,20 +1600,23 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     return { start, end };
   }
   // 同じ QuestPopup を任意のマウントに描く（地図の上／フルスクリーン上部）
-  function qpRender(mount, c) {
-    if (!mount || !c || !c.quest) return;
+  function qpRender(mount, c, quest) {
+    if (!mount || !c) return;
+    const q = quest || c.quest;
+    if (!q) return;
+    const past = !!q.past;
     const cards = mount.querySelectorAll('.qp');
     const put = (sel, txt) => mount.querySelectorAll(sel).forEach(e => { e.textContent = txt; });
-    put('.qp-title', c.quest.title);
+    put('.qp-title', q.title);
     cards.forEach(k => k.classList.remove('urgent', 'cleared'));
-    if (c.cleared) {
+    if (!past && c.cleared) {
       cards.forEach(k => k.classList.add('cleared'));
       put('.qp-label', 'Quest cleared');
       put('.qp-time', 'クリア済み');
       return;
     }
-    put('.qp-label', 'Quest');
-    const w = questWindow(c.quest); if (!w) { put('.qp-time', ''); return; }
+    put('.qp-label', past ? 'Past quest' : 'Quest');
+    const w = questWindow(q); if (!w) { put('.qp-time', ''); return; }
     const now = Date.now();
     if (now > w.end) { cards.forEach(k => k.classList.add('cleared')); put('.qp-time', '終了'); return; }
     // 開催前は開始まで、開催中は終了までのカウントダウンを出し続ける
@@ -1348,7 +1636,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   document.getElementById('fsQpBody').appendChild(fsQpMount);
   function tickHero() {
     qpRender(qpMount, CIRCLES[active]);
-    if (typeof fsCircle !== 'undefined' && fsCircle) qpRender(fsQpMount, fsCircle);
+    if (typeof fsCircle !== 'undefined' && fsCircle) {
+      qpRender(fsQpMount, fsCircle, (typeof fsDay !== 'undefined' && fsDay) ? fsDay.quest : null);
+    }
   }
   setInterval(tickHero, 1000);
 
@@ -1387,11 +1677,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       + '<button class="qedit" aria-label="お題を編集"><img src="../../assets/icons/icon_edit.png" alt=""></button></span></span>'
       + '<span class="qlbl" style="display:none"></span>'
       + '<span class="qb-dots" style="display:none"></span>'
+      + '<span class="qday"></span>'
       + '<button class="qcam" aria-label="クエストを投稿"><img src="../../assets/icons/icon_camera.png" alt=""></button>'
       + '<button class="qmine" aria-label="自分の投稿"><img alt=""></button>';
     bd.querySelector('.qmine').addEventListener('click', () => {
       active = CIRCLES.indexOf(c); renderBoard();
-      openFs(c.posts[0], c);
+      openFs(c.posts[0], c, c.today);
     });
     if (c.admin) bd.classList.add('admin');
     bd.querySelector('.qedit').addEventListener('click', () => {
@@ -1486,25 +1777,30 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       }
       return t;
     }
-    const PATTERNS_UNUSED = null;
+    const TILE_N = { A: 1, AL: 1, B: 2, C: 2, F: 2, G: 2, C3: 3, D: 3, E: 3, H: 4, I: 4 };
+    const SEP_W = 40;
 
-    function addColumn() {
+    // ひとつのお題の投稿を 1 列分だけ置く。次に使う投稿の index を返す
+    function addColumnFrom(posts, idx, day) {
       const H = rail.clientHeight - PAD_TOP - PAD;
-      if (H <= 40) return;
-      const set = c.posts.length <= 2 ? TYPES_SPARSE : TYPES;
-      const type = set[c.colIdx % set.length];
-      c.colIdx++;
-      const tiles = layoutColumn(type, H);
+      if (H <= 40) return posts.length;
+      const remain = posts.length - idx;
+      let type = null;
+      for (let g = 0; g < TYPES.length; g++) {
+        const t = TYPES[(c.colIdx + g) % TYPES.length];
+        if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
+      }
+      if (!type) { type = TYPES_SPARSE[c.colIdx % TYPES_SPARSE.length]; c.colIdx++; }
+      const tiles = layoutColumn(type, H).slice(0, remain);
       const colW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       const center = Math.max(0, Math.round((H - used) / 2));   // 余白がある列は縦中央に
       const yOff = PAD_TOP + center + (center > 4 ? 0 : Math.round(rnd() * GAP * 1.6));
       tiles.forEach((t) => {
-        const p = c.posts[c.feedIdx % c.posts.length];
-        const cycle = Math.floor(c.feedIdx / c.posts.length);
-        c.feedIdx++;
+        const p = posts[idx++];
         const cell = makeCell(p);
         if (t.w < 132) cell.classList.add('sm');
+        cell._day = day;
         cell.style.left = (c.cursorX + t.dx) + 'px';
         cell.style.top = (yOff + t.dy) + 'px';
         cell.style.width = t.w + 'px';
@@ -1512,17 +1808,37 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         inner.appendChild(cell);
       });
       c.cursorX += colW + GAP;
-      inner.style.width = (c.cursorX + PAD) + 'px';
+      return idx;
     }
 
+    /* ボードを [古いお題 … 今日のお題] の順で一回だけ組む。
+       初期位置は今日のお題の先頭 — 左へスクロールすると過去のお題に戻る。 */
     c.buildBoard = () => {
-      if (rail.clientHeight <= 40) { requestAnimationFrame(c.buildBoard); return; }
+      if (rail.clientHeight <= 40) {
+        requestAnimationFrame(c.buildBoard); setTimeout(c.buildBoard, 240); return;
+      }
       inner.innerHTML = '';
       seed = 1337 + CIRCLES.indexOf(c) * 977;
-      c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
-      for (let i = 0; i < 9; i++) addColumn();
+      c.cursorX = PAD; c.colIdx = 0;
+      c.days.forEach((day, di) => {
+        if (di) {
+          const sep = document.createElement('div');
+          sep.className = 'day-sep';
+          sep.style.left = c.cursorX + 'px';
+          sep.innerHTML = '<span class="dsl">' + md(day.date) + '</span>';
+          inner.appendChild(sep);
+          c.cursorX += SEP_W;
+        }
+        day.x0 = c.cursorX;
+        let i = 0, guard = 0;
+        while (i < day.posts.length && guard++ < 60) i = addColumnFrom(day.posts, i, day);
+        day.x1 = c.cursorX;
+      });
+      inner.style.width = Math.max(c.cursorX + PAD, c.today.x0 + rail.clientWidth) + 'px';
+      rail.scrollLeft = Math.max(0, c.today.x0 - PAD);
       c.setFocus();
       renderDots(c);
+      syncDay(c, true);
     };
     /* 視界内の動画だけ再生 */
     c.setFocus = () => {
@@ -1544,33 +1860,39 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     lock.className = 'lock-note';
     const d = distTo(c);
     lock.innerHTML = '<span class="lscrim"></span>'
-      + '<span class="lt">エリアに入ると見れます</span>'
       + '<span class="lmeta">'
       +   '<span class="ldist"><span class="v">' + d.val + '</span><span class="u">' + d.unit + '</span></span>'
-      +   '<span class="ldir" style="transform:rotate(' + d.bearing.toFixed(0) + 'deg)">'
-      +     '<img src="../../assets/icons/icon_near.png" alt="">'
-      +   '</span>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
       + '</span>';
+    lock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     wrap.appendChild(lock);
     c.lock = lock;
     strip.appendChild(wrap);
     strip.appendChild(bd);
+    // セクション下端 — 前日の日付。タップでその日のお題へ
+    const foot = document.createElement('button');
+    foot.className = 'strip-foot';
+    foot.innerHTML = '<span class="sf-arw">‹</span><span class="sf-d"></span>';
+    foot.addEventListener('click', () => {
+      const i = c.days.indexOf(c.curDay || c.today);
+      const prev = c.days[i - 1];
+      if (prev) rail.scrollTo({ left: Math.max(0, prev.x0 - PAD), behavior: 'smooth' });
+    });
+    strip.appendChild(foot);
+    c.foot = foot;
     col.appendChild(strip);
-    // 右端に近づいたら列を足して無限に横へ伸ばす
     let rt = null;
     rail.addEventListener('scroll', () => {
-      if (!rail.classList.contains('locked')
-          && rail.scrollLeft > inner.offsetWidth - rail.clientWidth - 420) {
-        for (let i = 0; i < 3; i++) addColumn();
-      }
+      syncDay(c);
       clearTimeout(rt);
       rt = setTimeout(() => { c.setFocus(); renderDots(c); }, 80);
     }, { passive: true });
     rail.addEventListener('click', (ev) => {
       const cell = ev.target.closest('.post-cell');
-      if (cell) openFs(cell._post, c);
+      if (cell) openFs(cell._post, c, cell._day);
     });
     requestAnimationFrame(c.buildBoard);
+    setTimeout(c.buildBoard, 240);
     let rz = null;
     window.addEventListener('resize', () => {
       clearTimeout(rz); rz = setTimeout(c.buildBoard, 160);
@@ -1587,16 +1909,45 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   // 閲覧条件: そのお題を投稿済み(cleared) または エリア内(inside)
   function canView(c) { return !!(c.cleared || c.inside); }
 
+  /* ---- 表示中のお題（日）の同期 -----------------------------------------
+     リスト表示ではお題が変わってもマップは動かさない。
+     変わるのはタイトル・日付・投稿ボタンの有無だけ。 */
+  function currentDay(c) {
+    if (!c.days || c.days[0].x0 == null) return c.today;
+    const x = c.rail.scrollLeft + c.rail.clientWidth * 0.34;
+    let best = c.days[0];
+    c.days.forEach((d) => { if (x >= d.x0 - 20) best = d; });
+    return best;
+  }
+  function syncDay(c, force) {
+    const day = currentDay(c);
+    if (!force && c.curDay === day) return;
+    c.curDay = day;
+    const bd = c.board;
+    bd.querySelector('.qt').textContent = day.quest.title;
+    bd.querySelector('.qday').textContent = md(day.date);
+    bd.classList.toggle('past', !!day.past);
+    const prev = c.days[c.days.indexOf(day) - 1];
+    if (prev) {
+      c.foot.style.display = '';
+      c.foot.querySelector('.sf-d').textContent = md(prev.date);
+    } else {
+      c.foot.style.display = 'none';
+    }
+  }
+
   // ---- fullscreen viewer — UniverseView の story-fs と同じ挙動 ---------------
   const fsViewer = document.getElementById('fsViewer');
   const fsMedia = document.getElementById('fsMedia');
   const fsText = document.getElementById('fsText');
-  let fsCircle = null, fsIndex = 0;
+  let fsCircle = null, fsIndex = 0, fsDay = null;
   const fsLock = document.getElementById('fsLock');
   const fsMine = document.getElementById('fsMine');
+  const fsDate = document.getElementById('fsDate');
   document.getElementById('fsBack').addEventListener('click', closeFs);
   document.getElementById('fsPost').addEventListener('click', () => {
     if (!fsCircle || fsCircle.cleared) return;
+    if (fsDay && fsDay.past) return;   // 過去のお題には投稿できない
     closeFs();
     active = CIRCLES.indexOf(fsCircle);
     renderBoard();
@@ -1611,7 +1962,10 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
   function renderFs() {
     const c = fsCircle; if (!c) return;
-    const p = c.posts[fsIndex];
+    if (!fsDay || c.days.indexOf(fsDay) < 0) fsDay = c.today;
+    const day = fsDay;
+    fsIndex = Math.max(0, Math.min(fsIndex, day.posts.length - 1));
+    const p = day.posts[fsIndex];
     fsMedia.innerHTML = '';
     if (p.vid) {
       const v = document.createElement('video');
@@ -1629,26 +1983,36 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     if (v0 && !open) v0.pause();
     const dd = distTo(c);
     fsLock.innerHTML = '<span class="lscrim"></span>'
-      + '<span class="lt">エリアに入ると見れます</span>'
       + '<span class="lmeta">'
       +   '<span class="ldist"><span class="v">' + dd.val + '</span><span class="u">' + dd.unit + '</span></span>'
-      +   '<span class="ldir" style="transform:rotate(' + dd.bearing.toFixed(0) + 'deg)">'
-      +     '<img src="../../assets/icons/icon_near.png" alt="">'
-      +   '</span>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
       + '</span>';
-    qpRender(fsQpMount, c);
-    fsViewer.classList.toggle('cleared-quest', !!c.cleared);
-    if (c.cleared) fsMine.src = c.myThumb || c.posts[0].img || c.cover;
+    fsLock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
+    qpRender(fsQpMount, c, day.quest);
+    fsViewer.classList.toggle('past-quest', !!day.past);
+    fsDate.textContent = (day.date.getMonth() + 1) + '/' + day.date.getDate();
+    fsViewer.classList.toggle('cleared-quest', !!c.cleared && !day.past);
+    if (c.cleared && !day.past) fsMine.src = c.myThumb || c.posts[0].img || c.cover;
     cbName.textContent = c.name;
     cbDesc.textContent = c.desc;
     cbCover.src = c.cover;
   }
 
 
+  /* 横移動 = 時間軸。左（-1）へ進むと同じサークルの過去のお題に入る。 */
   function stepFs(d) {
     if (!fsCircle) return;
-    const n = fsCircle.posts.length;
-    fsIndex = (fsIndex + d + n) % n;
+    const days = fsCircle.days;
+    if (!fsDay) fsDay = fsCircle.today;
+    const di = days.indexOf(fsDay);
+    const i = fsIndex + d;
+    if (i < 0) {
+      if (di > 0) { fsDay = days[di - 1]; fsIndex = fsDay.posts.length - 1; } else fsIndex = 0;
+    } else if (i >= fsDay.posts.length) {
+      if (di < days.length - 1) { fsDay = days[di + 1]; fsIndex = 0; } else fsIndex = fsDay.posts.length - 1;
+    } else {
+      fsIndex = i;
+    }
     renderFs();
   }
 
@@ -1662,7 +2026,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     fsMedia.style.transform = 'translateY(' + (d > 0 ? -34 : 34) + 'px)';
     fsMedia.style.opacity = '0';
     setTimeout(() => {
-      fsCircle = next; fsIndex = 0; renderFs();
+      fsCircle = next; fsDay = next.today; fsIndex = 0; renderFs();
       fsMedia.style.transition = 'none';
       fsMedia.style.transform = 'translateY(' + (d > 0 ? 34 : -34) + 'px)';
       requestAnimationFrame(() => {
@@ -1699,9 +2063,10 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     }
   }, { passive: true });
 
-  function openFs(p, c) {
+  function openFs(p, c, day) {
     fsCircle = c;
-    fsIndex = Math.max(0, c.posts.indexOf(p));
+    fsDay = day || c.today;
+    fsIndex = Math.max(0, fsDay.posts.indexOf(p));
     renderFs();
     fsMedia.style.transition = 'none';
     fsMedia.style.transform = 'translateY(0)';
@@ -2098,6 +2463,199 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       focusCircle(true);
     } catch (err) { built = false; console.warn('circle focus:', err); }
   }
+  // ==========================================================================
+  // WdCircleTimeline — サークルフッター → モーダルシート → フルスクリーン
+  // ==========================================================================
+  const TL_TIMES = ['8分', '24分', '1時間', '3時間', '5時間', '昨日'];
+  CIRCLES.forEach((c) => {
+    c.timeline = c.posts.map((p, i) => ({
+      ava: p.ava, name: p.name || 'user',
+      handle: '@' + String(p.name || 'user').toLowerCase(),
+      time: TL_TIMES[i % TL_TIMES.length],
+      body: p.text, media: p.img ? [p.img] : [], vid: p.vid || null,
+      comments: 3 + ((i * 7) % 38), likes: 18 + ((i * 47) % 280), liked: i === 0,
+    }));
+  });
+
+  const phone = document.querySelector('.phone');
+  const tlSheet = document.getElementById('tlSheet');
+  const tlScrim = document.getElementById('tlScrim');
+  const tlList = document.getElementById('tlList');
+  const tlCompose = document.getElementById('tlCompose');
+  const tlcText = document.getElementById('tlcText');
+  const tlcSend = document.getElementById('tlcSend');
+  const tlcPrev = document.getElementById('tlcPrev');
+  const tlcStrip = document.getElementById('tlcStrip');
+  let tlCircle = null;
+
+  function tlNode(e, c) {
+    const el = document.createElement('article');
+    el.className = 'tlp';
+    const d = distTo(c);
+    let media = '';
+    if (e.vid) {
+      media = '<div class="tlp-m1"><video src="' + e.vid + '" muted loop playsinline autoplay></video></div>';
+    } else if (e.media.length === 1) {
+      media = '<div class="tlp-m1"><img src="' + e.media[0] + '" alt=""></div>';
+    } else if (e.media.length >= 2) {
+      media = '<div class="tlp-m2">' + e.media.slice(0, 2)
+        .map(m => '<img src="' + m + '" alt="">').join('') + '</div>';
+    }
+    el.innerHTML = '<img class="tlp-av" src="' + e.ava + '" alt="">'
+      + '<div class="tlp-col">'
+      +   '<div class="tlp-head"><span class="tlp-name">' + e.name + '</span>'
+      +     '<span class="tlp-meta">' + e.handle + ' · ' + e.time + '</span></div>'
+      +   (e.body ? '<p class="tlp-body">' + e.body + '</p>' : '')
+      +   media
+      +   '<div class="tlp-acts">'
+      +     '<button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt="">'
+      +       '<span>' + e.comments + '</span></button>'
+      +     '<button class="tlp-act like' + (e.liked ? ' liked' : '') + '" type="button">'
+      +       '<img src="../../assets/icons/icon_like.png" alt=""><span>' + e.likes + '</span></button>'
+      +     '<button class="tlp-act" type="button"><img src="../../assets/icons/icon_share.png" alt="">'
+      +       '<span>共有</span></button>'
+      +   '</div>'
+      + '</div>';
+    const like = el.querySelector('.tlp-act.like');
+    like.addEventListener('click', () => {
+      e.liked = !e.liked; e.likes += e.liked ? 1 : -1;
+      like.classList.toggle('liked', e.liked);
+      like.querySelector('span').textContent = e.likes;
+    });
+    return el;
+  }
+
+  function tlRender(fresh) {
+    const c = tlCircle; if (!c) return;
+    document.getElementById('tlName').textContent = c.name;
+    document.getElementById('tlDesc').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
+    document.getElementById('tlCover').src = c.cover;
+    tlList.innerHTML = '';
+    c.timeline.forEach((e, i) => {
+      const n = tlNode(e, c);
+      if (fresh && i === 0) n.classList.add('fresh');
+      tlList.appendChild(n);
+    });
+  }
+
+  function tlFull(on) {
+    tlSheet.classList.toggle('full', on);
+    phone.classList.toggle('light-status', on || tlCompose.classList.contains('on'));
+  }
+  function tlOpen() {
+    tlCircle = CIRCLES[active];
+    tlRender(false);
+    tlSheet.setAttribute('aria-hidden', 'false');
+    tlScrim.classList.add('on');
+    tlSheet.classList.add('on');
+    tlList.scrollTop = 0;
+  }
+  function tlClose() {
+    tlSheet.classList.remove('on');
+    tlScrim.classList.remove('on');
+    tlSheet.setAttribute('aria-hidden', 'true');
+    setTimeout(() => tlFull(false), 300);
+  }
+
+  document.querySelector('.wd-circle-bar').addEventListener('click', tlOpen);
+  document.getElementById('tlClose').addEventListener('click', tlClose);
+  tlScrim.addEventListener('click', tlClose);
+
+  // スクロールでフルスクリーンへ昇格 / 上端で引き下げると戻る
+  tlList.addEventListener('scroll', () => {
+    if (tlList.scrollTop > 6) tlFull(true);
+  }, { passive: true });
+  tlList.addEventListener('wheel', (ev) => {
+    if (ev.deltaY > 16) tlFull(true);
+    else if (tlList.scrollTop <= 0 && ev.deltaY < -24 && tlSheet.classList.contains('full')) tlFull(false);
+  }, { passive: true });
+
+  // グリップ / ヘッダーのドラッグ — 下げてモーダル → 閉じる、上げてフル
+  (function () {
+    let sy = 0, dy = 0, on = false;
+    const grab = (ev) => {
+      on = true; sy = ev.clientY; dy = 0;
+      tlSheet.classList.add('dragging');
+      ev.currentTarget.setPointerCapture(ev.pointerId);
+    };
+    const move = (ev) => {
+      if (!on) return;
+      dy = ev.clientY - sy;
+      tlSheet.style.transform = 'translateY(' + Math.max(-24, dy) + 'px)';
+    };
+    const up = () => {
+      if (!on) return;
+      on = false;
+      tlSheet.classList.remove('dragging');
+      tlSheet.style.transform = '';
+      if (dy < -40) tlFull(true);
+      else if (dy > 96) { if (tlSheet.classList.contains('full')) tlFull(false); else tlClose(); }
+    };
+    ['tlGrab', 'tlHead'].forEach((id) => {
+      const el = document.getElementById(id);
+      el.addEventListener('pointerdown', grab);
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', up);
+      el.addEventListener('pointercancel', up);
+    });
+  })();
+
+  // ---- 投稿画面 -------------------------------------------------------------
+  const TLC_POOL = ['../../assets/reel/reel001.jpg', '../../assets/reel/reel003.jpg', '../../assets/reel/reel005.jpg',
+    '../../assets/reel/reel007.jpg', '../../assets/reel/reel009.jpg', '../../assets/reel/reel011.jpg',
+    '../../assets/reel/reel012.jpg', '../../assets/reel/reel014.jpg'];
+  let tlcPicked = [];
+
+  TLC_POOL.forEach((src) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tlc-thumb';
+    b.innerHTML = '<img src="' + src + '" alt="">';
+    b.addEventListener('click', () => {
+      const i = tlcPicked.indexOf(src);
+      if (i >= 0) tlcPicked.splice(i, 1);
+      else { if (tlcPicked.length >= 2) tlcPicked.shift(); tlcPicked.push(src); }
+      tlcSync();
+    });
+    b._src = src;
+    tlcStrip.appendChild(b);
+  });
+
+  function tlcSync() {
+    Array.from(tlcStrip.children).forEach((b) => b.classList.toggle('sel', tlcPicked.indexOf(b._src) >= 0));
+    tlcPrev.className = 'tlc-prev' + (tlcPicked.length ? ' on' : '') + (tlcPicked.length === 2 ? ' two' : '');
+    tlcPrev.innerHTML = tlcPicked.map(s => '<img src="' + s + '" alt="">').join('');
+    tlcSend.disabled = !(tlcText.value.trim() || tlcPicked.length);
+  }
+  tlcText.addEventListener('input', tlcSync);
+
+  document.getElementById('tlFab').addEventListener('click', () => {
+    if (!tlCircle) tlCircle = CIRCLES[active];
+    document.getElementById('tlcWhere').textContent = tlCircle.name;
+    tlcText.value = ''; tlcPicked = []; tlcSync();
+    tlCompose.classList.add('on');
+    tlCompose.setAttribute('aria-hidden', 'false');
+    phone.classList.add('light-status');
+    setTimeout(() => tlcText.focus(), 320);
+  });
+  function tlcClose() {
+    tlCompose.classList.remove('on');
+    tlCompose.setAttribute('aria-hidden', 'true');
+    phone.classList.toggle('light-status', tlSheet.classList.contains('full'));
+  }
+  document.getElementById('tlcCancel').addEventListener('click', tlcClose);
+  tlcSend.addEventListener('click', () => {
+    if (tlcSend.disabled) return;
+    tlCircle.timeline.unshift({
+      ava: 'uploads/user007.jpg', name: 'Pixel', handle: '@you', time: 'たった今',
+      body: tlcText.value.trim(), media: tlcPicked.slice(), vid: null,
+      comments: 0, likes: 0, liked: false,
+    });
+    tlcClose();
+    tlRender(true);
+    tlFull(true);
+    tlList.scrollTop = 0;
+  });
+
   renderBoard();
   build();
 })();
@@ -2105,4 +2663,3 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
 </body>
 </html>
-
