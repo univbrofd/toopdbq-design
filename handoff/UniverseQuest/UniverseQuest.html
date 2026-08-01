@@ -40,7 +40,26 @@ html, body {
 .specimen-cap p { font-size: 11.5px; line-height: 1.55; color: var(--fg-2); margin-top: 7px; }
 
 /* iPhone 17 frame  (402×874 · r55 · Dynamic Island) */
+/* ============================================================
+   LAYOUT FORMULA — 他言語(Flutter等)へそのまま移植できる計算式
+   ------------------------------------------------------------
+   vw = 画面幅 / vh = 画面高さ
+   ratio = 3 / 4                     マップのアスペクト比（横長）
+   h  = vw * ratio                   マップ高さ
+   r  = 24                           マップ下角の角丸半径
+   d  = 4                            初期描画でマップとリストが空ける隙間
+   H  = vh - h + (r - d)             クエストリスト高さ（下端揃え）
+   overlap        = r - d            リストがマップに重なる量
+   listPaddingTop = r                リスト内先頭要素の上余白（= d が実際の隙間）
+   ============================================================ */
 .phone {
+  --vw: 402px; --vh: 874px;
+  --map-ratio: calc(3 / 4);
+  --map-r: 24px;                                 /* r */
+  --map-gap: 4px;                                /* d */
+  --map-h: calc(var(--vw) * var(--map-ratio));   /* h */
+  --feed-h: calc(var(--vh) - var(--map-h) + (var(--map-r) - var(--map-gap)));  /* H */
+  --feed-pad-top: var(--map-r);                  /* listPaddingTop */
   position: relative; width: 402px; height: 874px; flex: none;
   border-radius: 55px; overflow: hidden; background: var(--bg);
   box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
@@ -52,17 +71,18 @@ html, body {
 /* L0  space backdrop */
 #bg-white {
   position: absolute; inset: 0; z-index: 0;
-  background:
-    radial-gradient(125% 120% at 50% 38%,
-      var(--space-core)  0%,
-      var(--space-mid)   46%,
-      var(--space-edge)  100%);
+  background: #fff;
   transition: opacity .6s var(--ease-out);
 }
 
 /* L0  the MapLibre canvas (positron sphere) */
-#map { position: absolute; inset: 0; z-index: 1; background: transparent;
-  filter: saturate(1.08); }
+#map {
+  position: absolute; top: 0; left: 0; right: 0; height: var(--map-h);
+  background: #08080b; filter: saturate(1.08);
+  border-radius: 0 0 var(--map-r) var(--map-r); overflow: hidden;
+  z-index: 52;
+  box-shadow: 0 4px 10px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.14);
+}
 #map .maplibregl-canvas { outline: none; }
 .maplibregl-ctrl-attrib { font-family: var(--font-latin); }
 .maplibregl-ctrl-bottom-right { bottom: 36px; }
@@ -70,7 +90,8 @@ html, body {
 .maplibregl-ctrl-attrib a { color: rgba(255,255,255,.6); }
 a { color: var(--text-1); } a:hover { color: #fff; }
 
-/* L0.5  atmosphere ring */
+/* L0.5  atmosphere ring — 球体ではなくパネル表示のため非表示 */
+#strato-shadow, #globe-frame { display: none; }
 #strato-shadow {
   position: absolute; left: 50%; top: 50%; z-index: 2;
   transform: translate(-50%, -50%);
@@ -155,12 +176,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    cover → name/description → circle-timeline post button.
    ============================================================ */
 .wd-circle-tool {
-  position: absolute; bottom: 564px; left: 50%; transform: translateX(-50%); z-index: 55;
+  position: absolute; bottom: calc(var(--vh) - var(--map-h) + 8px); left: 50%; transform: translateX(-50%); z-index: 55;
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  width: calc(100% - 32px); max-width: 344px;
+  width: calc(var(--vw) * 0.8); max-width: none;
 }
 .wd-circle-bar {
-  position: relative; flex: 0 1 auto; min-width: 0;
+  position: relative; flex: 1 1 auto; min-width: 0;
   display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px;
   border-radius: var(--radius-pill);
   background:
@@ -245,15 +266,95 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   mask-composite: intersect, exclude;
 }
 .wd-icon-btn.done { pointer-events: none; }
-.wd-icon-btn.done::after { background: linear-gradient(135deg, #4be3b0, #3fd0e0); }
+.wd-icon-btn.done::after { background: linear-gradient(135deg, #2f7a34, #1b5e20); }
 
 /* ============================================================
    QUEST BOARD (看板) — lives INSIDE the sheet, one per circle
    section. Date/time · title · overview · post dots.
    ============================================================ */
+/* ============================================================
+   QUEST TITLE (リスト上部) + QUEST FOOT (画面下部の日時・カメラ)
+   ============================================================ */
+.strip-title {
+  position: absolute; top: 12px; left: 16px; right: 16px; z-index: 6;
+  display: flex; align-items: center; gap: 10px; pointer-events: none;
+}
+.strip-title .qhead {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 5px;
+  min-width: 0; flex: 1;
+}
+.strip-title .qmeta { display: flex; align-items: center; gap: 8px; }
+.strip-title .qtime {
+  display: flex; align-items: baseline; gap: 4px;
+  font: 700 11px/1 var(--font-latin); color: #000; font-variant-numeric: tabular-nums;
+}
+.strip-title .qtime .tl { font: 700 9px/1 var(--font-latin); color: rgba(0,0,0,.5); letter-spacing: .1em; text-transform: lowercase; }
+.strip-title.cleared .qtime .tl { display: none; }
+.strip-title.cleared .qtime .tv { color: rgba(0,0,0,.5); font-size: 11px; letter-spacing: .06em; }
+.strip-title .qtime.soon { color: #ff2f74; }
+.strip-title .qlabel {
+  flex: none; padding: 0;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font: 800 12.5px/1 var(--font-latin); letter-spacing: .06em;
+}
+.strip-title .qt {
+  font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: rgba(0,0,0,.5);
+  letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.strip-title { pointer-events: none; }
+.strip-title .qcam {
+  margin-left: auto; flex: none; pointer-events: auto; cursor: pointer;
+  width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+  border: 0; padding: 0; background: transparent; -webkit-appearance: none; appearance: none;
+  transition: transform .12s var(--ease-out), opacity .12s var(--ease-out);
+}
+.strip-title .qcam img { width: 24px; height: 24px; object-fit: contain;
+  filter: brightness(0) opacity(.72) drop-shadow(0 1px 3px rgba(0,0,0,.22)); }
+.strip-title .qcam:active { transform: scale(.9); opacity: .6; }
+.strip-title.cleared .qcam { display: none; }
+.strip-title .qmine {
+  margin-left: auto; flex: none; pointer-events: auto; cursor: pointer; display: none;
+  width: 30px; height: 30px; border-radius: 8px; overflow: hidden; padding: 0; border: 0;
+  background: #101014; -webkit-appearance: none; appearance: none;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,.5);
+  transition: transform .12s var(--ease-out);
+}
+.strip-title.cleared .qmine { display: block; }
+.strip-title .qmine img { width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: blur(.5px) saturate(1.05); image-rendering: pixelated; transform: scale(1.05); }
+.strip-title .qmine:active { transform: scale(.92); }
+
+.quest-foot { display: none; }
+.quest-foot .qf-date {
+  pointer-events: auto; display: flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: var(--radius-pill); position: relative;
+  background: linear-gradient(90deg, rgba(0,0,0,.10) 0%, rgba(0,0,0,.36) 70%), var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  font: 600 11.5px var(--font-latin); letter-spacing: .03em; color: #fff; white-space: nowrap;
+}
+.quest-foot .qf-date::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--lg-edge);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.quest-foot .qf-date img { width: 11px; height: 11px; object-fit: contain; opacity: .85; }
+.quest-foot .qf-cam { pointer-events: auto; width: 54px; height: 54px; }
+.quest-foot .qf-cam > img { width: 24px; height: 24px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.quest-foot .qf-cam:not(.done) { animation: boardpulse 2.2s var(--ease-out) infinite; }
+
+/* ============================================================
+   QUEST BOARD (看板) — fullscreen viewer 内でのみ使用
+   ============================================================ */
 .strip-board {
-  position: absolute; left: 14px; right: 14px; z-index: 6;
-  top: 50%; transform: translateY(-50%);
+  position: absolute; top: 10px; left: 14px; right: 14px; z-index: 6;
+  pointer-events: auto;
   border-radius: 20px; padding: 12px 16px 11px;
   background:
     linear-gradient(120deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.38) 70%),
@@ -269,9 +370,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
-.strip-board.cleared::after { background: linear-gradient(135deg, #4be3b0, #3fd0e0); }
-/* cleared: the board tucks to the bottom of the post area */
-.strip-board.cleared { top: auto; bottom: 12px; transform: none; }
+.circle-strip { isolation: isolate; }
+.strip-board.cleared::after { background: linear-gradient(135deg, #2f7a34, #1b5e20); }
+
 .strip-board .qb-row1 { display: flex; align-items: center; gap: 8px; }
 .strip-board .ql {
   display: flex; align-items: center; gap: 6px;
@@ -280,7 +381,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .strip-board .ql .qdot { width: 5px; height: 5px; border-radius: 50%; flex: none;
   background: #ff3e88; box-shadow: 0 0 7px #ff3e88;
   animation: pinpulse-dot 2.2s var(--ease-out) infinite; }
-.strip-board.cleared .ql .qdot { background: #4be3b0; box-shadow: 0 0 7px #4be3b0; animation: none; }
+.strip-board.cleared .ql .qdot { background: #2f7a34; box-shadow: 0 0 7px rgba(47,122,52,.7); animation: none; }
 @keyframes pinpulse-dot { 0% { opacity: 1; } 60% { opacity: .3; } 100% { opacity: 1; } }
 .strip-board:not(.cleared) { animation: boardpulse 2.2s var(--ease-out) infinite; }
 @keyframes boardpulse {
@@ -310,7 +411,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 }
 .strip-board .qb-dots i.on { background: #fff; width: 14px; border-radius: 99px; }
 .strip-board { cursor: pointer; }
-.strip-board:active { transform: translateY(-50%) scale(.97); }
+.strip-board:active { transform: scale(.97); }
 .strip-board.cleared:active { transform: scale(.97); }
 .strip-board .qb-cam {
   position: absolute; right: 12px; bottom: 10px; width: 22px; height: 22px;
@@ -325,48 +426,63 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    sections (board + 9:16 post rail); the next circle peeks 20%.
    ============================================================ */
 .feed-sheet {
-  position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
-  overflow: hidden;
-  background: #fff;
-  padding-top: 8px;
+  position: absolute; left: 0; right: 0; bottom: 0; height: var(--feed-h); z-index: 50;
+  overflow: visible;
+  background: transparent;
+  pointer-events: none;
+  padding-top: 0;
 }
+.feed-sheet > * { pointer-events: auto; }
+/* 下のクエストを弱める画面下部スクリム */
+.feed-scrim {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 210px; z-index: 58;
+  pointer-events: none;
+  background: linear-gradient(0deg,
+    rgba(255,255,255,.58) 0%,
+    rgba(255,255,255,.40) 22%,
+    rgba(255,255,255,.20) 48%,
+    rgba(255,255,255,.07) 74%,
+    rgba(255,255,255,0) 100%);
+}
+/* 最上部の内側シャドウ */
+
+
 
 /* vertical circle pager — fixed height; each section is 80% so
    the next circle's posts stay 20% visible below */
 .feed-col {
   display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
   scroll-snap-type: y mandatory;
-  height: 540px;
+  height: 100%; padding-top: var(--feed-pad-top);
+  scroll-padding-top: var(--feed-pad-top);
   -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none;
 }
 .feed-col::-webkit-scrollbar { display: none; }
 .circle-strip {
-  position: relative; width: 100%; height: 80%; flex: none;
+  position: relative; width: 100%; height: 76%; flex: none;
   display: flex; flex-direction: column;
   scroll-snap-align: start; scroll-snap-stop: always;
-  margin-bottom: 8px;
 }
-/* posts of that quest — horizontal, gapless, 9:16 portrait */
-.rail-wrap { position: relative; flex: 1; min-height: 0; }
+/* posts of that quest — FREE BOARD: 自由配置（重なりなし）· 横スクロール */
+.rail-wrap { position: relative; flex: 1; min-height: 0;
+  background: transparent; }
 .strip-rail {
   position: relative; height: 100%; width: 100%;
-  display: flex; gap: 0; overflow-x: auto; overflow-y: hidden;
+  overflow-x: auto; overflow-y: hidden;
   overflow-anchor: none;
-  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; scrollbar-width: none;
 }
 .strip-rail::-webkit-scrollbar { display: none; }
+.strip-rail .board-inner { position: relative; height: 100%; }
 
-/* one post = a 9:16 portrait video — centered full, neighbors peeking */
+/* one post = a freely placed tile on the board */
 .post-cell {
-  position: relative; height: 100%; aspect-ratio: 9 / 16; flex: none;
-  scroll-snap-align: center;
-  overflow: hidden; background: #101014; cursor: pointer;
+  position: absolute; overflow: hidden; background: #101014; cursor: pointer;
+  border-radius: 14px;
   -webkit-tap-highlight-color: transparent;
-  opacity: .68; transform: scale(.94);
-  transition: opacity .28s var(--ease-standard), transform .28s var(--ease-standard);
+  transition: transform .16s var(--ease-out);
 }
-.post-cell.focus { opacity: 1; transform: scale(1); }
+.post-cell:active { transform: scale(.975); }
 .post-cell video, .post-cell img.media {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
 }
@@ -376,6 +492,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     linear-gradient(180deg, rgba(0,0,0,.42) 0%, transparent 34%),
     radial-gradient(80% 70% at 50% 52%, rgba(0,0,0,.30) 0%, transparent 100%);
 }
+.post-cell.sm .u-text { font-size: 10px; padding: 30px 8px 14px; }
+.post-cell.sm .u-name { font-size: 10px; top: 8px; left: 9px; }
+.post-cell .u-name {
+  position: absolute; top: 10px; left: 12px; z-index: 3;
+  font: 700 11.5px var(--font-latin); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 1px 6px rgba(0,0,0,.85), 0 0 16px rgba(0,0,0,.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 20px);
+}
 .post-cell .u-ava {
   position: absolute; top: 10px; left: 12px; z-index: 3;
   width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
@@ -383,16 +507,123 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 }
 .post-cell .u-text {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
-  padding: 18px 16px; pointer-events: none; text-align: center;
-  font: 700 13px/1.55 var(--font-jp); color: #fff; letter-spacing: .015em;
+  padding: 44px 14px 22px; pointer-events: none; text-align: center;
+  font: 700 12px/1.5 var(--font-jp); color: #fff; letter-spacing: .015em;
   text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6);
   text-wrap: pretty;
 }
 
+/* ---- LOCKED NOTE — エリア外の案内 + ピン ---------------- */
+.lock-note {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 7;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  width: 100%; text-align: center; pointer-events: none;
+}
+.strip-rail:not(.locked) ~ .lock-note { display: none; }
+/* 最背面 — 上下 100% 透過 / 中心が真っ白の縦グラデーションスクリム */
+.lock-note .lscrim {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 320px; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,.44) 34%,
+    rgba(0,0,0,.6) 50%,
+    rgba(0,0,0,.44) 66%,
+    rgba(0,0,0,0) 100%);
+}
+.lock-note > *:not(.lscrim) { position: relative; z-index: 1; }
+.lock-note .lt {
+  font: 700 15px/1.5 var(--font-jp); color: var(--text-1); letter-spacing: .02em;
+}
+.lock-note .lmeta {
+  margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.lock-note .ldist {
+  display: flex; align-items: baseline; gap: 3px;
+  font: 700 18px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums;
+}
+.lock-note .ldist .u { font: 700 9px/1 var(--font-latin); color: var(--text-2); }
+.lock-note .ldir {
+  width: 24px; height: 24px; display: grid; place-items: center;
+}
+.lock-note .ldir img { width: 20px; height: 20px; object-fit: contain;
+  filter: brightness(0) invert(1) opacity(.8); }
+
+.strip-title .qtrow { display: flex; align-items: center; gap: 7px; max-width: 100%; }
+.strip-title .qedit {
+  flex: none; pointer-events: auto; cursor: pointer; display: none;
+  width: 22px; height: 22px; padding: 0; border: 0; background: transparent;
+  -webkit-appearance: none; appearance: none;
+  align-items: center; justify-content: center;
+  transition: transform .12s var(--ease-out), opacity .12s var(--ease-out);
+}
+.strip-title.admin .qedit { display: flex; }
+.strip-title .qedit img { width: 15px; height: 15px; object-fit: contain;
+  filter: brightness(0) invert(1) opacity(.8); }
+.strip-title .qedit:active { transform: scale(.9); opacity: .6; }
+
+/* ---- QUEST EDIT SHEET --------------------------------------- */
+.qe-veil {
+  position: absolute; inset: 0; z-index: 69; display: flex; align-items: flex-end;
+  background: rgba(4,4,8,.6);
+  -webkit-backdrop-filter: blur(8px) saturate(140%); backdrop-filter: blur(8px) saturate(140%);
+  opacity: 0; pointer-events: none; transition: opacity .24s var(--ease-out);
+}
+.qe-veil.on { opacity: 1; pointer-events: auto; }
+.qe-sheet {
+  width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: rgba(14,14,20,.95); padding: 10px 20px 30px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 -20px 60px rgba(0,0,0,.6);
+  transform: translateY(18px); transition: transform .3s var(--ease-out);
+}
+.qe-veil.on .qe-sheet { transform: translateY(0); }
+.qe-sheet .grip { width: 38px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.25); margin: 0 auto 14px; }
+.qe-sheet h3 { font: 700 15px var(--font-jp); color: #fff; margin-bottom: 14px; }
+.qe-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.qe-field label { font: 600 10px var(--font-latin); letter-spacing: .1em; color: rgba(255,255,255,.5); }
+.qe-field input, .qe-field textarea {
+  width: 100%; border-radius: var(--radius-xs, 8px); border: 0; padding: 11px 13px;
+  background: rgba(255,255,255,.09); color: #fff; font: 500 13px/1.5 var(--font-jp);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); resize: none;
+}
+.qe-field input:focus, .qe-field textarea:focus { outline: none; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.4); }
+.qe-acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.qe-acts button {
+  appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+  padding: 14px 8px; border-radius: var(--radius-pill);
+  font: 700 13px var(--font-jp); color: #fff; background: rgba(255,255,255,.12);
+}
+.qe-acts button.save { background: var(--gradient-colorful-linear); }
+.qe-acts button:active { transform: scale(.98); }
+
+/* ---- ROUTE DIALOG ------------------------------------------- */
+.route-veil {
+  position: absolute; inset: 0; z-index: 68; display: flex; align-items: center; justify-content: center;
+  background: rgba(4,4,8,.6);
+  -webkit-backdrop-filter: blur(8px) saturate(140%); backdrop-filter: blur(8px) saturate(140%);
+  opacity: 0; pointer-events: none; transition: opacity .24s var(--ease-out);
+}
+.route-veil.on { opacity: 1; pointer-events: auto; }
+.route-card {
+  position: relative; width: 272px; border-radius: 20px; overflow: hidden;
+  background: rgba(14,14,20,.92); text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 24px 70px rgba(0,0,0,.6);
+}
+.route-card .rc-body { padding: 20px 20px 16px; }
+.route-card .rc-title { font: 700 14px/1.6 var(--font-jp); color: #fff; }
+.route-card .rc-sub { font: 500 11px/1.6 var(--font-jp); color: rgba(255,255,255,.6); margin-top: 6px; }
+.route-card .rc-acts { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid rgba(255,255,255,.12); }
+.route-card .rc-acts button {
+  appearance: none; -webkit-appearance: none; border: 0; background: transparent; cursor: pointer;
+  padding: 14px 8px; font: 700 13px var(--font-jp); color: rgba(255,255,255,.7);
+}
+.route-card .rc-acts button + button { border-left: 1px solid rgba(255,255,255,.12); color: #fff; }
+.route-card .rc-acts button:active { background: rgba(255,255,255,.08); }
+
 /* ---- LOCKED STATE — quest not cleared yet ------------------- */
 .strip-rail.locked { overflow: hidden; }
 .strip-rail.locked .post-cell video, .strip-rail.locked .post-cell img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
-.strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-ava { visibility: hidden; }
+.strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-name { visibility: hidden; }
 /* past / recommend tag chip */
 .post-cell .u-tag {
   position: absolute; top: 10px; right: 10px; z-index: 3;
@@ -402,48 +633,210 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
 }
 
-/* ---- FULLSCREEN POST VIEWER --------------------------------- */
-.fs-viewer {
-  position: absolute; inset: 0; z-index: 64; background: #000;
-  opacity: 0; pointer-events: none; transition: opacity .28s var(--ease-out);
+/* ---- FULLSCREEN POST VIEWER — UniverseView の story-fs と同一デザイン ----
+   全面 black / 上下 protection scrim / セグメント進捗バー / 右サイドレール
+   (like・comment・pin) / 下部 WdCircleBar glass identity pill / 投稿ボタン。 */
+.story-fs {
+  position: absolute; inset: 0; z-index: 64; overflow: hidden;
+  background: #000; opacity: 0; pointer-events: none;
+  transition: opacity .22s var(--ease-out);
 }
-.fs-viewer.on { opacity: 1; pointer-events: auto; }
-.fs-viewer video, .fs-viewer img.media {
-  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+.story-fs.open { opacity: 1; pointer-events: auto; }
+.story-fs .sfs-scrim-top, .story-fs .sfs-scrim-bot, .story-fs .sfs-bar, .story-fs .sfs-head {
+  opacity: 0; transition: opacity .28s var(--ease-out);
 }
-.fs-viewer .cell-scrim {
-  position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 30%),
-    linear-gradient(0deg, rgba(0,0,0,.4) 0%, transparent 26%);
-}
-.fs-viewer .u-ava {
-  position: absolute; top: 74px; left: 18px; z-index: 3;
-  width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 1px 5px rgba(0,0,0,.6);
-}
-.fs-viewer .u-text {
+.story-fs.expanded .sfs-scrim-top, .story-fs.expanded .sfs-scrim-bot,
+.story-fs.expanded .sfs-bar, .story-fs.expanded .sfs-head { opacity: 1; }
+.story-fs .sfs-media { position: absolute; inset: 0; overflow: hidden; }
+.story-fs .sfs-media > video, .story-fs .sfs-media > img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.story-fs .sfs-text {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
-  padding: 24px 30px; pointer-events: none; text-align: center;
+  padding: 24px 78px 24px 30px; pointer-events: none; text-align: center;
   font: 700 18px/1.6 var(--font-jp); color: #fff; letter-spacing: .015em;
-  text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6);
-  text-wrap: pretty;
+  text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6); text-wrap: pretty;
 }
-.fs-viewer .fs-close {
-  position: absolute; top: 70px; right: 16px; z-index: 4;
-  width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--glass-fill); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
-  -webkit-appearance: none; appearance: none;
+.story-fs .sfs-scrim-top { position: absolute; top: 0; left: 0; right: 0; height: 168px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.26) 46%, transparent 100%); }
+.story-fs .sfs-scrim-bot { position: absolute; bottom: 0; left: 0; right: 0; height: 150px; pointer-events: none;
+  background: linear-gradient(0deg, rgba(0,0,0,.5) 0%, transparent 100%); }
+.story-fs .sfs-bar { position: absolute; top: 70px; left: 16px; right: 16px; height: 2.5px; z-index: 3;
+  display: flex; gap: 4px; }
+.story-fs .sfs-bar .seg { flex: 1 1 0; min-width: 0; height: 100%; border-radius: 2px;
+  background: rgba(255,255,255,.3); overflow: hidden; }
+.story-fs .sfs-bar .seg .sfill { display: block; height: 100%; width: 100%; background: #fff;
+  transform-origin: left; transform: scaleX(0); transition: transform .08s linear; }
+.story-fs .sfs-bar .seg.done .sfill { transform: scaleX(1); }
+.story-fs .sfs-head { position: absolute; top: 84px; left: 16px; right: 16px; z-index: 4;
+  display: flex; align-items: center; gap: 10px; }
+.story-fs .sfs-close { margin-left: auto; width: 34px; height: 34px; flex: none; display: flex;
+  align-items: center; justify-content: center; border: 0; border-radius: 50%; cursor: pointer;
+  background: var(--glass-fill); -webkit-appearance: none; appearance: none;
+  backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
+  transition: transform .12s var(--ease-out); }
+.story-fs .sfs-close:active { transform: scale(.92); }
+/* WdSideTool — 縦並びアクションレール（右端中央） */
+.story-fs .wd-side-tool {
+  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); z-index: 5;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  opacity: 0; transition: opacity .3s var(--ease-out); }
+.story-fs.expanded .wd-side-tool { opacity: 1; }
+.story-fs .wd-side-tool .wd-icon-btn { width: 47px; height: 47px; }
+.story-fs .wd-side-tool .act { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.story-fs .wd-side-tool .act .ct {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+.story-fs .wd-side-tool .act.liked .wd-icon-btn {
+  background: var(--state-like); backdrop-filter: none; -webkit-backdrop-filter: none;
+  box-shadow: 0 2px 10px rgba(255,62,136,.45); }
+.story-fs .wd-side-tool .act.liked .wd-icon-btn::after { display: none; }
+.story-fs .wd-side-tool .act.liked .ct { color: var(--state-like); }
+/* ---- WdQuestFooter（DS） — サークルフッター × クエスト看板 の複合 ----------
+   シルエットは L 字: 縦棒 = サークルアイコン(64) / 横棒 = 下寄せのサークル名。
+   L の内側の窪みに QuestBoard(.qb) を落とし込む。ガラスは看板 1 枚だけ。 */
+.story-fs .wd-quest-footer {
+  position: absolute; left: 10px; right: 10px; bottom: 20px; z-index: 5;
+  font-family: var(--font-jp);
+  display: flex; align-items: flex-end; gap: 12px;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .3s var(--ease-out), transform .42s var(--ease-out);
 }
-.fs-viewer .fs-close::after {
-  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
-  background: var(--gradient-border);
+.story-fs.expanded .wd-quest-footer { opacity: 1; transform: translateY(0); }
+.story-fs .wd-quest-footer > * { position: relative; z-index: 1; }
+/* 下端の保護グラデ — 写真の上の bare テキストを構造で読ませる */
+.story-fs .wd-quest-footer::before {
+  content: ""; position: absolute; left: -10px; right: -10px; top: -28px; bottom: -30px; z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--scrim-min) 52%, rgba(0,0,0,0.74) 100%);
+  pointer-events: none;
+}
+.story-fs .wd-quest-footer .stack { flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.story-fs .wd-quest-footer .slot { display: flex; align-items: flex-end; min-width: 0; }
+.story-fs .wd-quest-footer .slot .qb { width: auto; flex: 1 1 auto; min-width: 0; }
+.story-fs .wd-quest-footer .cover {
+  flex: none; width: 64px; height: 64px; border-radius: 50%;
+  object-fit: cover; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.35), var(--shadow-avatar); }
+.story-fs .wd-quest-footer .id { min-width: 0; }
+.story-fs .wd-quest-footer .nm { margin-top: 4px; font-family: var(--font-jp); font-weight: 700;
+  font-size: 17px; line-height: 1.15; color: var(--text-1);
+  text-shadow: 0 0 8px rgba(0,0,0,.6);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .wd-quest-footer.no-quest .slot { display: none; }
+/* QuestBoard（.qb） — DS canonical */
+.story-fs .wd-quest-footer .qb {
+  position: relative; padding: 12px 16px; border-radius: var(--radius-md);
+  font-family: var(--font-jp); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(120deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.20) 70%), var(--lg-tint);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  transition: transform .12s var(--ease-standard);
+}
+.story-fs .wd-quest-footer .qb::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px;
+  background: rgba(255,255,255,0.7);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
 }
-.fs-viewer .fs-close img { width: 15px; height: 15px; object-fit: contain; }
-.fs-viewer .fs-close:active { transform: scale(.94); }
+.story-fs .wd-quest-footer .qb:active { transform: scale(.97); }
+.story-fs .wd-quest-footer .qb.cleared { cursor: default; }
+.story-fs .wd-quest-footer .qb.pulse { animation: qb-pulse 2.2s var(--ease-out) infinite; }
+@keyframes qb-pulse {
+  0%       { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot),
+             var(--lg-shadow), 0 0 0 0 var(--state-quest-active-ring); }
+  70%,100% { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot),
+             var(--lg-shadow), 0 0 0 9px rgba(255,62,136,0); }
+}
+.story-fs .wd-quest-footer .qb-eyebrow { display: flex; align-items: baseline; gap: 10px; min-height: 16px; }
+.story-fs .wd-quest-footer .qb-label { font-family: var(--font-latin); font-weight: 700; font-size: 11px;
+  line-height: 1; letter-spacing: .10em;
+  background: linear-gradient(90deg,#fff0a6 0%,#bfcc96 10%,#80a787 20%,#40837f 30%,#5d9ba1 40%,#8d8499 50%,#a97ba2 60%,#bf4680 70%,#ff3e88 80%,#e86f6d 90%,#d0a052 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+.story-fs .wd-quest-footer .qb.cleared .qb-label { background: none;
+  -webkit-background-clip: border-box; background-clip: border-box;
+  color: var(--state-quest-cleared); filter: none; }
+.story-fs .wd-quest-footer .qb-count { margin-left: auto; font-family: var(--font-latin); font-weight: 700;
+  font-size: 16px; line-height: 1; letter-spacing: .02em; color: var(--text-2);
+  font-variant-numeric: tabular-nums; white-space: nowrap; }
+.story-fs .wd-quest-footer .qb-count.soon { color: var(--state-quest-active); }
+.story-fs .wd-quest-footer .qb.cleared .qb-count { display: none; }
+.story-fs .wd-quest-footer .qb-mine { flex: none; width: 34px; height: 34px; margin: -6px 0; border-radius: 8px;
+  object-fit: cover; display: none; background: #101014;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.7), 0 2px 8px rgba(0,0,0,.5);
+  filter: blur(.6px) saturate(1.1) contrast(.96); image-rendering: pixelated; }
+.story-fs .wd-quest-footer .qb.cleared .qb-mine { display: block; }
+.story-fs .wd-quest-footer .qb-titlerow { margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+.story-fs .wd-quest-footer .qb-title { flex: 1 1 auto; font-family: var(--font-jp); font-weight: 700;
+  font-size: 16px; line-height: 1.4; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.story-fs .wd-quest-footer .qb-cam { flex: none; width: 20px; height: 20px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.story-fs .wd-quest-footer .qb.cleared .qb-cam { display: none; }
+/* ---- FULLSCREEN LOCKED — 未クリア かつ エリア外 -------------- */
+.story-fs.locked .sfs-media > video, .story-fs.locked .sfs-media > img {
+  filter: blur(26px) saturate(1.15) brightness(.6); transform: scale(1.12); }
+.story-fs.locked .sfs-text, .story-fs.locked .wd-side-tool { display: none; }
+/* 閲覧不可の案内 — 元画面の .lock-note と同一意匠（面を持たない縦グラデのみ） */
+.story-fs .fs-lock {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); z-index: 6;
+  display: none; flex-direction: column; align-items: center; text-align: center; pointer-events: none;
+}
+.story-fs.locked .fs-lock { display: flex; }
+.story-fs .fs-lock .lscrim {
+  position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
+  height: 320px; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 0%, rgba(0,0,0,.44) 34%, rgba(0,0,0,.6) 50%, rgba(0,0,0,.44) 66%, rgba(0,0,0,0) 100%);
+}
+.story-fs .fs-lock > *:not(.lscrim) { position: relative; z-index: 1; }
+.story-fs .fs-lock .lt { font: 700 15px/1.5 var(--font-jp); color: var(--text-1); letter-spacing: .02em; }
+.story-fs .fs-lock .lmeta { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.story-fs .fs-lock .ldist { display: flex; align-items: baseline; gap: 3px;
+  font: 700 18px/1 var(--font-latin); color: var(--text-1); font-variant-numeric: tabular-nums; }
+.story-fs .fs-lock .ldist .u { font: 700 9px/1 var(--font-latin); color: var(--text-2); }
+.story-fs .fs-lock .ldir { width: 24px; height: 24px; display: grid; place-items: center; }
+.story-fs .fs-lock .ldir img { width: 20px; height: 20px; object-fit: contain;
+  filter: brightness(0) invert(1) opacity(.8); }
+
+/* 投稿ボタン（右下・カラフル） */
+.story-fs .post-btn { position: absolute; right: 12px; bottom: 24px; z-index: 5; width: 56px; height: 56px;
+  opacity: 0; transition: opacity .3s var(--ease-out), transform .12s var(--ease-out); }
+.story-fs.expanded .post-btn { opacity: 1; }
+.story-fs .post-btn.wd-icon-btn.color > img { width: 25px; height: 25px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.story-fs .post-btn:active { transform: scale(.94); }
+/* 投稿済み: 投稿ボタンは自分の投稿の低解像度サムネイル */
+.story-fs .post-btn.posted { background: #101014; overflow: hidden; padding: 0;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.85), 0 4px 14px rgba(0,0,0,.5); }
+.story-fs .post-btn.posted::after { display: none; }
+.story-fs .post-btn.posted > img:not(.my-thumb), .story-fs .post-btn.posted > .wd-badge { display: none; }
+.story-fs .post-btn.posted .my-thumb {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  filter: blur(.6px) saturate(1.1) contrast(.96); image-rendering: pixelated; transform: scale(1.06); }
+.story-fs .post-btn.posted .my-chip {
+  position: absolute; left: 50%; bottom: 3px; transform: translateX(-50%);
+  padding: 2px 7px; border-radius: var(--radius-pill); background: var(--gradient-colorful-linear);
+  font: 800 7.5px/1 var(--font-latin); letter-spacing: .1em; color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,.5); }
+
+/* 縦スワイプでサークル切替 */
+.story-fs .sfs-stack { position: absolute; inset: 0; transition: transform .34s var(--ease-out); }
+.story-fs .sfs-stack.snap { transition: none; }
+.story-fs .sfs-hint {
+  position: absolute; left: 50%; top: 118px; transform: translateX(-50%); z-index: 7;
+  padding: 5px 12px; border-radius: var(--radius-pill); background: rgba(0,0,0,.5);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  font: 600 10px var(--font-jp); letter-spacing: .04em; color: rgba(255,255,255,.9);
+  opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-out); }
+.story-fs.expanded .sfs-hint { opacity: 1; }
+.story-fs.moved .sfs-hint { opacity: 0; }
+
+/* タップゾーン: 左＝前 / 右＝次 */
+.story-fs .sfs-tap { position: absolute; top: 120px; bottom: 96px; width: 34%; z-index: 3; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; }
+.story-fs .sfs-tap.prev { left: 0; }
+.story-fs .sfs-tap.next { right: 78px; }
 
 /* ---- UPLOAD MODAL — quest clear flow ------------------------ */
 .up-veil {
@@ -478,7 +871,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   transition: width .24s var(--ease-standard);
 }
 .up-card .up-state { font: 600 10px var(--font-latin); letter-spacing: .1em; color: rgba(255,255,255,.55); margin-top: 9px; }
-.up-card.cleared .up-bar i { background: linear-gradient(90deg, #4be3b0, #3fd0e0); }
+.up-card.cleared .up-bar i { background: linear-gradient(90deg, #2f7a34, #1b5e20); }
 
 /* quest-clear toast */
 .clear-toast {
@@ -493,11 +886,54 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .clear-toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 .clear-toast::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
-  background: linear-gradient(135deg, #4be3b0, #3fd0e0);
+  background: linear-gradient(135deg, #2f7a34, #1b5e20);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude;
 }
 .clear-toast img { width: 16px; height: 16px; object-fit: contain; }
+
+/* ---- WdQuestPopup — エリアの中心に浮かぶクエスト（DS 準拠 / 最新） ----
+   面（看板）もスクリムもアンカーも持たない。可読性は文字自身の影 3 枚で担保。 */
+.qp-mount { position: relative; width: 280px; pointer-events: none; }
+/* 同じ表示を 2 枚重ね、後ろの 1 枚をぼかして奥行きを出す */
+.qp-back { position: absolute; inset: 0; transform: scale(1.06); transform-origin: 50% 50%;
+  filter: blur(4px); opacity: .95; }
+/* 背面 — 太い白の輪郭線（ぼけたまま光の縁になる） */
+.qp-back .qp-title, .qp-back .qp-time, .qp-back .qp-until, .qp-back .qp-label {
+  -webkit-text-stroke: 3px rgba(255,255,255,.95); paint-order: stroke fill;
+  text-shadow: 0 2px 18px rgba(0,0,0,.45), 0 0 48px rgba(0,0,0,.35);
+}
+/* 前面 — 細い黒の輪郭線で地図から切り離す */
+.qp-mount > .qp .qp-title, .qp-mount > .qp .qp-time, .qp-mount > .qp .qp-until {
+  color: #08080b; -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill;
+}
+.qp-mount > .qp .qp-label { -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill; }
+.qp-mount > .qp.cleared .qp-time { color: #08080b; }
+.qp {
+  --qp-shadow: none;
+  position: relative; text-align: center;
+  animation: qp-float 5.5s var(--ease-standard) infinite alternate;
+}
+@keyframes qp-float { to { transform: translateY(-8px); } }
+.qp-eyebrow { display: flex; align-items: center; justify-content: center; min-height: 16px; }
+.qp-label {
+  font-family: var(--font-latin); font-weight: 700; font-size: 17px; line-height: 1;
+  letter-spacing: .02em;
+  background: linear-gradient(90deg, #fff0a6 0%, #bfcc96 10%, #80a787 20%, #40837f 30%,
+    #5d9ba1 40%, #8d8499 50%, #a97ba2 60%, #bf4680 70%, #ff3e88 80%, #e86f6d 90%, #d0a052 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.qp.cleared .qp-label { background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #6fae74; }
+.qp-title { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 700;
+  font-size: 18px; line-height: 1.34; letter-spacing: .01em; color: #fff; text-wrap: balance; }
+.qp-time { text-shadow: var(--qp-shadow); margin-top: 9px; font-family: var(--font-latin); font-weight: 700;
+  font-size: 26px; line-height: 1; letter-spacing: .02em; color: #fff; font-variant-numeric: tabular-nums; }
+.qp.urgent .qp-time { color: var(--state-quest-active); }
+.qp.cleared .qp-time { font-size: 19px; color: #fff; }
+.qp-until { text-shadow: var(--qp-shadow); margin-top: 6px; font-family: var(--font-jp); font-weight: 500;
+  font-size: 13px; letter-spacing: .02em; color: #fff; }
+.maplibregl-marker { will-change: transform; }
 
 /* quest spot marker (map) */
 .quest-pin { position: relative; width: 34px; height: 34px; cursor: pointer; }
@@ -539,18 +975,6 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 </style>
 </head>
 <body>
-<style>
-  body.screen-only .studio { padding: 0; gap: 0; min-height: 100dvh; align-items: center; justify-content: center; }
-  body.screen-only .specimen-cap,
-  body.screen-only .preset-rail,
-  body.screen-only .hint,
-  body.screen-only .dynamic-island,
-  body.screen-only .home-ind { display: none; }
-  body.screen-only .phone { width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh; border-radius: 0; box-shadow: none; }
-</style>
-<script>
-  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
-</script>
 <div class="studio">
 
   <div class="stage">
@@ -585,19 +1009,93 @@ a { color: var(--text-1); } a:hover { color: #fff; }
           <div class="feed-col" id="feedCol"></div>
         </div>
 
-        <!-- fullscreen post viewer -->
-        <div class="fs-viewer" id="fsViewer">
-          <div id="fsMedia"></div>
-          <span class="cell-scrim"></span>
-          <span class="u-text" id="fsText"></span>
-          <img class="u-ava" id="fsAva" alt="" style="display:none">
-          <button class="fs-close" id="fsClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+        <div class="feed-scrim"></div>
+
+        <!-- お題の編集（管理者のみ） -->
+        <div class="qe-veil" id="qeVeil">
+          <div class="qe-sheet">
+            <div class="grip"></div>
+            <h3>お題を編集</h3>
+            <div class="qe-field"><label>title</label><input id="qeTitle" type="text"></div>
+            <div class="qe-field"><label>venue</label><input id="qeVenue" type="text"></div>
+            <div class="qe-field"><label>schedule</label><input id="qeDate" type="text"></div>
+            <div class="qe-field"><label>description</label><textarea id="qeDesc" rows="3"></textarea></div>
+            <div class="qe-acts">
+              <button id="qeCancel">キャンセル</button>
+              <button id="qeSave" class="save">保存</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 経路ダイアログ -->
+        <div class="route-veil" id="routeVeil">
+          <div class="route-card">
+            <div class="rc-body">
+              <div class="rc-title">マップアプリで経路を表示しますか？</div>
+              <div class="rc-sub" id="rcSub"></div>
+            </div>
+            <div class="rc-acts">
+              <button id="rcCancel">キャンセル</button>
+              <button id="rcOpen">開く</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- fullscreen post viewer — UniverseView story-fs と同一 -->
+        <div class="story-fs" id="fsViewer" aria-hidden="true">
+          <div class="sfs-media" id="fsMedia"></div>
+          <div class="sfs-scrim-top"></div>
+          <div class="sfs-scrim-bot"></div>
+          <span class="sfs-text" id="fsText"></span>
+          <div class="sfs-tap prev" id="fsPrev"></div>
+          <div class="sfs-tap next" id="fsNext"></div>
+          <div class="sfs-bar" id="fsBar"></div>
+          <div class="sfs-head">
+            <button class="sfs-close" id="fsClose" aria-label="閉じる">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="wd-side-tool">
+            <div class="act" data-act="like">
+              <button class="wd-icon-btn" aria-label="いいね"><img src="../../assets/icons/icon_like.png" alt=""></button>
+              <span class="ct">1.2k</span>
+            </div>
+            <div class="act" data-act="comment">
+              <button class="wd-icon-btn" aria-label="コメント"><img src="../../assets/icons/icon_comment.png" alt=""></button>
+              <span class="ct">84</span>
+            </div>
+            <div class="act" data-act="pin">
+              <button class="wd-icon-btn" aria-label="ピン"><img src="../../assets/icons/icon_pin.png" alt=""></button>
+              <span class="ct">312</span>
+            </div>
+          </div>
+          <div class="fs-lock" id="fsLock"></div>
+          <div class="sfs-hint">↑↓ サークル切替 · ←→ 投稿送り</div>
+          <div class="wd-quest-footer" id="fsFooter">
+            <img class="cover" id="fsFootImg" alt="">
+            <div class="stack">
+              <div class="slot">
+                <div class="qb pulse" id="fsQuest">
+                  <div class="qb-eyebrow">
+                    <span class="qb-label">Quest</span>
+                    <span class="qb-count" id="fsQCount">--:--:--</span>
+                  </div>
+                  <div class="qb-titlerow">
+                    <div class="qb-title" id="fsQTitle"></div>
+                    <img class="qb-cam" src="../../assets/icons/icon_camera.png" alt="">
+                    <img class="qb-mine" id="fsQMine" alt="">
+                  </div>
+                </div>
+              </div>
+              <div class="id"><div class="nm" id="fsFootName">渋谷コミュニティ</div></div>
+            </div>
+          </div>
         </div>
 
         <!-- upload modal -->
         <div class="up-veil" id="upVeil">
           <div class="up-card" id="upCard">
-            <div class="up-vid"><video id="upVideo" src="../../assets/sample/3d/mqmav1c7_wnam/video.mp4" muted playsinline loop></video></div>
+            <div class="up-vid"><video id="upVideo" src="uploads/video.mp4" muted playsinline loop></video></div>
             <div class="up-body">
               <div class="up-title" id="upTitle">クエスト動画をアップロード</div>
               <div class="up-sub" id="upSub">現在地で撮影された動画</div>
@@ -632,7 +1130,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       <button data-preset="region"><span class="ico">🗾</span>Region</button>
       <button data-preset="street" class="active"><span class="ico">🏙</span>Street+3D</button>
     </div>
-    <div class="hint">縦スクロール＝サークル切替 · 横スワイプ＝投稿 · 看板タップ＝動画を投稿してクリア</div>
+    <div class="hint">縦スクロール＝サークル切替 · 横スクロール＝フリーボード · 右下カメラ＝動画を投稿してクリア</div>
   </div>
 
 </div>
@@ -660,20 +1158,21 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     {
       name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
       cover: '../../assets/sample/uv/story-05.png',
+      admin: true,
       center: [139.70064, 35.65905], radius: 520,
       quest: {
-        title: 'とぅーぷどぅっくバーで乾杯', date: '7/31(金) 19:00–23:00',
+        title: 'とぅーぷどぅっくバーで乾杯', date: '8/1(土) 19:00–23:00',
         venue: 'とぅーぷどぅっくバー', spot: [139.70142, 35.65962],
         desc: '指定のバーで乾杯している動画をアップロードするとクリア。クリアするとこのクエストの投稿が見られる。',
       },
-      cleared: false,
+      cleared: false, inside: false,
       posts: [
-        { ava: '../../assets/sample/user/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: '../../assets/sample/3d/mqmav1c7_wnam/video.mp4' },
-        { ava: '../../assets/sample/user/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/sample/reel/reel003.jpg' },
-        { ava: '../../assets/sample/user/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/sample/reel/reel005.jpg' },
-        { ava: '../../assets/sample/user/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/sample/reel/reel007.jpg' },
-        { ava: '../../assets/sample/user/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/sample/reel/reel009.jpg' },
-        { ava: '../../assets/sample/user/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/sample/reel/reel011.jpg' },
+        { ava: 'uploads/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: 'uploads/video.mp4' },
+        { ava: 'uploads/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: 'uploads/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/sample/reel/reel005.jpg' },
+        { ava: 'uploads/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/sample/reel/reel007.jpg' },
+        { ava: 'uploads/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/sample/reel/reel009.jpg' },
+        { ava: 'uploads/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/sample/reel/reel011.jpg' },
       ],
     },
     {
@@ -685,13 +1184,13 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         venue: 'MIYASHITA PARK', spot: [139.70352, 35.66812],
         desc: '朝のセッションに参加して、ヨガ中の動画をアップロードするとクリア。早起き組の投稿が解錠される。',
       },
-      cleared: false,
+      cleared: false, inside: true,
       posts: [
-        { ava: '../../assets/sample/user/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/sample/reel/reel002.jpg' },
-        { ava: '../../assets/sample/user/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/sample/reel/reel004.jpg' },
-        { ava: '../../assets/sample/user/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/sample/reel/reel006.jpg' },
-        { ava: '../../assets/sample/user/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/sample/reel/reel008.jpg' },
-        { ava: '../../assets/sample/user/user013.jpg', text: '来週も参加します', img: '../../assets/sample/reel/reel010.jpg' },
+        { ava: 'uploads/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/sample/reel/reel002.jpg' },
+        { ava: 'uploads/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/sample/reel/reel004.jpg' },
+        { ava: 'uploads/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/sample/reel/reel006.jpg' },
+        { ava: 'uploads/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/sample/reel/reel008.jpg' },
+        { ava: 'uploads/user013.jpg', text: '来週も参加します', img: '../../assets/sample/reel/reel010.jpg' },
       ],
     },
     {
@@ -703,26 +1202,105 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         venue: '道玄坂', spot: [139.69906, 35.65788],
         desc: '指定の3店舗のうち1杯を食べている動画をアップロードするとクリア。みんなの一杯が見られる。',
       },
-      cleared: false,
+      cleared: false, inside: false,
       posts: [
-        { ava: '../../assets/sample/user/user014.jpg', text: '一軒目から優勝した', img: '../../assets/sample/reel/reel012.jpg' },
-        { ava: '../../assets/sample/user/user015.jpg', text: '替え玉は文化です', img: '../../assets/sample/reel/reel014.jpg' },
-        { ava: '../../assets/sample/user/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/sample/reel/reel001.jpg' },
-        { ava: '../../assets/sample/user/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/sample/reel/reel003.jpg' },
-        { ava: '../../assets/sample/user/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/sample/reel/reel005.jpg' },
+        { ava: 'uploads/user014.jpg', text: '一軒目から優勝した', img: '../../assets/sample/reel/reel012.jpg' },
+        { ava: 'uploads/user015.jpg', text: '替え玉は文化です', img: '../../assets/sample/reel/reel014.jpg' },
+        { ava: 'uploads/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/sample/reel/reel001.jpg' },
+        { ava: 'uploads/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: 'uploads/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/sample/reel/reel005.jpg' },
       ],
     },
   ];
   let active = 0;
+
+  // 現在地（サンプル） — ロック表示の距離・方角の基準
+  const MY_POS = [139.70140, 35.65580];
+  function distTo(c) {
+    const [lo1, la1] = MY_POS, [lo2, la2] = c.center;
+    const R = 6371000, rad = Math.PI / 180;
+    const dLa = (la2 - la1) * rad, dLo = (lo2 - lo1) * rad;
+    const a = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * rad) * Math.cos(la2 * rad) * Math.sin(dLo / 2) ** 2;
+    const m = 2 * R * Math.asin(Math.sqrt(a));
+    const y = Math.sin(dLo) * Math.cos(la2 * rad);
+    const x = Math.cos(la1 * rad) * Math.sin(la2 * rad) - Math.sin(la1 * rad) * Math.cos(la2 * rad) * Math.cos(dLo);
+    const bearing = (Math.atan2(y, x) / rad + 360) % 360;
+    return m >= 1000
+      ? { val: (m / 1000).toFixed(1), unit: 'km', bearing }
+      : { val: String(Math.round(m)), unit: 'm', bearing };
+  }
+
+  const NAMES = ['SunnyVi', 'Kawaii', 'Dreamy', 'foodie', 'Pixel', 'ZenGarden', 'Starry', 'o_cean', 'Mocha'];
+  CIRCLES.forEach((c, ci) => c.posts.forEach((p, pi) => { p.name = NAMES[(ci * 3 + pi) % NAMES.length]; }));
 
   const col = document.getElementById('feedCol');
   const sheet = document.getElementById('feedSheet');
   const cbName = document.getElementById('cbName');
   const cbDesc = document.getElementById('cbDesc');
   const cbCover = document.getElementById('cbCover');
+  // ---- WdQuestPopup — マップのエリア上空に直接浮かべる ----------------
+  const qpMount = document.createElement('div');
+  qpMount.className = 'qp-mount';
+  const qpBlock = '<div class="qp sm">'
+    + '<div class="qp-eyebrow"><span class="qp-label">Quest</span></div>'
+    + '<div class="qp-title"></div>'
+    + '<div class="qp-time"></div>'
+    + '</div>';
+  qpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
+  const qpCards = qpMount.querySelectorAll('.qp');
+  const qpCard = qpCards[qpCards.length - 1];
+  const setAll = (sel, txt) => qpMount.querySelectorAll(sel).forEach(e => { e.textContent = txt; });
+  const qpTitle = { set textContent(v) { setAll('.qp-title', v); } };
+  const qpTime = { set textContent(v) { setAll('.qp-time', v); } };
+  const qpUntil = { set textContent(v) { setAll('.qp-until', v); } };
+  let qpMarker = null;
+  function placePopup(map, C) {
+    if (!qpMarker) {
+      qpMarker = new maplibregl.Marker({ element: qpMount, anchor: 'center', offset: [0, -28] })
+        .setLngLat(C).addTo(map);
+    } else {
+      qpMarker.setLngLat(C);
+    }
+  }
+
+  // '8/1(土) 19:00–23:00' → { start, end }（年はそのまま、繰り上げない）
+  function questWindow(q) {
+    const m = /^(\d+)\/(\d+)[^\d]*(\d+):(\d+)(?:[^\d]+(\d+):(\d+))?/.exec(q.date);
+    if (!m) return null;
+    const y = new Date().getFullYear();
+    const start = new Date(y, +m[1] - 1, +m[2], +m[3], +m[4]);
+    const end = m[5] != null
+      ? new Date(y, +m[1] - 1, +m[2], +m[5], +m[6])
+      : new Date(start.getTime() + 7200000);
+    if (end < start) end.setDate(end.getDate() + 1);   // 日跨ぎ
+    return { start, end };
+  }
+  function tickHero() {
+    const c = CIRCLES[active]; if (!c) return;
+    qpTitle.textContent = c.quest.title;
+    qpCards.forEach(k => k.classList.remove('urgent', 'cleared'));
+    if (c.cleared) {
+      qpCards.forEach(k => k.classList.add('cleared'));
+      setAll('.qp-label', 'Quest cleared');
+      qpTime.textContent = 'クリア済み';
+      return;
+    }
+    setAll('.qp-label', 'Quest');
+    const w = questWindow(c.quest); if (!w) { qpTime.textContent = ''; return; }
+    const now = Date.now();
+    if (now > w.end) { qpCards.forEach(k => k.classList.add('cleared')); qpTime.textContent = '終了'; return; }
+    if (now >= w.start) { qpCards.forEach(k => k.classList.add('urgent')); qpTime.textContent = '開催中'; return; }
+    let s = Math.floor((w.start - now) / 1000);
+    const p = n => String(n).padStart(2, '0');
+    const d = Math.floor(s / 86400);
+    qpTime.textContent = (d > 0 ? d + 'd ' : '')
+      + p(Math.floor(s / 3600) % 24) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60);
+    if (s < 1800) qpCards.forEach(k => k.classList.add('urgent'));
+  }
+  setInterval(tickHero, 1000);
 
   // ---- cells ----------------------------------------------------------------
-  function makeCell(p, tag) {
+  function makeCell(p) {
     const cell = document.createElement('div');
     cell.className = 'post-cell';
     if (p.vid) {
@@ -738,12 +1316,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     scrim.className = 'cell-scrim'; cell.appendChild(scrim);
     const txt = document.createElement('span');
     txt.className = 'u-text'; txt.textContent = p.text; cell.appendChild(txt);
-    const ava = document.createElement('img');
-    ava.className = 'u-ava'; ava.src = p.ava; ava.alt = ''; cell.appendChild(ava);
-    if (tag) {
-      const t = document.createElement('span');
-      t.className = 'u-tag'; t.textContent = tag; cell.appendChild(t);
-    }
+    const nm = document.createElement('span');
+    nm.className = 'u-name'; nm.textContent = p.name || 'user'; cell.appendChild(nm);
     cell.dataset.postRef = ''; cell._post = p;
     return cell;
   }
@@ -752,101 +1326,239 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   CIRCLES.forEach((c) => {
     const strip = document.createElement('div');
     strip.className = 'circle-strip';
-    // quest board (看板) inside the sheet
+    // クエスト名 — リスト上部にオーバーレイ
     const bd = document.createElement('div');
-    bd.className = 'strip-board';
-    bd.innerHTML = '<div class="qb-row1"><span class="ql"><span class="qdot"></span><span class="qlbl">QUEST</span></span>'
-      + '<span class="qb-date"><img src="../../assets/icons/icon_pin_location.png" alt=""><span>' + c.quest.date + '</span></span></div>'
-      + '<div class="qb-title">' + c.quest.title + '</div>'
-      + '<div class="qb-desc">' + c.quest.desc + '</div>'
-      + '<div class="qb-dots"></div>'
-      + '<span class="qb-cam"><img src="../../assets/icons/icon_camera.png" alt=""></span>';
+    bd.className = 'strip-title';
+    bd.innerHTML = '<span class="qhead">'
+      + '<span class="qtrow"><span class="qt">' + c.quest.title + '</span>'
+      + '<button class="qedit" aria-label="お題を編集"><img src="../../assets/icons/icon_edit.png" alt=""></button></span></span>'
+      + '<span class="qlbl" style="display:none"></span>'
+      + '<span class="qb-dots" style="display:none"></span>'
+      + '<button class="qcam" aria-label="クエストを投稿"><img src="../../assets/icons/icon_camera.png" alt=""></button>'
+      + '<button class="qmine" aria-label="自分の投稿"><img alt=""></button>';
+    bd.querySelector('.qmine').addEventListener('click', () => {
+      active = CIRCLES.indexOf(c); renderBoard();
+      openFs(c.posts[0], c);
+    });
+    if (c.admin) bd.classList.add('admin');
+    bd.querySelector('.qedit').addEventListener('click', () => {
+      active = CIRCLES.indexOf(c); renderBoard(); openQuestEdit(c);
+    });
+    bd.querySelector('.qcam').addEventListener('click', () => {
+      active = CIRCLES.indexOf(c); renderBoard();
+      if (!c.cleared) runUpload();
+    });
     const wrap = document.createElement('div');
     wrap.className = 'rail-wrap';
     const rail = document.createElement('div');
-    rail.className = 'strip-rail locked';
-    c.posts.forEach((p) => rail.appendChild(makeCell(p)));
-    c.rail = rail; c.board = bd;
+    rail.className = 'strip-rail' + (canView(c) ? '' : ' locked');
+    const inner = document.createElement('div');
+    inner.className = 'board-inner';
+    rail.appendChild(inner);
+    c.rail = rail; c.board = bd; c.inner = inner;
+
+    /* ---- FREE BOARD packing -------------------------------------------------
+       ボードを「列」単位で埋める。列同士は X が重ならないので、列内のタイルを
+       縦に積むだけで全体の非重複が保証される。タイル数・アスペクト比・
+       左右の寄せをランダム化してグリッド感を消す。右端に近づくと列を追加。 */
+    let seed = 1337 + CIRCLES.indexOf(c) * 977;
+    const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+    const GAP = 7, PAD = 10, PAD_TOP = 48, MAXW = 244;   // PAD_TOP: クエスト名 + 8px の余白
+    const P = 9 / 16, L = 16 / 9;
+    /* 列レイアウト
+       A: 縦1 / AL: 横1  ← 一枚絵。投稿が極端に少ないときのみ許可
+       B: 縦2枚縦並び / C: 横2枚縦並び / C3: 横3枚縦並び
+       D: 横1 の下に縦2枚横並び / E: 縦2枚横並び の下に横1
+       F: 縦1 の下に横1 / G: 横1 の下に縦1
+       H: 横1 の下に縦3枚横並び / I: 縦3枚横並び の下に横1 */
+    const TYPES = ['B', 'F', 'C', 'D', 'H', 'G', 'C3', 'B', 'E', 'I', 'C', 'F'];
+    const TYPES_SPARSE = ['A', 'AL'];   // 投稿が極端に少ないとき
+    function layoutColumn(type, H) {
+      const t = [];
+      const fit = (h, ar) => { let w = Math.round(h * ar); if (w > MAXW) { w = MAXW; h = Math.round(w / ar); } return { w, h }; };
+      if (type === 'A' || type === 'AL') {
+        // 一枚絵は縦・横で同じ幅。縦がボード高さに収まる幅を共通幅にする
+        const w = Math.min(Math.round(H * P), MAXW);
+        t.push({ dx: 0, dy: 0, w, h: Math.round(w / (type === 'A' ? P : L)) });
+      } else if (type === 'C3') {
+        // 横3枚 — 上下の余白をなくす（アスペクト比維持のまま最大高）
+        const ah = Math.round((H - GAP * 2) / 3);
+        const a = { h: ah, w: Math.round(ah * L) };
+        for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (a.h + GAP) * i, w: a.w, h: a.h });
+      } else if (type === 'H' || type === 'I') {
+        // 横1 + 縦3 — 列高にちょうど収まる幅（MAXW で頭打ちにしない）
+        const wb = Math.round((H - GAP * 2.125) / 3.4653);
+        const hb = Math.round(wb / P);
+        const colW = wb * 3 + GAP * 2;
+        const lh = Math.round(colW / L);
+        if (type === 'H') {
+          t.push({ dx: 0, dy: 0, w: colW, h: lh });
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: lh + GAP, w: wb, h: hb });
+        } else {
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh });
+        }
+      } else if (type === 'B' || type === 'C') {
+        const ar = type === 'B' ? P : L;
+        const ah = Math.round((H - GAP) / 2);
+        const a = type === 'C' ? { h: ah, w: Math.round(ah * L) } : fit(ah, ar);
+        t.push({ dx: 0, dy: 0, w: a.w, h: a.h });
+        t.push({ dx: 0, dy: a.h + GAP, w: a.w, h: a.h });
+      } else if (type === 'F' || type === 'G') {
+        // 縦1 + 横1 は同じ幅。共通幅 w に対し h = w/P + w/L + GAP = H
+        const w = Math.min(Math.round((H - GAP) / (1 / P + 1 / L)), MAXW);
+        const p1 = { w, h: Math.round(w / P) };
+        const l1 = { w, h: Math.round(w / L) };
+        if (type === 'F') {
+          t.push({ dx: 0, dy: 0, w, h: p1.h });
+          t.push({ dx: 0, dy: p1.h + GAP, w, h: l1.h });
+        } else {
+          t.push({ dx: 0, dy: 0, w, h: l1.h });
+          t.push({ dx: 0, dy: l1.h + GAP, w, h: p1.h });
+        }
+      } else {
+        const hb = Math.round((H - GAP * 1.5625) / 1.6328);
+        const wb = Math.round(hb * P);
+        const colW = wb * 2 + GAP;
+        const ht = Math.round(colW * P);
+        if (type === 'D') {
+          t.push({ dx: 0, dy: 0, w: colW, h: ht });
+          t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb });
+          t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb });
+        } else {
+          t.push({ dx: 0, dy: 0, w: wb, h: hb });
+          t.push({ dx: wb + GAP, dy: 0, w: wb, h: hb });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: ht });
+        }
+      }
+      return t;
+    }
+    const PATTERNS_UNUSED = null;
+
+    function addColumn() {
+      const H = rail.clientHeight - PAD_TOP - PAD;
+      if (H <= 40) return;
+      const set = c.posts.length <= 2 ? TYPES_SPARSE : TYPES;
+      const type = set[c.colIdx % set.length];
+      c.colIdx++;
+      const tiles = layoutColumn(type, H);
+      const colW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
+      const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
+      const center = Math.max(0, Math.round((H - used) / 2));   // 余白がある列は縦中央に
+      const yOff = PAD_TOP + center + (center > 4 ? 0 : Math.round(rnd() * GAP * 1.6));
+      tiles.forEach((t) => {
+        const p = c.posts[c.feedIdx % c.posts.length];
+        const cycle = Math.floor(c.feedIdx / c.posts.length);
+        c.feedIdx++;
+        const cell = makeCell(p);
+        if (t.w < 132) cell.classList.add('sm');
+        cell.style.left = (c.cursorX + t.dx) + 'px';
+        cell.style.top = (yOff + t.dy) + 'px';
+        cell.style.width = t.w + 'px';
+        cell.style.height = t.h + 'px';
+        inner.appendChild(cell);
+      });
+      c.cursorX += colW + GAP;
+      inner.style.width = (c.cursorX + PAD) + 'px';
+    }
+
+    c.buildBoard = () => {
+      if (rail.clientHeight <= 40) { requestAnimationFrame(c.buildBoard); return; }
+      inner.innerHTML = '';
+      seed = 1337 + CIRCLES.indexOf(c) * 977;
+      c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
+      for (let i = 0; i < 9; i++) addColumn();
+      c.setFocus();
+      renderDots(c);
+    };
+    /* 視界内の動画だけ再生 */
     c.setFocus = () => {
-      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 1;
-      const pad = Math.max(0, (rail.clientWidth - cellW) / 2);
-      rail.style.paddingLeft = pad + 'px'; rail.style.paddingRight = pad + 'px';
-      const i = Math.round(rail.scrollLeft / cellW);
-      Array.from(rail.children).forEach((el, k) => {
-        el.classList.toggle('focus', k === i);
+      const L = rail.scrollLeft - 60, R = rail.scrollLeft + rail.clientWidth + 60;
+      const locked = rail.classList.contains('locked');
+      Array.from(inner.children).forEach((el) => {
         const v = el.querySelector('video');
-        if (v) { if (k === i && !c.rail.classList.contains('locked')) v.play().catch(() => {}); else v.pause(); }
+        if (!v) return;
+        const x = el.offsetLeft;
+        if (!locked && x + el.offsetWidth > L && x < R) v.play().catch(() => {}); else v.pause();
       });
     };
+    c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
     c.dots = bd.querySelector('.qb-dots');
     c.qlbl = bd.querySelector('.qlbl');
     c.qdesc = bd.querySelector('.qb-desc');
     wrap.appendChild(rail);
+    const lock = document.createElement('div');
+    lock.className = 'lock-note';
+    const d = distTo(c);
+    lock.innerHTML = '<span class="lscrim"></span>'
+      + '<span class="lt">エリアに入ると見れます</span>'
+      + '<span class="lmeta">'
+      +   '<span class="ldist"><span class="v">' + d.val + '</span><span class="u">' + d.unit + '</span></span>'
+      +   '<span class="ldir" style="transform:rotate(' + d.bearing.toFixed(0) + 'deg)">'
+      +     '<img src="../../assets/icons/icon_near.png" alt="">'
+      +   '</span>'
+      + '</span>';
+    wrap.appendChild(lock);
+    c.lock = lock;
     strip.appendChild(wrap);
     strip.appendChild(bd);
     col.appendChild(strip);
-    bd.addEventListener('click', () => { if (CIRCLES[active] === c && !c.cleared) runUpload(); });
-    // infinite horizontal: left = past posts, right = recommendations
-    c.pastCursor = 0; c.recCursor = 0; c.growing = false;
-    function prependPast(n) {
-      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 0;
-      if (!cellW) return;
-      for (let k = 0; k < n; k++) {
-        c.pastCursor++;
-        const src = c.posts[(c.posts.length * 100 - c.pastCursor) % c.posts.length];
-        const days = c.pastCursor + 1;
-        rail.insertBefore(makeCell(src, days + '日前'), rail.firstChild);
-      }
-      rail.scrollLeft += n * cellW;
-    }
-    function appendRec(n) {
-      for (let k = 0; k < n; k++) {
-        const src = c.posts[c.recCursor % c.posts.length];
-        c.recCursor++;
-        rail.appendChild(makeCell(src, 'おすすめ'));
-      }
-    }
-    rail.addEventListener('scroll', () => {
-      if (c.rail.classList.contains('locked') || c.growing) return;
-      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 1;
-      c.growing = true;
-      if (rail.scrollLeft < cellW * 1.5) prependPast(3);
-      else if (rail.scrollLeft > rail.scrollWidth - rail.clientWidth - cellW * 1.5) appendRec(3);
-      c.growing = false;
-    }, { passive: true });
-    rail.addEventListener('click', (ev) => {
-      if (c.rail.classList.contains('locked')) return;
-      const cell = ev.target.closest('.post-cell');
-      if (!cell) return;
-      const cells = Array.from(rail.children);
-      const k = cells.indexOf(cell);
-      if (cell.classList.contains('focus')) { openFs(cell._post, c); }
-      else { rail.scrollTo({ left: k * cell.offsetWidth, behavior: 'smooth' }); }
-    });
-    renderDots(c);
-    requestAnimationFrame(c.setFocus);
-    requestAnimationFrame(() => {
-      prependPast(3);
-      const cellW = rail.firstChild ? rail.firstChild.offsetWidth : 0;
-      rail.scrollLeft = c.pastCursor * cellW;
-      requestAnimationFrame(() => { c.setFocus(); renderDots(c); });
-    });
-    rail.addEventListener('scroll', () => c.setFocus(), { passive: true });
+    // 右端に近づいたら列を足して無限に横へ伸ばす
     let rt = null;
     rail.addEventListener('scroll', () => {
+      if (!rail.classList.contains('locked')
+          && rail.scrollLeft > inner.offsetWidth - rail.clientWidth - 420) {
+        for (let i = 0; i < 3; i++) addColumn();
+      }
       clearTimeout(rt);
-      rt = setTimeout(() => renderDots(c), 70);
+      rt = setTimeout(() => { c.setFocus(); renderDots(c); }, 80);
+    }, { passive: true });
+    rail.addEventListener('click', (ev) => {
+      const cell = ev.target.closest('.post-cell');
+      if (cell) openFs(cell._post, c);
     });
-    window.addEventListener('resize', c.setFocus);
+    requestAnimationFrame(c.buildBoard);
+    let rz = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(rz); rz = setTimeout(c.buildBoard, 160);
+    });
   });
 
-  // ---- fullscreen viewer -----------------------------------------------------
+  // 最後のクエストを上までスクロールできるよう末尾にスペーサー
+  (function () {
+    const tail = document.createElement('div');
+    tail.style.cssText = 'flex:none;height:60%;pointer-events:none;';
+    col.appendChild(tail);
+  })();
+
+  // 閲覧条件: そのお題を投稿済み(cleared) または エリア内(inside)
+  function canView(c) { return !!(c.cleared || c.inside); }
+
+  // ---- fullscreen viewer — UniverseView の story-fs と同じ挙動 ---------------
   const fsViewer = document.getElementById('fsViewer');
   const fsMedia = document.getElementById('fsMedia');
   const fsText = document.getElementById('fsText');
-  const fsAva = document.getElementById('fsAva');
+  const fsBar = document.getElementById('fsBar');
+  const fsFootImg = document.getElementById('fsFootImg');
+  const fsFootName = document.getElementById('fsFootName');
+  const fsFooter = document.getElementById('fsFooter');
+  const fsQuest = document.getElementById('fsQuest');
+  const fsQTitle = document.getElementById('fsQTitle');
+  const fsQCount = document.getElementById('fsQCount');
+  const fsQMine = document.getElementById('fsQMine');
+  let fsCircle = null, fsIndex = 0;
+  const fsLock = document.getElementById('fsLock');
+
   document.getElementById('fsClose').addEventListener('click', closeFs);
-  function openFs(p, c) {
+  document.getElementById('fsPrev').addEventListener('click', () => { if (canView(fsCircle)) stepFs(-1); });
+  document.getElementById('fsNext').addEventListener('click', () => { if (canView(fsCircle)) stepFs(1); });
+  fsViewer.querySelectorAll('.wd-side-tool .act').forEach((a) => {
+    a.addEventListener('click', () => { if (a.dataset.act === 'like') a.classList.toggle('liked'); });
+  });
+
+  function renderFs() {
+    const c = fsCircle; if (!c) return;
+    const p = c.posts[fsIndex];
     fsMedia.innerHTML = '';
     if (p.vid) {
       const v = document.createElement('video');
@@ -854,25 +1566,131 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       fsMedia.appendChild(v);
     } else {
       const im = document.createElement('img');
-      im.className = 'media'; im.src = p.img; im.alt = '';
+      im.src = p.img; im.alt = '';
       fsMedia.appendChild(im);
     }
     fsText.textContent = p.text;
-    fsAva.src = p.ava; fsAva.style.display = '';
-    fsViewer.classList.add('on');
+    const open = canView(c);
+    fsViewer.classList.toggle('locked', !open);
+    const v0 = fsMedia.querySelector('video');
+    if (v0 && !open) v0.pause();
+    const dd = distTo(c);
+    fsLock.innerHTML = '<span class="lscrim"></span>'
+      + '<span class="lt">エリアに入ると見れます</span>'
+      + '<span class="lmeta">'
+      +   '<span class="ldist"><span class="v">' + dd.val + '</span><span class="u">' + dd.unit + '</span></span>'
+      +   '<span class="ldir" style="transform:rotate(' + dd.bearing.toFixed(0) + 'deg)">'
+      +     '<img src="../../assets/icons/icon_near.png" alt="">'
+      +   '</span>'
+      + '</span>';
+    fsBar.innerHTML = '';
+    c.posts.forEach((_, k) => {
+      const s = document.createElement('span');
+      s.className = 'seg' + (k <= fsIndex ? ' done' : '');
+      s.innerHTML = '<i class="sfill"></i>';
+      fsBar.appendChild(s);
+    });
+    fsFootImg.src = c.cover;
+    fsFootName.textContent = c.name;
+    fsFooter.classList.toggle('no-quest', !c.quest);
+    if (c.quest) {
+      fsQuest.classList.toggle('cleared', !!c.cleared);
+      fsQuest.classList.toggle('pulse', !c.cleared);
+      fsQuest.querySelector('.qb-label').textContent = c.cleared ? 'Quest cleared' : 'Quest';
+      fsQTitle.textContent = c.quest.title;
+      if (c.cleared) fsQMine.src = c.myThumb || c.posts[0].img || c.cover;
+      tickFsCount();
+    }
+  }
+
+
+  fsQuest.addEventListener('click', () => {
+    if (!fsCircle || fsCircle.cleared) return;
+    closeFs();
+    active = CIRCLES.indexOf(fsCircle);
+    renderBoard();
+    setTimeout(runUpload, 240);
+  });
+
+  function stepFs(d) {
+    if (!fsCircle) return;
+    const n = fsCircle.posts.length;
+    fsIndex = (fsIndex + d + n) % n;
+    renderFs();
+  }
+
+  function stepCircle(d) {
+    if (!fsCircle) return;
+    const i = CIRCLES.indexOf(fsCircle);
+    const n = CIRCLES.length;
+    const next = CIRCLES[(i + d + n) % n];
+    fsViewer.classList.add('moved');
+    fsMedia.style.transition = 'transform .18s var(--ease-out), opacity .18s var(--ease-out)';
+    fsMedia.style.transform = 'translateY(' + (d > 0 ? -34 : 34) + 'px)';
+    fsMedia.style.opacity = '0';
+    setTimeout(() => {
+      fsCircle = next; fsIndex = 0; renderFs();
+      fsMedia.style.transition = 'none';
+      fsMedia.style.transform = 'translateY(' + (d > 0 ? 34 : -34) + 'px)';
+      requestAnimationFrame(() => {
+        fsMedia.style.transition = 'transform .26s var(--ease-out), opacity .26s var(--ease-out)';
+        fsMedia.style.transform = 'translateY(0)';
+        fsMedia.style.opacity = '1';
+      });
+      active = CIRCLES.indexOf(next);
+      renderBoard();
+      if (typeof flyToActive === 'function') { try { flyToActive(); } catch (e) {} }
+    }, 180);
+  }
+
+  let tY = 0, tX = 0, tActive = false;
+  fsViewer.addEventListener('touchstart', (e) => {
+    tY = e.touches[0].clientY; tX = e.touches[0].clientX; tActive = true;
+  }, { passive: true });
+  fsViewer.addEventListener('touchend', (e) => {
+    if (!tActive) return; tActive = false;
+    const dy = e.changedTouches[0].clientY - tY;
+    const dx = e.changedTouches[0].clientX - tX;
+    if (Math.abs(dy) > 46 && Math.abs(dy) > Math.abs(dx)) stepCircle(dy < 0 ? 1 : -1);
+    else if (Math.abs(dx) > 46 && canView(fsCircle)) stepFs(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  let wheelLock = 0;
+  fsViewer.addEventListener('wheel', (e) => {
+    if (!fsViewer.classList.contains('open')) return;
+    const now = Date.now();
+    if (now - wheelLock < 520) return;
+    if (Math.abs(e.deltaY) > 24 && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      wheelLock = now; stepCircle(e.deltaY > 0 ? 1 : -1);
+    } else if (Math.abs(e.deltaX) > 24 && canView(fsCircle)) {
+      wheelLock = now; stepFs(e.deltaX > 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  function openFs(p, c) {
+    fsCircle = c;
+    fsIndex = Math.max(0, c.posts.indexOf(p));
+    renderFs();
+    fsMedia.style.transition = 'none';
+    fsMedia.style.transform = 'translateY(0)';
+    fsMedia.style.opacity = '1';
+    fsViewer.classList.remove('moved');
+    fsViewer.classList.add('open');
+    fsViewer.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => fsViewer.classList.add('expanded'));
   }
   function closeFs() {
-    fsViewer.classList.remove('on');
+    fsViewer.classList.remove('open', 'expanded');
+    fsViewer.setAttribute('aria-hidden', 'true');
     const v = fsMedia.querySelector('video');
     if (v) v.pause();
   }
 
   // ---- board / circle bar sync ---------------------------------------------
   function renderDots(c) {
-    const cellW = c.rail.firstChild ? c.rail.firstChild.offsetWidth : 1;
-    const raw = Math.round(c.rail.scrollLeft / cellW);
     const len = c.posts.length;
-    const i = (((raw - (c.pastCursor || 0)) % len) + len) % len;
+    const max = Math.max(1, c.inner.offsetWidth - c.rail.clientWidth);
+    const f = Math.min(1, c.rail.scrollLeft / max);
+    const i = Math.min(len - 1, Math.round(f * (len - 1)));
     c.dots.innerHTML = '';
     c.posts.forEach((_, k) => {
       const d = document.createElement('i');
@@ -886,17 +1704,93 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     cbName.textContent = c.name;
     cbDesc.textContent = c.desc;
     cbCover.src = c.cover;
+    tickHero();
     c.board.classList.toggle('cleared', c.cleared);
-    c.qlbl.textContent = c.cleared ? 'QUEST CLEARED' : 'QUEST';
-    c.qdesc.textContent = c.cleared ? 'クリア済み · このクエストの投稿が解錠されています' : c.quest.desc;
+    if (c.cleared) {
+      const mi = c.board.querySelector('.qmine img');
+      if (mi) mi.src = c.myThumb || c.posts[0].img || c.cover;
+    }
     syncPulse();
   }
+
+  // ---- quest countdown ------------------------------------------------------
+  const NOW0 = Date.now();
+  CIRCLES.forEach((c, i) => { c.endsAt = NOW0 + [2.25, 30, 76][i] * 3600e3; });
+  function tickCountdown() {
+    CIRCLES.forEach((c) => {
+      if (!c.board) return;
+      const el = c.board.querySelector('.qtime');
+      if (!el) return;      if (c.cleared) { el.querySelector('.tv').textContent = 'cleared'; el.classList.remove('soon'); return; }
+      let s = Math.max(0, Math.floor((c.endsAt - Date.now()) / 1000));
+      const d = Math.floor(s / 86400); s -= d * 86400;
+      const h = Math.floor(s / 3600); s -= h * 3600;
+      const m = Math.floor(s / 60); s -= m * 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      el.querySelector('.tv').textContent = d > 0
+        ? d + 'd ' + pad(h) + 'h ' + pad(m) + 'm'
+        : pad(h) + ':' + pad(m) + ':' + pad(s);
+      el.classList.toggle('soon', d === 0 && h < 3);
+    });
+  }
+  function tickFsCount() {
+    const c = fsCircle;
+    if (!c || !c.quest) return;
+    if (c.cleared) { fsQCount.textContent = 'CLEARED'; fsQCount.classList.remove('soon'); return; }
+    let s = Math.max(0, Math.floor((c.endsAt - Date.now()) / 1000));
+    const d = Math.floor(s / 86400); s -= d * 86400;
+    const hh = Math.floor(s / 3600); s -= hh * 3600;
+    const m = Math.floor(s / 60); s -= m * 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    fsQCount.textContent = d > 0 ? d + 'd ' + pad(hh) + 'h ' + pad(m) + 'm'
+                                 : pad(hh) + ':' + pad(m) + ':' + pad(s);
+    fsQCount.classList.toggle('soon', d === 0 && hh < 3);
+  }
+  tickCountdown();
+  setInterval(() => { tickCountdown(); tickFsCount(); }, 1000);
+
+  // ---- quest edit (サークル管理者) ------------------------------------------
+  const qeVeil = document.getElementById('qeVeil');
+  const qeTitle = document.getElementById('qeTitle');
+  const qeVenue = document.getElementById('qeVenue');
+  const qeDate = document.getElementById('qeDate');
+  const qeDesc = document.getElementById('qeDesc');
+  let qeTarget = null;
+  function openQuestEdit(c) {
+    qeTarget = c;
+    qeTitle.value = c.quest.title; qeVenue.value = c.quest.venue;
+    qeDate.value = c.quest.date; qeDesc.value = c.quest.desc;
+    qeVeil.classList.add('on');
+  }
+  document.getElementById('qeCancel').addEventListener('click', () => qeVeil.classList.remove('on'));
+  document.getElementById('qeSave').addEventListener('click', () => {
+    if (qeTarget) {
+      const q = qeTarget.quest;
+      q.title = qeTitle.value.trim() || q.title;
+      q.venue = qeVenue.value.trim() || q.venue;
+      q.date = qeDate.value.trim() || q.date;
+      q.desc = qeDesc.value.trim() || q.desc;
+      qeTarget.board.querySelector('.qt').textContent = q.title;
+    }
+    qeVeil.classList.remove('on');
+  });
+  qeVeil.addEventListener('click', (e) => { if (e.target === qeVeil) qeVeil.classList.remove('on'); });
+
+  // ---- route dialog ---------------------------------------------------------
+  const routeVeil = document.getElementById('routeVeil');
+  const rcSub = document.getElementById('rcSub');
+  function openRoute(c) {
+    rcSub.textContent = c.quest.venue + ' · ' + c.name;
+    routeVeil.classList.add('on');
+  }
+  document.getElementById('rcCancel').addEventListener('click', () => routeVeil.classList.remove('on'));
+  document.getElementById('rcOpen').addEventListener('click', () => routeVeil.classList.remove('on'));
+  routeVeil.addEventListener('click', (e) => { if (e.target === routeVeil) routeVeil.classList.remove('on'); });
 
   let scrollT = null;
   col.addEventListener('scroll', () => {
     clearTimeout(scrollT);
     scrollT = setTimeout(() => {
-      const stripH = col.clientHeight * 0.8 + 8;
+      const stripH = (col.querySelector('.circle-strip')?.getBoundingClientRect().height) || col.clientHeight * 0.8;
       const i = Math.round(col.scrollTop / stripH);
       if (i !== active && CIRCLES[i]) {
         active = i;
@@ -958,8 +1852,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
   function unlock(c) {
     c.cleared = true;
+    c.myThumb = c.posts[0].img || c.cover;
+    const mi = c.board.querySelector('.qmine img');
+    if (mi) mi.src = c.myThumb;
+    c.board.classList.add('cleared');
     c.rail.classList.remove('locked');
+    if (fsCircle === c && fsViewer.classList.contains('open')) renderFs();
     renderBoard();
+    if (window.EarthMap && EarthMap.map) applyWallState(EarthMap.map, CIRCLES[active]);
     clearToast.classList.add('on');
     setTimeout(() => clearToast.classList.remove('on'), 2600);
     c.setFocus();
@@ -978,44 +1878,145 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     return out;
   }
   function disk(center, rM) { return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring(center, rM, 128)] } }; }
-  function lineF(center, rM) { return { type: 'Feature', geometry: { type: 'LineString', coordinates: ring(center, rM, 128) } }; }
-  function annulus(center, rOut, rIn) {
-    return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [ring(center, rOut, 160), ring(center, rIn, 160).reverse()] } };
+
+  /* ---- WdEriaWall — 領域（中心＋半径）を真円のまま 56 分割で押し出した
+     「光のカーテン」。壁色は --gradient-colorful の 11 stop を一周サンプリングし、
+     暗い stop だけ輝度下限までリフトして途切れて見せない。 */
+  const WALL_N = 56;
+  const WALL_PAL = ['#fff0a6','#bfcc96','#80a787','#40837f','#005f67','#60566f',
+                    '#804e78','#bf4680','#ff3e88','#e86f6d','#d0a052'].map(lift);
+  function lift(hex) {
+    const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+    const L = (.2126 * r + .7152 * g + .0722 * b) / 255;
+    if (L >= .38) return hex;
+    const t = (.38 - L) / (1 - L) * .85;
+    const m = v => Math.round(v + (255 - v) * t).toString(16).padStart(2, '0');
+    return '#' + m(r) + m(g) + m(b);
+  }
+  function segColor(i) { return WALL_PAL[Math.min(WALL_PAL.length - 1, Math.round(i / WALL_N * (WALL_PAL.length - 1)))]; }
+  function wallH(R) { return Math.max(160, R * 0.39); }
+  /* カーテン面のフェード（DS: 下 66% → 34% で 36% → 70% で 14% → 上 0%）を
+     10 バンドの押し出しでなめらかに近似し、最上部に天端リムを乗せる。 */
+  const WALL_BANDS = (function () {
+    const stop = f => f < .34 ? .66 + (.36 - .66) * (f / .34)
+      : f < .70 ? .36 + (.14 - .36) * ((f - .34) / .36)
+      : .14 * (1 - (f - .70) / .30);
+    const n = 10, out = [];
+    for (let i = 0; i < n; i++) {
+      const f0 = i / n, f1 = (i + 1) / n;
+      out.push(['b' + i, f0, f1, +stop((f0 + f1) / 2).toFixed(3)]);
+    }
+    out.push(['rim', 0.99, 1.012, 1]);
+    return out;
+  })();
+  function wallSegs(center, R) {
+    const t = Math.max(4, R * 0.012), feats = [];
+    for (let i = 0; i < WALL_N; i++) {
+      const a0 = i / WALL_N * 2 * Math.PI, a1 = (i + 1) / WALL_N * 2 * Math.PI;
+      const p = [dest(center[0], center[1], R + t, a0), dest(center[0], center[1], R + t, a1),
+                 dest(center[0], center[1], R - t, a1), dest(center[0], center[1], R - t, a0)];
+      feats.push({ type: 'Feature', properties: { c: segColor(i) },
+        geometry: { type: 'Polygon', coordinates: [p.concat([p[0]])] } });
+    }
+    return { type: 'FeatureCollection', features: feats };
+  }
+  function wallLines(center, R) {
+    const feats = [];
+    for (let i = 0; i < WALL_N; i++) {
+      const a0 = i / WALL_N * 2 * Math.PI, a1 = (i + 1) / WALL_N * 2 * Math.PI;
+      feats.push({ type: 'Feature', properties: { c: segColor(i) },
+        geometry: { type: 'LineString', coordinates: [dest(center[0], center[1], R, a0), dest(center[0], center[1], R, a1)] } });
+    }
+    return { type: 'FeatureCollection', features: feats };
+  }
+  /* 面の縦ストライプ（DS: 24px ごとの 1px 白線を上方へマスク）を
+     境界角ごとの細い押し出しリブで再現する。 */
+  function wallRibs(center, R) {
+    const t = Math.max(5, R * 0.015), feats = [];
+    const aw = (2 * Math.PI / WALL_N) * 0.09;
+    for (let i = 0; i < WALL_N; i++) {
+      const a = i / WALL_N * 2 * Math.PI;
+      const p = [dest(center[0], center[1], R + t, a - aw), dest(center[0], center[1], R + t, a + aw),
+                 dest(center[0], center[1], R - t, a + aw), dest(center[0], center[1], R - t, a - aw)];
+      feats.push({ type: 'Feature', properties: {},
+        geometry: { type: 'Polygon', coordinates: [p.concat([p[0]])] } });
+    }
+    return { type: 'FeatureCollection', features: feats };
   }
   // zoom at which the circle area spans 80% of the screen width
   function questZoom(C, R) {
     const w = document.querySelector('.phone').clientWidth || 402;
-    const mpp = (R * 2) / (w * 0.8);
+    const mpp = (R * 2) / (w * 0.72);
     return Math.log2(78271.51696 * Math.cos(C[1] * Math.PI / 180) / mpp);
   }
 
   function areaAdd(map, C, R) {
     if (map.getSource('area-disk')) return;
     const firstSymbol = (map.getStyle().layers.find(l => l.type === 'symbol') || {}).id;
+    const H = wallH(R);
     map.addSource('area-disk', { type: 'geojson', data: disk(C, R) });
-    map.addSource('area-line', { type: 'geojson', data: lineF(C, R) });
-    map.addSource('area-wall-core', { type: 'geojson', data: annulus(C, R + 6, R - 6) });
+    map.addSource('area-line', { type: 'geojson', data: wallLines(C, R) });
+    map.addSource('area-wall', { type: 'geojson', data: wallSegs(C, R) });
+    map.addSource('area-rib', { type: 'geojson', data: wallRibs(C, R) });
+    // 領域の床 — ブランドピンクをごく薄く
     map.addLayer({ id: 'area-fill', type: 'fill', source: 'area-disk',
-      paint: { 'fill-color': '#4be3b0', 'fill-opacity': 0.08 } }, firstSymbol);
+      paint: { 'fill-color': '#08080b', 'fill-opacity': 0.16 } }, firstSymbol);
+    // ① 地面ブリード — 境界の外光（壁と同じ stop 色）
     map.addLayer({ id: 'area-glow-wide', type: 'line', source: 'area-line',
       layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': '#5effc7', 'line-width': 26, 'line-blur': 28, 'line-opacity': 0.7 } });
+      paint: { 'line-color': ['get', 'c'], 'line-width': 24, 'line-blur': 26, 'line-opacity': 0.5 } });
     map.addLayer({ id: 'area-glow-mid', type: 'line', source: 'area-line',
       layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': '#7bffe0', 'line-width': 9, 'line-blur': 6, 'line-opacity': 0.85 } });
-    map.addLayer({ id: 'area-glow', type: 'line', source: 'area-line',
-      layout: { 'line-cap': 'round', 'line-join': 'round' },
-      paint: { 'line-color': '#ffffff', 'line-width': 2.6, 'line-blur': 0.5, 'line-opacity': 1 } });
-    map.addLayer({ id: 'area-wall-core', type: 'fill-extrusion', source: 'area-wall-core',
-      paint: { 'fill-extrusion-color': '#c3c8d1', 'fill-extrusion-height': 220,
-        'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.7, 'fill-extrusion-vertical-gradient': true } });
+      paint: { 'line-color': ['get', 'c'], 'line-width': 7, 'line-blur': 5, 'line-opacity': 0.8 } });
+    // ② カーテン面＋③ 天端リム
+    WALL_BANDS.forEach(b => {
+      map.addLayer({ id: 'area-wall-' + b[0], type: 'fill-extrusion', source: 'area-wall',
+        paint: { 'fill-extrusion-color': ['get', 'c'],
+          'fill-extrusion-base': H * b[1], 'fill-extrusion-height': H * b[2],
+          'fill-extrusion-opacity': b[3], 'fill-extrusion-vertical-gradient': false } });
+    });
+
+    // 縦ストライプ — 下ほど濃く、上で消える 2 段
+    [['lo', 0, 0.42, 0.16], ['hi', 0.42, 0.80, 0.07]].forEach(r => {
+      map.addLayer({ id: 'area-rib-' + r[0], type: 'fill-extrusion', source: 'area-rib',
+        paint: { 'fill-extrusion-color': '#ffffff',
+          'fill-extrusion-base': H * r[1], 'fill-extrusion-height': H * r[2],
+          'fill-extrusion-opacity': r[3], 'fill-extrusion-vertical-gradient': false } });
+    });
+    applyWallState(map, CIRCLES[active]);
   }
+
+  /* 壁の状態 — 未クリア / 残り30分未満（scan 2.2s）/ クリア済み
+     （cleared: --state-quest-cleared 単色・scan 停止・高さ 60%、壁は消さない） */
+  const WALL_CLEARED = '#7cc47f';
+  function applyWallState(map, c) {
+    if (!c || !map.getLayer('area-wall-b0')) return;
+    const cleared = !!c.cleared;
+    const color = cleared ? WALL_CLEARED : ['get', 'c'];
+    const H = wallH(c.radius) * (cleared ? 0.6 : 1);
+    WALL_BANDS.forEach(b => {
+      map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-color', color);
+      map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-base', H * b[1]);
+      map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-height', H * b[2]);
+    });
+    ['area-glow-wide', 'area-glow-mid'].forEach(id => {
+      if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', cleared ? WALL_CLEARED : ['get', 'c']);
+    });
+    [['lo', 0, 0.42], ['hi', 0.42, 0.80]].forEach(r => {
+      if (!map.getLayer('area-rib-' + r[0])) return;
+      map.setPaintProperty('area-rib-' + r[0], 'fill-extrusion-base', H * r[1]);
+      map.setPaintProperty('area-rib-' + r[0], 'fill-extrusion-height', H * r[2]);
+    });
+  }
+
 
   function areaMove(map, C, R) {
     if (!map.getSource('area-disk')) return;
     map.getSource('area-disk').setData(disk(C, R));
-    map.getSource('area-line').setData(lineF(C, R));
-    map.getSource('area-wall-core').setData(annulus(C, R + 6, R - 6));
+    map.getSource('area-line').setData(wallLines(C, R));
+    map.getSource('area-wall').setData(wallSegs(C, R));
+    map.getSource('area-rib').setData(wallRibs(C, R));
+    applyWallState(map, CIRCLES[active]);
   }
 
   // restart board + marker pulses together so they beat in sync
@@ -1035,23 +2036,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
   // ---- quest spot marker ----------------------------------------------------
   let spotMarker = null;
-  function placeSpot(map) {
-    const c = CIRCLES[active];
-    const at = c.quest.spot || c.center;
-    if (!spotMarker) {
-      const el = document.createElement('div');
-      el.className = 'quest-pin';
-      el.innerHTML = '<span class="pin-stem"></span><span class="pin-halo"></span>'
-        + '<span class="pin-core"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>';
-      el.title = c.quest.venue;
-      spotMarker = new maplibregl.Marker({ element: el, anchor: 'bottom', offset: [0, -14] })
-        .setLngLat(at).addTo(map);
-      syncPulse();
-    } else {
-      spotMarker.setLngLat(at);
-      spotMarker.getElement().title = c.quest.venue;
-    }
-  }
+  function placeSpot() { /* マップ上のクエストピンは非表示 */ }
 
   // ---- focus the map on the active circle -----------------------------------
   function focusCircle(instant) {
@@ -1062,11 +2047,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     try {
       areaMove(map, C, c.radius);
       placeSpot(map);
+      placePopup(map, C);
       if (window.EarthOverlay && EarthOverlay.setCenter) EarthOverlay.setCenter(C);
       if (EM.setCenter) EM.setCenter(C);
       map.stop();
       const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
-        padding: { top: 102, bottom: 560 } };
+        padding: { top: 70, bottom: 0 } };
       if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
     } catch (err) { console.warn('circle focus:', err); }
   }
@@ -1088,6 +2074,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     const c = CIRCLES[active];
     try {
       areaAdd(map, c.center, c.radius);
+      placePopup(map, c.center);
       focusCircle(true);
     } catch (err) { built = false; console.warn('circle focus:', err); }
   }
@@ -1098,3 +2085,4 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
 </body>
 </html>
+

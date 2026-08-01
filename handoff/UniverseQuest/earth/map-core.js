@@ -8,10 +8,12 @@
   const CENTER = [139.70064, 35.65905];
 
   const POSITRON = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+  const BRIGHT = 'https://tiles.openfreemap.org/styles/bright';
+  const LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';   // 現在使用中
 
   const map = new maplibregl.Map({
     container: 'map',
-    style: POSITRON,
+    style: LIBERTY,
     center: CENTER,
     zoom: 16,
     pitch: 55,
