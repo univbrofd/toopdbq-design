@@ -1,0 +1,30 @@
+<!-- @dsCard group="Components" tier="component" name="SystemButtons" subtitle="WdTakeButton — カメラシャッター（capture）。ring + fill の2効果のみ・glass: no — システム操作系" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(150deg,#241d3a,#0f1019); gap:24px; }
+  .lede { font:500 12px/1.7 var(--font-jp); color:var(--text-2); max-width:680px; }
+  .lede b { color:#fff; font-weight:700; }
+  .tok { display:inline-block; font:600 10px var(--font-latin); color:var(--text-2);
+    background:rgba(255,255,255,.06); border-radius:5px; padding:2px 6px; margin:0 1px; }
+  .grp { display:flex; flex-direction:column; gap:13px; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-2); }
+  .stage { display:flex; align-items:center; gap:36px; flex-wrap:wrap; }
+  .u { display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .u .n { font:500 10px var(--font-latin); color:var(--fg-3); }
+</style></head>
+<body>
+  <div class="eyebrow">SystemButtons — システム操作系（capture / device controls）</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag no">glass: no — 純白の物理シャッター</span></div>
+  <div class="lede"><b>WdTakeButton — カメラシャッター。</b>2効果のみ（純白 4px <span class="tok">ring</span> ＋ 56px の白 <span class="tok">fill</span>）。カラフルアクセントは載せない — 撮影は中立な system 操作のため、色を持たせず白の物理ボタンとして表現する。</div>
+
+  <div class="grp">
+    <div class="lbl">WdTakeButton — default / pressed</div>
+    <div class="stage">
+      <div class="u"><button class="wd-take-btn"><span class="core"></span></button><span class="n">take (shutter)</span></div>
+      <div class="u"><button class="wd-take-btn" style="transform:scale(.96)"><span class="core" style="transform:scale(.86)"></span></button><span class="n">pressed</span></div>
+    </div>
+  </div>
+</body></html>

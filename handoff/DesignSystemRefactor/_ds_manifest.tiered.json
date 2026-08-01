@@ -1,0 +1,209 @@
+{
+  "namespace": "ToopdbqDesignSystem_af3394",
+  "schema": "toopdbq-refactor/tiered-v2",
+  "generated": "2026-06-15",
+  "tierModel": {
+    "foundation": "Colors / Type / Spacing / Brand — canonical tokens & assets; all layers obey.",
+    "component": "Wd* atoms + molecules REUSED across ≥2 screens — stable contracts (components.css).",
+    "exploration": "Design探求の記録（索引外）。"
+  },
+  "systemIndex": {
+    "note": "canonical system = foundation + component のみ。screen（フル画面・シート・フロー）は消費側として DS の外へ分離・除去済み。",
+    "tiers": [
+      "foundation",
+      "component"
+    ],
+    "count": 26
+  },
+  "separatedOut": {
+    "note": "以下の screen-tier specimen は DS の責務外として本プロジェクトから削除（consumer 側で管理）。",
+    "removed": [
+      "universe-screen",
+      "universe-focus",
+      "universe-3d-overlay",
+      "universe-flow",
+      "terrestrial-stage",
+      "chat-list",
+      "chat-row",
+      "menu-sheet",
+      "story-comment-sheet",
+      "screen-01-splash〜screen-08-story-comment",
+      "ui_kits/app (full-screen JSX kit)"
+    ]
+  },
+  "counts": {
+    "foundation": 15,
+    "component": 11
+  },
+  "globalCssPaths": [
+    "colors_and_type.css",
+    "styles.css"
+  ],
+  "cards": [
+    {
+      "path": "preview/brand-icons.html",
+      "tier": "foundation",
+      "group": "Brand",
+      "name": "Icons — IconImage set",
+      "subtitle": "29 glyphs · liquid glass タイル表示 · クリックで個別 PNG 書き出し（glyph / glass / colorful × 64–256px）· 純白に正規化",
+      "viewport": "900x1180"
+    },
+    {
+      "path": "preview/brand-imagery.html",
+      "tier": "foundation",
+      "group": "Brand",
+      "name": "Imagery — sample pool",
+      "subtitle": "v2 pool: background 16 · reel 15 · user 16 · logo — repo-internal only, no external CDN"
+    },
+    {
+      "path": "preview/brand-logo.html",
+      "tier": "foundation",
+      "group": "Brand"
+    },
+    {
+      "path": "preview/colors-base.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/colors-edge-gradients.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/colors-foreground.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/colors-gradient.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/colors-neutrals.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/colors-semantic.html",
+      "tier": "foundation",
+      "group": "Colors"
+    },
+    {
+      "path": "preview/spacing-elevation.html",
+      "tier": "foundation",
+      "group": "Spacing"
+    },
+    {
+      "path": "preview/spacing-radii.html",
+      "tier": "foundation",
+      "group": "Spacing"
+    },
+    {
+      "path": "preview/spacing-scale.html",
+      "tier": "foundation",
+      "group": "Spacing",
+      "name": "Spacing scale",
+      "subtitle": "--space-1…-9（4/8 ベース・参照フレーム 393×852）· 各ステップを2タイル間の実ギャップで提示 · 値はレスポンシブ派生（直書きしない）"
+    },
+    {
+      "path": "preview/type-body.html",
+      "tier": "foundation",
+      "group": "Type",
+      "name": "Body, caption & micro",
+      "subtitle": "Inter for Latin, Noto Sans JP for copy"
+    },
+    {
+      "path": "preview/type-headings.html",
+      "tier": "foundation",
+      "group": "Type",
+      "name": "Headings & actions",
+      "subtitle": "Nav title · button · card title"
+    },
+    {
+      "path": "preview/type-wordmark.html",
+      "tier": "foundation",
+      "group": "Type",
+      "name": "Display & wordmark",
+      "subtitle": "Pacifico script + Noto Sans JP bold — app identity"
+    },
+    {
+      "path": "preview/comp-01-text-button.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdTextButton",
+      "subtitle": "Primary CTA · ダーク透過ガラス面（うっすら黒・背景が透ける）＋テーマカラーの枠 · types: canonical / it(icon+label) · glass: yes"
+    },
+    {
+      "path": "preview/comp-02-icon-buttons.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdIconButton",
+      "subtitle": "Liquid glass / dark-glass color circle, badgeColor & badge · color系はうっすら黒の透過面＋テーマカラーの枠 · glass: yes"
+    },
+    {
+      "path": "preview/comp-03-system-buttons.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "SystemButtons",
+      "subtitle": "WdTakeButton — カメラシャッター（capture）。ring + fill の2効果のみ・glass: no — システム操作系"
+    },
+    {
+      "path": "preview/comp-04-login-buttons.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdLoginButton",
+      "subtitle": "Google / Apple 284×54 r8 · 枠が identity（Google=--gradient-auth / Apple=白→黒）· glass: yes（ベゼル枠＋暗/明インテリア）"
+    },
+    {
+      "path": "preview/comp-05-text-field.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdTextField",
+      "subtitle": "rounded pill / plain 下線 · glass: yes（rounded・composer pill のみ／plain=no）"
+    },
+    {
+      "path": "preview/comp-06-toggle.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdToggl",
+      "subtitle": "ラベルは白ピルノブの上に乗る · ON=colorful gradient track · glass: no（小型コントロール）"
+    },
+    {
+      "path": "preview/comp-07-stats.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "Status & slider",
+      "subtitle": "WdMemberStatus · WdStatusBar · WdDistanceSlider · glass: no(perf) — フィード/オーバーレイ内の頻出要素"
+    },
+    {
+      "path": "preview/comp-08-avatar.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "WdAvatar",
+      "subtitle": "relation badge付きアバター + WdSpesialIcon（特別印） · glass: no（画像要素）"
+    },
+    {
+      "path": "preview/comp-09-rows.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "Rows & lists",
+      "subtitle": "WdUserBar · WdMenuItem · WdSettingRow · WdUserComment · glass: no(perf) — リスト行セルは従来面"
+    },
+    {
+      "path": "preview/comp-10-circle-bar.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "Content Bars",
+      "subtitle": "先頭メディア（円カバー写真 / ユーザーアバター / アイコンタイル）＋タイトル・名前＋説明 · glass pill / bare（背景・枠なし）の2形式"
+    },
+    {
+      "path": "preview/comp-11-cards.html",
+      "tier": "component",
+      "group": "Components",
+      "name": "Content cards",
+      "subtitle": "WdCircleCard · WdCircleBarBig · WdCircleMiniCard · glass: no(perf) — グリッド/フィードの写真セルは scrim 面"
+    }
+  ]
+}

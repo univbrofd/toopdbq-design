@@ -1,0 +1,78 @@
+<!-- @dsCard group="Components" tier="component" viewport="1340x520" name="QuestBoard" subtitle="クエスト看板 — 9:16 レールに重なるオーバーレイ" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>QuestBoard — クエスト看板</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+body{background:#0d0d0f;width:1340px;height:520px;padding:0;display:block;overflow:hidden}
+a{color:var(--text-1)}a:hover{color:var(--state-quest-active)}
+.wrap{width:1340px;height:520px;padding:32px 40px;display:flex;flex-direction:column;gap:20px}
+h1{font:700 26px/1.15 var(--font-jp);color:var(--text-1);letter-spacing:.01em}
+.grid{display:flex;gap:24px}
+.col{display:flex;flex-direction:column;gap:10px}
+.lbl{font:700 13px/1.2 var(--font-latin);letter-spacing:.07em;text-transform:uppercase;color:var(--text-2)}
+.stage{position:relative;width:402px;padding:16px 14px;overflow:hidden;border-radius:16px;display:flex;flex-direction:column;gap:12px;align-items:stretch;justify-content:center;flex:none}
+.stage>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage.sheet{background:#fff}
+.stage>.qb,.stage>.qb-create,.stage>.qb-empty{position:relative}
+</style></head>
+<body><div class="wrap">
+<h1>QuestBoard — クエスト看板</h1>
+
+<div class="grid">
+  <div class="col"><span class="lbl">Active</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel001.jpg" alt="" style="object-position:50% 45%">
+      <div class="qb pulse">
+        <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+          <span class="qb-when"><span>02:14:39</span></span></div>
+        <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+        <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+      </div></div>
+    <span class="lbl">Owner</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel003.jpg" alt="" style="object-position:50% 40%">
+      <div class="qb pulse owner">
+        <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+          <span class="qb-when"><span>02:14:39</span></span></div>
+        <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+        <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+        <button class="qb-edit"><i><img src="../../assets/icons/icon_edit.png" alt=""></i></button>
+      </div></div>
+  </div>
+
+  <div class="col"><span class="lbl">Cleared</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel007.jpg" alt="" style="object-position:50% 35%">
+      <div class="qb cleared">
+        <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest cleared</span>
+          <span class="qb-when"><span>02:14:39</span></span></div>
+        <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+        <div class="qb-desc">クリア済み · このクエストの投稿が解錠されています</div>
+      </div></div>
+    <span class="lbl">Long text</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel012.jpg" alt="" style="object-position:50% 40%">
+      <div class="qb pulse">
+        <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+          <span class="qb-when"><span>02:14:39</span></span></div>
+        <div class="qb-title">とぅーぷどぅっくバー本店の 2 階カウンターで乾杯してその瞬間を残そう</div>
+        <div class="qb-desc">乾杯している瞬間の動画をアップロードするとクリアになります。グラスが 2 つ以上写っていること、店内で撮影されていることが条件です。</div>
+      </div></div>
+  </div>
+
+  <div class="col"><span class="lbl">No-blur fallback</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel002.jpg" alt="" style="object-position:50% 40%">
+      <div class="qb pulse no-blur">
+        <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+          <span class="qb-when"><span>02:14:39</span></span></div>
+        <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+        <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+      </div></div>
+    <span class="lbl">Empty</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel006.jpg" alt="" style="object-position:50% 40%">
+      <button class="qb-create"><img src="../../assets/icons/icon_add.png" alt=""><span>クエストを出題</span></button>
+    </div>
+    <div class="stage sheet" style="padding:14px"><span class="qb-empty">このサークルにはまだクエストがありません</span></div>
+  </div>
+</div>
+
+</div>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#0d0d0f"/><rect x="18" y="42" width="84" height="36" rx="8" fill="#1b1b20" stroke="url(#g)" stroke-width="2"/><circle cx="30" cy="54" r="3" fill="#ff3e88"/><rect x="30" y="63" width="44" height="4" rx="2" fill="#fff"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a6"/><stop offset=".38" stop-color="#005f67"/><stop offset=".7" stop-color="#ff3e88"/><stop offset="1" stop-color="#d0a052"/></linearGradient></defs></svg></template>
+</body></html>

@@ -1,0 +1,94 @@
+<!-- @dsCard group="Components" tier="component" viewport="1340x560" name="WdQuestFooter" subtitle="サークルフッター × クエスト看板 の複合" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>WdQuestFooter — サークルフッター × クエスト看板</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+body{background:#0d0d0f;width:1340px;height:560px;padding:0;display:block;overflow:hidden}
+a{color:var(--text-1)}a:hover{color:var(--state-quest-active)}
+.wrap{width:1340px;height:560px;padding:32px 40px;display:flex;flex-direction:column;gap:20px}
+h1{font:700 26px/1.15 var(--font-jp);color:var(--text-1)}
+.grid{display:flex;gap:24px}
+.col{display:flex;flex-direction:column;gap:10px}
+.lbl{font:700 13px/1.2 var(--font-latin);letter-spacing:.07em;text-transform:uppercase;color:var(--text-2)}
+.stage{position:relative;width:402px;padding:20px 14px;overflow:hidden;border-radius:16px;display:flex;flex-direction:column;gap:20px;align-items:stretch;justify-content:flex-end;flex:none}
+.stage>img.bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.stage>.wd-quest-footer{position:relative}
+</style></head>
+<body><div class="wrap">
+<h1>WdQuestFooter — サークルフッター × クエスト看板</h1>
+
+<div class="grid">
+  <div class="col"><span class="lbl">Active</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel001.jpg" alt="" style="object-position:50% 45%">
+      <div class="wd-quest-footer">
+        <div class="slot"><div class="qb pulse">
+          <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+            <span class="qb-when"><span>02:14:39</span></span></div>
+          <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+          <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+        </div></div>
+        <img class="cover" src="../../assets/sample/reel/reel007.jpg" alt="">
+        <div class="id"><span class="nm">渋谷コミュニティ</span></div>
+      </div></div>
+    <span class="lbl">Owner</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel011.jpg" alt="" style="object-position:50% 40%">
+      <div class="wd-quest-footer">
+        <div class="slot"><div class="qb pulse owner">
+          <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+            <span class="qb-when"><span>02:14:39</span></span></div>
+          <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+          <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+          <button class="qb-edit"><i><img src="../../assets/icons/icon_edit.png" alt=""></i></button>
+        </div></div>
+        <img class="cover" src="../../assets/sample/reel/reel007.jpg" alt="">
+        <div class="id"><span class="nm">渋谷コミュニティ</span></div>
+      </div></div>
+  </div>
+
+  <div class="col"><span class="lbl">Cleared</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel012.jpg" alt="" style="object-position:50% 40%">
+      <div class="wd-quest-footer">
+        <div class="slot"><div class="qb cleared">
+          <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest cleared</span>
+            <span class="qb-when"><span>02:14:39</span></span></div>
+          <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+          <div class="qb-desc">クリア済み · このクエストの投稿が解錠されています</div>
+        </div></div>
+        <img class="cover" src="../../assets/sample/reel/reel009.jpg" alt="">
+        <div class="id"><span class="nm">原宿コミュニティ</span></div>
+      </div></div>
+    <span class="lbl">No-blur fallback</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel002.jpg" alt="" style="object-position:50% 40%">
+      <div class="wd-quest-footer">
+        <div class="slot"><div class="qb pulse no-blur">
+          <div class="qb-eyebrow"><span class="qb-dot"></span><span class="qb-label">Quest</span>
+            <span class="qb-when"><span>02:14:39</span></span></div>
+          <div class="qb-title">とぅーぷどぅっくバーで乾杯</div>
+          <div class="qb-desc">乾杯している動画をアップロードするとクリア</div>
+        </div></div>
+        <img class="cover" src="../../assets/sample/reel/reel007.jpg" alt="">
+        <div class="id"><span class="nm">渋谷コミュニティ</span></div>
+      </div></div>
+  </div>
+
+  <div class="col"><span class="lbl">No quest / owner</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel010.jpg" alt="" style="object-position:50% 40%">
+      <div class="wd-quest-footer">
+        <div class="slot"><button class="qb-create"><img src="../../assets/icons/icon_add.png" alt=""><span>クエストを出題</span></button></div>
+        <img class="cover" src="../../assets/sample/reel/reel014.jpg" alt="">
+        <div class="id"><span class="nm">恵比寿ナイト</span></div>
+      </div></div>
+    <span class="lbl">No quest</span>
+    <div class="stage"><img class="bg" src="../../assets/sample/reel/reel006.jpg" alt="" style="object-position:50% 40%">
+      <div class="wd-quest-footer no-quest">
+        <div class="slot"></div>
+        <img class="cover" src="../../assets/sample/reel/reel006.jpg" alt="">
+        <div class="id"><span class="nm">中目黒コミュニティ</span></div>
+      </div></div>
+  </div>
+</div>
+
+</div>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="#0d0d0f"/><circle cx="30" cy="80" r="14" fill="#2b2b2b" stroke="#fff" stroke-opacity=".5"/><rect x="50" y="44" width="52" height="26" rx="6" fill="#1b1b20" stroke="url(#g)" stroke-width="2"/><rect x="50" y="76" width="38" height="5" rx="2.5" fill="#fff"/><rect x="50" y="86" width="26" height="4" rx="2" fill="#fff" fill-opacity=".55"/><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a6"/><stop offset=".38" stop-color="#005f67"/><stop offset=".7" stop-color="#ff3e88"/><stop offset="1" stop-color="#d0a052"/></linearGradient></defs></svg></template>
+</body></html>

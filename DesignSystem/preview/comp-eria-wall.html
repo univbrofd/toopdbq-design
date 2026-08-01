@@ -1,0 +1,143 @@
+<!-- @dsCard group="Components" tier="component" viewport="1720x1400" name="WdEriaWall" subtitle="サークル領域（中心＋半径）の境界を真円のまま押し出した半透明の『光のカーテン』。面＋天端リム＋地面ブリードの 3 レイヤで 1 効果。壁のみ（クエスト表示は WdQuestPopup）。" -->
+<html lang="ja"><head><meta charset="utf-8"><title>WdEriaWall — 領域境界の光の壁</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+body{background:#0d0d0f;width:1720px;height:1400px;padding:0;display:block;overflow:hidden}
+a{color:var(--text-1)}a:hover{color:var(--state-quest-active)}
+.wrap{width:1720px;height:1400px;padding:26px 30px;display:flex;flex-direction:column;gap:18px}
+.hd{display:flex;align-items:flex-end;gap:34px}
+.hd h1{font-family:var(--font-jp);font-weight:700;font-size:26px;letter-spacing:.01em}
+.sub{margin-top:8px;max-width:1000px;font-family:var(--font-jp);font-weight:400;font-size:12.5px;line-height:1.7;color:var(--text-2)}
+.sub b{font-weight:700;color:var(--text-1)}
+.chips{margin-left:auto;display:flex;gap:8px;flex:none}
+.chip{padding:6px 12px;border-radius:var(--radius-pill);background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--border-hairline);font-family:var(--font-latin);font-weight:600;font-size:11px;color:var(--text-2)}
+.band{display:flex;gap:18px}
+.bt{font-family:var(--font-jp);font-weight:700;font-size:13px;color:var(--text-1);margin-bottom:9px}
+.cap{font-family:var(--font-jp);font-weight:400;font-size:11.5px;line-height:1.6;color:var(--text-2)}
+.cap b{font-weight:700;color:var(--text-1)}
+.lbl{font-family:var(--font-latin);font-weight:600;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px}
+.panel{border-radius:var(--radius-md);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px var(--border-hairline);padding:20px}
+.sect{position:relative;height:236px;display:flex;align-items:flex-end;padding:0 8px 34px}
+.sect .grnd{position:absolute;left:8px;right:8px;bottom:34px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent)}
+.sect .gl{position:absolute;left:8px;right:8px;bottom:26px;height:16px;background:radial-gradient(60% 100% at 50% 0%,rgba(255,62,136,.35),transparent 70%);filter:blur(4px)}
+.sect .curtain{position:relative;width:250px;height:168px;background:linear-gradient(to top,rgba(255,62,136,.66) 0%,rgba(255,62,136,.36) 34%,rgba(255,62,136,.14) 70%,transparent 100%);overflow:hidden}
+.sect .curtain::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.20) 0 1px,transparent 1px 24px);-webkit-mask-image:linear-gradient(to top,#000,transparent 82%);mask-image:linear-gradient(to top,#000,transparent 82%)}
+.sect .rim{position:absolute;left:8px;width:250px;bottom:202px;height:3px;background:linear-gradient(90deg,transparent,#ff3e88 12%,#ff3e88 88%,transparent);box-shadow:0 0 12px #ff3e88,0 0 34px rgba(255,62,136,.5)}
+.sect .ann{position:absolute;display:flex;align-items:center;gap:8px;font-family:var(--font-jp);font-size:11px;font-weight:500;color:var(--text-2);white-space:nowrap}
+.sect .ann i{display:block;width:44px;height:1px;background:rgba(255,255,255,.30);flex:none}
+.sect .ann b{font-family:var(--font-latin);font-weight:700;font-size:11px;color:var(--text-1)}
+.dims{position:absolute;left:8px;bottom:0;display:flex;gap:26px}
+.dims div{font-family:var(--font-latin);font-size:10.5px;color:var(--text-3)}
+.dims b{color:var(--text-2)}
+.rules{display:flex;flex-direction:column;gap:11px}
+.fx{display:flex;gap:11px;align-items:flex-start}
+.fx .n{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--border-hairline);font-family:var(--font-latin);font-weight:700;font-size:10px;color:var(--text-2)}
+.fx .d{font-family:var(--font-jp);font-weight:400;font-size:12px;line-height:1.6;color:var(--text-2)}
+.fx .d b,.fx .d em{font-style:normal;color:var(--text-1);font-weight:700}
+.fx .d s{color:var(--text-3)}
+.states{display:flex;gap:14px}
+.st{display:flex;flex-direction:column;gap:8px;width:352px}
+.st .cap{min-height:37px}
+.pw{transform:scale(.5);transform-origin:top left;width:402px;height:874px}
+.phold{width:201px;height:437px;overflow:hidden;flex:none}
+.phone .ew{position:absolute;inset:0;border-radius:0;box-shadow:none}
+</style></head>
+<body><div class="wrap">
+
+<div class="hd">
+  <div>
+    <h1>WdEriaWall — 領域境界の「光の壁」</h1>
+    <div class="sub">サークルの<b>領域（中心＋半径）を真円のまま 56 分割で押し出し（Extrude）</b>して、地図の上に立てた半透明の光のカーテン。<b>面 → 天端リム → 地面ブリード</b>の 3 レイヤで <b>1 群 = 1 効果</b>と数える。中心の<b>広場（プラザ）</b>は取り付け点として残すだけで、この壁自体は<b>クエスト表示を持たない</b> — 頭上の表示は <a href="comp-quest-popup.html">WdQuestPopup</a> 側の責務。ジオメトリ生成は <code class="mono">preview/eria-wall.js</code>（<code class="mono">EriaWall.build()</code>）。</div>
+  </div>
+  <div class="chips">
+    <span class="chip">glass: yes（chrome 1 のみ）</span>
+    <span class="chip">effects: 1 群</span>
+    <span class="chip">no new hue</span>
+  </div>
+</div>
+
+<div class="band">
+  <div style="display:flex;flex-direction:column">
+    <div class="bt">主景 — 円形領域の押し出し（壁のみ）</div>
+    <div class="ew live" id="hero" style="width:1078px;height:620px;--tilt:58deg;--spin:-24deg;--z:-40px;--oy:46px">
+      <div class="ew-scene"></div>
+      <div class="ew-chrome">
+        <img class="av" src="../../assets/sample/user/user011.jpg" alt="">
+        <span class="nm">渋谷ナイトウォーク</span>
+        <span class="mt">領域内 128 人</span>
+      </div>
+    </div>
+    <div class="cap" style="width:1078px;margin-top:10px">壁色は<b>ブランドのカラフル放射グラデを一周でサンプリング</b>した値だけを使う（新しい色を作らない）。壁は<b>途切れのない閉じた輪</b>にし、暗い stop は輝度下限までリフトする。</div>
+  </div>
+
+  <div style="width:562px;display:flex;flex-direction:column;gap:16px">
+    <div class="panel">
+      <div class="lbl">Anatomy — 押し出し断面</div>
+      <div class="sect">
+        <div class="gl"></div><div class="grnd"></div>
+        <div class="rim"></div>
+        <div class="curtain"></div>
+        <div class="ann" style="left:274px;bottom:196px"><i></i><span><b>03</b> 天端リム 3px — グローはここだけ</span></div>
+        <div class="ann" style="left:274px;bottom:120px"><i></i><span><b>02</b> カーテン面 — 下 66% → 上 0%</span></div>
+        <div class="ann" style="left:274px;bottom:52px"><i></i><span><b>01</b> 地面ブリード — 境界の外光</span></div>
+        <div class="dims">
+          <div>height <b>168px</b> ≒ 地図 6 階相当</div>
+          <div>scan <b>5.5s linear</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="lbl">Rules</div>
+      <div class="rules">
+        <div class="fx"><span class="n">01</span><span class="d">領域は<b>つねに真円</b>（中心＋半径）。<em>56 分割の直線セグメント</em>で押し出し、形の揺らぎは持たせない — サークル範囲＝半径という意味をそのまま出す。</span></div>
+        <div class="fx"><span class="n">02</span><span class="d">壁は <b>1 群 = 1 効果</b>。建物・地面は無彩色に落とし、<em>色を持つのは壁だけ</em>。</span></div>
+        <div class="fx"><span class="n">03</span><span class="d">壁色 <s>新規のネオン</s> → <em>--gradient-colorful の 11 stop を一周サンプリング</em>。暗い stop は輝度 0.38 までリフトして<b>途切れて見せない</b>。</span></div>
+        <div class="fx"><span class="n">04</span><span class="d">地図の上の chrome は <em>--lg-tint-dark</em>。明るい地図の上でも白文字 AA を確保する。</span></div>
+        <div class="fx"><span class="n">05</span><span class="d">毎フレーム動く層（壁・建物）に <b>liquid glass を置かない</b>（性能予算）。ガラスは静止 chrome 1 枚のみ。</span></div>
+        <div class="fx"><span class="n">06</span><span class="d">クリア済みは <em>--state-quest-cleared</em> 単色・scan 停止・高さ 60%。<b>壁は消さない</b>（領域は残る）。</span></div>
+        <div class="fx"><span class="n">07</span><span class="d">壁は<b>クエストの内容を持たない</b>。中心の広場（<code class="mono">.ew-core</code>）だけを取り付け点として残し、表示は <a href="comp-quest-popup.html">WdQuestPopup</a> を<b>領域の中心に重ねる</b>（アンカーは引かない）。</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="band">
+  <div class="states">
+    <div class="st">
+      <div class="cap"><b>01 未クリア</b> — 壁はブランドグラデ、scan あり。</div>
+      <div class="ew live" data-map="1" data-seed="12" data-state="active" style="width:352px;height:300px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+      </div>
+    </div>
+    <div class="st">
+      <div class="cap"><b>02 残り 30 分未満</b> — 壁の高さはそのまま、<b>scan を 2.2s に速める</b>だけ。色は変えない。</div>
+      <div class="ew live urgent" data-map="1" data-seed="31" data-state="urgent" style="width:352px;height:300px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+      </div>
+    </div>
+    <div class="st">
+      <div class="cap"><b>03 クリア済み</b> — 壁は <code class="mono">--state-quest-cleared</code> 単色・scan 停止・高さ 60%。</div>
+      <div class="ew" data-map="1" data-seed="8" data-state="cleared" style="width:352px;height:300px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+      </div>
+    </div>
+    <div class="st" style="width:auto">
+      <div class="cap"><b>04 実機（402×874 · 0.5 倍）</b> — 領域の内側から見た全画面</div>
+      <div class="phold"><div class="pw"><div class="phone">
+        <div class="ew live" id="phonemap" style="--tilt:62deg;--spin:-16deg;--z:-20px;--oy:46px"><div class="ew-scene"></div></div>
+        <div class="statusbar"><span class="time">9:41</span><span class="sys"><svg width="18" height="12" viewBox="0 0 18 12" fill="#fff"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="24" height="12" viewBox="0 0 24 12" fill="#fff"><rect x="0" y="0" width="20" height="12" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="2" y="2" width="16" height="8" rx="2"/><rect x="21.5" y="4" width="2" height="4" rx="1" fill-opacity=".5"/></svg></span></div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div></div></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="eria-wall.js"></script>
+<script>
+EriaWall.build(document.getElementById('phonemap'),{seed:21,n:56,r:330,h:150,blds:34,ground:6,state:'active'});
+EriaWall.build(document.getElementById('hero'),{seed:5,n:56,r:340,h:168,blds:46,state:'active'});
+document.querySelectorAll('[data-map]').forEach(el=>EriaWall.build(el,{seed:+el.dataset.seed,n:40,r:118,h:56,blds:14,state:el.dataset.state}));
+
+</script>
+</body></html>

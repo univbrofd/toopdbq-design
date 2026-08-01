@@ -60,6 +60,15 @@
   --state-error:        #ff6b6b;
   --state-like:         #ff3e88;
   --state-focus:        #ffffff;                  /* focus-ring base (+ gradient)*/
+  /* Quest (QuestBoard / クエスト看板) — ROLE tokens, added in the QuestBoard pass.
+     PROPOSAL → adopted: the as-built board hard-coded #ff3e88 and a teal pair
+     (#4be3b0 → #3fd0e0) that exists NOWHERE in the DS. Resolution: the "active
+     quest" announcement reuses the brand pink VALUE under its own role name
+     (it is not a "like"), and the cleared state folds onto the existing
+     --state-success instead of inventing a teal. No new hues enter the DS. */
+  --state-quest-active:      #ff3e88;                  /* = --state-like value, different role */
+  --state-quest-active-ring: rgba(255,62,136,0.42);    /* pulse ring on the un-cleared board   */
+  --state-quest-cleared:     var(--state-success);     /* folded onto success — teal dropped   */
   --state-disabled-opacity: 0.38; /* @kind other */
 
   /* Translucent black "glass" — the universal surface fill.

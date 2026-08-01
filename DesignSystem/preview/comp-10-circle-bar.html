@@ -1,19 +1,70 @@
-<!-- @dsCard group="Components" name="WdCircleBar" subtitle="story footer identity chip · glass: yes（footer chrome — liquid glass pill）" --><!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
-<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
-<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
-<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<!-- @dsCard group="Components" tier="component" name="Content Bars" subtitle="先頭メディア（円カバー写真 / ユーザーアバター / アイコンタイル）＋タイトル・名前＋説明 · glass pill / bare（背景・枠なし）の2形式" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
 <style>
-  body { background: linear-gradient(120deg,rgba(0,0,0,.2),rgba(0,0,0,.55)), url('../../assets/sample/reel/reel015.jpg'); background-size:cover; background-position:center; gap:14px; }
+  body { background: linear-gradient(120deg,rgba(0,0,0,.2),rgba(0,0,0,.55)), url('../../assets/sample/background/background010.jpg'); background-size:cover; background-position:center; gap:16px; align-items:flex-start; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.7; text-shadow:0 1px 4px #000; }
+  .grp { display:flex; flex-direction:column; gap:8px; width:100%; max-width:340px; }
+  .grp .wd-circle-bar { width:100%; }
+  .grp .wd-circle-bar .ds { white-space:nowrap; }
 </style></head>
 <body>
-  <div class="eyebrow" style="text-shadow:0 1px 4px #000;">WdCircleBar — circle identity over a story photo</div>
-  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — footer chrome</span></div>
-  <div class="wd-circle-bar" style="max-width:330px;">
-    <img class="cover" src="../../assets/sample/reel/reel013.jpg">
-    <div class="col" style="gap:2px;">
-      <span class="nm">渋谷コミュニティ</span>
-      <span class="ds">渋谷駅周辺のコミュニティ</span>
+  <div class="eyebrow" style="text-shadow:0 1px 4px #000;">Content Bars — icon/avatar/cover ＋ title ＋ description</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — liquid glass pill</span><span class="glass-tag no">bare — 背景・枠なし</span></div>
+
+  <div class="grp">
+    <span class="lbl">circle cover — サークル identity</span>
+    <div class="wd-circle-bar">
+      <img class="cover" src="../../assets/images/sample_3d.png">
+      <div class="col" style="gap:2px;">
+        <span class="nm">渋谷コミュニティ</span>
+        <span class="ds">渋谷駅周辺のコミュニティ</span>
+      </div>
+    </div>
+    <div class="wd-circle-bar bare">
+      <img class="cover" src="../../assets/images/sample_3d.png">
+      <div class="col" style="gap:2px;">
+        <span class="nm">渋谷コミュニティ</span>
+        <span class="ds">渋谷駅周辺のコミュニティ</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <span class="lbl">user avatar — 名前 ＋ ハンドル</span>
+    <div class="wd-circle-bar">
+      <div class="wd-avatar"><img src="../../assets/sample/user/user006.jpg" style="object-position:50% 30%;"></div>
+      <div class="col" style="gap:2px;">
+        <span class="nm">佐藤 ゆい</span>
+        <span class="ds">@yui · 表参道サークル</span>
+      </div>
+    </div>
+    <div class="wd-circle-bar bare">
+      <div class="wd-avatar"><img src="../../assets/sample/user/user006.jpg" style="object-position:50% 30%;"></div>
+      <div class="col" style="gap:2px;">
+        <span class="nm">佐藤 ゆい</span>
+        <span class="ds">@yui · 表参道サークル</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <span class="lbl">icon tile — タイトル ＋ 説明</span>
+    <div class="wd-circle-bar">
+      <div class="ic"><img src="../../assets/icons/icon_pin.png"></div>
+      <div class="col" style="gap:2px;">
+        <span class="nm">近くの投稿</span>
+        <span class="ds">現在地から 500m 以内</span>
+      </div>
+    </div>
+    <div class="wd-circle-bar bare">
+      <div class="ic"><img src="../../assets/icons/icon_pin.png"></div>
+      <div class="col" style="gap:2px;">
+        <span class="nm">近くの投稿</span>
+        <span class="ds">現在地から 500m 以内</span>
+      </div>
     </div>
   </div>
 </body></html>

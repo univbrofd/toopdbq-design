@@ -152,9 +152,24 @@ iOS 26 系の屈折リキッドガラスが「半透明黒＋blur2＋グラデ�
 
 ---
 
-## 6. 参照
+## 6. サンプル画像（imagery pool v2 — 2026-06 再編）
+
+**出典: `assets/sample/`（実ブランドアセットは `assets/images/`）。外部 CDN（midjourney / unsplash 等）への画像参照と、プレースホルダ画像の生成は禁止。** 必ず repo 内プールから相対参照する（`DesignSystem/preview/*.html` からは `../../assets/...`）。
+
+- フルスクリーン背景: `assets/sample/background/background001..016.jpg`（816×1456）— splash / ログイン裏 / story full-bleed / hero / specimen の全面デモ背景。
+- 投稿/リール写真: `assets/sample/reel/reel001..015.jpg`（816×1456）— 9:16 投稿セル・リール・ピン thumb・circle カバー。
+- アバター: `assets/sample/user/user001..016.jpg`（480×480）— WdAvatar・チャット行・コメント行・メンバーリスト（円形 44–96px・顔中心に `object-position` 調整）。
+- アプリロゴ: `logo_toopdbq.png`（透過 PNG）— 再描画・再生成禁止、そのまま使う（splash アイコン・login ワードマーク上）。
+- 固定: `auth_background.png`（ログイン/スプラッシュ背景）・`sample_3d.png`（3D レンダ・写真ではない）。
+- `assets/sample/uv/` は Universe specimen 専用の派生セット（旧プール由来の story-NN / circle-NN と 3D 透過 PNG obj-01..04）。新規デザインでは background/reel/user を直接使う。
+- **同一画面で同じ画像・同じアバターを隣接させない**。full-bleed / Ken Burns / カバー用途は被写体に合わせ `object-position` を調整。
+- ペルソナ対応（specimen 間で固定）: SunnyVi=user002 / Dreamy=user009 / o_cean=user011 / Kawaii=user004 / Mocha=user010 / foodie=user016 / ZenGarden=user001 / 自分(composer)=user006 / 渋谷コミュニティ cover=reel007 / 原宿コミュニティ cover=reel009。
+- カタログ: `preview/brand-imagery.html`（内容ラベル付き）。プールの追加・差し替え時はここも更新する。
+
+---
+
+## 7. 参照
 
 - トークン CSS: `colors_and_type.css`（このルールの色・型を変数化）
 - 仕様まとめ: `README.md`（CONTENT / VISUAL FOUNDATIONS / ICONOGRAPHY）
-- 実装サンプル: `ui_kits/app/`（`Wd*` を模した HTML/JSX 再現）
 - 原典: `univbrofd/toopdbq` `lib/component/ui/` および各 `CLAUDE.md`、`.claude/rules/`

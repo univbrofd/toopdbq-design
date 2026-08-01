@@ -1,0 +1,85 @@
+<!-- @dsCard group="Components" tier="component" name="WdChatBubble" subtitle="チャットルーム & コメントViewのテキストバブル — in/out・グループ・写真上 · glass: no(perf) セル単位 --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: linear-gradient(160deg,#1a1628,#0d0d15); gap:24px; }
+  .grp { display:flex; flex-direction:column; gap:11px; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:var(--fg-2); }
+  /* thread frame — the ChatRoomView surface (app bg), 360 reference column */
+  .thread { width:360px; max-width:100%; background:var(--bg); border-radius:16px;
+            padding:8px 16px 18px; box-shadow:var(--shadow-card); }
+  .thread .wd-chat-bubble { max-width:264px; }
+  /* over-photo frame — comment view sitting on full-bleed imagery */
+  .photo { position:relative; width:360px; max-width:100%; height:300px; border-radius:16px;
+           overflow:hidden; box-shadow:var(--shadow-card); }
+  .photo .bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .photo .scrim { position:absolute; inset:0; background:linear-gradient(transparent 35%, rgba(0,0,0,.55)); }
+  .photo .stack { position:absolute; left:16px; right:16px; bottom:14px; }
+  .photo .wd-chat-bubble { max-width:248px; }
+</style></head>
+<body>
+  <div class="eyebrow">テキストバブル — チャットルーム & コメントViewで使う1メッセージ</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag no">glass: no(perf) — メッセージはセル単位。面は raised/scrim でガラス禁止</span></div>
+
+  <div class="grp">
+    <div class="lbl">ChatRoomView — グループスレッド（相手=白の面・黒文字 / 自分=黒めの面・白文字）</div>
+    <div class="thread">
+      <div class="chat-day">2026年6月22日</div>
+
+      <!-- incoming, group: name + avatar on first of run -->
+      <div class="wd-chat-bubble in">
+        <img class="av" src="../../assets/sample/user/user002.jpg" style="object-position:45% 35%;">
+        <div class="col">
+          <div class="nm">SunnyVi</div>
+          <div class="brow"><div class="bub">この前の渋谷のスポット、すごく良かった！</div><span class="tm">14:01</span></div>
+        </div>
+      </div>
+      <div class="wd-chat-bubble in grouped">
+        <img class="av" src="../../assets/sample/user/user002.jpg" style="object-position:45% 35%;">
+        <div class="col">
+          <div class="brow"><div class="bub">今度みんなで行きませんか？</div><span class="tm">14:02</span></div>
+        </div>
+      </div>
+
+      <!-- outgoing (me) -->
+      <div class="wd-chat-bubble out">
+        <div class="col">
+          <div class="brow"><div class="bub">いいね、行きたい！土曜あたりどう？</div><span class="tm">14:05</span></div>
+        </div>
+      </div>
+
+      <!-- incoming -->
+      <div class="wd-chat-bubble in">
+        <img class="av" src="../../assets/sample/user/user010.jpg" style="object-position:50% 35%;">
+        <div class="col">
+          <div class="nm">Mocha</div>
+          <div class="brow"><div class="bub">土曜OK！集合場所はハチ公前でいい？</div><span class="tm">14:07</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <div class="lbl">コメントView（写真上）— 同じバブルを on-photo で。受信地は黒52%スクリム</div>
+    <div class="photo">
+      <img class="bg" src="../../assets/sample/reel/reel007.jpg" alt="">
+      <div class="scrim"></div>
+      <div class="stack">
+        <div class="wd-chat-bubble in on-photo">
+          <img class="av" src="../../assets/sample/user/user011.jpg" style="object-position:50% 40%;">
+          <div class="col">
+            <div class="nm">o_cean</div>
+            <div class="brow"><div class="bub">ここどこですか？景色が綺麗すぎる</div><span class="tm">21:10</span></div>
+          </div>
+        </div>
+        <div class="wd-chat-bubble out on-photo">
+          <div class="col">
+            <div class="brow"><div class="bub">原宿のルーフトップだよ</div><span class="tm">21:12</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body></html>

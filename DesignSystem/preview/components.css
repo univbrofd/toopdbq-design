@@ -875,3 +875,323 @@ button.wd-login, .wd-toggle, button.wd-spesial-icon { border: none; -webkit-appe
 .wd-identity-tool .stack { display: flex; flex-direction: column; gap: 12px; flex: none; }
 .wd-identity-tool .stack .wd-icon-btn { width: 48px; height: 48px; }
 
+
+/* ============================================================================
+   QuestBoard — クエスト看板  (CircleFocus / QuestFeedSheet の中のオーバーレイ)
+   サークルが 1 件だけ出す「お題」の掲示物。未クリアのときは看板全面が提出フロー
+   起動の主 CTA（tap 域 374×143 ≫ 44pt）。クリア後は下端 tuck ＋ tap 無効。
+   面は canonical .lg レシピ（--lg-* トークン）を dark tint で使う。再発明なし。
+   効果は 2 つ: ①ガラス面＋屈折エッジ（1群） ②未クリアのパルスリング。
+   ========================================================================== */
+.qb {
+  position: relative; width: 374px; padding: 12px 16px; border-radius: var(--radius-md);
+  font-family: var(--font-jp); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  /* 明るい写真 / 白シートの両方で白文字 AA を保つため --lg-tint-dark ＋ 傾斜スクリム。
+     合成不透明度は最も明るい角でも ≈0.60 で --scrim-min(0.45) を上回る。 */
+  background: linear-gradient(120deg, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.52) 70%), var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot), var(--lg-shadow);
+  transition: transform .12s var(--ease-standard), bottom .35s var(--ease-out);
+}
+/* エッジは廃止（カラーの縁なし）。面はガラスのみ。 */
+.qb::after {
+  content: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.qb:active { transform: scale(.97); }
+.qb.cleared { cursor: default; }
+.qb.cleared::after {
+  background: linear-gradient(135deg, var(--state-quest-cleared) 0%, rgba(76,175,80,0.40) 100%);
+}
+/* WebView(platform view) の上では backdrop blur が使えない。不透明近似は
+   --surface-raised ＋ 微かな斜め lift。blur 有無で見えが変わらないこと。 */
+.qb.no-blur {
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  background: linear-gradient(120deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%), var(--surface-raised);
+}
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .qb { background: linear-gradient(120deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 70%), var(--surface-raised); }
+}
+/* ②未クリアのみ: 外側パルスリング（ガラス形状自体は動かさない） */
+.qb.pulse { animation: qb-pulse 2.2s var(--ease-out) infinite; }
+@keyframes qb-pulse {
+  0%       { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot),
+             var(--lg-shadow), 0 0 0 0 var(--state-quest-active-ring); }
+  70%,100% { box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot),
+             var(--lg-shadow), 0 0 0 16px rgba(255,62,136,0); }
+}
+@media (prefers-reduced-motion: reduce) { .qb.pulse { animation: none; } }
+
+/* --- row 1: eyebrow ------------------------------------------------------- */
+.qb-eyebrow { display: flex; align-items: center; gap: 8px; min-height: 16px; }
+.qb-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--state-quest-active); }
+.qb.cleared .qb-dot { background: var(--state-quest-cleared); }
+.qb-label {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  letter-spacing: .02em; text-transform: none;
+  background: linear-gradient(90deg,#fff0a6 0%,#bfcc96 10%,#80a787 20%,#40837f 30%,#5d9ba1 40%,#8d8499 50%,#a97ba2 60%,#bf4680 70%,#ff3e88 80%,#e86f6d 90%,#d0a052 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.7));
+}
+.qb.cleared .qb-label { background: none; -webkit-background-clip: border-box; background-clip: border-box; color: var(--state-quest-cleared); }
+/* カウントダウン pill — 締切までの残り時間。右寄せ・tabular-nums。 */
+.qb-when {
+  margin-left: auto; display: flex; align-items: center; gap: 5px; flex: none;
+  padding: 3px 10px; border-radius: var(--radius-pill); background: rgba(255,255,255,0.09);
+}
+.qb-when img { width: 12px; height: 12px; opacity: .8; }
+.qb.urgent .qb-when span { color: var(--state-quest-active); }
+.qb-when span {
+  font-family: var(--font-latin); font-weight: 700; font-size: 12px; line-height: 1;
+  letter-spacing: .04em; color: var(--text-1); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+
+/* --- body ---------------------------------------------------------------- */
+/* 主役はタイトル1つ。面がスクリムを担保するので text-shadow は載せない。 */
+.qb-title {
+  margin-top: 6px; font-family: var(--font-jp); font-weight: 700; font-size: 16px; line-height: 1.4;
+  color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qb-desc {
+  margin-top: 4px; font-family: var(--font-jp); font-weight: 500; font-size: 12px; line-height: 1.5;
+  color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* --- footer: 投稿 dots ＋ 提出 CTA --------------------------------------- */
+.qb-foot { position: relative; margin-top: 8px; min-height: 26px; display: flex; align-items: center; justify-content: center; }
+.qb-dots { display: flex; align-items: center; gap: 5px; }
+.qb-dots i { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.28);
+  transition: width .25s ease-in-out, background .25s ease-in-out; }
+.qb-dots i.on { width: 14px; border-radius: var(--radius-pill); background: var(--text-1); }
+/* 未クリアの CTA ラベル。看板全面が tap 域なので自身は pointer-events:none。
+   as-built の「意味が曖昧な装飾カメラ」の後継 — 何をすれば解錠かを明示する。 */
+.qb-cta {
+  position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+  display: flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px;
+  border-radius: var(--radius-pill); background: rgba(255,255,255,0.12);
+  box-shadow: inset 0 0 0 1px var(--border-hairline); pointer-events: none;
+}
+.qb-cta img { width: 14px; height: 14px; }
+.qb-cta span { font-family: var(--font-jp); font-weight: 700; font-size: 11px; line-height: 1; color: var(--text-1); }
+
+/* --- owner: 編集 — 44×44 の tap 域（見た目は 28px 円）。提出 CTA と対角に置く */
+.qb-edit {
+  position: absolute; top: 0; right: 0; width: 44px; height: 44px; z-index: 2;
+  display: grid; place-items: center; border: 0; background: none; padding: 0; cursor: pointer;
+}
+.qb-edit i { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255,255,255,0.12); box-shadow: inset 0 0 0 1px var(--border-hairline); }
+.qb-edit img { width: 16px; height: 16px; opacity: .9; }
+.qb.owner .qb-eyebrow, .qb.owner .qb-title { padding-right: 44px; }
+
+/* --- 兄弟状態: クエスト未設定 ------------------------------------------- */
+/* オーナー → 作成 pill（tap 域 44 高）。看板ではないので枠だけ共有する。 */
+.qb-create {
+  display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px;
+  border-radius: var(--radius-pill); background: rgba(255,255,255,0.10);
+  box-shadow: inset 0 0 0 1px var(--border-hairline);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: var(--text-1); cursor: pointer;
+}
+.qb-create img { width: 14px; height: 14px; }
+/* 非オーナー → 看板なし。白シートのレールに載る空文言なので ink 系で組む。 */
+.qb-empty { font-family: var(--font-jp); font-weight: 500; font-size: 12px; color: var(--ink-2); }
+
+
+/* ============================================================================
+   WdQuestFooter — サークルフッター × クエスト看板 の複合（既存パーツの合成のみ）
+   シルエットは L 字: 縦棒 = サークルアイコン(64) / 横棒 = 下寄せのサークル名。
+   名前が下に偏るので L の内側に平たい「窪み」ができる。そこに QuestBoard を
+   落とし込む（看板の左端＝名前カラムの左端で縦のリズムが揃う）。
+   ガラスは看板 1 枚だけ。identity は bare（面なし）＋下端の保護グラデで可読性を
+   構造で担保する（taste.md 原則2）。新しいスタイルは足さない。
+   ========================================================================== */
+.wd-quest-footer {
+  position: relative; width: 374px; font-family: var(--font-jp);
+  display: grid; grid-template-columns: 64px 1fr; grid-template-rows: auto auto;
+  column-gap: 12px; row-gap: 0; align-items: end;
+}
+.wd-quest-footer > * { position: relative; z-index: 1; }
+/* 下端の保護グラデ — 写真の上の bare テキストを構造で読ませる（--scrim-min 以上） */
+.wd-quest-footer::before {
+  content: ""; position: absolute; left: -14px; right: -14px; top: 0; bottom: -46px; z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--scrim-min) 52%, rgba(0,0,0,0.74) 100%);
+  pointer-events: none;
+}
+/* 窪み = row1 / col2。看板・作成 pill はここに入る */
+.wd-quest-footer .slot { grid-column: 2; grid-row: 1; display: flex; align-items: flex-end; justify-content: stretch; min-width: 0; margin-bottom: 0; }
+.wd-quest-footer .slot .qb { width: auto; flex: 1 1 auto; min-width: 0; }
+/* L の縦棒 — サークルアイコン。bottom で名前と揃える */
+.wd-quest-footer .cover {
+  grid-column: 1; grid-row: 1 / 3; align-self: end; width: 64px; height: 64px; border-radius: 50%;
+  margin-bottom: 0;
+  object-fit: cover; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.35), var(--shadow-avatar);
+}
+/* L の横棒 — 下寄せの identity。主役は名前1つ、説明は --text-2 へ降格 */
+.wd-quest-footer .id {
+  grid-column: 2; grid-row: 2; align-self: start; display: flex; flex-direction: column; justify-content: flex-start;
+  min-width: 0; padding-top: 2px;
+}
+.wd-quest-footer .nm { font: 700 17px/1.15 var(--font-jp); color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* status 行は廃止 — 名前 1 つに絞り、baseline をアイコン下端まで落とす */
+/* 窪みが空のとき（クエスト未設定・非オーナー）は L だけが残る */
+.wd-quest-footer.no-quest { grid-template-rows: 0 auto; row-gap: 0; }
+.wd-quest-footer.no-quest .id { align-self: end; padding-top: 0; padding-bottom: 4px; }
+
+
+/* ============================================================================
+   WdEriaWall — サークル領域（中心＋半径）の境界を押し出した「光のカーテン」
+   ジオメトリは preview/eria-wall.js が生成する（真円 N 分割の直線セグメント）。
+   効果は 1 群 = ①カーテン面 ②天端リム ③地面ブリード。色はブランドグラデのみ。
+   ========================================================================== */
+.ew{position:relative;border-radius:var(--radius-md);overflow:hidden;background:radial-gradient(120% 100% at 50% 42%,#12131b 0%,#08080b 62%,#050507 100%);box-shadow:inset 0 0 0 1px var(--border-hairline);flex:none}
+.ew-scene{position:absolute;inset:0;transform-style:preserve-3d;transform:translateY(var(--oy,0px)) translateZ(var(--z,-120px)) rotateX(var(--tilt,58deg)) rotateZ(var(--spin,-24deg))}
+.ew-scene>*{position:absolute;left:50%;top:50%}
+.ew-grd{background:
+  repeating-linear-gradient(90deg,rgba(255,255,255,.10) 0 1px,transparent 1px 46px),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.10) 0 1px,transparent 1px 46px),
+  repeating-linear-gradient(90deg,rgba(255,255,255,.16) 0 2px,transparent 2px 184px),
+  repeating-linear-gradient(0deg,rgba(255,255,255,.16) 0 2px,transparent 2px 184px),
+  radial-gradient(50% 50% at 50% 50%,#15161f 0%,#0b0b10 70%,#07070a 100%);
+  -webkit-mask-image:radial-gradient(50% 50% at 50% 50%,#000 56%,transparent 98%);mask-image:radial-gradient(50% 50% at 50% 50%,#000 56%,transparent 98%)}
+.ew-svg{overflow:visible;pointer-events:none}
+/* 建物 — 天面+2側面の押し出しボックス。壁と競合しないよう無彩色に落とす */
+.ew-bld{width:0;height:0;transform-style:preserve-3d}
+.ew-bld i{position:absolute;left:0;top:0;display:block}
+.ew-bld i.t{background:linear-gradient(135deg,#262935,#1a1d27);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16)}
+.ew-bld i.s{background:linear-gradient(to top,#101219,#1a1d26)}
+.ew-bld i.s2{background:linear-gradient(to top,#0a0b10,#12141c)}
+/* 壁本体 — 下端が最も濃く、上に向かって消えるカーテン */
+.ew-seg{transform-origin:50% 50%;background:linear-gradient(to top,
+  color-mix(in oklab,var(--c) 66%,transparent) 0%,
+  color-mix(in oklab,var(--c) 36%,transparent) 34%,
+  color-mix(in oklab,var(--c) 14%,transparent) 70%,
+  transparent 100%);overflow:hidden}
+.ew-seg::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.20) 0 1px,transparent 1px 24px);-webkit-mask-image:linear-gradient(to top,#000,transparent 82%);mask-image:linear-gradient(to top,#000,transparent 82%)}
+.ew.live .ew-seg::after{content:"";position:absolute;left:0;right:0;bottom:0;height:30%;background:linear-gradient(to top,transparent,rgba(255,255,255,.20),transparent);animation:ew-scan 5.5s linear infinite}
+.ew.urgent .ew-seg::after{animation-duration:2.2s}
+@keyframes ew-scan{0%{transform:translateY(30%);opacity:0}18%{opacity:1}82%{opacity:1}100%{transform:translateY(-340%);opacity:0}}
+/* 天端リム — 壁の「上端がある」ことを 1 本の光で示す（グローはここだけ） */
+.ew-cap{transform-origin:50% 50%;background:linear-gradient(90deg,transparent,var(--c) 12%,var(--c) 88%,transparent);box-shadow:0 0 12px var(--c),0 0 34px color-mix(in oklab,var(--c) 50%,transparent)}
+/* 中央のプラザ — ポップアップの足元 */
+.ew-core{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:radial-gradient(50% 50% at 50% 50%,rgba(255,62,136,.28),transparent 70%)}
+.ew-core.r{width:168px;height:168px;margin:-84px 0 0 -84px;background:none;box-shadow:inset 0 0 0 1.5px var(--state-quest-active-ring);animation:ew-core-pulse 2.6s var(--ease-out) infinite}
+@keyframes ew-core-pulse{0%{transform:scale(.72);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+/* ポップアップの取り付け位置（3D の外＝スクリーン空間）— エリアの中心に置く。
+   アンカー（テザー）は持たない。 */
+.ew-popup{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;animation:ew-float 5.5s var(--ease-standard) infinite alternate}
+@keyframes ew-float{to{transform:translate(-50%,-50%) translateY(-8px)}}
+/* 地図の上の chrome は必ず dark glass（白文字 AA） */
+.ew-chrome{position:absolute;top:16px;left:16px;z-index:4;display:flex;align-items:center;gap:10px;height:44px;padding:0 16px 0 8px;border-radius:var(--radius-pill);background:var(--lg-tint-dark);-webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-saturate));box-shadow:inset 0 1px 0 var(--lg-specular-top),inset 0 -1px 0 var(--lg-specular-bot),var(--lg-shadow)}
+.ew-chrome img.av{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.ew-chrome .nm{font-family:var(--font-jp);font-weight:700;font-size:13px;color:var(--text-1)}
+.ew-chrome .mt{font-family:var(--font-latin);font-weight:600;font-size:11px;color:var(--text-2);padding-left:10px;margin-left:2px;box-shadow:inset 1px 0 0 rgba(255,255,255,.18)}
+
+/* ============================================================================
+   WdQuestPopup — 街の頭上に浮かぶクエスト（v2 / 2 レイヤー方式）
+   ---------------------------------------------------------------------------
+   置き換え対象: preview/components.css 末尾の「WdQuestPopup」ブロック全体
+   （.qp / .qp-eyebrow / .qp-label / .qp-title / .qp-time / .qp-until /
+     .qp.md / .qp.sm）を、このファイルの内容で丸ごと差し替える。
+
+   何が変わったか
+   - 可読性の担保を「黒い text-shadow 3 枚」から **同じ文字を 2 枚重ねる構造** に変更。
+       背面 .qp-back = 太い白アウトライン + blur → 文字のまわりに光のハローが立つ
+       前面 .qp      = 黒文字 + 細い白アウトライン → 3D マップから完全に切り離される
+     面（看板）もスクリムもアンカーも持たない、という原則は変わらない。効果は 1 群。
+   - 色を持つのは Quest ラベル（ブランドグラデ／cleared は --state-quest-cleared）と
+     残り 30 分未満の数字（--state-quest-active）だけ。ここは従来どおり。
+   - サイズ（lg / md / sm）はクラス名も数値も従来どおり。ストローク幅とぼかし量だけ
+     サイズに追従する（--qp-blur / --qp-back-stroke / --qp-front-stroke）。
+
+   必須マークアップ（2 枚重ね）: comp-quest-popup.html を参照
+   <div class="qp-mount">
+     <div class="qp-back" aria-hidden="true"> ← 中身は前面と完全に同じ
+       <div class="qp sm">…</div>
+     </div>
+     <div class="qp sm">…</div>
+   </div>
+   ※ .qp-mount で包まない裸の .qp は従来の影 3 枚版として動く（後方互換）。
+   ========================================================================== */
+
+/* 従来版（.qp-mount なし）の影 — 後方互換のため残す */
+.qp {
+  --qp-shadow: 0 1px 2px rgba(0,0,0,1), 0 2px 10px rgba(0,0,0,.95), 0 0 30px rgba(0,0,0,.85);
+  position: relative; text-align: center;
+}
+
+/* --- 2 レイヤーのマウント ------------------------------------------------- */
+.qp-mount {
+  position: relative; display: block;
+  --qp-blur: 7px; --qp-back-stroke: 5px; --qp-front-stroke: 2.2px;   /* lg */
+}
+.qp-mount:has(.qp.md) { --qp-blur: 5px; --qp-back-stroke: 4px; --qp-front-stroke: 1.8px; }
+.qp-mount:has(.qp.sm) { --qp-blur: 4px; --qp-back-stroke: 3px; --qp-front-stroke: 1.4px; }
+.qp-mount .qp { --qp-shadow: none; }   /* 影は使わない。可読性は 2 枚重ねが担保する */
+
+/* 背面 — 太い白の輪郭線。ぼけたまま「光の縁」になる */
+.qp-back {
+  position: absolute; inset: 0; pointer-events: none;
+  transform: scale(1.06); transform-origin: 50% 50%;
+  filter: blur(var(--qp-blur)); opacity: .95;
+}
+.qp-back .qp-label, .qp-back .qp-title, .qp-back .qp-time, .qp-back .qp-until {
+  -webkit-text-stroke: var(--qp-back-stroke) rgba(255,255,255,.95); paint-order: stroke fill;
+  text-shadow: 0 2px 18px rgba(0,0,0,.45), 0 0 48px rgba(0,0,0,.35);
+}
+
+/* 前面 — 黒文字＋細い白の輪郭線 */
+.qp-mount > .qp .qp-title,
+.qp-mount > .qp .qp-time,
+.qp-mount > .qp .qp-until {
+  color: #08080b;
+  -webkit-text-stroke: var(--qp-front-stroke) rgba(255,255,255,.95); paint-order: stroke fill;
+}
+.qp-mount > .qp .qp-label {
+  -webkit-text-stroke: var(--qp-front-stroke) rgba(255,255,255,.95); paint-order: stroke fill;
+  filter: none;                       /* 白縁が影の役目を持つので drop-shadow は外す */
+}
+
+/* --- 行組（従来どおり） --------------------------------------------------- */
+.qp-eyebrow { display: flex; align-items: center; justify-content: center; min-height: 16px; }
+
+/* Quest ラベルだけが色を持つ = 特別扱い。colors-gradient の 11 stop を語幅に
+   等間隔で通す（暗い teal 帯だけ輝度を上げる／色相は変えない）。 */
+.qp-label {
+  font-family: var(--font-latin); font-weight: 700; font-size: 15px; line-height: 1;
+  letter-spacing: .02em;
+  background: linear-gradient(90deg, #fff0a6 0%, #bfcc96 10%, #80a787 20%, #40837f 30%,
+    #5d9ba1 40%, #8d8499 50%, #a97ba2 60%, #bf4680 70%, #ff3e88 80%, #e86f6d 90%, #d0a052 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.95)) drop-shadow(0 0 12px rgba(0,0,0,.8));
+}
+.qp.cleared .qp-label {
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: var(--state-quest-cleared);
+}
+.qp-title { text-shadow: var(--qp-shadow); margin-top: 14px; font-family: var(--font-jp);
+  font-weight: 700; font-size: 30px; line-height: 1.34; letter-spacing: .01em;
+  color: var(--text-1); text-wrap: balance; }
+.qp-time { text-shadow: var(--qp-shadow); margin-top: 16px; font-family: var(--font-latin);
+  font-weight: 700; font-size: 44px; line-height: 1; letter-spacing: .02em;
+  color: var(--text-1); font-variant-numeric: tabular-nums; }
+.qp.urgent .qp-time { color: var(--state-quest-active); }
+.qp.cleared .qp-time { font-size: 30px; color: var(--text-2); }
+/* cleared でも前面レイヤーは黒文字を保つ（legacy ルールの後に置いて上書き） */
+.qp-mount > .qp.cleared .qp-time,
+.qp-mount > .qp.cleared .qp-until { color: #08080b; }
+.qp-until { text-shadow: var(--qp-shadow); margin-top: 10px; font-family: var(--font-jp);
+  font-weight: 500; font-size: 12px; letter-spacing: .02em; color: var(--text-2); }
+
+.qp.md .qp-title { margin-top: 11px; font-size: 22px; }
+.qp.md .qp-time  { margin-top: 12px; font-size: 34px; }
+.qp.md .qp-until { margin-top: 8px; }
+.qp.sm .qp-label { font-size: 13px; }
+.qp.sm .qp-title { margin-top: 8px; font-size: 15px; }
+.qp.sm .qp-time  { margin-top: 9px; font-size: 22px; }
+.qp.sm .qp-until { margin-top: 6px; font-size: 11px; }
+

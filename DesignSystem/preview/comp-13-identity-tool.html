@@ -1,0 +1,32 @@
+<!-- @dsCard group="Components" tier="component" name="WdIdentityTool" subtitle="identity ＋ quick-actions クラスター — 左 Content Bars（circle cover）／右 WdIconButton 縦2連（camera badgeColor の下に pen standart）· glass: yes" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { min-height:100vh; background: linear-gradient(120deg,rgba(0,0,0,.2),rgba(0,0,0,.55)), url('../../assets/sample/background/background010.jpg'); background-size:cover; background-position:center; gap:14px; align-items:flex-start; justify-content:flex-end; }
+  .lbl { font:600 10px/1 var(--font-latin); letter-spacing:.12em; text-transform:uppercase; color:#fff; opacity:.7; text-shadow:0 1px 4px #000; }
+  .grp { display:flex; flex-direction:column; gap:8px; width:100%; max-width:360px; }
+</style></head>
+<body>
+  <div class="eyebrow" style="text-shadow:0 1px 4px #000;">WdIdentityTool — Content Bars（circle cover）＋ camera / pen の縦アクション</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — circle-bar pill ＋ WdIconButton</span></div>
+
+  <!-- glass pill identity + action stack -->
+  <div class="grp">
+    <span class="lbl">glass pill — グループ identity ＋ 編集アクション</span>
+    <div class="wd-identity-tool">
+      <div class="wd-circle-bar">
+        <img class="cover" src="../../assets/images/sample_3d.png">
+        <div class="col" style="gap:2px;">
+          <span class="nm">渋谷コミュニティ</span>
+          <span class="ds">渋谷駅周辺のコミュニティ</span>
+        </div>
+      </div>
+      <div class="stack">
+        <button class="wd-icon-btn color has-badge"><img src="../../assets/icons/icon_camera.png"><span class="wd-badge"><img src="../../assets/icons/icon_add.png"></span></button>
+        <button class="wd-icon-btn"><img src="../../assets/icons/icon_edit.png"></button>
+      </div>
+    </div>
+  </div>
+</body></html>

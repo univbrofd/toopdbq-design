@@ -13,7 +13,6 @@ If the user invokes this skill without any other guidance, ask them what they wa
 - **Tokens:** `colors_and_type.css` — import it for every mock. Black/white + cool grays, one signature colorful radial gradient (`#FFF0A6 → #005F67 → #FF3E88 → #D0A052`), translucent-black glass surfaces with diagonal gradient hairlines.
 - **Type:** Pacifico (wordmark only), Noto Sans JP (JP copy / bold buttons), Inter (Latin / numerals).
 - **Icons:** custom white PNGs in `assets/icons/` — reference them directly, never redraw or substitute emoji.
-- **UI kit:** `ui_kits/app/` — copy its `app.css` + `.jsx` components to assemble screens fast.
 - **Specimens:** `preview/` cards show every color, type and component treatment.
 
 When in doubt, match the app: full-bleed photography, glass controls, the colorful gradient reserved for the highest-intent action, soft dark shadows, nothing sharp-cornered.

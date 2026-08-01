@@ -1,0 +1,270 @@
+<!-- @dsCard group="Components" tier="component" viewport="1560x1580" name="WdQuestPopup" subtitle="街の頭上に浮かぶクエスト。面（看板）を持たず Quest／クエスト名／カウントダウンを中央揃えで縦に 3 行。可読性は同じ文字を 2 枚重ねて担保する — 前面が黒文字、背面は太い白アウトラインにブラー。" -->
+<html lang="ja"><head><meta charset="utf-8"><title>WdQuestPopup — 頭上のクエスト</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+body{background:#0d0d0f;width:1560px;height:1580px;padding:0;display:block;overflow:hidden}
+a{color:var(--text-1)}a:hover{color:var(--state-quest-active)}
+.wrap{width:1560px;height:1580px;padding:26px 30px;display:flex;flex-direction:column;gap:18px}
+.hd{display:flex;align-items:flex-end;gap:34px}
+.hd h1{font-family:var(--font-jp);font-weight:700;font-size:26px;letter-spacing:.01em}
+.sub{margin-top:8px;max-width:1080px;font-family:var(--font-jp);font-weight:400;font-size:12.5px;line-height:1.7;color:var(--text-2)}
+.sub b{font-weight:700;color:var(--text-1)}
+.chips{margin-left:auto;display:flex;gap:8px;flex:none}
+.chip{padding:6px 12px;border-radius:var(--radius-pill);background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px var(--border-hairline);font-family:var(--font-latin);font-weight:600;font-size:11px;color:var(--text-2)}
+.band{display:flex;gap:18px}
+.bt{font-family:var(--font-jp);font-weight:700;font-size:13px;color:var(--text-1);margin-bottom:9px}
+.cap{font-family:var(--font-jp);font-weight:400;font-size:11.5px;line-height:1.6;color:var(--text-2)}
+.cap b{font-weight:700;color:var(--text-1)}
+.lbl{font-family:var(--font-latin);font-weight:600;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);margin-bottom:7px}
+.panel{border-radius:var(--radius-md);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px var(--border-hairline);padding:20px}
+.col{display:flex;flex-direction:column;gap:9px}
+.staterow .col>.cap{min-height:37px}
+.rules{display:flex;flex-direction:column;gap:11px}
+.fx{display:flex;gap:11px;align-items:flex-start}
+.fx .n{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px var(--border-hairline);font-family:var(--font-latin);font-weight:700;font-size:10px;color:var(--text-2)}
+.fx .d{font-family:var(--font-jp);font-weight:400;font-size:12px;line-height:1.6;color:var(--text-2)}
+.fx .d b,.fx .d em{font-style:normal;color:var(--text-1);font-weight:700}
+.fx .d s{color:var(--text-3)}
+.ann{display:flex;align-items:center;gap:9px;font-family:var(--font-jp);font-size:11px;font-weight:500;color:var(--text-2)}
+.ann i{width:10px;height:10px;border-radius:2px;flex:none}
+.sizes{display:flex;align-items:flex-end;gap:18px}
+.szbox{position:relative;border-radius:var(--radius-md);overflow:hidden;background:radial-gradient(120% 100% at 50% 40%,#15161f,#08080b 70%);display:grid;place-items:center;flex:none}
+pre.code{margin:0;padding:12px 14px;border-radius:var(--radius-sm);background:rgba(0,0,0,.42);box-shadow:inset 0 0 0 1px var(--border-hairline);font-family:var(--font-mono,ui-monospace,monospace);font-size:10.5px;line-height:1.65;color:var(--text-2);white-space:pre;overflow:auto}
+pre.code b{color:var(--text-1);font-weight:700}
+/* 分解図 — 背面／前面をずらして見せる */
+.expl{position:relative;width:300px;height:200px;border-radius:var(--radius-md);overflow:hidden;background:radial-gradient(120% 100% at 50% 40%,#15161f,#08080b 70%);display:grid;place-items:center}
+.expl .qp-mount{width:250px}
+.expl.only-back .qp-mount>.qp{visibility:hidden}
+.expl.only-front .qp-back{display:none}
+</style></head>
+<body><div class="wrap">
+
+<div class="hd">
+  <div>
+    <h1>WdQuestPopup — 街の頭上に浮かぶクエスト</h1>
+    <div class="sub">サークルが 1 件だけ出す「お題」を、<b>ポストのタイトルのように</b>地図の中心の頭上に浮かべる表示。<b>面（看板）を持たない</b> — <b>Quest ／ クエスト名 ／ カウントダウン</b>を中央揃えで縦に積むだけ。可読性は<b>同じ文字を 2 枚重ねる構造</b>で担保する — <b>前面は黒文字＋細い白の輪郭線</b>、<b>背面は太い白の輪郭線にブラー</b>をかけて光のハローにする。黒い影を敷かない・面を敷かない・アンカーを持たない。取り付け先は <a href="comp-eria-wall.html">WdEriaWall</a> の<b>領域のちょうど中心</b>。色を持つのは <b>Quest ラベル</b>と<b>残り 30 分未満の数字</b>だけ。</div>
+  </div>
+  <div class="chips">
+    <span class="chip">glass: no（面なし）</span>
+    <span class="chip">layers: 2（back + front）</span>
+    <span class="chip">3 lines only</span>
+  </div>
+</div>
+
+<div class="band">
+  <div class="col">
+    <div class="bt">サイズ — lg / md / sm（輪郭線とぼかし量はサイズに追従。残り時間は tabular-nums）</div>
+    <div class="sizes">
+      <div class="col">
+        <div class="cap"><b>lg</b> — 主景の地図 / 全画面</div>
+        <div class="szbox" style="width:700px;height:300px">
+          <div class="qp-mount" style="width:640px">
+            <div class="qp">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">宮下公園でスカイランタンを上げる</div>
+              <div class="qp-time" data-countdown="14352">03:59:12</div>
+              <div class="qp-until">8/2 22:00 まで</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cap"><b>md</b> — 実機 402 幅</div>
+        <div class="szbox" style="width:402px;height:300px">
+          <div class="qp-mount" style="width:370px">
+            <div class="qp md">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">宮下公園でスカイランタンを上げる</div>
+              <div class="qp-time" data-countdown="14352">03:59:12</div>
+              <div class="qp-until">8/2 22:00 まで</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cap"><b>sm</b> — 一覧・ミニ地図</div>
+        <div class="szbox" style="width:280px;height:300px">
+          <div class="qp-mount" style="width:250px">
+            <div class="qp sm">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">スカイランタンを上げる</div>
+              <div class="qp-time" data-countdown="14352">03:59:12</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="band">
+  <div class="col">
+    <div class="bt">状態 — 未クリア / 残り 30 分未満 / クリア済み</div>
+    <div class="band staterow">
+      <div class="col">
+        <div class="cap"><b>01 未クリア</b> — ラベルはブランドグラデ。</div>
+        <div class="ew live" data-mini="1" data-seed="4" data-state="active" style="width:340px;height:230px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+          <div class="ew-popup" style="width:300px">
+            <div class="qp-mount">
+              <div class="qp sm">
+                <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+                <div class="qp-title">スカイランタンを上げる</div>
+                <div class="qp-time" data-countdown="14352">03:59:12</div>
+                <div class="qp-until">8/2 22:00 まで</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cap"><b>02 残り 30 分未満</b> — <b>数字だけ</b>をアクセント色に。文字組は変えない。</div>
+        <div class="ew live urgent" data-mini="1" data-seed="31" data-state="urgent" style="width:340px;height:230px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+          <div class="ew-popup" style="width:300px">
+            <div class="qp-mount">
+              <div class="qp sm urgent">
+                <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+                <div class="qp-title">スカイランタンを上げる</div>
+                <div class="qp-time" data-countdown="1687">00:28:07</div>
+                <div class="qp-until">8/2 22:00 まで</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cap"><b>03 クリア済み</b> — ラベルは Quest cleared で <code class="mono">--state-quest-cleared</code> 単色、数字は達成時刻（サイズを 1 段落とす）。</div>
+        <div class="ew" data-mini="1" data-seed="8" data-state="cleared" style="width:340px;height:230px;--tilt:60deg;--spin:-18deg;--z:-30px"><div class="ew-scene"></div>
+          <div class="ew-popup" style="width:300px" data-noanim="1">
+            <div class="qp-mount">
+              <div class="qp sm cleared">
+                <div class="qp-eyebrow"><span class="qp-label">Quest cleared</span></div>
+                <div class="qp-title">スカイランタンを上げる</div>
+                <div class="qp-time">8/2 21:12</div>
+                <div class="qp-until">12 人が達成</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col" style="flex:1">
+        <div class="cap"><b>04 WdEriaWall に取り付いた状態</b> — 領域のちょうど中心。</div>
+        <div class="ew live" id="mini" style="width:390px;height:230px;--tilt:60deg;--spin:-18deg;--z:-30px;--oy:22px">
+          <div class="ew-scene"></div>
+          <div class="ew-popup" style="width:280px">
+            <div class="qp-mount">
+              <div class="qp sm">
+                <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+                <div class="qp-title">スカイランタンを上げる</div>
+                <div class="qp-time" data-countdown="14352">03:59:12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="band" style="flex:1;flex-direction:column">
+  <div class="panel" style="flex:none">
+    <div class="lbl">Anatomy — 2 枚重ね</div>
+    <div class="band" style="gap:12px">
+      <div class="col">
+        <div class="expl only-back">
+          <div class="qp-mount">
+            <div class="qp sm">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">背面 — 白の輪郭線をぼかす</div>
+              <div class="qp-time">03:59:12</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap"><b>背面 .qp-back</b> — 前面と同じ内容を <code class="mono">scale(1.06)</code>・太い白ストローク・<code class="mono">blur()</code>。文字の外周にだけ光が残る。</div>
+      </div>
+      <div class="col">
+        <div class="expl only-front">
+          <div class="qp-mount">
+            <div class="qp sm">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">前面 — 黒文字＋細い白縁</div>
+              <div class="qp-time">03:59:12</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap"><b>前面 .qp</b> — <code class="mono">#08080b</code> の黒文字に細い白ストローク。Quest ラベルだけグラデを保つ。</div>
+      </div>
+      <div class="col">
+        <div class="expl">
+          <div class="qp-mount">
+            <div class="qp sm">
+              <div class="qp-eyebrow"><span class="qp-label">Quest</span></div>
+              <div class="qp-title">重ねると地図から浮き上がる</div>
+              <div class="qp-time">03:59:12</div>
+            </div>
+          </div>
+        </div>
+        <div class="cap"><b>合成</b> — 黒い影も面もスクリムも使わずに、明るい建物の上でも文字が沈まない。</div>
+      </div>
+    </div>
+    <div class="col" style="margin-top:12px;gap:7px">
+      <div class="ann"><i style="background:rgba(255,255,255,.95)"></i><span><b style="color:var(--text-1)">背面</b> <code class="mono">-webkit-text-stroke 3–5px / blur 4–7px / scale 1.06</code>（サイズに追従）</span></div>
+      <div class="ann"><i style="background:#08080b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.8)"></i><span><b style="color:var(--text-1)">前面</b> <code class="mono">color #08080b</code> ＋ <code class="mono">-webkit-text-stroke 1.4–2.2px #fff</code>・<code class="mono">paint-order: stroke fill</code></span></div>
+      <div class="ann"><i style="background:linear-gradient(90deg,#fff0a6,#bfcc96,#80a787,#40837f,#5d9ba1,#8d8499,#a97ba2,#bf4680,#ff3e88,#e86f6d,#d0a052)"></i><span>色を持つのは <b style="color:var(--text-1)">Quest ラベル</b>（11 stop を語幅に等間隔で background-clip）と、残り 30 分未満の数字だけ</span></div>
+    </div>
+  </div>
+  <div class="panel" style="flex:1;display:flex;gap:26px">
+    <div style="flex:1;min-width:0">
+    <div class="lbl">Rules</div>
+    <div class="rules">
+      <div class="fx"><span class="n">01</span><span class="d">行は <b>Quest / クエスト名 / カウントダウン</b> の 3 つ。補足（期限日時・達成人数）は 1 行まで。<b>4 行目を足さない</b>。</span></div>
+      <div class="fx"><span class="n">02</span><span class="d">可読性は <b>2 枚重ね</b>（背面＝白の太い縁にブラー／前面＝黒文字に細い白縁）。<s>黒い text-shadow 3 枚</s>は廃止。<b>面もスクリムもアンカーも置かない</b>。</span></div>
+      <div class="fx"><span class="n">03</span><span class="d">背面は必ず<b>前面と同じ内容</b>を持つ。テキストを差し替えるときは<b>両方</b>を更新する（<code class="mono">.qp-mount</code> 内の同 class を一括更新）。背面は <code class="mono">aria-hidden="true"</code>。</span></div>
+      <div class="fx"><span class="n">04</span><span class="d">主役は<b>クエスト名 1 つ</b>。ラベルは<em>ブランドグラデの文字</em>（面や点を持たせない）、補足は同じ強さで並べない。</span></div>
+      <div class="fx"><span class="n">05</span><span class="d">残り時間は <em>font-variant-numeric: tabular-nums</em>。桁が動いてもレイアウトが揺れない。</span></div>
+      <div class="fx"><span class="n">06</span><span class="d">効果は<b>この 2 レイヤーだけ</b>。枠・グロー・<s>ドット</s>・<s>アンカー</s>・<s>影</s>を足さない。</span></div>
+      <div class="fx"><span class="n">07</span><span class="d">3D シーンの中に置かない（<b>常にスクリーン空間</b>）。傾いた面にテキストを載せない。</span></div>
+      <div class="fx"><span class="n">08</span><span class="d">残り 30 分未満は<b>数字の色だけ</b>を <code class="mono">--state-quest-active</code> に。サイズ・行組は同一に保つ。</span></div>
+    </div>
+    </div>
+    <div style="flex:none;width:440px">
+    <div class="lbl">Markup</div>
+    <pre class="code">&lt;div class="<b>qp-mount</b>"&gt;
+  &lt;div class="<b>qp-back</b>" aria-hidden="true"&gt;   <span style="color:var(--text-3)">&lt;!-- 前面と同一の複製 --&gt;</span>
+    &lt;div class="qp sm"&gt;…&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="<b>qp</b> sm"&gt;
+    &lt;div class="qp-eyebrow"&gt;&lt;span class="qp-label"&gt;Quest&lt;/span&gt;&lt;/div&gt;
+    &lt;div class="qp-title"&gt;スカイランタンを上げる&lt;/div&gt;
+    &lt;div class="qp-time"&gt;03:59:12&lt;/div&gt;
+    &lt;div class="qp-until"&gt;8/2 22:00 まで&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="eria-wall.js"></script>
+<script>
+/* 背面レイヤーは前面の完全な複製。マークアップに手で 2 度書かせないため、
+   仕様カードでは初期化時に複製する（実装側は上の Markup どおり静的に書いても
+   よいし、この mirror を使ってもよい）。 */
+(function(){
+  document.querySelectorAll('.qp-mount').forEach(function(m){
+    if(m.querySelector('.qp-back'))return;
+    var front=m.querySelector(':scope > .qp');if(!front)return;
+    var back=document.createElement('div');
+    back.className='qp-back';back.setAttribute('aria-hidden','true');
+    back.appendChild(front.cloneNode(true));
+    m.insertBefore(back,front);
+  });
+})();
+EriaWall.build(document.getElementById('mini'),{seed:12,n:40,r:118,h:56,blds:14,state:'active'});
+document.querySelectorAll('[data-mini]').forEach(el=>EriaWall.build(el,{seed:+el.dataset.seed,n:40,r:110,h:52,blds:12,state:el.dataset.state}));
+document.querySelectorAll('[data-noanim]').forEach(el=>el.style.animation='none');
+EriaWall.countdown();EriaWall.seatPopups();
+document.fonts&&document.fonts.ready.then(EriaWall.seatPopups);
+</script>
+</body></html>

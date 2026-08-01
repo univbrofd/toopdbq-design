@@ -1,0 +1,106 @@
+<!-- @dsCard group="Components" tier="component" name="WdSideTool" subtitle="縦並びアクションレール — WdAvatar(poster) → like → comment → pin · WdIconButton(standart glass) + under-count · liked = state-like" --><!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="components.css">
+<style>
+  body { background: #0d0d0f; gap: 20px; }
+  .u { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  .u .n { font-size: 10px; color: var(--fg-2); }
+  /* a cropped reel photo so the floating rail reads in real context */
+  .reel {
+    position: relative; width: 300px; height: 440px; border-radius: var(--radius-md);
+    overflow: hidden; flex: none; display: flex; background: #222;
+  }
+  .reel > img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .reel .scrim { position: absolute; inset: 0;
+    background: linear-gradient(270deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,0) 42%); }
+  /* rail pinned to the right edge, bottom-aligned (Reels convention) */
+  .reel .wd-side-tool { position: absolute; right: 14px; bottom: 18px; z-index: 2; }
+  .swatch { background: linear-gradient(135deg,#2a2440,#101019); }
+</style></head>
+<body>
+  <div class="eyebrow">WdSideTool — 縦並びアクションレール（avatar → like → comment → pin）</div>
+  <div class="row" style="gap:8px;"><span class="glass-tag yes">glass: yes — WdIconButton（standart glass circle）</span></div>
+
+  <div class="row" style="justify-content:space-around; align-items:flex-start; margin-top:4px;">
+
+    <!-- 1 · in-context, default state -->
+    <div class="u">
+      <div class="reel">
+        <img class="bg" src="../../assets/sample/reel/reel004.jpg" alt="">
+        <div class="scrim"></div>
+        <div class="wd-side-tool">
+          <div class="wd-avatar">
+            <img src="../../assets/sample/user/user007.jpg" style="object-position:50% 30%;">
+            <span class="b"><img src="../../assets/icons/icon_add.png"></span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_like.png"></button>
+            <span class="ct">1.2k</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_comment.png"></button>
+            <span class="ct">84</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_pin.png"></button>
+            <span class="ct">312</span>
+          </div>
+        </div>
+      </div>
+      <span class="n">in context · over reel</span>
+    </div>
+
+    <!-- 2 · anatomy on neutral, default -->
+    <div class="u">
+      <div class="reel swatch" style="height:auto; width:auto; padding:24px 30px; align-items:center;">
+        <div class="wd-side-tool" style="position:static;">
+          <div class="wd-avatar">
+            <img src="../../assets/sample/user/user003.jpg" style="object-position:50% 30%;">
+            <span class="b"><img src="../../assets/icons/icon_add.png"></span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_like.png"></button>
+            <span class="ct">1.2k</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_comment.png"></button>
+            <span class="ct">84</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_pin.png"></button>
+            <span class="ct">312</span>
+          </div>
+        </div>
+      </div>
+      <span class="n">anatomy · default</span>
+    </div>
+
+    <!-- 3 · liked state -->
+    <div class="u">
+      <div class="reel swatch" style="height:auto; width:auto; padding:24px 30px; align-items:center;">
+        <div class="wd-side-tool" style="position:static;">
+          <div class="wd-avatar">
+            <img src="../../assets/sample/user/user010.jpg" style="object-position:50% 30%;">
+            <span class="b"><img src="../../assets/icons/icon_check.png"></span>
+          </div>
+          <div class="act liked">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_like.png"></button>
+            <span class="ct">1.3k</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_comment.png"></button>
+            <span class="ct">84</span>
+          </div>
+          <div class="act">
+            <button class="wd-icon-btn"><img src="../../assets/icons/icon_pin.png"></button>
+            <span class="ct">312</span>
+          </div>
+        </div>
+      </div>
+      <span class="n">liked · following</span>
+    </div>
+
+  </div>
+</body></html>
