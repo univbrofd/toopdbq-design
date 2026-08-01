@@ -975,6 +975,18 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 </style>
 </head>
 <body>
+<style>
+  body.screen-only .studio { padding: 0; gap: 0; min-height: 100dvh; align-items: center; justify-content: center; }
+  body.screen-only .specimen-cap,
+  body.screen-only .preset-rail,
+  body.screen-only .hint,
+  body.screen-only .dynamic-island,
+  body.screen-only .home-ind { display: none; }
+  body.screen-only .phone { width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh; border-radius: 0; box-shadow: none; }
+</style>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+</script>
 <div class="studio">
 
   <div class="stage">
