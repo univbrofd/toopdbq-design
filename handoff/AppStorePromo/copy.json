@@ -1,0 +1,116 @@
+{
+  "panels": [
+    {
+      "id": "01-quest",
+      "ja": {
+        "headline": "近くのフェスに\n今日のお題がある",
+        "accent": "お題",
+        "sub": "参加して熱気を共有しよう",
+        "badge": "本日のお題"
+      },
+      "en": {
+        "headline": "Find local quests\nat nearby events",
+        "accent": "quests",
+        "sub": "Join the fun at festivals around you.",
+        "badge": "Today's Quest"
+      }
+    },
+    {
+      "id": "02-area",
+      "ja": {
+        "headline": "現場にいる人だけ\n投稿できるサークル",
+        "accent": "サークル",
+        "sub": "エリア内から写真で参加"
+      },
+      "en": {
+        "headline": "Only people inside\ncan post here",
+        "accent": "inside",
+        "sub": "Share photos from the exact event location."
+      }
+    },
+    {
+      "id": "03-lock",
+      "ja": {
+        "headline": "君が投稿するまで\n答えは秘密のまま",
+        "accent": "秘密",
+        "sub": "見るだけの人にはなれない"
+      },
+      "en": {
+        "headline": "Answers stay hidden\nuntil you post",
+        "accent": "hidden",
+        "sub": "You must join to see others' posts."
+      }
+    },
+    {
+      "id": "04-unlock",
+      "ja": {
+        "headline": "出した瞬間に\n全員の熱狂がひらく",
+        "accent": "熱狂",
+        "sub": "みんなの視点を楽しもう",
+        "badge": "ロック解除"
+      },
+      "en": {
+        "headline": "Post to unlock\nthe community vibe",
+        "accent": "unlock",
+        "sub": "See what everyone else is doing now.",
+        "badge": "Vibe Unlocked"
+      }
+    },
+    {
+      "id": "05-world",
+      "ja": {
+        "headline": "近くのイベントが\nそのままフィードに",
+        "accent": "フィード",
+        "sub": "今起きていることをリアルタイムで"
+      },
+      "en": {
+        "headline": "Nearby events become\nyour live feed",
+        "accent": "feed",
+        "sub": "See what is happening around you now."
+      }
+    },
+    {
+      "id": "06-circle",
+      "ja": {
+        "headline": "同じ場所にいる\n夢中な仲間と出会う",
+        "accent": "仲間",
+        "sub": "一緒にその場を盛り上げよう"
+      },
+      "en": {
+        "headline": "Find passionate peers\nin one community",
+        "accent": "peers",
+        "sub": "Connect with people sharing the same moment."
+      }
+    }
+  ],
+  "alt_hook": {
+    "ja": {
+      "headline": "いつもの街角が\n熱いコミュニティに",
+      "accent": "コミュニティ",
+      "sub": "クエストに答えて仲間と繋がる",
+      "badge": "参加型SNS"
+    },
+    "en": {
+      "headline": "Turn local places\ninto active communities",
+      "accent": "communities",
+      "sub": "Answer daily quests at nearby festivals today.",
+      "badge": "Join Locals"
+    }
+  },
+  "metadata": {
+    "ja": {
+      "name": "Toopdbq - 場所で繋がるSNS",
+      "subtitle": "エリア限定のお題に写真で答えるコミュニティ",
+      "keywords": "近く,フェス,イベント,サークル,クエスト,動画,位置情報,仲間,友達,ローカル,集まり,参加,地図,記録,夏,音楽,ライブ,祭り,街,現地,交流,出会い,地域,近所,旅行,趣味,学生",
+      "promotional_text": "距離が近いのに、情報が遠い。そんな日常を変えるソーシャルアプリです。現在地のサークルに入って、今日のお題に挑戦しましょう。自分が出すまでみんなの投稿は見えないロック機能で、見るだけの人から「一緒にやる」仲間へ。",
+      "description": "距離が近いのに、情報が遠い。Toopdbqは、そんな日常を変える地理コミュニティ型のソーシャルアプリです。\nすぐ近くのイベントやフェスで起きている面白いことに、今すぐ参加しましょう。\nみんなで今日のお題に答えて、その場所だけの熱気を共有する体験が待っています。\n\n【Toopdbqの特徴】\n■ エリア限定の「サークル」\n地図上に引かれた特定のエリア（フェス会場、駅前、公園など）にいる人だけが投稿できるコミュニティです。外にいる人は閲覧のみ。あなたの正確な位置情報は公開されないため、安心して参加できます。\n\n■ 今日のお題「クエスト」\nサークルには「渋谷で乾杯」「路地裏のうまい一杯」など、日々変わるお題が登場します。メンバーはそのエリア内で撮影した写真や動画を使って、お題に答えることができます。\n\n■ みんなでひらく「ロック」機能\n自分がお題に答えるまで、他のメンバーの投稿はすべてぼかされて見えません。投稿した瞬間に全員の答えがひらき、熱狂を共有できます。見るだけでなく「一緒にやる」ための設計です。\n\n■ 記録が積み重なる場所\n投稿は24時間で消えることなく、永久保存されます。過去のお題も、そのサークルに投稿したことがある人ならいつでも見返すことができ、場所の歴史が少しずつ積み上がっていきます。\n\n初めましての人とも、同じ場所にいるだけで仲間になれる。Toopdbqで、あなたの周りの世界をもっと面白くしましょう。"
+    },
+    "en": {
+      "name": "Toopdbq - Local Community",
+      "subtitle": "Answer quests at local events",
+      "keywords": "festival,nearby,circle,photo,video,location,friends,social,meetup,join,map,history,share,group",
+      "promotional_text": "Close in distance, but far in connection. Toopdbq changes that. Join a nearby circle, answer today's quest with a photo, and unlock what everyone else is sharing now.",
+      "description": "Close in distance, but far in connection. Toopdbq is a location-based social app that brings you closer to the action.\nJump into nearby festivals and events, and share the excitement with people right around you.\nAnswer daily quests and unlock real-time experiences shared by the local community.\n\n[Key Features]\n■ Exclusive Location \"Circles\"\nCircles are designated areas on the map like festival grounds, parks, or campuses. Only people physically inside the circle can post, while outsiders can only view. Your exact location is never publicly shared.\n\n■ Daily \"Quests\"\nEach circle offers a unique daily prompt, such as \"Cheers in the city\" or \"Best local street food.\" Members can only reply to the quest using photos or videos taken strictly within that specific area.\n\n■ \"Lock\" Mechanism\nTo keep everyone engaged, all answers from other users remain blurred out. They only unlock the moment you submit your own post! This ensures that everyone participates and nobody is just a silent observer.\n\n■ Permanent Memories\nUnlike disappearing stories, your posts remain forever. Users who have participated in a circle's quest can always look back at past posts. The history of that location builds up over time, creating a lasting memory of the community's passion.\n\nStop just looking and start doing. Connect with passionate peers who are right there with you on Toopdbq!"
+    }
+  }
+}
