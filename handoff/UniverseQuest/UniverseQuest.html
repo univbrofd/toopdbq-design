@@ -361,6 +361,28 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .strip-foot:active { opacity: .5; transform: translateX(-3px); }
 .strip-foot .sf-arw { font: 700 14px/1 var(--font-latin); color: rgba(0,0,0,.42); }
 
+/* クエストリストの拡大 — マップを上に閉じてリストを画面上端まで伸ばす */
+.strip-expand {
+  position: absolute; right: 14px; bottom: 4px; z-index: 7;
+  width: 30px; height: 30px; display: grid; place-items: center;
+  padding: 0; border: 0; background: transparent; cursor: pointer;
+  -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent;
+  transition: transform .14s var(--ease-out), opacity .12s var(--ease-out);
+}
+.strip-expand:active { transform: scale(.9); opacity: .6; }
+.strip-expand img { width: 17px; height: 17px; object-fit: contain;
+  filter: brightness(0) opacity(.5); }
+.strip-expand .ic-col, .phone.feed-max .strip-expand .ic-exp { display: none; }
+.phone.feed-max .strip-expand .ic-col { display: block; }
+
+/* 拡大状態 — --feed-h を画面全高にすると --quest-h も連動して伸びる */
+.phone.feed-max { --feed-h: var(--vh); --feed-pad-top: 72px; }
+#map { transition: transform .44s var(--ease-out), opacity .34s var(--ease-out); }
+.phone.feed-max #map { transform: translateY(calc(-1 * var(--map-h))); opacity: 0; }
+.feed-sheet, .circle-strip { transition: height .44s var(--ease-out); }
+.wd-circle-tool, .scrim-top { transition: opacity .3s var(--ease-out), transform .34s var(--ease-out); }
+.phone.feed-max .scrim-top { opacity: 0; }
+
 /* 日ごとの区切り — ボード上の縦組み日付 */
 .day-sep {
   position: absolute; top: 0; bottom: 0; width: 40px; z-index: 1;
@@ -565,7 +587,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   display: flex; flex-direction: column; align-items: center; gap: 0;
   width: 100%; text-align: center; pointer-events: none;
 }
-.strip-rail:not(.locked) ~ .lock-note { display: none; }
+.rail-wrap:not(.day-locked) .lock-note { display: none; }
 /* 最背面 — 上下 100% 透過 / 中心が真っ白の縦グラデーションスクリム */
 .lock-note .lscrim {
   position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%);
@@ -690,10 +712,10 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .route-card .rc-acts button + button { border-left: 1px solid rgba(255,255,255,.12); color: #fff; }
 .route-card .rc-acts button:active { background: rgba(255,255,255,.08); }
 
-/* ---- LOCKED STATE — quest not cleared yet ------------------- */
-.strip-rail.locked { overflow-x: auto; overflow-y: hidden; }
-.strip-rail.locked .post-cell video, .strip-rail.locked .post-cell img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
-.strip-rail.locked .post-cell .u-text, .strip-rail.locked .post-cell .u-name { visibility: hidden; }
+/* ---- LOCKED STATE — 閲覧できない日の投稿だけをぼかす ---------- */
+.strip-rail { overflow-x: auto; overflow-y: hidden; }
+.post-cell.locked video, .post-cell.locked img.media { filter: blur(18px) saturate(1.2) brightness(.72); transform: scale(1.08); }
+.post-cell.locked .u-text, .post-cell.locked .u-name { visibility: hidden; }
 /* past / recommend tag chip */
 .post-cell .u-tag {
   position: absolute; top: 10px; right: 10px; z-index: 3;
@@ -1252,7 +1274,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         <!-- WdCircleBar in the header — follows the vertically-active circle -->
         <div class="wd-circle-tool">
           <div class="wd-circle-bar">
-            <span class="cover"><img id="cbCover" src="../../assets/images/story-05.png" alt=""></span>
+            <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
             <div class="col">
               <span class="nm" id="cbName">渋谷コミュニティ</span>
               <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
@@ -1338,7 +1360,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         <section class="tl-sheet" id="tlSheet" aria-hidden="true">
           <div class="tl-grab" id="tlGrab"><span></span></div>
           <header class="tl-head" id="tlHead">
-            <img class="tl-cover" id="tlCover" src="../../assets/images/story-05.png" alt="">
+            <img class="tl-cover" id="tlCover" src="../../assets/sample/uv/story-05.png" alt="">
             <div class="tl-hcol">
               <span class="tl-nm" id="tlName">渋谷コミュニティ</span>
               <span class="tl-ds" id="tlDesc">タイムライン</span>
@@ -1359,7 +1381,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
             <button class="tlc-send" id="tlcSend" disabled>ポストする</button>
           </div>
           <div class="tlc-body">
-            <img class="tlc-av" src="uploads/user007.jpg" alt="">
+            <img class="tlc-av" src="../../assets/sample/user/user007.jpg" alt="">
             <div class="tlc-col">
               <textarea class="tlc-ta" id="tlcText" placeholder="いまこのエリアで起きていることは？"></textarea>
               <div class="tlc-prev" id="tlcPrev"></div>
@@ -1373,7 +1395,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         <!-- upload modal -->
         <div class="up-veil" id="upVeil">
           <div class="up-card" id="upCard">
-            <div class="up-vid"><video id="upVideo" src="uploads/video.mp4" muted playsinline loop></video></div>
+            <div class="up-vid"><video id="upVideo" src="../../assets/sample/3d/mqmav1c7_wnam/video.mp4" muted playsinline loop></video></div>
             <div class="up-body">
               <div class="up-title" id="upTitle">クエスト動画をアップロード</div>
               <div class="up-sub" id="upSub">現在地で撮影された動画</div>
@@ -1435,7 +1457,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   const CIRCLES = [
     {
       name: '渋谷コミュニティ', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
-      cover: '../../assets/images/story-05.png',
+      cover: '../../assets/sample/uv/story-05.png',
       admin: true,
       center: [139.70064, 35.65905], radius: 520,
       quest: {
@@ -1443,19 +1465,19 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         venue: 'とぅーぷどぅっくバー', spot: [139.70142, 35.65962],
         desc: '指定のバーで乾杯している動画をアップロードするとクリア。クリアするとこのクエストの投稿が見られる。',
       },
-      cleared: false, inside: false,
+      cleared: false, inside: false, member: true,
       posts: [
-        { ava: 'uploads/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: 'uploads/video.mp4' },
-        { ava: 'uploads/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/reel/reel003.jpg' },
-        { ava: 'uploads/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/reel/reel005.jpg' },
-        { ava: 'uploads/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/reel/reel007.jpg' },
-        { ava: 'uploads/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/reel/reel009.jpg' },
-        { ava: 'uploads/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/reel/reel011.jpg' },
+        { ava: '../../assets/sample/user/user001.jpg', text: '金曜のとぅーぷどぅっくバー、最高すぎた', vid: '../../assets/sample/3d/mqmav1c7_wnam/video.mp4' },
+        { ava: '../../assets/sample/user/user002.jpg', text: '初参加だけどみんな優しかった', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: '../../assets/sample/user/user003.jpg', text: '乾杯クエスト、3回目のクリア', img: '../../assets/sample/reel/reel005.jpg' },
+        { ava: '../../assets/sample/user/user004.jpg', text: '仕事終わりの一杯はここで', img: '../../assets/sample/reel/reel007.jpg' },
+        { ava: '../../assets/sample/user/user005.jpg', text: '今日のメンバーで乾杯！', img: '../../assets/sample/reel/reel009.jpg' },
+        { ava: '../../assets/sample/user/user006.jpg', text: '渋谷の夜はここから始まる', img: '../../assets/sample/reel/reel011.jpg' },
       ],
     },
     {
       name: '原宿コミュニティ', desc: '原宿・キャットストリート周辺',
-      cover: '../../assets/images/story-02.png',
+      cover: '../../assets/sample/uv/story-02.png',
       center: [139.70290, 35.66880], radius: 460,
       quest: {
         title: '宮下パークで朝ヨガ', date: '8/2(日) 7:00–9:00',
@@ -1464,16 +1486,16 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       },
       cleared: false, inside: true,
       posts: [
-        { ava: 'uploads/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/reel/reel002.jpg' },
-        { ava: 'uploads/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/reel/reel004.jpg' },
-        { ava: 'uploads/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/reel/reel006.jpg' },
-        { ava: 'uploads/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/reel/reel008.jpg' },
-        { ava: 'uploads/user013.jpg', text: '来週も参加します', img: '../../assets/reel/reel010.jpg' },
+        { ava: '../../assets/sample/user/user009.jpg', text: '朝の渋谷、空気が違う', img: '../../assets/sample/reel/reel002.jpg' },
+        { ava: '../../assets/sample/user/user010.jpg', text: '初ヨガ。想像の3倍きつい', img: '../../assets/sample/reel/reel004.jpg' },
+        { ava: '../../assets/sample/user/user011.jpg', text: '芝生の上って気持ちいい', img: '../../assets/sample/reel/reel006.jpg' },
+        { ava: '../../assets/sample/user/user012.jpg', text: '終わったあとのコーヒーが最高', img: '../../assets/sample/reel/reel008.jpg' },
+        { ava: '../../assets/sample/user/user013.jpg', text: '来週も参加します', img: '../../assets/sample/reel/reel010.jpg' },
       ],
     },
     {
       name: '道玄坂グループ', desc: '道玄坂・円山町のごはん好き',
-      cover: '../../assets/images/story-08.png',
+      cover: '../../assets/sample/uv/story-08.png',
       center: [139.69820, 35.65740], radius: 400,
       quest: {
         title: '道玄坂ラーメン食べ歩き', date: '8/5(水) 18:00–21:00',
@@ -1482,11 +1504,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       },
       cleared: false, inside: false,
       posts: [
-        { ava: 'uploads/user014.jpg', text: '一軒目から優勝した', img: '../../assets/reel/reel012.jpg' },
-        { ava: 'uploads/user015.jpg', text: '替え玉は文化です', img: '../../assets/reel/reel014.jpg' },
-        { ava: 'uploads/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/reel/reel001.jpg' },
-        { ava: 'uploads/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/reel/reel003.jpg' },
-        { ava: 'uploads/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/reel/reel005.jpg' },
+        { ava: '../../assets/sample/user/user014.jpg', text: '一軒目から優勝した', img: '../../assets/sample/reel/reel012.jpg' },
+        { ava: '../../assets/sample/user/user015.jpg', text: '替え玉は文化です', img: '../../assets/sample/reel/reel014.jpg' },
+        { ava: '../../assets/sample/user/user016.jpg', text: '並んででも食べる価値あり', img: '../../assets/sample/reel/reel001.jpg' },
+        { ava: '../../assets/sample/user/user001.jpg', text: '3杯目に挑戦中…', img: '../../assets/sample/reel/reel003.jpg' },
+        { ava: '../../assets/sample/user/user002.jpg', text: '〆のラーメンではなく主役', img: '../../assets/sample/reel/reel005.jpg' },
       ],
     },
   ];
@@ -1530,7 +1552,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     'あっという間だった', '思ったより人が多かった', 'リピート確定', '静かで落ち着く',
     '偶然通りかかって', '今日の一枚', '並んだ甸斐あった', '帰り道で撮った',
   ];
-  const REEL = (i) => '../../assets/reel/reel' + String((((i % 15) + 15) % 15) + 1).padStart(3, '0') + '.jpg';
+  const REEL = (i) => '../../assets/sample/reel/reel' + String((((i % 15) + 15) % 15) + 1).padStart(3, '0') + '.jpg';
 
   CIRCLES.forEach((c, ci) => {
     const days = [];
@@ -1553,6 +1575,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       });
     }
     days.push({ date: new Date(TODAY), past: false, posts: c.posts, quest: c.quest });
+    // 今日のお題の日付も実時刻基準に揃える（時間帯は元の定義を維持）
+    const tm = /(\d+:\d+(?:[^\d]+\d+:\d+)?)\s*$/.exec(c.quest.date);
+    c.quest.date = jpDate(TODAY) + ' ' + (tm ? tm[1] : '19:00–23:00');
     c.days = days;
     c.today = days[days.length - 1];
   });
@@ -1695,7 +1720,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     const wrap = document.createElement('div');
     wrap.className = 'rail-wrap';
     const rail = document.createElement('div');
-    rail.className = 'strip-rail' + (canView(c) ? '' : ' locked');
+    rail.className = 'strip-rail';
     const inner = document.createElement('div');
     inner.className = 'board-inner';
     rail.appendChild(inner);
@@ -1785,13 +1810,25 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       const H = rail.clientHeight - PAD_TOP - PAD;
       if (H <= 40) return posts.length;
       const remain = posts.length - idx;
+      const wide = document.querySelector('.phone').classList.contains('feed-max');
       let type = null;
       for (let g = 0; g < TYPES.length; g++) {
         const t = TYPES[(c.colIdx + g) % TYPES.length];
+        if (wide && (t === 'H' || t === 'I')) continue;   // 拡大時は 横1+縦3 の列を使わない
         if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
       }
       if (!type) { type = TYPES_SPARSE[c.colIdx % TYPES_SPARSE.length]; c.colIdx++; }
       const tiles = layoutColumn(type, H).slice(0, remain);
+      // 列幅は画面幅の 90% まで。超える列は比率を保って縮小し、上下は中央寄せ
+      const cap = Math.round(rail.clientWidth * 0.9);
+      const rawW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
+      if (rawW > cap) {
+        const k = cap / rawW;
+        tiles.forEach((t) => {
+          t.dx = Math.round(t.dx * k); t.dy = Math.round(t.dy * k);
+          t.w = Math.round(t.w * k); t.h = Math.round(t.h * k);
+        });
+      }
       const colW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       const center = Math.max(0, Math.round((H - used) / 2));   // 余白がある列は縦中央に
@@ -1800,6 +1837,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         const p = posts[idx++];
         const cell = makeCell(p);
         if (t.w < 132) cell.classList.add('sm');
+        if (!canViewDay(c, day)) cell.classList.add('locked');
         cell._day = day;
         cell.style.left = (c.cursorX + t.dx) + 'px';
         cell.style.top = (yOff + t.dy) + 'px';
@@ -1815,7 +1853,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
        初期位置は今日のお題の先頭 — 左へスクロールすると過去のお題に戻る。 */
     c.buildBoard = () => {
       if (rail.clientHeight <= 40) {
-        requestAnimationFrame(c.buildBoard); setTimeout(c.buildBoard, 240); return;
+        clearTimeout(c._bt); c._bt = setTimeout(c.buildBoard, 120); return;
       }
       inner.innerHTML = '';
       seed = 1337 + CIRCLES.indexOf(c) * 977;
@@ -1835,7 +1873,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         day.x1 = c.cursorX;
       });
       inner.style.width = Math.max(c.cursorX + PAD, c.today.x0 + rail.clientWidth) + 'px';
-      rail.scrollLeft = Math.max(0, c.today.x0 - PAD);
+      // 初期位置 — 今日のお題が見られないなら見られる一番新しい日から
+      let start = c.today;
+      if (!canViewDay(c, c.today)) {
+        for (let k = c.days.length - 2; k >= 0; k--) {
+          if (canViewDay(c, c.days[k])) { start = c.days[k]; break; }
+        }
+      }
+      rail.scrollLeft = Math.max(0, start.x0 - PAD);
       c.setFocus();
       renderDots(c);
       syncDay(c, true);
@@ -1843,12 +1888,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     /* 視界内の動画だけ再生 */
     c.setFocus = () => {
       const L = rail.scrollLeft - 60, R = rail.scrollLeft + rail.clientWidth + 60;
-      const locked = rail.classList.contains('locked');
       Array.from(inner.children).forEach((el) => {
         const v = el.querySelector('video');
         if (!v) return;
         const x = el.offsetLeft;
-        if (!locked && x + el.offsetWidth > L && x < R) v.play().catch(() => {}); else v.pause();
+        if (!el.classList.contains('locked') && x + el.offsetWidth > L && x < R) v.play().catch(() => {}); else v.pause();
       });
     };
     c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
@@ -1867,6 +1911,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     lock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     wrap.appendChild(lock);
     c.lock = lock;
+    c.wrap = wrap;
     strip.appendChild(wrap);
     strip.appendChild(bd);
     // セクション下端 — 前日の日付。タップでその日のお題へ
@@ -1880,6 +1925,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     });
     strip.appendChild(foot);
     c.foot = foot;
+    const exp = document.createElement('button');
+    exp.className = 'strip-expand';
+    exp.setAttribute('aria-label', 'クエストリストを拡大');
+    exp.innerHTML = '<img class="ic-exp" src="../../assets/icons/icon_expand.png" alt="">'
+      + '<img class="ic-col" src="../../assets/icons/icon_close.png" alt="">';
+    exp.addEventListener('click', () => { active = CIRCLES.indexOf(c); renderBoard(); setFeedMax(!phone.classList.contains('feed-max')); });
+    strip.appendChild(exp);
+    c.strip = strip;
     col.appendChild(strip);
     let rt = null;
     rail.addEventListener('scroll', () => {
@@ -1893,6 +1946,27 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     });
     requestAnimationFrame(c.buildBoard);
     setTimeout(c.buildBoard, 240);
+    /* 高さが変わったら組み直す — 見ていたお題の位置も復元する */
+    c.rebuildKeep = () => {
+      const d = c.curDay;
+      c.buildBoard();
+      if (d && d !== c.today && d.x0 != null) {
+        rail.scrollLeft = Math.max(0, d.x0 - PAD);
+        syncDay(c, true);
+      }
+    };
+    /* 遷移中の高さでボードが確定しないよう debounce。
+       RO が配送されない環境向けに setFeedMax 側のタイマーと併用する。 */
+    if (window.ResizeObserver) {
+      let roH = 0, roT = null;
+      new ResizeObserver(() => {
+        const h = rail.clientHeight;
+        if (Math.abs(h - roH) < 2) return;
+        roH = h;
+        clearTimeout(roT);
+        roT = setTimeout(c.rebuildKeep, 140);
+      }).observe(rail);
+    }
     let rz = null;
     window.addEventListener('resize', () => {
       clearTimeout(rz); rz = setTimeout(c.buildBoard, 160);
@@ -1908,6 +1982,37 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 
   // 閲覧条件: そのお題を投稿済み(cleared) または エリア内(inside)
   function canView(c) { return !!(c.cleared || c.inside); }
+  /* 進行中のお題はクリア or エリア内のときだけ。
+     過去のお題は、そのサークルで投稿したことがある人（member）ならエリア外でも見られる。 */
+  function canViewDay(c, day) {
+    if (day && day.past) return !!(c.member || canView(c));
+    return canView(c);
+  }
+
+  /* ---- リストの拡大 / 縮小 -------------------------------------------
+     マップは上へ閉じ、リストは画面上端まで伸びる。
+     セクション高さが変わるので遷移後にボードを組み直し、
+     見ていたお題（日）とサークル位置を復元する。 */
+  let feedMaxT = null;
+  function setFeedMax(on) {
+    // 高さの基準はクラス切替えの前に取る（即時確定する環境でも差分を見失わない）
+    const h0 = CIRCLES.map((c) => (c.rail ? c.rail.clientHeight : 0));
+    phone.classList.toggle('feed-max', on);
+    phone.classList.toggle('light-status', on);
+    clearTimeout(feedMaxT);
+    const pass = (force) => {
+      CIRCLES.forEach((c, i) => {
+        if (!c.rail || !c.rebuildKeep) return;
+        if (!force && Math.abs(c.rail.clientHeight - h0[i]) < 2) return;
+        h0[i] = c.rail.clientHeight;
+        c.rebuildKeep();
+      });
+      const st = CIRCLES[active].strip;
+      if (st) col.scrollTop = Math.max(0, st.offsetTop - (parseFloat(getComputedStyle(col).paddingTop) || 0));
+    };
+    setTimeout(() => pass(false), 500);
+    feedMaxT = setTimeout(() => pass(true), 900);   // 最後は無条件に組み直す
+  }
 
   /* ---- 表示中のお題（日）の同期 -----------------------------------------
      リスト表示ではお題が変わってもマップは動かさない。
@@ -1927,6 +2032,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     bd.querySelector('.qt').textContent = day.quest.title;
     bd.querySelector('.qday').textContent = md(day.date);
     bd.classList.toggle('past', !!day.past);
+    if (c.wrap) c.wrap.classList.toggle('day-locked', !canViewDay(c, day));
     const prev = c.days[c.days.indexOf(day) - 1];
     if (prev) {
       c.foot.style.display = '';
@@ -1954,8 +2060,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     setTimeout(runUpload, 240);
   });
 
-  document.getElementById('fsPrev').addEventListener('click', () => { if (canView(fsCircle)) stepFs(-1); });
-  document.getElementById('fsNext').addEventListener('click', () => { if (canView(fsCircle)) stepFs(1); });
+  document.getElementById('fsPrev').addEventListener('click', () => { if (canViewDay(fsCircle, fsDay)) stepFs(-1); });
+  document.getElementById('fsNext').addEventListener('click', () => { if (canViewDay(fsCircle, fsDay)) stepFs(1); });
   fsViewer.querySelectorAll('.wd-side-tool .act').forEach((a) => {
     a.addEventListener('click', () => { if (a.dataset.act === 'like') a.classList.toggle('liked'); });
   });
@@ -1977,7 +2083,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       fsMedia.appendChild(im);
     }
     fsText.textContent = p.text;
-    const open = canView(c);
+    const open = canViewDay(c, day);
     fsViewer.classList.toggle('locked', !open);
     const v0 = fsMedia.querySelector('video');
     if (v0 && !open) v0.pause();
@@ -2049,7 +2155,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     const dy = e.changedTouches[0].clientY - tY;
     const dx = e.changedTouches[0].clientX - tX;
     if (Math.abs(dy) > 46 && Math.abs(dy) > Math.abs(dx)) stepCircle(dy < 0 ? 1 : -1);
-    else if (Math.abs(dx) > 46 && canView(fsCircle)) stepFs(dx < 0 ? 1 : -1);
+    else if (Math.abs(dx) > 46 && canViewDay(fsCircle, fsDay)) stepFs(dx < 0 ? 1 : -1);
   }, { passive: true });
   let wheelLock = 0;
   fsViewer.addEventListener('wheel', (e) => {
@@ -2058,7 +2164,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     if (now - wheelLock < 520) return;
     if (Math.abs(e.deltaY) > 24 && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
       wheelLock = now; stepCircle(e.deltaY > 0 ? 1 : -1);
-    } else if (Math.abs(e.deltaX) > 24 && canView(fsCircle)) {
+    } else if (Math.abs(e.deltaX) > 24 && canViewDay(fsCircle, fsDay)) {
       wheelLock = now; stepFs(e.deltaX > 0 ? 1 : -1);
     }
   }, { passive: true });
@@ -2241,7 +2347,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     const mi = c.board.querySelector('.qmine img');
     if (mi) mi.src = c.myThumb;
     c.board.classList.add('cleared');
-    c.rail.classList.remove('locked');
+    c.rail.querySelectorAll('.post-cell.locked').forEach((el) => el.classList.remove('locked'));
+    syncDay(c, true);
+    c.setFocus();
     if (fsCircle === c && fsViewer.classList.contains('open')) renderFs();
     renderBoard();
     if (window.EarthMap && EarthMap.map) applyWallState(EarthMap.map, CIRCLES[active]);
@@ -2601,9 +2709,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   })();
 
   // ---- 投稿画面 -------------------------------------------------------------
-  const TLC_POOL = ['../../assets/reel/reel001.jpg', '../../assets/reel/reel003.jpg', '../../assets/reel/reel005.jpg',
-    '../../assets/reel/reel007.jpg', '../../assets/reel/reel009.jpg', '../../assets/reel/reel011.jpg',
-    '../../assets/reel/reel012.jpg', '../../assets/reel/reel014.jpg'];
+  const TLC_POOL = ['../../assets/sample/reel/reel001.jpg', '../../assets/sample/reel/reel003.jpg', '../../assets/sample/reel/reel005.jpg',
+    '../../assets/sample/reel/reel007.jpg', '../../assets/sample/reel/reel009.jpg', '../../assets/sample/reel/reel011.jpg',
+    '../../assets/sample/reel/reel012.jpg', '../../assets/sample/reel/reel014.jpg'];
   let tlcPicked = [];
 
   TLC_POOL.forEach((src) => {
@@ -2646,7 +2754,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   tlcSend.addEventListener('click', () => {
     if (tlcSend.disabled) return;
     tlCircle.timeline.unshift({
-      ava: 'uploads/user007.jpg', name: 'Pixel', handle: '@you', time: 'たった今',
+      ava: '../../assets/sample/user/user007.jpg', name: 'Pixel', handle: '@you', time: 'たった今',
       body: tlcText.value.trim(), media: tlcPicked.slice(), vid: null,
       comments: 0, likes: 0, liked: false,
     });
