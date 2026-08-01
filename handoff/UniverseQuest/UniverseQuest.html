@@ -56,10 +56,12 @@ html, body {
   --vw: 402px; --vh: 874px;
   --map-ratio: calc(3 / 4);
   --map-r: 24px;                                 /* r */
-  --map-gap: 4px;                                /* d */
+  --map-gap: 28px;                               /* d = リストがマップに重なる量 */
   --map-h: calc(var(--vw) * var(--map-ratio));   /* h */
-  --feed-h: calc(var(--vh) - var(--map-h) + (var(--map-r) - var(--map-gap)));  /* H */
-  --feed-pad-top: var(--map-r);                  /* listPaddingTop */
+  --feed-h: calc(var(--vh) - var(--map-h) + var(--map-gap));                  /* lh */
+  --feed-pad-top: 36px;                          /* a = リスト上部のスペース */
+  --footer-h: 96px;                              /* ch = サークルフッター上端〜画面下端 */
+  --quest-h: calc(var(--feed-h) - (var(--feed-pad-top) + var(--footer-h)));   /* qh */
   position: relative; width: 402px; height: 874px; flex: none;
   border-radius: 55px; overflow: hidden; background: var(--bg);
   box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
@@ -176,9 +178,16 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    cover → name/description → circle-timeline post button.
    ============================================================ */
 .wd-circle-tool {
-  position: absolute; bottom: calc(var(--vh) - var(--map-h) + 8px); left: 50%; transform: translateX(-50%); z-index: 55;
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 72; height: var(--footer-h);
+  box-sizing: border-box;
   display: flex; align-items: center; justify-content: center; gap: 12px;
-  width: calc(var(--vw) * 0.8); max-width: none;
+  padding: 16px 16px 22px;
+}
+/* 画面フッターとしての保護グラデ（写真・地図どちらの上でも白文字 AA） */
+.wd-circle-tool::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; top: -34px; z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--scrim-min) 54%, rgba(0,0,0,0.78) 100%);
+  pointer-events: none;
 }
 .wd-circle-bar {
   position: relative; flex: 1 1 auto; min-width: 0;
@@ -276,7 +285,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    QUEST TITLE (リスト上部) + QUEST FOOT (画面下部の日時・カメラ)
    ============================================================ */
 .strip-title {
-  position: absolute; top: 12px; left: 16px; right: 16px; z-index: 6;
+  position: absolute; top: 0; left: 16px; right: 16px; z-index: 6;
   display: flex; align-items: center; gap: 10px; pointer-events: none;
 }
 .strip-title .qhead {
@@ -438,10 +447,10 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   position: absolute; left: 0; right: 0; bottom: 0; height: 210px; z-index: 58;
   pointer-events: none;
   background: linear-gradient(0deg,
-    rgba(255,255,255,.58) 0%,
-    rgba(255,255,255,.40) 22%,
-    rgba(255,255,255,.20) 48%,
-    rgba(255,255,255,.07) 74%,
+    rgba(255,255,255,.96) 0%,
+    rgba(255,255,255,.82) 22%,
+    rgba(255,255,255,.50) 48%,
+    rgba(255,255,255,.20) 74%,
     rgba(255,255,255,0) 100%);
 }
 /* 最上部の内側シャドウ */
@@ -459,7 +468,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 }
 .feed-col::-webkit-scrollbar { display: none; }
 .circle-strip {
-  position: relative; width: 100%; height: 76%; flex: none;
+  position: relative; width: 100%; height: var(--quest-h); flex: none;
+  padding-bottom: 16px; box-sizing: border-box;
   display: flex; flex-direction: column;
   scroll-snap-align: start; scroll-snap-stop: always;
 }
@@ -675,9 +685,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   backdrop-filter: blur(8px) saturate(140%); -webkit-backdrop-filter: blur(8px) saturate(140%);
   transition: transform .12s var(--ease-out); }
 .story-fs .sfs-close:active { transform: scale(.92); }
-/* WdSideTool — 縦並びアクションレール（右端中央） */
+/* WdSideTool — 縦並びアクションレール（右端・サークルフッターの直上） */
 .story-fs .wd-side-tool {
-  position: absolute; right: 14px; top: 50%; transform: translateY(-50%); z-index: 5;
+  position: absolute; right: 14px; bottom: 96px; z-index: 5;
   display: flex; flex-direction: column; align-items: center; gap: 20px;
   opacity: 0; transition: opacity .3s var(--ease-out); }
 .story-fs.expanded .wd-side-tool { opacity: 1; }
@@ -831,6 +841,39 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   opacity: 0; pointer-events: none; transition: opacity .25s var(--ease-out); }
 .story-fs.expanded .sfs-hint { opacity: 1; }
 .story-fs.moved .sfs-hint { opacity: 0; }
+
+/* WdQuestPopup — フルスクリーン上部（面もアンカーも持たない）
+   左に戻る／中央にクエスト（タイトル＋カウントダウン）／右に投稿 or 自分のサムネ */
+.story-fs .fs-qp {
+  position: absolute; left: 12px; right: 12px; top: 76px; z-index: 7;
+  display: flex; align-items: center; gap: 10px; pointer-events: none;
+  opacity: 0; transition: opacity .3s var(--ease-out); }
+.story-fs.expanded .fs-qp { opacity: 1; }
+.story-fs .fs-qp .qp-mount { width: 100%; }
+.story-fs .fs-qp .fs-qp-body { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; }
+/* フルスクリーンでは Quest ラベルを出さない — タイトルとカウントダウンだけ */
+.story-fs .fs-qp .qp-eyebrow { display: none; }
+.story-fs .fs-qp .qp.urgent .qp-time { color: #08080b; }
+.qp-mount > .qp.urgent .qp-time { color: #08080b; }
+.story-fs .fs-qp .qp-title { margin-top: 0; }
+.story-fs .fs-back {
+  flex: none; width: 40px; height: 40px; display: grid; place-items: center; padding: 0;
+  border: 0; border-radius: 50%; cursor: pointer; pointer-events: auto;
+  background: var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow);
+  transition: transform .12s var(--ease-out); }
+.story-fs .fs-back:active { transform: scale(.92); }
+.story-fs .fs-qp .fs-post { flex: none; width: 40px; height: 40px; pointer-events: auto; }
+.story-fs .fs-qp .fs-post.wd-icon-btn.color > img { width: 19px; height: 19px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.story-fs .fs-qp .fs-mine { flex: none; width: 40px; height: 40px; border-radius: 10px; display: none;
+  object-fit: cover; background: #101014;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.75), 0 2px 8px rgba(0,0,0,.5);
+  filter: blur(.6px) saturate(1.1) contrast(.96); image-rendering: pixelated; }
+.story-fs.cleared-quest .fs-qp .fs-post { display: none; }
+.story-fs.cleared-quest .fs-qp .fs-mine { display: block; }
 
 /* タップゾーン: 左＝前 / 右＝次 */
 .story-fs .sfs-tap { position: absolute; top: 120px; bottom: 96px; width: 34%; z-index: 3; cursor: pointer;
@@ -1061,11 +1104,15 @@ a { color: var(--text-1); } a:hover { color: #fff; }
           <span class="sfs-text" id="fsText"></span>
           <div class="sfs-tap prev" id="fsPrev"></div>
           <div class="sfs-tap next" id="fsNext"></div>
-          <div class="sfs-bar" id="fsBar"></div>
-          <div class="sfs-head">
-            <button class="sfs-close" id="fsClose" aria-label="閉じる">
-              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 3l10 10M13 3L3 13" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div class="fs-qp" id="fsQpHost">
+            <button class="fs-back" id="fsBack" aria-label="戻る">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+            <div class="fs-qp-body" id="fsQpBody"></div>
+            <button class="fs-post wd-icon-btn color" id="fsPost" aria-label="投稿">
+              <img src="../../assets/icons/icon_camera.png" alt="">
+            </button>
+            <img class="fs-mine" id="fsMine" alt="">
           </div>
           <div class="wd-side-tool">
             <div class="act" data-act="like">
@@ -1082,26 +1129,6 @@ a { color: var(--text-1); } a:hover { color: #fff; }
             </div>
           </div>
           <div class="fs-lock" id="fsLock"></div>
-          <div class="sfs-hint">↑↓ サークル切替 · ←→ 投稿送り</div>
-          <div class="wd-quest-footer" id="fsFooter">
-            <img class="cover" id="fsFootImg" alt="">
-            <div class="stack">
-              <div class="slot">
-                <div class="qb pulse" id="fsQuest">
-                  <div class="qb-eyebrow">
-                    <span class="qb-label">Quest</span>
-                    <span class="qb-count" id="fsQCount">--:--:--</span>
-                  </div>
-                  <div class="qb-titlerow">
-                    <div class="qb-title" id="fsQTitle"></div>
-                    <img class="qb-cam" src="../../assets/icons/icon_camera.png" alt="">
-                    <img class="qb-mine" id="fsQMine" alt="">
-                  </div>
-                </div>
-              </div>
-              <div class="id"><div class="nm" id="fsFootName">渋谷コミュニティ</div></div>
-            </div>
-          </div>
         </div>
 
         <!-- upload modal -->
@@ -1287,27 +1314,41 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     if (end < start) end.setDate(end.getDate() + 1);   // 日跨ぎ
     return { start, end };
   }
-  function tickHero() {
-    const c = CIRCLES[active]; if (!c) return;
-    qpTitle.textContent = c.quest.title;
-    qpCards.forEach(k => k.classList.remove('urgent', 'cleared'));
+  // 同じ QuestPopup を任意のマウントに描く（地図の上／フルスクリーン上部）
+  function qpRender(mount, c) {
+    if (!mount || !c || !c.quest) return;
+    const cards = mount.querySelectorAll('.qp');
+    const put = (sel, txt) => mount.querySelectorAll(sel).forEach(e => { e.textContent = txt; });
+    put('.qp-title', c.quest.title);
+    cards.forEach(k => k.classList.remove('urgent', 'cleared'));
     if (c.cleared) {
-      qpCards.forEach(k => k.classList.add('cleared'));
-      setAll('.qp-label', 'Quest cleared');
-      qpTime.textContent = 'クリア済み';
+      cards.forEach(k => k.classList.add('cleared'));
+      put('.qp-label', 'Quest cleared');
+      put('.qp-time', 'クリア済み');
       return;
     }
-    setAll('.qp-label', 'Quest');
-    const w = questWindow(c.quest); if (!w) { qpTime.textContent = ''; return; }
+    put('.qp-label', 'Quest');
+    const w = questWindow(c.quest); if (!w) { put('.qp-time', ''); return; }
     const now = Date.now();
-    if (now > w.end) { qpCards.forEach(k => k.classList.add('cleared')); qpTime.textContent = '終了'; return; }
-    if (now >= w.start) { qpCards.forEach(k => k.classList.add('urgent')); qpTime.textContent = '開催中'; return; }
-    let s = Math.floor((w.start - now) / 1000);
+    if (now > w.end) { cards.forEach(k => k.classList.add('cleared')); put('.qp-time', '終了'); return; }
+    // 開催前は開始まで、開催中は終了までのカウントダウンを出し続ける
+    const target = now >= w.start ? w.end : w.start;
+    if (now >= w.start) cards.forEach(k => k.classList.add('urgent'));
+    let s = Math.floor((target - now) / 1000);
     const p = n => String(n).padStart(2, '0');
     const d = Math.floor(s / 86400);
-    qpTime.textContent = (d > 0 ? d + 'd ' : '')
-      + p(Math.floor(s / 3600) % 24) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60);
-    if (s < 1800) qpCards.forEach(k => k.classList.add('urgent'));
+    put('.qp-time', (d > 0 ? d + 'd ' : '')
+      + p(Math.floor(s / 3600) % 24) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60));
+    if (s < 1800) cards.forEach(k => k.classList.add('urgent'));
+  }
+  // フルスクリーン上部の QuestPopup — 地図のものと同じ 2 レイヤー構造
+  const fsQpMount = document.createElement('div');
+  fsQpMount.className = 'qp-mount';
+  fsQpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
+  document.getElementById('fsQpBody').appendChild(fsQpMount);
+  function tickHero() {
+    qpRender(qpMount, CIRCLES[active]);
+    if (typeof fsCircle !== 'undefined' && fsCircle) qpRender(fsQpMount, fsCircle);
   }
   setInterval(tickHero, 1000);
 
@@ -1375,7 +1416,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
        左右の寄せをランダム化してグリッド感を消す。右端に近づくと列を追加。 */
     let seed = 1337 + CIRCLES.indexOf(c) * 977;
     const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
-    const GAP = 7, PAD = 10, PAD_TOP = 48, MAXW = 244;   // PAD_TOP: クエスト名 + 8px の余白
+    const GAP = 7, PAD = 10, PAD_TOP = 41, MAXW = 244;   // PAD_TOP: クエスト名(34) + 7px の余白
     const P = 9 / 16, L = 16 / 9;
     /* 列レイアウト
        A: 縦1 / AL: 横1  ← 一枚絵。投稿が極端に少ないときのみ許可
@@ -1550,18 +1591,18 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   const fsViewer = document.getElementById('fsViewer');
   const fsMedia = document.getElementById('fsMedia');
   const fsText = document.getElementById('fsText');
-  const fsBar = document.getElementById('fsBar');
-  const fsFootImg = document.getElementById('fsFootImg');
-  const fsFootName = document.getElementById('fsFootName');
-  const fsFooter = document.getElementById('fsFooter');
-  const fsQuest = document.getElementById('fsQuest');
-  const fsQTitle = document.getElementById('fsQTitle');
-  const fsQCount = document.getElementById('fsQCount');
-  const fsQMine = document.getElementById('fsQMine');
   let fsCircle = null, fsIndex = 0;
   const fsLock = document.getElementById('fsLock');
+  const fsMine = document.getElementById('fsMine');
+  document.getElementById('fsBack').addEventListener('click', closeFs);
+  document.getElementById('fsPost').addEventListener('click', () => {
+    if (!fsCircle || fsCircle.cleared) return;
+    closeFs();
+    active = CIRCLES.indexOf(fsCircle);
+    renderBoard();
+    setTimeout(runUpload, 240);
+  });
 
-  document.getElementById('fsClose').addEventListener('click', closeFs);
   document.getElementById('fsPrev').addEventListener('click', () => { if (canView(fsCircle)) stepFs(-1); });
   document.getElementById('fsNext').addEventListener('click', () => { if (canView(fsCircle)) stepFs(1); });
   fsViewer.querySelectorAll('.wd-side-tool .act').forEach((a) => {
@@ -1595,34 +1636,14 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       +     '<img src="../../assets/icons/icon_near.png" alt="">'
       +   '</span>'
       + '</span>';
-    fsBar.innerHTML = '';
-    c.posts.forEach((_, k) => {
-      const s = document.createElement('span');
-      s.className = 'seg' + (k <= fsIndex ? ' done' : '');
-      s.innerHTML = '<i class="sfill"></i>';
-      fsBar.appendChild(s);
-    });
-    fsFootImg.src = c.cover;
-    fsFootName.textContent = c.name;
-    fsFooter.classList.toggle('no-quest', !c.quest);
-    if (c.quest) {
-      fsQuest.classList.toggle('cleared', !!c.cleared);
-      fsQuest.classList.toggle('pulse', !c.cleared);
-      fsQuest.querySelector('.qb-label').textContent = c.cleared ? 'Quest cleared' : 'Quest';
-      fsQTitle.textContent = c.quest.title;
-      if (c.cleared) fsQMine.src = c.myThumb || c.posts[0].img || c.cover;
-      tickFsCount();
-    }
+    qpRender(fsQpMount, c);
+    fsViewer.classList.toggle('cleared-quest', !!c.cleared);
+    if (c.cleared) fsMine.src = c.myThumb || c.posts[0].img || c.cover;
+    cbName.textContent = c.name;
+    cbDesc.textContent = c.desc;
+    cbCover.src = c.cover;
   }
 
-
-  fsQuest.addEventListener('click', () => {
-    if (!fsCircle || fsCircle.cleared) return;
-    closeFs();
-    active = CIRCLES.indexOf(fsCircle);
-    renderBoard();
-    setTimeout(runUpload, 240);
-  });
 
   function stepFs(d) {
     if (!fsCircle) return;
@@ -1744,21 +1765,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       el.classList.toggle('soon', d === 0 && h < 3);
     });
   }
-  function tickFsCount() {
-    const c = fsCircle;
-    if (!c || !c.quest) return;
-    if (c.cleared) { fsQCount.textContent = 'CLEARED'; fsQCount.classList.remove('soon'); return; }
-    let s = Math.max(0, Math.floor((c.endsAt - Date.now()) / 1000));
-    const d = Math.floor(s / 86400); s -= d * 86400;
-    const hh = Math.floor(s / 3600); s -= hh * 3600;
-    const m = Math.floor(s / 60); s -= m * 60;
-    const pad = (n) => String(n).padStart(2, '0');
-    fsQCount.textContent = d > 0 ? d + 'd ' + pad(hh) + 'h ' + pad(m) + 'm'
-                                 : pad(hh) + ':' + pad(m) + ':' + pad(s);
-    fsQCount.classList.toggle('soon', d === 0 && hh < 3);
-  }
   tickCountdown();
-  setInterval(() => { tickCountdown(); tickFsCount(); }, 1000);
+  setInterval(tickCountdown, 1000);
 
   // ---- quest edit (サークル管理者) ------------------------------------------
   const qeVeil = document.getElementById('qeVeil');
