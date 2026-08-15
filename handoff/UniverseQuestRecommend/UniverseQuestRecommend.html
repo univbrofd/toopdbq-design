@@ -1,0 +1,398 @@
+<!-- @dsCard group="UniverseQuestRecommend" tier="screen" viewport="560x1240" name="UniverseQuestRecommend — 起動直後のおすすめ" subtitle="前日のクエスト結果（優勝作品）一覧。ヘッダーなし・コンテンツのみ。feed-max と同一の FREE BOARD（列パターン B/G/F/AL・横スクロール）+ 順位記号（1st + 花）。?screen=after で画面のみ。" -->
+<!DOCTYPE html>
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniverseQuestRecommend — 起動直後のおすすめ（前日のクエスト結果）</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<style>
+body { gap: 22px; }
+a { color: var(--text-1); } a:hover { color: #fff; }
+
+.page-head { max-width: 920px; }
+.page-head h1 { font: 700 18px/1.4 var(--font-jp); color: var(--text-1); margin-top: 6px; }
+.page-head p { font: 500 11.5px/1.7 var(--font-jp); color: var(--fg-2); margin-top: 8px; max-width: 720px; }
+
+.board-row { display: flex; gap: 44px; flex-wrap: wrap; align-items: flex-start; }
+.stage { display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.stage .cap { text-align: center; max-width: 402px; }
+.stage .cap .tag {
+  display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill);
+  font: 700 10px/1 var(--font-latin); letter-spacing: .12em;
+  background: rgba(255,255,255,.08); color: var(--fg-2);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.14);
+}
+.stage.after .cap .tag { background: var(--gradient-colorful-linear); color: #fff; box-shadow: none; }
+.stage .cap p { font: 500 11px/1.6 var(--font-jp); color: var(--fg-2); margin-top: 8px; }
+
+/* ============================================================
+   SCREEN — 白面（feed-max と同じ地）・full-bleed リスト
+   listPaddingTop = safe-top(62) + 10 / 下端 = 最終セル + 96
+   pad 10 · gap 7 · colW = (402 - 20 - 7) / 2
+   ============================================================ */
+.phone .screen { position: absolute; inset: 0; background: #fff; overflow: hidden; }
+.statusbar { color: #000; }
+.home-ind { background: rgba(0,0,0,.85); }
+
+.qr-list {
+  position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden;
+  -webkit-overflow-scrolling: touch; overscroll-behavior: contain; scrollbar-width: none;
+}
+.qr-list::-webkit-scrollbar { display: none; }
+.qr-head { padding: 72px 16px 12px; }
+.qr-board { position: relative; margin: 0 10px 96px; }
+
+/* ---- After: ヘッダーなし・コンテンツのみ。feed-max と同一の FREE BOARD（横スクロール） ---- */
+.after .qr-head { display: none; }
+.after .qr-list { overflow-y: hidden; overflow-x: auto; }
+.after .qr-board { margin: 0; height: 100%; }
+
+/* 小セル（w < 132）の文字サイズ — feed の .post-cell.sm と同じ考え方 */
+.qr-cell.sm .qt { font-size: 11px; -webkit-line-clamp: 2; }
+.qr-cell.sm .cn { font-size: 9px; letter-spacing: .06em; }
+.qr-cell.sm .wn { font-size: 10px; }
+.qr-cell.sm .likes { font-size: 10px; }
+.qr-cell.sm .flower { width: 11px; height: 11px; }
+
+/* ---- 見出し Before（仮実装・差分表の参照用に残置） ---- */
+.before { display: none; }
+.before .qr-head .b-title {
+  font: 800 22px/1.2 var(--font-latin); letter-spacing: -.01em; color: rgba(0,0,0,.90);
+}
+.before .qr-head .b-sub {
+  margin-top: 4px; font: 500 11.5px/1.5 var(--font-jp); color: rgba(0,0,0,.54);
+}
+.after .qr-head .b-title, .after .qr-head .b-sub { display: none; }
+.before .qr-head .a-eyebrow, .before .qr-head .a-title, .before .qr-head .a-date { display: none; }
+
+/* ---- 見出し After（役割トークン・日付主導の 3 行階層） ---- */
+.after .qr-head .a-eyebrow {
+  font: 700 11px/1 var(--font-latin); letter-spacing: .08em; color: var(--ink-3);
+}
+.after .qr-head .a-title {
+  margin-top: 7px; font: 700 21px/1.3 var(--font-jp); color: var(--ink-1);
+}
+.after .qr-head .a-date {
+  margin-top: 5px; font: 600 11.5px/1.5 var(--font-jp); color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- セル（優勝作品）— UniverseQuest .post-cell と同じ語彙 ---- */
+.qr-cell {
+  position: absolute; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: transform .16s var(--ease-out);
+}
+.qr-cell:active { transform: scale(.975); }
+.qr-cell .mediabox {
+  position: relative; width: 100%; border-radius: 14px; overflow: hidden; background: #101014;
+}
+.qr-cell .media { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* スクリム Before: 5-stop の場当たり値 */
+.before .qr-cell .scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,.35) 0%, rgba(0,0,0,.14) 30%, rgba(0,0,0,.30) 50%,
+    rgba(0,0,0,.14) 70%, rgba(0,0,0,.25) 100%);
+}
+/* スクリム After: UniverseQuest feed の cell-scrim と同一レシピ（地続き） */
+.after .qr-cell .scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.42) 0%, transparent 34%),
+    radial-gradient(80% 70% at 50% 52%, rgba(0,0,0,.30) 0%, transparent 100%);
+}
+
+/* 左上 — 優勝者（After は 1st ラベル付き） */
+.qr-cell .win {
+  position: absolute; top: 10px; left: 12px; z-index: 3;
+  display: flex; align-items: baseline; gap: 6px; max-width: calc(100% - 24px);
+}
+.qr-cell .rank {
+  flex: none; font: 800 10px/1 var(--font-latin); letter-spacing: .06em;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.8));
+}
+.before .qr-cell .rank { display: none; }
+.qr-cell .wn {
+  font: 700 11.5px/1 var(--font-latin); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 1px 6px rgba(0,0,0,.85), 0 0 16px rgba(0,0,0,.5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 中央 — お題（クエストタイトル）のみ。サークル名は下のキャプション帯へ */
+.qr-cell .mid {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 7px; padding: 30px 12px; text-align: center;
+}
+.qr-cell .cn {
+  font: 700 11px/1 var(--font-latin); letter-spacing: .08em; color: rgba(255,255,255,.85);
+  text-shadow: 0 1px 6px rgba(0,0,0,.8);
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qr-cell .qt {
+  font: 700 15px/1.4 var(--font-jp); color: #fff; text-wrap: pretty;
+  text-shadow: 0 1px 10px rgba(0,0,0,.85), 0 0 26px rgba(0,0,0,.6);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.qr-cell.l .qt { -webkit-line-clamp: 2; }
+
+/* 右下 — 優勝いいね（花 + 数）。After は花を --state-like に */
+.qr-cell .likes {
+  position: absolute; right: 10px; bottom: 8px; z-index: 3;
+  display: flex; align-items: center; gap: 4px;
+  font: 700 11.5px/1 var(--font-latin); color: #fff; font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 6px rgba(0,0,0,.85);
+}
+.qr-cell .flower {
+  width: 13px; height: 13px; flex: none; background: #fff;
+  -webkit-mask: url("../../assets/icons/icon_like.png") center / contain no-repeat;
+  mask: url("../../assets/icons/icon_like.png") center / contain no-repeat;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.7));
+}
+.after .qr-cell .flower { background: var(--state-like); }
+
+/* media 下キャプション帯 24 — サークル名の小テキスト */
+.qr-cell .capline {
+  height: 24px; display: flex; align-items: center; padding: 0 3px; min-width: 0;
+}
+.before .qr-cell .capline span { font: 600 10.5px/1 var(--font-latin); color: rgba(0,0,0,.50); }
+.after .qr-cell .capline span { font: 600 10.5px/1 var(--font-latin); color: var(--ink-3); }
+.qr-cell .capline span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ============================================================
+   DIFF — Before → After の変更点
+   ============================================================ */
+.diff { max-width: 920px; display: flex; flex-direction: column; gap: 10px; }
+.diff .d-row {
+  display: grid; grid-template-columns: 150px 1fr 1fr; gap: 16px; align-items: baseline;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.diff .d-row.head { background: transparent; box-shadow: none; padding: 0 16px; }
+.diff .d-k { font: 700 11px/1.5 var(--font-jp); color: var(--text-1); }
+.diff .d-b, .diff .d-a { font: 500 10.5px/1.65 var(--font-jp); color: var(--fg-2); }
+.diff .d-row.head .d-b, .diff .d-row.head .d-a, .diff .d-row.head .d-k {
+  font: 600 10px/1 var(--font-latin); letter-spacing: .12em; color: var(--fg-3);
+}
+.diff .d-a { color: var(--text-2); }
+.diff code {
+  font: 600 9.5px/1.6 ui-monospace, monospace; color: var(--fg-2);
+  background: rgba(255,255,255,.07); border-radius: 4px; padding: 1px 5px; white-space: nowrap;
+}
+
+/* ---- 単体表示 ?screen=before|after ---- */
+body.solo { padding: 0; min-height: 100vh; align-items: center; justify-content: center; }
+body.solo .page-head, body.solo .diff, body.solo .stage .cap { display: none; }
+body.solo .stage { display: none; }
+body.solo .stage.on { display: flex; }
+</style>
+</head>
+<body>
+
+<div class="page-head">
+  <div class="eyebrow">Handoff — UniverseQuestRecommend</div>
+  <h1>起動直後のおすすめ — 前日のクエスト結果一覧</h1>
+  <p>アプリを開いた一発目に出る全画面。前日に各サークルで行われたクエスト（コンテスト）の優勝作品（いいね 1 位）を、UniverseQuest の feed-max と同一の白面 FREE BOARD（角丸 14・9:16 / 16:9 混在・横スクロール）でぎっしり見せる。ヘッダーなし・コンテンツのみ。セルタップ → そのサークルのクエストフィードへ（画面全体が上へ抜けながら 380ms フェードアウト）。下の差分表は仮実装（QuestRecommendSheet 初稿）から直した逸脱の記録。</p>
+</div>
+
+<div class="board-row">
+
+  <div class="stage after" id="stage-after">
+    <div class="cap">
+      <span class="tag">UniverseQuestRecommend</span>
+      <p>ヘッダーなし・コンテンツのみ。UniverseQuest feed-max と同一の FREE BOARD（列パターン B/G/F/AL・横スクロール）。順位記号 = 1st グラデラベル + --state-like の花。</p>
+    </div>
+    <div class="phone">
+      <div class="screen">
+        <div class="qr-list">
+          <div class="qr-head">
+            <div class="b-title">Quest results</div>
+            <div class="b-sub">昨日のクエストの優勝作品</div>
+            <div class="a-eyebrow">Quest results</div>
+            <div class="a-title">昨日の優勝作品</div>
+            <div class="a-date">8月14日（金） · 9 サークルのコンテスト結果</div>
+          </div>
+          <div class="qr-board"></div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <div class="time">9:41</div>
+        <div class="sys">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 2.4c2.1 0 4 .8 5.5 2.1l1.4-1.5C13.6 1.3 11.1.3 8.5.3 5.9.3 3.4 1.3 1.6 3l1.4 1.5C4.5 3.2 6.4 2.4 8.5 2.4z" opacity=".9"/><path d="M8.5 6c1.1 0 2.2.4 3 1.2l1.4-1.5C11.7 4.6 10.2 4 8.5 4S5.3 4.6 4.1 5.7L5.5 7.2C6.3 6.4 7.4 6 8.5 6z"/><circle cx="8.5" cy="10" r="1.7"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="3" stroke="currentColor" stroke-opacity=".5"/><rect x="2.5" y="2.5" width="17" height="7" rx="1.5" fill="currentColor"/><rect x="23.5" y="4" width="1.6" height="4" rx=".8" fill="currentColor" fill-opacity=".6"/></svg>
+        </div>
+      </div>
+      <div class="dynamic-island"></div>
+      <div class="home-ind"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="diff">
+  <div class="eyebrow">Before → After — 直した逸脱</div>
+  <div class="d-row head"><div class="d-k">項目</div><div class="d-b">Before（仮実装）</div><div class="d-a">After（提案）</div></div>
+  <div class="d-row">
+    <div class="d-k">見出し</div>
+    <div class="d-b"><code>Quest results</code> Inter w800 22 / <code>rgba(0,0,0,.90)</code> + サブ <code>rgba(0,0,0,.54)</code> — 場当たり値。</div>
+    <div class="d-a">見出しなし — コンテンツのみ。優勝作品そのものが画面の主役（セル内のサークル名 + お題が文脈を担う）。</div>
+  </div>
+  <div class="d-row">
+    <div class="d-k">スクリム</div>
+    <div class="d-b">縦 5-stop（.35/.14/.30/.14/.25）の独自グラデ。</div>
+    <div class="d-a">UniverseQuest feed の <code>cell-scrim</code> と同一レシピ（上 linear .42→34% + 中央 radial .30）。地続きの語彙・効果 1 個。</div>
+  </div>
+  <div class="d-row">
+    <div class="d-k">順位記号</div>
+    <div class="d-b">いいね数のみ（白の花 + 数）。「1 位」であることが弱い。</div>
+    <div class="d-a">左上に <code>1st</code>（<code>--gradient-colorful-linear</code> の clip テキスト）+ 優勝者名。右下の花を <code>--state-like</code> に着色 =「優勝いいね」。効果はセルあたり 2 個以内。</div>
+  </div>
+  <div class="d-row">
+    <div class="d-k">配置</div>
+    <div class="d-b">縦 2 列 masonry（pad 10 / gap 7 / 横は全幅）・縦スクロール。</div>
+    <div class="d-a">UniverseQuest feed-max と同一の FREE BOARD: 列単位で左→右に埋める（列パターン B/G/F/AL・9:16 / 16:9 混在）・<b>横スクロール</b>。PAD_TOP = safe-top + 10 / 下端 = home-ind + 10 / gap 7。タップ範囲 = セル全体。</div>
+  </div>
+</div>
+
+<script>
+/* 前日の結果 — HANDOFF の 5 件 + 4 件（P,P,L ×3 で穴なくタイル） */
+const DATA = [
+  { ar: "p", circle: "Ranway Shibuya",         quest: "ファッションバトル｜テーマ：白",              user: "SunnyVi",   likes: "4.2k", img: "reel003" },
+  { ar: "p", circle: "Shokugeki no Shibuya",   quest: "Shokugeki | テーマ : 日本食",                 user: "foodie",    likes: "5.0k", img: "reel005" },
+  { ar: "l", circle: "GrafitiMan Circle",      quest: "心に響いた言葉",                              user: "Pixel",     likes: "3.1k", img: "reel007" },
+  { ar: "p", circle: "Shibuya Dance",          quest: "ダンスチャレンジ | テーマ : Neon Lights",     user: "Dreamy",    likes: "4.8k", img: "reel009" },
+  { ar: "p", circle: "渋谷コミュニティ",        quest: "今日の空",                                    user: "Starry",    likes: "2.4k", img: "reel001" },
+  { ar: "l", circle: "Shibuya Skateboard Park",quest: "最高のトリック",                              user: "o_cean",    likes: "3.6k", img: "reel011" },
+  { ar: "p", circle: "原宿コミュニティ",        quest: "ベストコーデ snap",                           user: "Kawaii",    likes: "2.9k", img: "reel013" },
+  { ar: "p", circle: "Shinjuku Night Walk",    quest: "夜のネオン 1 枚",                             user: "Mocha",     likes: "2.2k", img: "reel014" },
+  { ar: "l", circle: "新宿グループ",            quest: "今日のベストショット",                        user: "ZenGarden", likes: "1.8k", img: "reel008" },
+];
+
+/* 配置式（HANDOFF どおり・他言語へ移植可）
+   W=402 pad=10 gap=7 cap=24
+   colW = (W - 2*pad - gap) / 2
+   縦: h = colW*16/9 + cap → 低い方の列へ / 横: 両列を max に揃え全幅 h = (W-2*pad)*9/16 + cap */
+function cellHTML(d, mh) {
+  return '<div class="mediabox" style="height:' + mh.toFixed(2) + 'px">' +
+      '<img class="media" src="../../assets/sample/reel/' + d.img + '.jpg" alt="">' +
+      '<i class="scrim"></i>' +
+      '<div class="win"><span class="rank">1st</span><span class="wn">' + d.user + "</span></div>" +
+      '<div class="mid"><span class="qt">' + d.quest + "</span></div>" +
+      '<div class="likes"><i class="flower"></i>' + d.likes + "</div>" +
+    "</div>" +
+    '<div class="capline"><span>' + d.circle + "</span></div>";
+}
+
+/* Before — 仮実装の縦 masonry（HANDOFF の実値） */
+function layout(board) {
+  const W = 402, pad = 10, gap = 7, cap = 24;
+  const colW = (W - pad * 2 - gap) / 2, fullW = W - pad * 2;
+  const colX = [0, colW + gap];
+  let y = [0, 0];
+  const frag = document.createDocumentFragment();
+  for (const d of DATA) {
+    const cell = document.createElement("div");
+    cell.className = "qr-cell " + d.ar;
+    let x, w, mh;
+    if (d.ar === "l") {
+      const top = Math.max(y[0], y[1]);
+      x = 0; w = fullW; mh = fullW * 9 / 16;
+      cell.style.top = top + "px";
+      y[0] = y[1] = top + mh + cap + gap;
+    } else {
+      const c = y[0] <= y[1] ? 0 : 1;
+      x = colX[c]; w = colW; mh = colW * 16 / 9;
+      cell.style.top = y[c] + "px";
+      y[c] += mh + cap + gap;
+    }
+    cell.style.left = x + "px";
+    cell.style.width = w + "px";
+    cell.innerHTML = cellHTML(d, mh);
+    frag.appendChild(cell);
+  }
+  board.style.height = (Math.max(y[0], y[1]) - gap) + "px";
+  board.appendChild(frag);
+}
+document.querySelectorAll("#stage-before .qr-board").forEach(layout); /* Before は非表示（記録として差分表に残置） */
+
+/* After — UniverseQuest feed-max と同一の FREE BOARD（列を左→右へ埋める・横スクロール）
+   GAP 7 / PAD 10 / PAD_TOP = safe-top + 10 = 72 / 下端 = home-ind(34) + 10 / MAXW 244
+   セル = 写真(9:16 or 16:9) + 下のキャプション帯 24 */
+function freeBoard(board) {
+  const GAP = 7, PAD = 10, PAD_TOP = 72, PAD_BOT = 44, MAXW = 244, CAP = 24;
+  const H = 874 - PAD_TOP - PAD_BOT;
+  const P = 9 / 16, L = 16 / 9;
+  const pool = { p: DATA.filter(d => d.ar === "p").slice(), l: DATA.filter(d => d.ar === "l").slice() };
+  const fit = (h, ar) => { let w = Math.round(h * ar); if (w > MAXW) { w = MAXW; h = Math.round(w / ar); } return { w, h }; };
+  /* 列パターン（feed の layoutColumn と同じ式・CAP 分を引いて解く）
+     B: 縦2 / G: 横1の下に縦1 / F: 縦1の下に横1 / AL: 横1一枚絵 */
+  function col(type) {
+    const t = [];
+    if (type === "B") {
+      const a = fit(Math.round((H - GAP - CAP * 2) / 2), P);
+      t.push({ dx: 0, dy: 0, w: a.w, h: a.h, k: "p" });
+      t.push({ dx: 0, dy: a.h + CAP + GAP, w: a.w, h: a.h, k: "p" });
+    } else if (type === "F" || type === "G") {
+      const w = Math.min(Math.round((H - GAP - CAP * 2) / (1 / P + 1 / L)), MAXW);
+      const ph = Math.round(w / P), lh = Math.round(w / L);
+      if (type === "F") {
+        t.push({ dx: 0, dy: 0, w, h: ph, k: "p" });
+        t.push({ dx: 0, dy: ph + CAP + GAP, w, h: lh, k: "l" });
+      } else {
+        t.push({ dx: 0, dy: 0, w, h: lh, k: "l" });
+        t.push({ dx: 0, dy: lh + CAP + GAP, w, h: ph, k: "p" });
+      }
+    } else { /* AL */
+      const w = Math.min(Math.round((H - CAP) * P), MAXW);
+      t.push({ dx: 0, dy: 0, w, h: Math.round(w / L), k: "l" });
+    }
+    return t;
+  }
+  const SEQ = ["B", "G", "F", "B", "AL"];
+  let x = PAD;
+  for (const type of SEQ) {
+    const tiles = col(type);
+    const used = Math.max(...tiles.map(t => t.dy + t.h + CAP));
+    const cy = Math.max(0, Math.round((H - used) / 2));
+    for (const t of tiles) {
+      const d = pool[t.k].shift();
+      if (!d) continue;
+      const cell = document.createElement("div");
+      cell.className = "qr-cell " + d.ar + (t.w < 132 ? " sm" : "");
+      cell.style.left = (x + t.dx) + "px";
+      cell.style.top = (PAD_TOP + cy + t.dy) + "px";
+      cell.style.width = t.w + "px";
+      cell.innerHTML = cellHTML(d, t.h);
+      board.appendChild(cell);
+    }
+    x += Math.max(...tiles.map(t => t.dx + t.w)) + GAP;
+  }
+  board.style.width = (x - GAP + PAD) + "px";
+  board.style.height = "100%";
+}
+document.querySelectorAll("#stage-after .qr-board").forEach(freeBoard);
+
+/* ?screen / ?screen=after → 画面のみ（DS カード・design-uc-test 用） */
+const solo = new URLSearchParams(location.search).get("screen");
+if (solo !== null && solo !== "before") {
+  document.body.classList.add("solo");
+  document.getElementById("stage-after").classList.add("on");
+}
+</script>
+
+<!-- thumbnail for the offline bundler -->
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#ffffff"/>
+    <rect x="18" y="22" width="28" height="42" rx="7" fill="#101014"/>
+    <rect x="52" y="22" width="28" height="30" rx="7" fill="#3a3a44"/>
+    <rect x="18" y="70" width="62" height="10" rx="5" fill="#ff3e88"/>
+  </svg>
+</template>
+
+</body></html>
