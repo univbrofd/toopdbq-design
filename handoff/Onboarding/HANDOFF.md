@@ -1,116 +1,119 @@
-# Onboarding — 初回起動オンボーディングを Quest 全面で一新（新規デザイン依頼）
+# Onboarding — 初回起動（Quest ループ・4 メッセージ + 許可）
 
-現行のオンボーディングは **Quest（サークル出題型クエスト）実装より前**の内容で、「サークル＝場所 / 範囲 /
-中は投稿・外は閲覧」の説明に終始している。いまのアプリの主役は Quest なので、**訴求そのものを作り直す**。
-既存 specimen（`comp-onboarding-01..06-*.html` / `onboarding.css` / `clean.html`）は**旧版・置換対象**。
-参照しない（構図を引き継がない）。
+repo: `univbrofd/toopdbq-design` / `main`
+raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
+索引: `DesignSystem/_ds_manifest.json`
+foundation: `DesignSystem/USAGE_RULES.md` → `taste.md` → `colors_and_type.css` → `preview/card.css`
 
-同じプロジェクト内の `handoff/AppStorePromo/`（App Store 掲載面）で確定した **Quest の訴求軸とコピー**を、
-アプリ内オンボーディングへ翻訳するのが今回の仕事。
-
-- repo: `univbrofd/toopdbq-design` / branch `main`
-- raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/`
-- 索引: `DesignSystem/_ds_manifest.json`
+旧 specimen（`comp-onboarding-01..06-*.html` / `onboarding.css` / `clean.html`）は**置換対象。構図を引き継がない**。
 
 ---
 
-## 1. AppStorePromo から継承するもの / しないもの
+## 何を作るか
 
-| | |
+初回起動 overlay（Splash の上・1 回きり）の **5 画面**。各面 = 1 メッセージ + 1 図。横スワイプ。
+
+成果物:
+- `handoff/Onboarding/Onboarding.html` — 全シーン縦並び。`?screen` で chrome 無し全画面、`?scene=01` で 1 面だけ
+- `handoff/Onboarding/Onboarding.css` — **差分だけ**（foundation をコピーしない）
+- 各面は `.phone`（402×874・Dynamic Island・statusbar 62 / home-ind 34）に**実配置**
+- `_ds_manifest.json` に `group="Onboarding"` で登録（既存カードは消さない）
+- 最終はダウンロード可能な bundle
+
+アセットは共有だけ: アイコン `../../assets/icons/`、写真 `../../assets/sample/{reel,user,uv}/`。新画像を持ち込まない。絵文字なし。呼称は「**投稿**」（ストーリー禁止）。
+
+---
+
+## ユーザーの脳に残すこと（これ以外は描かない）
+
+1. 世界中にサークルがある。それぞれ **1km 以内**の決まったエリア
+2. 毎日クエストが出る。達成方法は **お題の写真をエリア内から投稿**
+3. 達成すると、同じお題の他人の投稿が見える（外からは見えない）
+4. 他人の投稿をいいねし、相手も自分の投稿をいいねしたら、**その投稿について**メッセージできる
+
+コピーは下表を**意味固定**（語順・強調語は可読のため磨いてよい。新しい約束は足さない）。
+
+| # | eyebrow | 見出し（強調 = glow 1 語） | 本文 |
+|---|---|---|---|
+| 01 | サークル | 世界中に、**1km の舞台**がある。 | サークルは地図の上にいくつもある。それぞれに決められたエリアがある。半径 1km 以内。そこにいる人だけが、その日の主役になる。 |
+| 02 | クエスト | 毎日のお題を、**写真で届ける。** | サークルでは、毎日クエストが出る。お題にちなんだ写真を、そのエリアの中から投稿する。それだけ。 |
+| 03 | ひらく | 達成した人だけが、**中を見られる。** | クエストを達成すると、同じ場所・同じお題に応えた人たちの投稿が開く。外からは、見えない。 |
+| 04 | メッセージ | いいねが重なったら、**話せる。** | 誰かの投稿にいいねする。その人もあなたの投稿にいいねしてくれたら、メッセージが開く。 |
+| 05 | — | 近くのサークルを見つけるために位置情報を使います | **エリアの中にいるか**を判定して、今日のクエストに参加できる場所を見つける。位置情報が他人に共有されることはありません。 CTA「はじめる」 |
+
+共通 chrome: 右上「スキップ」（最終面は隠す）/ 下 foot = eyebrow + 見出し + 本文 + dots +「次へ」。
+
+英語は実装済み（端末言語）。specimen は **日本語**で描く。
+
+---
+
+## これはデーティングアプリではない（視覚の絶対禁止）
+
+日本法の「インターネット異性紹介事業」は、運営方針が**異性交際**のときだけ該当する。オンボの絵が Tinder に見えると、ストア審査もユーザーもデートアプリと誤認する。
+
+**04 で禁止:**
+- 2 人の顔が向かい合う構図、中央でぶつかるハート、マッチバッジ
+- 性別・年齢・距離のプロフィールカード、人をスワイプして選ぶ UI
+- 「運命」「出会い」「恋」「好きな人」コピー
+- チャット文が相手の容姿・関係性の話
+
+**04 の正しい絵:**
+- 主役は **クエスト写真 2 枚**（人の顔ではない）
+- 両方に like（`assets/icons/icon_like.png`）がついた状態
+- その下に、**写真／場所／お題**の短い会話が開く（例: 「この青、同じ路地だ」）
+- 人は投稿者チップ程度（小さく）
+
+01–03 も「相手を探す」絵にしない。場所・お題・投稿が主役。
+
+---
+
+## 各面の図（一次情報は既存 UI）
+
+部品は `handoff/UniverseQuest/UniverseQuest.html` から切り出す（無いものを発明しない）。
+
+| # | 図 |
 |---|---|
-| **継承する** | 訴求の軸と順序（`handoff/AppStorePromo/copy.json` の 01 quest → 02 area → 03 lock → 04 unlock）。見出しを 1 文の中で太さと色で切り替える書き方。強調語 1 つに `--state-quest-active`。UI を「画面まるごと」でなく**部品として切り取って置く**構図。写真は共有プール（`assets/sample/{uv,reel,user}/`） |
-| **継承しない** | **ライト地（`#f7f3ec` / `#efe8dc`）はポスター専用。アプリ内はダーク `--bg #08080b`**。ポスターの斜め配置・マーカー下線・ステッカー散らしも**アプリ内には持ち込まない**（審査向け販促の文法であってアプリ UI ではない）|
+| 01 | 擬似地図（透視グリッド + ブランドグロー。実 3D globe / 実タイル禁止）+ 複数の小さなピン + **1km 楕円レンジ** + タグ `1km` |
+| 02 | 同じ擬似地図の上に **QuestBoard 未クリア**（colorful リム・QUEST / TODAY・お題「青いものを撮れ」・カメラチップ「エリアの中から」）。看板の実値は `handoff/QuestBoard/HANDOFF.md` |
+| 03 | 投稿セル 3 枚。中央 = 自分（鮮明・YOU）。左右 = 未達成は blur + 「未公開」、達成後は鮮明 + 「公開」。**同じ絵の前後**が核 |
+| 04 | 上記「正しい絵」。会話バブルは `handoff/ChatRoom/` のバブル文法を小さく |
+| 05 | 下シート: ミニ地図 156 + pin タイル 46 + 見出し + 本文 + 単一 CTA「はじめる」。OS ダイアログは描かない（このボタンが呼ぶ） |
 
-一次情報:
-- `handoff/AppStorePromo/AppStorePromo.html`（このプロジェクト内。色と訴求の温度感を確認する用）
-- `handoff/AppStorePromo/copy.json` — コピーの正（訴求軸）
-- `handoff/UniverseQuest/UniverseQuest.html` — **UI 部品の一次情報**（`.strip-board` / `.feed-col .post-cell` /
-  `.rail-wrap.day-locked .lock-note` / `.up-card` / `.clear-toast` / `.wd-circle-bar`）。オンボの図案はここから切り出す
-- foundation: `DesignSystem/colors_and_type.css` / `preview/card.css` / `taste.md` / `USAGE_RULES.md`
+---
 
-## 2. 実装制約（Flutter 側の現実・厳守）
+## 配置・実装制約
 
-- **Splash の上に重なる overlay**。独立ルートではない。**初回起動時（OS 位置許可が未回答）だけ**表示され、2 回目以降は出ない。
-  → 「毎日使いたくなる」を作る機会は**この一度きり**。情報の網羅より、体験の欲求を立てることを優先する。
-- **最後のシーンで OS の位置情報許可ダイアログを実際に呼ぶ**。よって最終シーンは pre-permission（なぜ要るかを納得させる面）で、
-  ボタンは 3 択: 「Appの使用中は許可」/「一度だけ許可」/「許可しない」。**拒否でもアプリは進む**（デフォルト位置で起動）ので、
-  拒否を袋小路にしない。
-- Flutter **native 描画**。地図は**図案化した擬似地図**（透視グリッド＋グロー）で描く。実 3D globe / WebView は使えない。
-  → 地図の写実性に依存する図案にしない。
-- 画面 **402 × 874pt**（iPhone 17 / `preview/card.css` の `.phone` 既定）、SafeArea 上 62 / 下 34、タップ域 **最小 44pt**。
-- 横スワイプのページャ + 進捗ドット + CTA。**スキップ**を常時右上（最終シーン以外）。
-- 呼称は必ず「**投稿**」（「ストーリー」禁止）。絵文字なし。ダーク＋カラフル放射グラデ＋ガラス。
+- Splash 上の overlay。独立ルートではない。**1 回きり** → 説明の網羅より欲求。
+- 最終面の CTA が OS 位置許可を呼ぶ。拒否でもアプリは進む（拒否を袋小路にしない）。ボタンは **1 つ**（「はじめる」）。OS の 3 択は描かない。
+- Flutter native。地図は図案化のみ。
+- 画面 402×874、SafeArea 上 62 / 下 34、タップ **最小 44pt**。
+- 下部スクリム必須（写真の上の文字を text-shadow だけにしない）: `#08080b` alpha 1 / .92 / .55 / 0、stops .06 / .26 / .55 / 1、高さ 62%。
 
-## 3. シーン構成（推奨骨子・4 + 許可）
+**foot 実値:** eyebrow 番号 Noto 700 11 / tracking 2.2 + 18×1 白 40% バー + ラベル `--text-3`。見出し Noto 700 29 / 行間 1.34、強調だけ `--gradient-colorful-linear`。本文 Noto 500 14.5 / 行間 1.75 `--text-2` / max 318。dots 6、active 幅 22 colorful ピル。CTA 54h radius 12 colorful + 中心スクリム + `--gradient-border` 1px + `icon_next` 17。
 
-旧版は 6 シーンで説明過多だった。**4 シーン + 許可**に圧縮する。各面 = 1 メッセージ + 1 図。
+**許可シート実値:** radius 22 / `--surface-raised #16131f` / 1px 白 8% / 影 `0 -8 40 rgba(0,0,0,.6)`。CTA 50h 同じ colorful。
 
-| # | 役割 | 見出し案（強調語） | 補足案 | 図（UniverseQuest の部位） |
-|---|---|---|---|---|
-| 01 | HOOK | 近くのフェスに、今日の**お題**。 | 地図の上のサークルには、その日だけのお題が出る。 | 擬似地図 + `.strip-board`（未クリア・ピンクリム・パルス）を主役サイズで浮かせる |
-| 02 | AREA | 答えられるのは、いま**そこにいる人**だけ。 | エリアの中から、写真か動画で答える。 | サークル範囲（楕円リング）+ 圏内の自分ピン / 圏外の淡いアバター |
-| 03 | LOCK | **君が出すまで**、みんなの答えは見えない。 | 見るだけの人にはなれない。 | `.post-cell` の 2 列グリッドを blur18 + 中央に距離（44px）の lock-note |
-| 04 | UNLOCK | 出した瞬間、**全員の答え**がひらく。 | お題は毎日変わる。投稿は消えずに積み上がる。 | 解錠後グリッド + `QUEST CLEARED`（teal リム）。03 → 04 は**同じ絵の前後**として見せる |
-| 05 | 許可 | エリアの**中にいるか**を判定するために。 | 位置情報が他のユーザーに共有されることはありません。 | ミニ地図付き許可シート + 3 ボタン |
+**モーション:** `--ease-out cubic-bezier(.16,1,.3,1)`。入場 500–600ms。ページ送り 460ms。**常時アニメは 1 面 1 つ**。03 の blur→公開だけ厚くしてよい。各面に入場順・ms・イージングをコメントで残す。
 
-- **03 → 04 が体験の核**。同じグリッドがぼけ→ひらく、を連続として設計する（ページ送りで絵が変わるのでなく、
-  同じ絵の状態が変わる）。ここに一番の演出予算を割く。
-- 04 の補足で「毎日変わる／積み上がる」= 再訪動機に触れる。別シーンを足さない。
-- コピーは案。`copy.json` の訴求軸を保ったまま、アプリ内の一人称の文体に磨いてよい。**煽り・数値・最上級は禁止**。
+---
 
-## 4. 実装値（現行実装から捕捉。図案の部品はこの値で描く）
+## コピーの文法（広告心理・実装済み方針）
 
-**クエスト看板**（`.strip-board` 相当）: radius 20 / padding 16·12·16·11 / 面 `#1b1b20`→`#121216`（135°）/
-リム 1.5px `--gradient-colorful-linear` / 影 `0 8 24 rgba(0,0,0,.45)` / 未クリアは `--state-quest-active-ring` の
-パルス輪（0 → 16px・2.2s ease-out infinite）。行1 = 5px のピンク dot（同 2.2s で 1→.3→1）+ `QUEST`（Inter 700 / 9px /
-letter-spacing .14em / `rgba(255,255,255,.66)`）+ 右端に日付 pill（面 `rgba(255,255,255,.09)` / radius 9999 /
-padding 10·3 / Inter 600 10px）。タイトル = Noto 700 15px 白（影 `0 0 8 #000`）、説明 = Noto 500 10.5px /
-行間 1.5 / `--text-2`。下端 dots = 5px（active は幅 14 の白ピル・250ms ease-in-out）。クリア済みはリムを
-`#4be3b0 → #3fd0e0` に替え `QUEST CLEARED`。
+- 1 面 1 アイデア。機能名ではなく**得ること**を見出しに
+- 具体（1km / 毎日 / 写真 / いいねが重なったら）
+- 「あなた」視点。煽り・最上級・数値自慢は禁止
+- 手段→目的の順: 場所 → お題 → 中が見える → 投稿について話せる
 
-**ロックセル**: `blur(18px) brightness(.72) scale(1.08)`。テキスト・投稿者名は非表示。
-**lock-note**: 面を持たず縦グラデスクリムのみ（stops 0 / .34 / .5 / .66 / 1 = alpha 0 / .44 / .60 / .44 / 0）。
-中央に距離 Inter 700 **44px**（影 `0 2 14 rgba(0,0,0,.6)`）+ 単位 15px、その下に経路ボタン。
+---
 
-**許可シート**: radius 22 / 面 `--surface-raised #16131f` / 1px `rgba(255,255,255,.08)` /
-影 `0 -8 40 rgba(0,0,0,.6)` / 上端にミニ地図 156px。アイコンタイル 46 · radius 14 · `--gradient-colorful`。
-見出し Noto 700 18px 行間 1.4 / 本文 Noto 500 13px 行間 1.7 `--text-2`（要点だけ白 700）。
-ボタン: 許可 50h（colorful + 中心スクリム `radial 90% at 50% 52%, rgba(0,0,0,.5) → 0` + `--gradient-border` 1px）/
-一度だけ 50h（`--surface-input #2b2b2b`）/ 許可しない 44h（文字のみ `--text-3`）。すべて radius 12。
+## やらないこと
 
-**共通 foot**（再利用可能な既存部品がある）: eyebrow = 番号 Noto 700 11px（tracking 2.2）+ 18×1px の白 40% バー +
-ラベル `--text-3` / タイトル Noto 700 29px 行間 1.34（強調語だけ `--gradient-colorful-linear` の文字グラデ）/
-本文 Noto 500 14.5px 行間 1.75 `--text-2`（最大幅 318）/ dots 6px・active は幅 22 の colorful ピル（300ms `--ease-out`）/
-CTA 54h · radius 12 · colorful + 中心スクリム + `--gradient-border` 1px + 次アイコン 17。
-下部は 62% 高の黒スクリム（`#08080b` を alpha 1 / .92 / .55 / 0、stops .06 / .26 / .55 / 1）で可読性を構造で担保。
+- 新色・新フォント。トークンは `colors_and_type.css`
+- ライト地・ポスター文法（斜め配置 / マーカー下線 / ステッカー）
+- 実 3D globe、実地図タイル、多層パララックス
+- UniverseQuest に無い UI の発明
+- 6 画面に戻す、まとめ画面を足す、サークル作成の教示
+- デートアプリに見える構図（上記禁止リスト）
+- 効果の盛りすぎ（1 面 1〜2）
 
-## 5. モーション（Flutter で再現するので仕様を明記すること）
-
-各シーンに「入場（何がどの順に・何 ms・どのイージング）」「常時アニメ（あれば 1 つだけ）」「シーン間の連続」を
-specimen 内にコメント or 併記の表で残す。基準: `--ease-out cubic-bezier(.16,1,.3,1)` / 入場 500〜600ms /
-ページ送り 460ms。**常時アニメは 1 面 1 つまで**（`taste.md` の効果予算）。03 → 04 の解錠だけは例外的に主役演出として厚く。
-
-## 6. 成果物
-
-- `handoff/Onboarding/Onboarding.html` — 全シーンを縦に並べた specimen。`?screen` で chrome 無しの**画面のみ**を
-  縦フルスクリーン、`?scene=03` で 1 面だけ描画できるようにする。各面は `.phone`（402×874）に**実配置**。
-- `handoff/Onboarding/Onboarding.css` — この View 固有の差分のみ。**foundation をコピーしない**（`colors_and_type.css` /
-  `card.css` / `components.css` は参照）。
-- `DesignSystem/_ds_manifest.json` に `group="Onboarding"` で登録（superset・既存カードを消さない）。
-- アセットは共有 `assets/` を相対参照（`../../assets/...`）。per-View に複製しない。新しい画像を持ち込まない。
-- 旧 `comp-onboarding-01..06-*.html` / `onboarding.css` / `clean.html` は**出力に含めない**（取り込み側で削除する）。
-- 最終は**ダウンロード可能な bundle** で出力。
-
-## 7. やらないこと
-
-- 新しい色・フォントの発明（トークンは `colors_and_type.css` が canonical）。
-- ライト面・ポスター文法（斜め配置 / マーカー下線 / ステッカー）のアプリ内持ち込み。
-- 実装できない図案（実写の 3D globe、実地図タイル、平行して動く多層パララックス）。
-- 未実装機能・存在しない画面を描く（描く UI は `UniverseQuest.html` に実在する状態のみ）。
-- 効果の盛りすぎ（1 面 1〜2 効果。`taste.md` の smell test を通す）。
-- 説明の網羅。**1 面 1 メッセージ**、読ませずに分からせる。
-
-## 実装側の対応箇所（別 repo `univbrofd/toopdbq`・参考。値は §4 が正）
-
-`lib/feature/Onboarding/`（View / Controller / widgets `ObMapStage` `ObCircleRange` `ObMarker` `ObFoot`）、
-`lib/component/ui/view/CircleFocus/`（`QuestBoard` / `QuestFeedSheet`）、`lib/feature/Splash/SplashController.dart`。
+実装対応（別 repo `univbrofd/toopdbq`・参考）: `lib/feature/Onboarding/`、`lib/l10n/app_ja.arb`。
