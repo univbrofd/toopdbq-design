@@ -22,6 +22,10 @@ foundation: `DesignSystem/USAGE_RULES.md` → `taste.md` → `colors_and_type.cs
 - `_ds_manifest.json` に `group="Onboarding"` で登録（既存カードは消さない）
 - 最終はダウンロード可能な bundle
 
+> **注記（取り込み側）**: `assets/sample/reel/ob-party.png` は Claude Design から取得できていない
+> （MCP `get_file` の 256 KiB 上限で truncate）。いまリポジトリにあるのは `reel008.jpg` 由来の
+> **プレースホルダ**。原本（夕暮れの空 + ストリングライトのパーティー写真）を別経路で入れ直すこと。
+
 アセットは共有だけ: `../../assets/icons/`、`../../assets/sample/{reel,user,uv}/`。新画像を持ち込まない。絵文字なし。呼称は「**投稿**」。
 
 ---

@@ -1,0 +1,327 @@
+/* ============================================================================
+   Onboarding — 初回起動 overlay（5面）· View 固有差分のみ
+   土台: ../../DesignSystem/colors_and_type.css / preview/card.css /
+         universe-quest.css（UniverseQuest.html の <style> を verbatim 抽出 —
+         .phone / .feed-sheet / .post-cell / .strip-board / .map-post /
+         .lock-note / .wd-icon-btn / .clear-toast）
+   構図: 暗い擬似地図フルブリード + 中央に主役 1 つ + 下部スクリム + foot。
+         本番ホーム（白シート・マップ切り欠き・サークル切替）は持ち込まない。
+   ========================================================================== */
+
+/* studio caption */
+.ob-head { text-align: center; max-width: 430px; }
+.ob-head .eyebrow, .scene-cap .eyebrow { font: 600 10px var(--font-latin); letter-spacing: .16em;
+  text-transform: uppercase; color: rgba(23,23,27,.50); }
+.ob-head h1 { font: 700 22px/1.4 var(--font-jp); color: #17171b; margin-top: 6px; }
+.ob-head p { font: 500 11.5px/1.6 var(--font-jp); color: rgba(23,23,27,.68); margin-top: 8px; }
+.scene-block { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.scene-cap { text-align: center; max-width: 402px; }
+.scene-cap h2 { font: 700 15px/1.4 var(--font-jp); color: #17171b; margin-top: 4px; }
+.scene-cap .spec { margin-top: 8px; text-align: left; font: 400 10px/1.7 var(--font-latin);
+  color: rgba(23,23,27,.62); white-space: pre-line; background: rgba(23,23,27,.035);
+  border: 1px solid rgba(23,23,27,.10); border-radius: 8px; padding: 8px 12px; }
+.glass-tag { display: inline-block; margin-left: 8px; padding: 2px 8px;
+  border-radius: var(--radius-pill); background: rgba(23,23,27,.07);
+  font: 600 9px/1.4 var(--font-latin); letter-spacing: .08em; color: rgba(23,23,27,.62);
+  text-transform: uppercase; vertical-align: 2px; }
+.studio { gap: 40px; }
+
+/* ?screen — chrome 無し・縦フルスクリーン */
+body.screen-only .studio { display: flex; flex-direction: column; gap: 0; }
+body.screen-only .scene-block { gap: 0; }
+body.screen-only .ob-head, body.screen-only .scene-cap { display: none; }
+
+/* ---- 地図フルブリード（UniverseQuest の #map ではなく overlay 用の全面版） ---- */
+.phone .screen { background: #f6f6f4; }
+.phone .obmap { position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  background: #eceeeb; border-radius: 0; }
+.phone .obmap .maplibregl-canvas { outline: none; }
+/* 地図の上に薄い暗幕 — 文字と主役のコントラストを構造で担保（--scrim-min 未満の均し） */
+.ob-veil { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(78% 58% at 50% 34%, rgba(246,246,244,0) 0%, rgba(246,246,244,.42) 100%); }
+/* 02–05 は主役が地図でないので、背景を一段落とす */
+.ob-veil.strong { background:
+  radial-gradient(78% 58% at 50% 34%, rgba(246,246,244,.30) 0%, rgba(246,246,244,.82) 100%),
+  rgba(246,246,244,.42); }
+
+/* skip — 常時右上（最終面以外）· tap 域 44 */
+.ob-skip { position: absolute; top: 62px; right: 8px; z-index: 85;
+  min-height: 44px; min-width: 44px; padding: 0 8px; border: 0; background: transparent;
+  cursor: pointer; -webkit-appearance: none; appearance: none;
+  -webkit-tap-highlight-color: transparent; display: flex; align-items: center; justify-content: center; }
+.ob-skip span { display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0;
+  border-radius: var(--radius-pill); background: rgba(255,255,255,.82);
+  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.12), 0 2px 8px rgba(0,0,0,.08);
+  font: 700 12px/1 var(--font-jp); color: rgba(23,23,27,.72); white-space: nowrap; }
+.ob-skip span img { width: 12px; height: 12px; object-fit: contain;
+  filter: brightness(0); opacity: .58; }
+.ob-skip:active span { opacity: .7; }
+
+/* ---- 主役 1 つの置き場 ------------------------------------------------------ */
+.ob-hero { position: absolute; left: 24px; right: 24px; top: 300px; z-index: 60;
+  transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; }
+
+/* 01 — 光の壁の半径注記 */
+.ob-scale { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ob-scale .bar { width: 96px; height: 1px; background: rgba(23,23,27,.45);
+  position: relative; }
+.ob-scale .bar::before, .ob-scale .bar::after { content: ""; position: absolute; top: -3px;
+  width: 1px; height: 7px; background: rgba(23,23,27,.45); }
+.ob-scale .bar::before { left: 0; } .ob-scale .bar::after { right: 0; }
+.ob-scale .v { font: 700 13px/1 var(--font-latin); letter-spacing: .1em; color: #17171b;
+  text-shadow: 0 1px 6px rgba(255,255,255,.9); }
+
+/* 02 — 看板は静的配置に。投稿ボタンは看板の直下に置く
+   地図（WebView/WebGL）の上では backdrop blur が使えない実装制約（QuestBoard HANDOFF）に合わせ、
+   看板と投稿ボタンは no-blur の不透明近似で描く。 */
+.ob-hero .strip-board { position: relative; top: auto; left: auto; right: auto; width: 100%;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  background: linear-gradient(120deg, rgba(255,255,255,.97) 0%, rgba(246,246,244,.97) 100%); }
+.ob-hero .map-post .mp-cam { -webkit-backdrop-filter: none; backdrop-filter: none;
+  background: #17171d; }
+.ob-hero .map-post { position: relative; top: auto; left: auto; right: auto; height: auto;
+  margin-top: 18px; display: flex; justify-content: center; }
+
+/* 03 / 04 — 投稿ボード（.post-cell の列パッキングを載せる面） */
+.ob-board { position: relative; width: 100%; height: 480px; border-radius: 18px;
+  overflow: hidden; background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.10), 0 12px 34px rgba(23,23,27,.16); }
+.ob-board .board-inner { position: absolute; inset: 0; }
+/* 04 — クエスト写真への like と、その投稿についての短い会話（顔を向かい合わせない） */
+.post-cell .ob-like { position: absolute; right: 8px; bottom: 8px; z-index: 4;
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--state-like); box-shadow: 0 2px 10px rgba(255,62,136,.45);
+  pointer-events: none; }
+.post-cell .ob-like img { width: 15px; height: 15px; object-fit: contain;
+  filter: brightness(0) invert(1); }
+.ob-talk { margin-top: 16px; width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.ob-talk .tk { display: flex; align-items: center; gap: 8px; }
+.ob-talk .tk.out { justify-content: flex-end; }
+.ob-talk .tk img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 2px 8px rgba(23,23,27,.18); }
+.ob-talk .bub { padding: 9px 14px; border-radius: var(--radius-pill);
+  font: 500 12.5px/1.4 var(--font-jp); color: #17171b;
+  background: rgba(255,255,255,.94); box-shadow: inset 0 0 0 1px rgba(23,23,27,.10); }
+.ob-talk .tk.out .bub { background: radial-gradient(90% 90% at 50% 52%, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 100%),
+  var(--gradient-colorful); box-shadow: none; font-weight: 700; }
+
+/* 04 — いいねがチャットの新規メッセージとして届く画面（DS chat row の anatomy） */
+.ob-inbox { width: 100%; border-radius: 18px; overflow: hidden; background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.10), 0 12px 34px rgba(23,23,27,.16); }
+.ib-hd { padding: 14px 16px 10px; font: 700 15px/1 var(--font-jp); color: #17171b; }
+.ib-row { position: relative; display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; min-height: 68px;
+  box-shadow: inset 0 1px 0 rgba(23,23,27,.08); }
+.ib-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 2px 8px rgba(23,23,27,.18); }
+.ib-col { flex: 1 1 auto; min-width: 0; }
+.ib-top { display: flex; align-items: baseline; gap: 8px; }
+.ib-nm { font: 700 14px var(--font-jp); color: #17171b; }
+.ib-tm { font: 400 10.5px var(--font-latin); color: rgba(23,23,27,.48); margin-left: auto; }
+.ib-ms { margin-top: 3px; font: 500 12.5px/1.45 var(--font-jp); color: rgba(23,23,27,.70);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ib-row.unread .ib-ms { color: #17171b; font-weight: 700; }
+.ib-th { width: 34px; height: 44px; border-radius: 6px; object-fit: cover; flex: none; }
+.ib-dot { position: absolute; left: 6px; top: 50%; width: 6px; height: 6px; margin-top: -3px;
+  border-radius: 50%; background: var(--gradient-colorful-linear); }
+
+/* 04 — 一対一のメッセンジャー面。いいね通知が上に立ち、相手側に自分の投稿が引用される
+   （吹き出しは universe-quest.css の .wd-chat-bubble をそのまま使う） */
+.ob-msgr { width: 100%; border-radius: 18px; overflow: hidden; background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.10), 0 12px 34px rgba(23,23,27,.16); }
+.mg-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  box-shadow: inset 0 -1px 0 rgba(23,23,27,.09); }
+.mg-head .av { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex: none;
+  box-shadow: 0 2px 8px rgba(23,23,27,.16); }
+.mg-head .col { min-width: 0; display: flex; flex-direction: column; }
+.mg-head .nm { font: 700 15px var(--font-jp); color: #17171b; }
+.mg-head .st { margin-top: 2px; font: 500 10.5px var(--font-jp); color: rgba(23,23,27,.48); }
+.mg-body { padding: 14px 14px 14px; display: flex; flex-direction: column; }
+.mg-sys { align-self: center; margin: 4px 0 6px; padding: 5px 12px; white-space: nowrap;
+  border-radius: var(--radius-pill); background: rgba(23,23,27,.06);
+  font: 700 11px var(--font-jp); color: rgba(23,23,27,.70); }
+.mg-quote { position: relative; display: inline-block; width: 132px; height: 176px;
+  border-radius: 12px; overflow: hidden; margin-bottom: 6px; }
+.mg-quote img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mg-quote .q-lb { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 10px 8px;
+  display: flex; align-items: center; gap: 5px;
+  font: 700 11px var(--font-jp); color: #fff;
+  background: linear-gradient(0deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,0) 100%); }
+.mg-quote .q-lb img { width: 12px; height: 12px; flex: none; object-fit: contain;
+  filter: brightness(0) invert(1); }
+.ob-msgr .wd-chat-bubble .bub { display: block; width: fit-content; max-width: 100%; }
+.mg-composer { display: flex; align-items: center; gap: 8px; padding: 10px 12px 14px;
+  box-shadow: inset 0 1px 0 rgba(23,23,27,.09); }
+.mg-composer .ph { flex: 1 1 auto; height: 40px; display: flex; align-items: center;
+  padding: 0 14px; border-radius: var(--radius-pill); background: rgba(23,23,27,.05);
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.12);
+  font: 400 13px var(--font-jp); color: rgba(23,23,27,.42); }
+.mg-composer .snd { width: 40px; height: 40px; flex: none; }
+.mg-composer .snd img { width: 40%; height: 40%; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+
+.ob-note { margin-top: 16px; display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px 8px 8px; border-radius: var(--radius-pill);
+  background: rgba(255,255,255,.88); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.10); }
+.ob-note img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex: none; }
+.ob-note span { font: 500 12.5px/1.5 var(--font-jp); color: rgba(23,23,27,.70); }
+
+/* 05 — 位置許可シート。地図とエリアは出さず、静かな暗い面に「端末の中だけ」の図だけを置く */
+.phone[data-screen-label="OB-05"] .obmap {
+  background:
+    radial-gradient(46% 34% at 50% 30%, rgba(255,62,136,.10) 0%, rgba(246,246,244,0) 70%),
+    radial-gradient(60% 42% at 50% 30%, rgba(23,23,27,.035) 0%, rgba(246,246,244,0) 72%),
+    #f6f6f4; }
+
+/* 端末の中に閉じている図 — 二重の破線リングの内側にだけ現在地がある */
+.ob-vault { position: relative; width: 168px; height: 168px; margin-bottom: 22px;
+  display: grid; place-items: center; flex: none; }
+.ob-vault .ring { position: absolute; border-radius: 50%; }
+.ob-vault .ring.r1 { inset: 0; border: 1px dashed rgba(23,23,27,.18); }
+.ob-vault .ring.r2 { inset: 30px; border: 1px solid rgba(23,23,27,.12);
+  background: radial-gradient(70% 70% at 50% 50%, rgba(255,62,136,.12) 0%, rgba(246,246,244,0) 100%); }
+.ob-vault .core { position: relative; width: 62px; height: 62px; border-radius: 20px;
+  display: grid; place-items: center; background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.12), 0 8px 28px rgba(23,23,27,.14); }
+.ob-vault .core img { width: 26px; height: 26px; object-fit: contain;
+  filter: brightness(0); opacity: .78; }
+.ob-vault .cap { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+  padding: 5px 12px; border-radius: 999px; white-space: nowrap;
+  background: rgba(255,255,255,.94); box-shadow: inset 0 0 0 1px rgba(23,23,27,.10);
+  font: 700 11px/1 var(--font-jp); letter-spacing: .04em; color: #17171b; }
+/* 外側 — 他のユーザーには渡らない */
+.ob-vault .out { position: absolute; top: 50%; transform: translateY(-50%);
+  font: 500 10.5px/1.4 var(--font-mono, var(--font-jp)); color: rgba(23,23,27,.42); }
+.ob-vault .out.l { left: -74px; text-align: right; }
+.ob-vault .out.r { right: -74px; }
+
+.ob-facts { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.ob-facts li { list-style: none; display: flex; align-items: flex-start; gap: 9px;
+  font: 500 12.5px/1.6 var(--font-jp); color: rgba(23,23,27,.70); }
+.ob-facts li i { flex: none; width: 16px; height: 16px; margin-top: 2px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(23,23,27,.06);
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.12); }
+.ob-facts li i img { width: 9px; height: 9px; object-fit: contain;
+  filter: brightness(0); opacity: .6; }
+
+.ob-sheet { width: 100%; border-radius: 22px; background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.10), 0 -8px 40px rgba(23,23,27,.14);
+  padding: 20px; font-family: var(--font-jp); }
+.ob-tile { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+  background: radial-gradient(90% 90% at 50% 52%, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 100%),
+    var(--gradient-colorful); }
+.ob-tile img { width: 22px; height: 22px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.ob-sheet h3 { margin-top: 16px; font: 700 18px/1.4 var(--font-jp); color: #17171b; }
+.ob-sheet h3 em { font-style: normal; background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ob-sheet p { margin-top: 8px; font: 500 13px/1.7 var(--font-jp); color: rgba(23,23,27,.70); }
+.ob-sheet p strong { font-weight: 700; color: #17171b; }
+
+/* ---- 共通 foot（HANDOFF §4） ------------------------------------------------ */
+.ob-foot-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 62%;
+  z-index: 80; pointer-events: none;
+  background: linear-gradient(0deg,
+    rgba(246,246,244,1) 6%, rgba(246,246,244,.94) 26%, rgba(246,246,244,.60) 55%, rgba(246,246,244,0) 100%); }
+.ob-foot { position: absolute; left: 24px; right: 24px; bottom: 48px; z-index: 81;
+  font-family: var(--font-jp); text-align: center; }
+.ob-eyebrow { display: none; }
+.ob-eyebrow .n { font: 700 11px/1 var(--font-jp); letter-spacing: .2em; color: #17171b; }
+.ob-eyebrow .bar { width: 18px; height: 1px; background: rgba(23,23,27,.35); }
+.ob-eyebrow .lb { font: 700 11px/1 var(--font-jp); letter-spacing: .2em; color: rgba(23,23,27,.48);
+  white-space: nowrap; }
+.ob-title { margin-top: 0; font: 700 29px/1.34 var(--font-jp); color: #17171b;
+  text-wrap: pretty; }
+.ob-title em { font-style: normal; background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.ob-body { margin: 20px auto 0; max-width: 318px; font: 500 14.5px/1.75 var(--font-jp);
+  color: rgba(23,23,27,.70); text-wrap: pretty; }
+.ob-dots { display: flex; align-items: center; justify-content: center; gap: 7px; margin-top: 30px; }
+.ob-dots i { width: 6px; height: 6px; border-radius: var(--radius-pill);
+  background: rgba(23,23,27,.20);
+  transition: width .3s var(--ease-out), background .3s var(--ease-out); }
+.ob-dots i.on { width: 8px; height: 8px; background: var(--gradient-colorful-linear); }
+.ob-cta { position: relative; margin-top: 28px; width: 100%; height: 54px;
+  border-radius: 12px; border: 0; display: flex; align-items: center; justify-content: center;
+  gap: 8px; cursor: pointer; -webkit-appearance: none; appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  background: var(--gradient-colorful);
+  font: 700 16px/1 var(--font-jp); color: var(--on-primary);
+  text-shadow: 0 1px 6px rgba(23,23,27,.45);
+  transition: transform .12s var(--ease-standard); }
+.ob-cta::after { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px;
+  background: var(--gradient-border);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.ob-cta img { width: 17px; height: 17px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.ob-cta:active { transform: scale(.98); }
+
+
+/* ---- 05 位置情報 — 白 + ブランド 1 色 + 鍵だけに絞った最小構成 -------------- */
+.ob-priv { display: flex; flex-direction: column; align-items: center;
+  font-family: var(--font-jp); }
+.ob-priv .mark { position: relative; width: 92px; height: 92px; display: grid; place-items: center; }
+.ob-priv .mark .halo { position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255,62,136,.18) 0%, rgba(246,246,244,0) 100%); }
+.ob-priv .mark .pin { position: relative; width: 40px; height: 40px; object-fit: contain;
+  filter: brightness(0); opacity: .82; }
+.ob-priv .mark .lk { position: absolute; right: 16px; bottom: 16px; width: 24px; height: 24px;
+  display: grid; place-items: center; border-radius: 50%; color: #fff;
+  background: var(--like); box-shadow: 0 4px 14px rgba(23,23,27,.28); }
+.ob-uses { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
+.ob-uses li { list-style: none; display: flex; align-items: center; gap: 10px;
+  font: 600 13.5px/1.5 var(--font-jp); color: #17171b; }
+.ob-uses li i { flex: none; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(23,23,27,.05);
+  box-shadow: inset 0 0 0 1px rgba(23,23,27,.12); }
+.ob-uses li i img { width: 12px; height: 12px; object-fit: contain;
+  filter: brightness(0); opacity: .62; }
+.ob-priv .note { margin-top: 26px; display: flex; align-items: center; gap: 7px;
+  color: rgba(23,23,27,.52); font: 500 11.5px/1.5 var(--font-jp); }
+.ob-priv .note svg { flex: none; }
+/* この画面だけ見出しの強調をブランド 1 色に（装飾感を落とす） */
+.scene-block[data-scene="05"] .ob-title em { background: none; -webkit-background-clip: border-box;
+  background-clip: border-box; color: var(--like); }
+
+/* 03 — ボードを大きく取り、投稿ボタンはその下端に重ねる */
+.phone[data-screen-label="OB-03"] .ob-hero .map-post { margin-top: -78px; }
+
+/* 02 — エリア中央のお題: 前面は白の極太、背面のぼかしはテーマカラー */
+.phone .qp-mount > .qp .qp-title,
+.phone .qp-mount > .qp .qp-time,
+.phone .qp-mount > .qp .qp-until { color: #fff; -webkit-text-stroke: 2.5px rgba(23,23,27,.55);
+  paint-order: stroke fill; text-shadow: 0 1px 10px rgba(23,23,27,.45); }
+.phone .qp-back { opacity: 1; }
+.phone .qp-mount .qp-title { font-weight: 900; font-size: 21px; letter-spacing: .02em; }
+.phone .qp-mount .qp-time { font-weight: 900; }
+.phone .qp-mount .qp-label { font-weight: 900; -webkit-text-stroke: 2.5px rgba(23,23,27,.55);
+  paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #fff; }
+.phone .qp-back .qp-title,
+.phone .qp-back .qp-time,
+.phone .qp-back .qp-until,
+.phone .qp-back .qp-label { -webkit-text-stroke: 0;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.phone .qp-back { filter: blur(5px) saturate(1.5); transform: scale(1.12); }
+
+/* 02 — 暗幕（.ob-veil）はマーカーの上に重なるためお題の文字まで沈む。
+   この面だけ暗幕をやめ、キャンバスそのものを落として文字は純白のまま出す。 */
+.phone[data-screen-label="OB-02"] .ob-veil { display: none; }
+.phone[data-screen-label="OB-02"] .obmap .maplibregl-canvas { filter: none; }
+
+
+/* ---- ライトモード — 端末クロームとチャット吹き出しの明転 -------------------- */
+body { background: #f0f0ee; }
+.phone .statusbar { color: #17171b; }
+.phone .home-ind { background: rgba(23,23,27,.55); }
+.ob-msgr .wd-chat-bubble.in .bub { background: rgba(23,23,27,.055); color: #17171b; }
+.ob-msgr .wd-chat-bubble.in .bub::after { background: linear-gradient(135deg, rgba(23,23,27,.10), rgba(23,23,27,.04)); }
+.ob-msgr .wd-chat-bubble.out .bub { background: #17171b; color: #fff; }
+.ob-msgr .wd-chat-bubble.out .bub::after { background: linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.06)); }
+.ob-msgr .wd-chat-bubble .tm { color: rgba(23,23,27,.42); }
+.ob-msgr .wd-chat-bubble .av { box-shadow: 0 2px 8px rgba(23,23,27,.18); }
