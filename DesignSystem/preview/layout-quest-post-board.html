@@ -1,0 +1,63 @@
+<!-- @dsCard group="Layout" tier="foundation" viewport="1340x860" name="クエスト投稿ボード — 列パターン11種" subtitle="P 9:16 / L 16:9 の2比だけで高さ H をぴったり埋める列パターンと、その寸法計算式（移植用）" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>Layout — クエスト投稿ボードの列パターン</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+body{gap:16px;width:1340px;height:860px;overflow:hidden}
+a{color:var(--text-1)}a:hover{color:var(--state-quest-active)}
+.lede{font:500 12px/1.7 var(--font-jp);color:var(--text-2);max-width:940px}
+.lede b{color:#fff;font-weight:700}
+.pats{display:flex;align-items:flex-end;gap:14px}
+.pat{display:flex;flex-direction:column;gap:8px;flex:none}
+.pat .slot{position:relative;border:1px dashed rgba(255,255,255,.16);border-radius:3px}
+.pat .tile{position:absolute;background:#333;border-radius:7px;display:flex;align-items:center;justify-content:center}
+.pat .tile span{font:600 9px/1 var(--font-latin);color:rgba(255,255,255,.34)}
+.pat .id{font:700 12px/1 var(--font-latin);letter-spacing:.06em;color:var(--text-1)}
+.pat .kinds{font:500 9.5px/1 var(--font-latin);letter-spacing:.04em;color:var(--fg-3);white-space:nowrap}
+.pat .head{display:flex;flex-direction:column;gap:5px}
+table{border-collapse:collapse;font-family:var(--font-latin)}
+th{text-align:left;font:600 9.5px/1 var(--font-latin);letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);padding:0 18px 8px 0}
+td{padding:4px 18px 4px 0;font-size:11px;color:var(--text-2);white-space:nowrap;vertical-align:baseline}
+td.id{font-weight:700;color:var(--text-1);width:34px}
+td.n{font-variant-numeric:tabular-nums;color:var(--fg-2)}
+td.jp{font-family:var(--font-jp);font-size:11px}
+td.f{color:#fff;font-size:11px}
+.foot{display:flex;gap:28px;flex-wrap:wrap}
+.mono{font-size:10.5px;line-height:1.8}
+</style></head>
+<body>
+<div class="eyebrow">Layout — quest post board / column patterns</div>
+<div class="lede"><b>1列＝1パターン。どの列も「高さ H にぴったり」を守る。</b>タイル比は <b>P（縦 9:16）</b>と <b>L（横 16:9）</b>の2種だけなので、列内の並べ方を決めれば寸法は連立式で一意に解ける（下表がその解）。A / AL は投稿が1枚しか残らない時のフォールバック。図は <b>H = 280（ボード高 331）</b>を 0.5 倍で描画 — 破線が列の H 枠、AL のように MAXW 244 で止まる列は枠内で縦中央寄せになる。</div>
+
+<div class="pats" id="pats"></div>
+
+<div><table id="tbl"></table></div>
+
+<div class="foot">
+  <span class="mono">GAP <b style="color:#fff">7</b> · PAD <b style="color:#fff">10</b> · PAD_TOP <b style="color:#fff">41</b> · MAXW <b style="color:#fff">244</b><br>H = ボード高 − PAD_TOP − PAD ／ 次の列の X = 現在の X + 列幅 + GAP</span>
+  <span class="mono">列の並び: <b style="color:#fff">B F C D H G C3 B E I C F</b> を循環<br>残り枚数 &lt; 必要枚数 → 次のパターンへスキップ（残1枚のみ A / AL）</span>
+  <span class="mono">仕上げ: 列幅 &gt; 可視幅×0.9 → 比率保持で縮小 ／ H 未満の列 → 縦中央寄せ<br>ぴったり列 → 0〜GAP×1.6px の縦ジッター（seed 固定・再描画で不変）</span>
+</div>
+<span class="mono">実装 <a href="../components/WdQuestPostBoard/card.html">WdQuestPostBoard</a> — <code>WdQuestPostBoardLayout({count, height, viewportWidth, seed})</code> が純関数の配置本体（他言語へはこれだけ移植）。角丸は仕様値 14px だが DS スケール外 — 本番は 12 / 16 に寄せる。</span>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="../_ds_bundle.js"></script>
+<script>
+const DS = window.ToopdbqDesignSystem_af3394;
+const LAY = DS.WdQuestPostBoardLayout, PT = DS.WdQuestPostBoardPatterns, SP = DS.WdQuestPostBoardSpec;
+const IDS = ['A','AL','B','C','C3','D','E','F','G','H','I'], HB = 331, S = 0.5;
+let pats = '', rows = '<tr><th>ID</th><th>枚</th><th>構成</th><th>並べ方</th><th>寸法計算式（P: h=w·16/9 ／ L: h=w·9/16 ／ G=GAP）</th></tr>';
+for (const id of IDS) {
+  const p = PT[id];
+  const L = LAY({ count: p.need, height: HB, sequence: [id], spec: { JITTER_GAPS: 0 } });
+  const c = L.columns[0];
+  let tiles = '';
+  for (const t of L.tiles) tiles += '<div class="tile" style="left:' + ((t.x - SP.PAD) * S).toFixed(1) + 'px;top:' + ((t.y - SP.PAD_TOP) * S).toFixed(1) + 'px;width:' + (t.w * S).toFixed(1) + 'px;height:' + (t.h * S).toFixed(1) + 'px"><span>' + t.kind + '</span></div>';
+  pats += '<div class="pat"><div class="head"><span class="id">' + id + '</span><span class="kinds">' + p.kinds + '</span></div>' +
+    '<div class="slot" style="width:' + (c.w * S).toFixed(1) + 'px;height:' + (L.contentHeight * S).toFixed(1) + 'px">' + tiles + '</div></div>';
+  rows += '<tr><td class="id">' + id + '</td><td class="n">' + p.need + '</td><td>' + p.kinds + '</td><td class="jp">' + p.desc + '</td><td class="f">' + p.formula + '</td></tr>';
+}
+document.getElementById('pats').innerHTML = pats;
+document.getElementById('tbl').innerHTML = rows;
+</script>
+</body></html>

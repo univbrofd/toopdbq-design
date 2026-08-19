@@ -1,0 +1,101 @@
+<!-- @dsCard group="Components" tier="component" name="WdCircleVoteList（オーバーレイ）" viewport="1180x1000" subtitle="サークルの名前をみんなで決める投票リスト。タイムラインの前面 — 縦に並ぶ候補名 / 右端にグッドボタン+カウント / タップで+1 / 常にグッドの多い順に並び替え（FLIP）· glass: no(perf)" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>WdCircleVoteList</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>html,body{margin:0;background:#0d0d0f;font-family:'Noto Sans JP','Hiragino Sans',sans-serif;color:#fff}
+.wrap{width:1180px;height:1000px;padding:26px 30px;box-sizing:border-box;display:flex;gap:30px}
+.eyebrow{font-family:'Inter',system-ui,sans-serif;font-weight:600;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:9px}
+.phone{position:relative;width:402px;height:852px;flex:none;border-radius:34px;overflow:hidden;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.tl{position:absolute;inset:0;overflow:hidden;background:#fff}
+.tlhead{display:flex;align-items:center;justify-content:space-between;padding:52px 20px 12px;border-bottom:1px solid rgba(8,8,11,.08);color:#08080b}
+.tlhead b{font-weight:700;font-size:17px}
+.tlhead span{font-family:'Inter',system-ui,sans-serif;font-size:12px;color:rgba(8,8,11,.56)}
+.col{display:flex;flex-direction:column;min-width:0}
+.wrap>.col:first-child{flex:none;width:402px}
+.wrap>.col:nth-child(2){flex:1}
+.cap{font-size:12px;line-height:1.7;color:rgba(255,255,255,.78);max-width:640px}
+.cap b{color:#fff;font-weight:700}
+.rules{margin:16px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+.rules li{display:flex;gap:11px;font-size:12px;line-height:1.6;color:rgba(255,255,255,.78)}
+.rules b{color:#fff;font-weight:700}
+.rules i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);font-family:'Inter',system-ui,sans-serif;font-style:normal;font-weight:700;font-size:10px;color:rgba(255,255,255,.78)}
+.states{margin-top:22px;display:flex;gap:14px}
+.st{padding:14px;border-radius:16px;background:#fff;color:#08080b;min-width:0}
+.stl{font-family:'Inter',system-ui,sans-serif;font-weight:600;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(8,8,11,.5);margin-bottom:10px}
+.pill{min-width:76px;height:44px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;font-family:'Inter',system-ui,sans-serif;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;gap:7px}
+.pill.off{background:rgba(8,8,11,.06);box-shadow:inset 0 0 0 1px rgba(8,8,11,.08);color:rgba(8,8,11,.56)}
+.pill.on{background:#08080b;color:#fff}
+.pill img{width:18px;height:18px;display:block}
+.pill.off img{filter:invert(1);opacity:.5}
+.inlinebox{margin-top:22px;width:402px;height:250px}
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+</head>
+<body><div class="wrap">
+<div class="col">
+  <div class="eyebrow">WdCircleVoteList — timeline overlay</div>
+  <div class="phone">
+    <div class="tl">
+      <div class="tlhead"><b>タイムライン</b><span>渋谷 · 1.2km</span></div>
+      <div id="feed"></div>
+    </div>
+    <div id="vote" style="position:absolute;inset:0"></div>
+  </div>
+</div>
+<div class="col">
+  <div class="eyebrow">仕様</div>
+  <div class="cap"><b>サークルの名前をユーザーみんなで決める投票シート。</b>タイムラインの前面に重ねる。縦に<b>候補のサークル名</b>が並び、右端に<b>グッドボタン</b>（<code style="font-family:'Inter',sans-serif">icon_good</code>＝サムズアップ。ハートの <code style="font-family:'Inter',sans-serif">icon_like</code> とは別用途）。ボタン自身が<b>現在のグッド数</b>を持ち、タップで <b>+1</b>、再タップで取り消し。並び順は<b>常にグッドの多い順</b>で、順位が入れ替わると行が滑って動く（FLIP・320ms）。面はタイムライン本体と同じライトモード、背後は黒 45% のスクリム。</div>
+  <ul class="rules">
+    <li><i>01</i><span>1 行 = <b>順位 / 候補のサークル名 / グッドボタン</b>。名前は 1 行で省略、補足は<b>提案者と時刻の 1 行まで</b>（Inter 12・黒56%）。</span></li>
+    <li><i>02</i><span>ボタンは <b>高さ 44px の pill</b>（最小タップ領域）。未投票＝黒6%地＋黒56%文字、<b>投票済み＝黒 pill ＋白文字</b>。like のピンクは使わない。</span></li>
+    <li><i>03</i><span>カウントは <code style="font-family:'Inter',sans-serif">tabular-nums</code>。桁が増えても pill の幅が揺れない（<code style="font-family:'Inter',sans-serif">min-width 76</code>）。</span></li>
+    <li><i>04</i><span>色を持つのは <b>1 位の順位数字だけ</b>（ブランドグラデを文字に clip）。行全体を塗らない・バーを足さない。</span></li>
+    <li><i>05</i><span>同数のときは<b>名前の五十音順</b>で安定させる。タップ直後に無関係な行が跳ねない。</span></li>
+    <li><i>06</i><span>閉じるのは <b>× か スクリムのタップ</b>。リスト内はスクロール、シートは画面高の <b>86%</b> まで。</span></li>
+  </ul>
+  <div class="states">
+    <div class="st">
+      <div class="stl">button — 未投票 / 投票済み</div>
+      <span class="pill off"><img src="../../assets/icons/icon_good.png" alt="">128</span>
+      <span class="pill on" style="margin-left:10px"><img src="../../assets/icons/icon_good.png" alt="">129</span>
+    </div>
+    <div class="st" style="flex:1">
+      <div class="stl">inline — スクリムを持たない素の面</div>
+      <div style="font-size:11px;line-height:1.6;color:rgba(8,8,11,.56)"><code style="font-family:'Inter',sans-serif">inline</code> を渡すと角丸 24 の面だけを返す。設定画面やサークル詳細の中に埋め込むときはこちら（スクリム・グリップ無し）。</div>
+    </div>
+  </div>
+  <div class="inlinebox"><div id="inline" style="width:100%;height:100%"></div></div>
+</div>
+</div>
+<script>
+const { WdTimelinePost, WdCircleVoteList } = window.ToopdbqDesignSystem_af3394;
+const h = React.createElement;
+const IC = '../../assets/icons';
+const posts=[
+ {avatar:'../../assets/images/user/user002.jpg',name:'SunnyVi',handle:'@sunnyvi',time:'8分',body:'公園のヤシの木の下、いつもの大型犬に今日も会えた。夕方まではこのベンチにいるらしい。',media:['../../assets/images/reel/reel003.jpg'],comments:24,likes:312,liked:true},
+ {avatar:'../../assets/images/user/user011.jpg',name:'o_cean',handle:'@o_cean',time:'41分',body:'干潮が19:10。岩場のいちばん奥まで歩けるのは今日だけ。',comments:7,likes:58},
+ {avatar:'../../assets/images/user/user016.jpg',name:'foodie',handle:'@foodie_h',time:'1時間',body:'キャットストリートの奥、看板が出てないコーヒースタンドが今日から営業してる。',comments:33,likes:140}
+];
+ReactDOM.createRoot(document.getElementById('feed')).render(
+  h(React.Fragment,null,posts.map((p,i)=>h(WdTimelinePost,{key:i,iconBase:IC,...p})))
+);
+const candidates=[
+ {id:'c1',name:'宮下公園ナイトラン',meta:'SunnyVi · 3時間前',goods:214},
+ {id:'c2',name:'みやしたナイターズ',meta:'o_cean · 5時間前',goods:188,voted:true},
+ {id:'c3',name:'渋谷よるラン部',meta:'foodie · 昨日',goods:143},
+ {id:'c4',name:'ナイトラン渋谷支部',meta:'ZenGarden · 昨日',goods:97},
+ {id:'c5',name:'宮下公園を走る会',meta:'Kawaii · 2日前',goods:76},
+ {id:'c6',name:'MIYASHITA RUNNERS',meta:'Mocha · 2日前',goods:52},
+ {id:'c7',name:'よるの宮下',meta:'Dreamy · 3日前',goods:31}
+];
+ReactDOM.createRoot(document.getElementById('vote')).render(
+  h(WdCircleVoteList,{iconBase:IC,candidates,
+    title:'サークル名を投票'})
+);
+ReactDOM.createRoot(document.getElementById('inline')).render(
+  h(WdCircleVoteList,{iconBase:IC,inline:true,showRank:false,title:'名前の候補',
+    candidates:candidates.slice(0,3),style:{boxShadow:'inset 0 0 0 1px rgba(8,8,11,.08)'}})
+);
+</script>
+</body></html>

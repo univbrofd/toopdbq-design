@@ -1,0 +1,26 @@
+<!-- @dsCard group="Components" tier="component" name="WdTimelinePost（ライト）" viewport="720x900" subtitle="タイムラインのリスト行セル — 名前+時刻 / 写真1〜2枚 / like=#ff3e88 · glass: no(perf)" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>html,body{margin:0;background:#f2f2f4;font-family:'Noto Sans JP','Hiragino Sans',sans-serif;color:#08080b}#root{width:672px;margin:24px auto;background:#fff;border:1px solid rgba(8,8,11,.08);border-radius:24px;overflow:hidden}.eyebrow{width:672px;margin:24px auto 0;font-family:'Inter',system-ui,sans-serif;font-weight:600;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(8,8,11,.5)}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+</head>
+<body>
+<div class="eyebrow">WdTimelinePost — リスト行セル（ライト）／名前=主役・補足は黒56%へ降格</div>
+<div id="root"></div>
+<script>
+const { WdTimelinePost } = window.ToopdbqDesignSystem_af3394;
+const h = React.createElement;
+const IC = '../../assets/icons';
+const posts = [
+  {avatar:'../../assets/images/user/user002.jpg',name:'SunnyVi',handle:'@sunnyvi',time:'8分',body:'公園のヤシの木の下、いつもの大型犬に今日も会えた。夕方まではこのベンチにいるらしいので近くの人はどうぞ。',media:['../../assets/images/reel/reel003.jpg'],comments:24,likes:312,liked:true},
+  {avatar:'../../assets/images/user/user011.jpg',name:'o_cean',handle:'@o_cean',time:'41分',body:'干潮が19:10。岩場のいちばん奥まで歩けるのは今日だけなので、サークルの誰か来たら合流します。',comments:7,likes:58},
+  {avatar:'../../assets/images/user/user016.jpg',name:'foodie',handle:'@foodie_h',time:'1時間',body:'キャットストリートの奥、看板が出てないコーヒースタンドが今日から営業してる。席は3つだけ、パンケーキは昼で終わるらしい。',media:['../../assets/images/reel/reel014.jpg','../../assets/images/reel/reel001.jpg'],comments:33,likes:140},
+  {avatar:'../../assets/images/user/user001.jpg',name:'ZenGarden',handle:'@zen_g',time:'3時間',body:'朝いちばんの苔庭。雨のあとだけこの色になる。',comments:11,likes:96}
+];
+ReactDOM.createRoot(document.getElementById('root')).render(
+  h(React.Fragment, null, posts.map((p,i)=>h(WdTimelinePost,{key:i,iconBase:IC,...p, style: i===posts.length-1?{borderBottom:'0'}:null})))
+);
+</script>
+</body></html>
