@@ -12,6 +12,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 
 | 日付 | 実装コミット | 範囲 |
 |---|---|---|
+| 2026-08-22 (5) | 05e361a7 + 未コミット作業ツリー | 全域拡張: 投稿フロー 7 枚（stages driver の認証経路を authStateChanges 化に追随修正して撮影）・サークル作成 4 枚・Chat 2 枚（testChat 新設 + mock inbox に CHAT_MESSAGE 追加）・Profile/下書き 3 枚（testProfile 新設）・Auth 1 枚（testAuth 新設）。タイムライン specimen 照合（fraction スナップ 0.25/0.5/0.92・velocity 800・単一フィード・composer すべて実装一致 → ✅）。StoryOverlay worktree は master へマージ済みを確認 → ✅ |
 | 2026-08-22 (4) | 05e361a7 + 未コミット作業ツリー | おすすめ起動画面の廃止を確認し 🗄 歴史資産へ（QuestRecommendSheet はどこからも未描画・起動はフィード直起動）。testSplash スイート新設で Splash を ✅ に |
 | 2026-08-22 (3) | 05e361a7 + 未コミット作業ツリー | Q04-past 撮影成功。原因 = 新宿の circle-04 は渋谷と geohash セルが precision 4 で分かれ近傍 sweep に載らない → ドライバを関心経路（markInterest → reassert）へ修正して解決。quest 5 枚を最新ビルドで撮り直し |
 | 2026-08-22 (2) | 05e361a7 + 未コミット作業ツリー | 全 4 スイート再撮影(8/22 昼の実装変更に追随)。旧 UC Q03-member / Q04-locked はドライバから撤去済みのため削除 |
@@ -27,7 +28,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 |---|---|---|---|---|
 | Splash（blur 背景＋白ロゴ呼吸アニメ） | `lib/feature/Splash/` | `handoff/SplashView/comp-splash-view.html` | `splash-SP00`（2026-08-22） | ✅ |
 | Onboarding（ライト5面・実地図+blur焼き込み。①世界中のサークル俯瞰 ②クエストに挑戦 ③クエストの報酬=blur解錠 ④いいねが友情のきっかけ ⑤位置プリパーミッション） | `lib/feature/Onboarding/` | `handoff/Onboarding/Onboarding.html` | `onb-OB01..OB05`（2026-08-22） | ✅ |
-| Auth（ログイン） | `lib/feature/Auth/` | なし | — | ⬜ |
+| Auth（ログインオーバーレイ。home 上に Toopdbq カード + Google/Apple ボタン。認証必須アクション時に `requireAuth` が表示） | `lib/feature/Auth/` + `lib/component/ui/modal/Auth/` | なし | `auth-AU00-overlay`（2026-08-22） | 🟡 specimen 未作成 |
 
 ### Home = クエスト（アプリの主画面）
 
@@ -40,28 +41,52 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 | クエスト feed 拡大（既定・マップは縮小トグル。上部にタイマー＋お題見出し） | 同上（`questFeedExpanded`） | 同上 | `quest-Q01-expanded` | ✅ |
 | 過去日お題＋エリア外＋ロック列（「エリアまで N km」ピル・右に blur ロックの日、日単位解錠 `canViewDay`） | 同上 | `handoff/UniverseQuestNoArea/UniverseQuestNoArea.html` | `quest-Q03-past` | ✅ |
 | 未提出エリア外サークルの初期表示（初期中心 = 1 つ前の過去日。今日まで送ると blur + lock-note） | 同上 | 同上 | `quest-Q04-past` | ✅ |
-| クエスト → タイムライン（ピルで開く） | `Universe/` + `lib/feature/CircleStoryList/` | `handoff/CircleFooterTimeline/comp-circle-timeline.html` | `questtl-Q00-list`, `questtl-Q01-open`（2026-08-22） | 🟠 specimen 要照合 |
+| クエスト → タイムライン（ピルで開く） | `Universe/` + `lib/feature/CircleStoryList/` | `handoff/CircleFooterTimeline/comp-circle-timeline.html` | `questtl-Q00-list`, `questtl-Q01-open`（2026-08-22） | ✅ 照合済（fraction スナップ 0.25/0.5/0.92・velocity 800・単一フィード・下端 composer すべて実装一致） |
 
 ### StoryViewer（投稿閲覧）
 
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
-| StoryViewer（縦送り・横動画は回転フィット） | `lib/feature/StoryViewer/` | `handoff/StoryOverlay/comp-story-overlay.html`（オーバーレイ刷新は worktree 進行中） | `story-F00-portrait`, `story-F01-landscape`（2026-08-22） | ✅（overlay は 🟠） |
+| StoryViewer（縦送り・横動画は回転フィット） | `lib/feature/StoryViewer/` | `handoff/StoryOverlay/comp-story-overlay.html` | `story-F00-portrait`, `story-F01-landscape`（2026-08-22） | ✅（オーバーレイ刷新 worktree は master マージ済み。shots は刷新後実装） |
 
 ### 投稿フロー
 
+shots は `testPostFlow/shootStages.sh`（fake image_picker でカメラ回避・実 Controller 駆動の dense burst）から採取。
+
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
-| 投稿（看板タップ → 撮影 → 編集 → 提出 → 解錠） | `lib/feature/UniversePostFlow/` `StoryPost/` `StoryVideoEdit/` `PostPin/` | `handoff/UniversePostFlow/UniversePostFlow.html` | — | 🟠 specimen はクエスト刷新前・要照合 |
+| 撮影（お題ヘッダー + シャッター + 写真/動画切替 + AI トグル） | `StoryPost/` | `handoff/UniversePostFlow/UniversePostFlow.html` | `post-P00-camera`（2026-08-22） | 🟠 specimen はクエスト刷新前・要照合 |
+| 画像編集（投稿する / 下書き保存 / サークル表示 / SNS カウント） | `StoryPost/` | 同上 | `post-P01-edit` | 🟠 同上 |
+| テキスト compose（キーボード + 配置テキスト） | `StoryPost/`（StoryComposeOverlay） | 同上 | `post-P02-compose` | 🟠 同上 |
+| 投稿完了（home 復帰 + 左上アップロード pill） | `Universe/` + `StoryUpload/` | 同上 | `post-P03-posted` | 🟠 同上 |
+| 動画トリム（切り取り + 完了） | `StoryVideoEdit/` | 同上 | `post-P04-vid-trim` | 🟠 同上 |
+| 動画サムネイル選択（表紙フレーム + 字幕トグル） | `StoryVideoEdit/` | 同上 | `post-P05-vid-thumb` | 🟠 同上 |
+| 動画投稿確定（投稿の設定シート） | `StoryVideoEdit/` | 同上 | `post-P06-vid-confirm` | 🟠 同上 |
+
+### Chat
+
+| 画面 | 実装 | canonical specimen | shots | 状態 |
+|---|---|---|---|---|
+| チャット一覧（未読バッジ + N 件の新着。announcement 受信箱を drain して構築） | `lib/feature/Chat/` | `handoff/ChatList/index.html` | `chat-CH00-list`（2026-08-22） | ✅（実装は specimen 由来・トークン一致） |
+| チャットルーム（日付チップ + 相手/自分バブル + 下端 composer） | `lib/feature/Chat/` | `handoff/ChatRoom/index.html` | `chat-CH01-room`（2026-08-22） | ✅ |
+
+### Profile・サークル作成
+
+| 画面 | 実装 | canonical specimen | shots | 状態 |
+|---|---|---|---|---|
+| プロフィール（自分: 右上メニュー。アバター + 名前 + 3 カウント + Posts 自由配置ボード） | `lib/feature/Profile/` | なし | `profile-PR00-self`（2026-08-22） | 🟡 specimen 未作成 |
+| プロフィール（他人: relation アクション） | 同上 | なし | `profile-PR01-other` | 🟡 |
+| 下書き一覧（3 列グリッド。shot のサムネは mock 都合の placeholder — 実機では実画像） | `lib/feature/DraftList/` | なし | `profile-PR02-drafts` | 🟡 |
+| サークル作成（Earth 上インプレイス・中心レティクル・入口） | `lib/feature/CircleCreate/` | なし | `circle-create-open`（2026-08-22） | 🟡 specimen 未作成 |
+| サークル作成（写真 + 名前 + 説明 入力済・作成有効） | 同上 | なし | `circle-create-filled` | 🟡 |
+| サークル作成（範囲スライダー + リング追従） | 同上 | なし | `circle-create-range` | 🟡 |
+| サークル作成（名前欄フォーカス・キーボード上にシート持ち上げ） | 同上 | なし | `circle-create-keyboard` | 🟡 |
 
 ### 未基準化（次回 /design-baseline の候補）
 
 | 画面 | 実装 | 既存 specimen | 状態 |
 |---|---|---|---|
-| Chat（一覧 / ルーム） | `lib/feature/Chat/` | `handoff/ChatList/index.html`, `handoff/ChatRoom/index.html` | 🟡 実機未照合 |
-| Profile | `lib/feature/Profile/` | なし | ⬜ |
-| サークル作成（マップ上インプレイス） | `lib/feature/CircleCreate/` `CircleFounding/` | なし | ⬜ |
-| 下書き一覧 | `lib/feature/DraftList/` | なし | ⬜ |
+| サークル設立フロー（CircleFounding） | `lib/feature/CircleFounding/` | なし | ⬜ |
 
 ### 歴史資産（現行アプリに存在しない — 起点にしない）
 

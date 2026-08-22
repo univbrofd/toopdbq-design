@@ -62,7 +62,7 @@
   <h1>Toopdbq App Baseline</h1>
   <p class="sub">アプリの「今」。<b>一次情報は Flutter 実装</b>（repo <span style="font-family:var(--mono)">univbrofd/toopdbq</span> master）で、shots はその実機撮影（iPhone 17 sim・mock データ）。このページは閲覧専用の起点 — 新しい機能を考えるときはまずここで現状を掴み、対象画面の canonical specimen を Remix して始める。<b>このページ自体は編集しない</b>（実装が進んだらアプリ側の再基準化で更新される）。</p>
   <div class="meta">
-    <span class="pill">最終再基準化 <b>2026-08-22 (4)</b></span>
+    <span class="pill">最終再基準化 <b>2026-08-22 (5)</b></span>
     <span class="pill">実装 <b>05e361a7 + 作業ツリー</b></span>
     <span class="pill">正 = Flutter 実装（このページ ＞ 過去の specimen / handoff）</span>
   </div>
@@ -149,7 +149,7 @@
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/questtl-Q01-open.jpg" alt="QT1"><span class="uc">QT1</span></div>
-      <div class="body"><span class="badge warn">specimen 要照合</span><h3>タイムライン</h3><p>ピルでサークルのタイムラインが home 上に開く。</p>
+      <div class="body"><span class="badge ok">現行・照合済</span><h3>タイムライン</h3><p>ピルでサークルのタイムラインが home 上に開く。specimen と実装一致（fraction スナップ 0.25/0.5/0.92・velocity 800・単一フィード・下端 composer）。</p>
         <div class="refs"><span class="ref"><b>impl</b> lib/feature/Universe/ + CircleStoryList/</span><span class="ref"><b>specimen</b> handoff/CircleFooterTimeline/comp-circle-timeline.html</span></div>
       </div>
     </div>
@@ -159,7 +159,7 @@
 <!-- ================================================================ -->
 <section class="flow">
   <h2>StoryViewer（投稿閲覧）</h2>
-  <p class="desc">フィードセルのタップで全画面へ。縦送り。横動画は回転フィット表示。オーバーレイ（ヘッダー/サイド/フッター）の刷新は別ブランチで進行中 — 現行は shots が正。</p>
+  <p class="desc">フィードセルのタップで全画面へ。縦送り。横動画は回転フィット表示。オーバーレイ（ヘッダー/サイド/フッター）刷新は master マージ済み — shots は刷新後の実装。</p>
   <div class="cards">
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/story-F00-portrait.jpg" alt="F00"><span class="uc">F00</span></div>
@@ -168,7 +168,7 @@
     <div class="card wide">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/story-F01-landscape.jpg" alt="F01"><span class="uc">F01</span></div>
       <div class="body"><span class="badge ok">現行</span><h3>横動画（回転フィット）</h3><p>横 ar のメディアは回転して全幅フィット。</p>
-        <div class="refs"><span class="ref"><b>impl</b> lib/feature/StoryViewer/</span><span class="ref"><b>specimen</b> handoff/StoryOverlay/comp-story-overlay.html（刷新進行中・要照合）</span></div>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/StoryViewer/</span><span class="ref"><b>specimen</b> handoff/StoryOverlay/comp-story-overlay.html</span></div>
       </div>
     </div>
   </div>
@@ -177,11 +177,103 @@
 <!-- ================================================================ -->
 <section class="flow">
   <h2>投稿フロー</h2>
-  <p class="desc">クエスト看板 or 投稿カメラ → エリア内判定 → 撮影（写真/動画・AI 現像は dev）→ 編集（動画トリム・字幕）→ 提出モーダル（CHECKING→UPLOADING→VERIFYING→CLEARED）→ 解錠。カメラ実機依存のため shots 未撮影。</p>
-  <table class="inv">
-    <tr><th>画面</th><th>実装</th><th>specimen</th><th>状態</th></tr>
-    <tr><td>撮影〜提出一式</td><td><span class="path">lib/feature/UniversePostFlow/ StoryPost/ StoryVideoEdit/ PostPin/</span></td><td><span class="path">handoff/UniversePostFlow/UniversePostFlow.html</span></td><td><span class="badge warn">クエスト刷新前・要照合</span></td></tr>
-  </table>
+  <p class="desc">クエスト看板 or 投稿カメラ → エリア内判定 → 撮影（写真/動画・AI 現像は dev）→ 編集（テキスト compose・動画はトリム＋サムネ＋字幕）→ 投稿 → home 復帰＋バックグラウンドアップロード → 解錠。shots は fake picker（カメラ回避）で実 Controller を駆動した実機撮影。specimen はクエスト刷新前のもの — 乖離時は shots が正。</p>
+  <div class="cards">
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P00-camera.jpg" alt="P00"><span class="uc">P00</span></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>撮影</h3><p>お題ヘッダー＋残り時間、写真/動画切替、シャッター、AI 現像トグル（dev）。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P01-edit.jpg" alt="P01"><span class="uc">P01</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>画像編集</h3><p>「投稿する」/ 下書き保存 / 投稿先サークル表示。右レールに SNS カウント。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P02-compose.jpg" alt="P02"><span class="uc">P02</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>テキスト compose</h3><p>キーボード＋画像上に自由配置するテキスト入力。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P03-posted.jpg" alt="P03"><span class="uc">P03</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>投稿完了（home 復帰）</h3><p>home へ戻り、左上に「投稿完了」pill。アップロードはバックグラウンド。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P04-vid-trim.jpg" alt="P04"><span class="uc">P04</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>動画トリム</h3><p>「動画を編集」— 切り取りハンドル＋長さ表示＋完了。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P05-vid-thumb.jpg" alt="P05"><span class="uc">P05</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>サムネイル選択</h3><p>表紙フレーム選択＋字幕（キャプション）トグル → 投稿する。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/post-P06-vid-confirm.jpg" alt="P06"><span class="uc">P06</span></div>
+      <div class="body"><span class="badge warn">specimen クエスト刷新前・要照合</span><h3>投稿の設定（確定シート）</h3><p>投稿する / キャンセル。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/UniversePostFlow/ StoryPost/ StoryVideoEdit/ StoryUpload/</span><span class="ref"><b>specimen</b> handoff/UniversePostFlow/UniversePostFlow.html（クエスト刷新前）</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="flow">
+  <h2>Chat</h2>
+  <p class="desc">announcement 受信箱（announcement/{uid}）を drain して構築。いいね/コメントも「相手からのメッセージ」としてルームに乗る。</p>
+  <div class="cards">
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/chat-CH00-list.jpg" alt="CH00"><span class="uc">CH00</span></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>チャット一覧</h3><p>戻る＋タイトル＋「N 件の新着」。行 = アバター / 名前 / 最新メッセージ / 日付 / 未読バッジ。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/chat-CH01-room.jpg" alt="CH01"><span class="uc">CH01</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>チャットルーム</h3><p>日付チップ、相手（左・白）/ 自分（右・黒）バブル＋時刻、下端 composer＋送信。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Chat/</span><span class="ref"><b>specimen</b> handoff/ChatList/index.html・handoff/ChatRoom/index.html</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================ -->
+<section class="flow">
+  <h2>Profile・サークル作成・Auth</h2>
+  <p class="desc">specimen 未作成（shots のみ）。デザイン着手時はここが最初の Remix 候補。</p>
+  <div class="cards">
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/profile-PR00-self.jpg" alt="PR00"><span class="uc">PR00</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>プロフィール（自分）</h3><p>アバター＋名前＋投稿/フォロー/フォロワー＋Posts 自由配置ボード（横スクロール）。右上メニューから下書き等へ。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/profile-PR01-other.jpg" alt="PR01"><span class="uc">PR01</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>プロフィール（他人）</h3><p>同レイアウトで右上が relation アクションに切替。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/profile-PR02-drafts.jpg" alt="PR02"><span class="uc">PR02</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>下書き一覧</h3><p>3 列グリッド。※shot のサムネは mock 都合の placeholder（実機では実画像）。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Profile/ DraftList/</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/circle-create-open.jpg" alt="CC0"><span class="uc">CC0</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>サークル作成（入口）</h3><p>Earth 上インプレイス。画面中心レティクル＝サークル中心、下部に写真/名前/説明シート。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/circle-create-filled.jpg" alt="CC1"><span class="uc">CC1</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>入力済（作成有効）</h3><p>写真＋名前＋説明が揃うとグラデの「サークルを作成」が有効化。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/circle-create-range.jpg" alt="CC2"><span class="uc">CC2</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>範囲をきめる</h3><p>スライダー（100m–1km）にマップ上のリングと距離表示が追従。</p></div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/circle-create-keyboard.jpg" alt="CC3"><span class="uc">CC3</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>キーボード追従</h3><p>名前欄フォーカスでシートがキーボード上へ持ち上がる。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/CircleCreate/</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/auth-AU00-overlay.jpg" alt="AU00"><span class="uc">AU00</span></div>
+      <div class="body"><span class="badge warn">specimen 未作成</span><h3>Auth（ログインオーバーレイ）</h3><p>認証必須アクション時に home 上へカード表示。Toopdbq ロゴ＋コピー＋Google/Apple ボタン＋規約文。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Auth/ + lib/component/ui/modal/Auth/</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ================================================================ -->
@@ -190,10 +282,7 @@
   <p class="desc">下段の「歴史資産」specimen は<b>現行アプリに存在しない</b>。起点にしない（Remix 元に選ばない）。</p>
   <table class="inv">
     <tr><th>画面</th><th>実装</th><th>specimen</th><th>状態</th></tr>
-    <tr><td>Auth（ログイン）</td><td><span class="path">lib/feature/Auth/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
-    <tr><td>Chat（一覧/ルーム）</td><td><span class="path">lib/feature/Chat/</span></td><td><span class="path">handoff/ChatList/ ChatRoom/</span></td><td><span class="badge warn">実機未照合</span></td></tr>
-    <tr><td>Profile</td><td><span class="path">lib/feature/Profile/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
-    <tr><td>サークル作成（インプレイス）</td><td><span class="path">lib/feature/CircleCreate/ CircleFounding/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
+    <tr><td>サークル設立フロー</td><td><span class="path">lib/feature/CircleFounding/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
     <tr><td>旧 circle home（回転デッキ）</td><td>撤去済み（部品は投稿フローに残存）</td><td><span class="path">handoff/UniverseCircle/UniverseCircle.html・project 内 Universe-Circle.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
     <tr><td>旧地図 home（3D ピン＋リール）</td><td>撤去済み</td><td><span class="path">handoff/UniverseView/・project 内 UniverseView.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
     <tr><td>旧 home 派生実験</td><td>—</td><td><span class="path">handoff/UniverseCircleGrid/ UniverseCircleReel/・project 内 Universe-Circle-Grid.html 回転する円筒UI.dc.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
