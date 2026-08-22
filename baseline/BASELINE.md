@@ -97,6 +97,14 @@ shots は `testPostFlow/shootStages.sh`（fake image_picker でカメラ回避�
 | `handoff/UniverseCircleGrid/` `handoff/UniverseCircleReel/` | 旧 home 派生の実験 |
 | `handoff/UniverseQuestRecommend/` | 旧おすすめ起動画面（前日クエスト結果の 2 列 masonry）。起動はフィード直起動に変更され廃止。`QuestRecommendSheet.dart` は widget 定義のみ残骸（未描画） |
 
+## アプリの画面だけ page（app/）
+
+chrome（タイトル・説明・ベゼル）を一切表示しない**画面そのもの**の page 群。Remix の起点はここ。
+
+- `app/App.html`（全体・実遷移付き）/ `QuestPast` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = canonical specimen の **screen-only モード**（`?screen` + `?view=` deep link）への薄い iframe ラッパー（本体は handoff/ の単一ソースのまま）
+- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の新規 screen-only 実装（CircleCreate は実 MapLibre positron）
+- specimen 側の対応: UniverseQuest に `?view=` deep link、SplashView / StoryOverlay(clean) に screen-only モードを追加（Onboarding / UniversePostFlow は既存）
+
 ## 運用ルール
 
 - **Flutter 実装が正**。specimen を直したら design-to-flutter で実装に入れ、実装が確定したら `/design-baseline` でここを更新する（逆流禁止）

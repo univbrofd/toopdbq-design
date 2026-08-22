@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toopdbq — CircleCreate</title>
+<link rel="stylesheet" href="../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<style>
+  /* サークル作成（Earth 上インプレイス・中心レティクル）— 実装 lib/feature/CircleCreate/ の画面だけ再現 */
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: var(--font-jp); }
+
+  .screen {
+    position: relative; overflow: hidden; background: #eef0ee;
+    width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh;
+  }
+
+  #map { position: absolute; inset: 0; }
+  #map .maplibregl-canvas { outline: none; }
+  .maplibregl-ctrl-attrib { display: none; }
+
+  /* statusbar（画面の一部として） */
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 62px; z-index: 60;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 36px; pointer-events: none; color: #1a1a1a;
+    font: 600 16px/1 var(--font-latin); letter-spacing: .02em;
+  }
+  .statusbar .sys { display: flex; gap: 7px; align-items: center; }
+
+  /* 上部タイトル + 閉じる */
+  .title {
+    position: absolute; top: 76px; left: 0; right: 0; z-index: 20; text-align: center;
+    font: 700 20px/1 var(--font-jp); color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,.35), 0 0 2px rgba(0,0,0,.25);
+    pointer-events: none;
+  }
+  .close {
+    position: absolute; top: 96px; left: 18px; z-index: 30;
+    width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(120,120,124,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    display: grid; place-items: center;
+  }
+  .close svg { display: block; }
+
+  /* 中心レティクル: 域リング + 現在地ピン（画面中心固定） */
+  .ring {
+    position: absolute; left: 50%; top: 44.5%; transform: translate(-50%, -50%);
+    width: 340px; height: 340px; border-radius: 50%;
+    border: 1.6px solid rgba(66,133,244,.85);
+    background: rgba(66,133,244,.10);
+    z-index: 10; pointer-events: none;
+    transition: width .18s ease, height .18s ease;
+  }
+  .pin {
+    position: absolute; left: 50%; top: 44.5%; transform: translate(-50%, -100%);
+    z-index: 12; pointer-events: none;
+  }
+  .dot {
+    position: absolute; left: 50%; top: 44.5%; transform: translate(-50%, -50%) translate(-2px, 32px);
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #4c8bf5; border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    z-index: 11; pointer-events: none;
+  }
+
+  /* 範囲スライダーカード */
+  .range {
+    position: absolute; left: 12px; right: 12px; bottom: 366px; z-index: 40;
+    background: rgba(16,16,18,.92); border-radius: 16px; padding: 16px 18px 14px;
+  }
+  .range .row1 { display: flex; align-items: baseline; justify-content: space-between; }
+  .range .lbl { font: 700 17px/1 var(--font-jp); color: #fff; }
+  .range .val { font: 800 22px/1 var(--font-latin); color: #fff; font-variant-numeric: tabular-nums; }
+  .range .val small { font-size: 14px; font-weight: 700; margin-left: 3px; }
+  .range input[type="range"] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent;
+    margin-top: 6px; cursor: pointer;
+  }
+  .range input[type="range"]::-webkit-slider-runnable-track {
+    height: 7px; border-radius: 99px;
+    background: linear-gradient(90deg, #ff2f74, #ff4d8f);
+  }
+  .range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,.4); margin-top: -8.5px;
+  }
+  .range .ticks { display: flex; justify-content: space-between; margin-top: 2px;
+    font: 600 12px/1 var(--font-latin); color: rgba(255,255,255,.55); }
+
+  /* 下部シート: 写真 + 名前 + 説明 + 作成 */
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: #141416; border-radius: 24px 24px 0 0;
+    padding: 10px 20px calc(18px + 8px);
+  }
+  .grab { width: 64px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.28); margin: 2px auto 16px; }
+  .sheet .row { display: flex; gap: 16px; align-items: flex-start; }
+  .avatar {
+    position: relative; width: 96px; height: 96px; border-radius: 50%; flex: none; cursor: pointer;
+    background: #2a2a2e; display: grid; place-items: center; overflow: visible; border: none; padding: 0;
+  }
+  .avatar .ph { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: none; }
+  .avatar.has .ph { display: block; }
+  .avatar.has .ico { display: none; }
+  .avatar .cam {
+    position: absolute; right: 2px; bottom: 2px; width: 30px; height: 30px; border-radius: 50%;
+    background: #3a3a3f; border: 2.5px solid #141416; display: grid; place-items: center;
+  }
+  .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+  .field {
+    width: 100%; border: none; outline: none; color: #fff; background: #2a2a2e;
+    border-radius: 26px; padding: 16px 20px; font: 500 16px/1.3 var(--font-jp);
+  }
+  .field::placeholder { color: rgba(255,255,255,.45); }
+  .cap { font: 500 12px/1 var(--font-jp); color: rgba(255,255,255,.5); padding-left: 6px; }
+  .desc { margin-top: 14px; }
+  .create {
+    margin-top: 18px; width: 100%; border: none; border-radius: 18px; padding: 18px 0; cursor: pointer;
+    font: 700 17px/1 var(--font-jp); color: rgba(255,255,255,.45);
+    background: #2a2a2e; display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .2s ease, color .2s ease;
+  }
+  .create .chk { display: none; }
+  .create.on {
+    color: #fff;
+    background: linear-gradient(100deg, #e8c44f 0%, #ef2f7c 45%, #8b34d8 100%);
+  }
+  .create.on .chk { display: inline; }
+</style>
+</head>
+<body>
+  <div class="screen">
+    <div id="map"></div>
+
+    <div class="ring" id="ring"></div>
+    <svg class="pin" width="34" height="44" viewBox="0 0 34 44">
+      <path d="M17 2C9 2 2.6 8.4 2.6 16.4 2.6 27 17 42 17 42s14.4-15 14.4-25.6C31.4 8.4 25 2 17 2Z"
+            fill="#4c8bf5" stroke="#fff" stroke-width="2.4"/>
+      <circle cx="17" cy="16.4" r="5.4" fill="#fff"/>
+    </svg>
+    <div class="dot"></div>
+
+    <div class="statusbar"><span>16:11</span>
+      <span class="sys">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="#1a1a1a"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4.5" width="3" height="7.5" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="#1a1a1a"><path d="M8.5 2.5c2.1 0 4 .8 5.4 2.1l1.3-1.4A10 10 0 0 0 8.5.5 10 10 0 0 0 1.8 3.2l1.3 1.4A8 8 0 0 1 8.5 2.5Z"/><path d="M8.5 6c1 0 2 .4 2.7 1.1l1.3-1.4A6 6 0 0 0 8.5 4 6 6 0 0 0 4 5.7l1.3 1.4A4 4 0 0 1 8.5 6Z"/><circle cx="8.5" cy="9.8" r="1.8"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x="1" y="1" width="21" height="10" rx="2.5" stroke="#1a1a1a" stroke-opacity="0.4"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.5" fill="#1a1a1a"/><rect x="23" y="4" width="2" height="4" rx="1" fill="#1a1a1a" fill-opacity="0.4"/></svg>
+      </span>
+    </div>
+    <div class="title">サークルをつくる</div>
+    <button class="close" aria-label="閉じる">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M3 3l12 12M15 3L3 15" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="range">
+      <div class="row1"><span class="lbl">範囲をきめる</span><span class="val" id="km">1.0<small>km</small></span></div>
+      <input type="range" id="slider" min="100" max="1000" step="10" value="1000">
+      <div class="ticks"><span>100m</span><span>1km</span></div>
+    </div>
+
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="row">
+        <button class="avatar" id="avatar" aria-label="写真を選ぶ">
+          <svg class="ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.7">
+            <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-9 9"/>
+          </svg>
+          <img class="ph" id="ph" src="../assets/sample/background/background003.jpg" alt="">
+          <span class="cam">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+              <path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.4"/>
+            </svg>
+          </span>
+        </button>
+        <div class="col">
+          <input class="field" id="nm" placeholder="サークル名" autocomplete="off">
+          <span class="cap">サークル名・必須</span>
+        </div>
+      </div>
+      <input class="field desc" id="ds" placeholder="サークルの説明（任意）" autocomplete="off">
+      <button class="create" id="create">
+        <svg class="chk" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 10 18.5 20 6.5"/></svg>
+        サークルを作成
+      </button>
+    </div>
+  </div>
+
+<script>
+  const map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+    center: [139.70064, 35.65905],   // 渋谷ハチ公
+    zoom: 14.05, pitch: 0, bearing: 0,
+    attributionControl: false, interactive: true, dragRotate: false, pitchWithRotate: false,
+  });
+  window.addEventListener('resize', () => map.resize());
+  setTimeout(() => map.resize(), 400);   // dvh 確定後にキャンバスを実寸へ
+
+  // 範囲スライダー: リング直径 + km 表示を追従（1km = リング 340px 基準）
+  const ring = document.getElementById('ring');
+  const km = document.getElementById('km');
+  document.getElementById('slider').addEventListener('input', (e) => {
+    const m = +e.target.value;
+    km.innerHTML = m >= 1000 ? '1.0<small>km</small>'
+      : m >= 100 && m % 1000 === 0 ? (m / 1000).toFixed(1) + '<small>km</small>'
+      : m >= 950 ? '1.0<small>km</small>'
+      : m >= 100 && m < 1000 && m % 100 === 0 ? m + '<small>m</small>'
+      : m + '<small>m</small>';
+    const d = Math.max(44, Math.round(340 * m / 1000));
+    ring.style.width = d + 'px'; ring.style.height = d + 'px';
+  });
+
+  // 写真 + 名前が揃うと作成ボタン有効（実装: 名前必須 / 写真必須）
+  const avatar = document.getElementById('avatar');
+  const nm = document.getElementById('nm');
+  const create = document.getElementById('create');
+  avatar.addEventListener('click', () => { avatar.classList.toggle('has'); sync(); });
+  nm.addEventListener('input', sync);
+  function sync() {
+    create.classList.toggle('on', avatar.classList.contains('has') && nm.value.trim().length > 0);
+  }
+</script>
+</body>
+</html>

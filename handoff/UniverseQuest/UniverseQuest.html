@@ -3519,6 +3519,22 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   }
   document.getElementById('crSend').addEventListener('click', send);
   crInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+
+  /* ---- Deep link（app/ の画面だけページ用） ------------------------------
+     ?view=profile|chatlist|chatroom : 該当ビューを開いた状態で起動する */
+  (function () {
+    const v = new URLSearchParams(location.search).get('view');
+    if (!v) return;
+    setTimeout(() => {
+      if (v === 'profile') document.getElementById('meBtn').click();
+      else if (v === 'chatlist') document.getElementById('chatBtn').click();
+      else if (v === 'chatroom') {
+        document.getElementById('chatBtn').click();
+        const row = clList.querySelector('.cl-row');
+        if (row) row.click();
+      }
+    }, 700);
+  })();
 })();
 </script>
 

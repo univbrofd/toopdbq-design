@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toopdbq — AuthOverlay</title>
+<link rel="stylesheet" href="../DesignSystem/colors_and_type.css">
+<style>
+  /* ログインオーバーレイ — 実装 lib/component/ui/modal/Auth/（home 上に requireAuth で表示）の画面だけ再現 */
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body { display: flex; align-items: center; justify-content: center; font-family: var(--font-jp); }
+
+  .screen {
+    position: relative; overflow: hidden; background: #0b0b10;
+    width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh;
+  }
+  .screen iframe.bg { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .veil { position: absolute; inset: 0; background: rgba(0,0,0,.55); z-index: 2; }
+
+  .card {
+    position: absolute; left: 32px; right: 32px; top: 168px; bottom: 108px; z-index: 3;
+    border-radius: 28px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.55);
+    display: flex; flex-direction: column;
+  }
+  .card .photo { position: absolute; inset: 0; }
+  .card .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card .photo::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,.18) 100%); }
+
+  .copy { position: relative; z-index: 2; padding: 40px 36px 0; color: #fff; }
+  .copy .wordmark {
+    font-family: 'Pacifico', var(--font-latin), cursive; font-size: 44px; line-height: 1.1;
+    text-shadow: 0 2px 14px rgba(0,0,0,.35);
+  }
+  .copy .lead {
+    margin-top: 8px; font: 700 24px/1.5 var(--font-jp);
+    text-shadow: 0 1px 10px rgba(0,0,0,.35);
+  }
+
+  .actions { position: relative; z-index: 2; margin-top: auto; padding: 0 26px 34px;
+    display: flex; flex-direction: column; gap: 18px; }
+  .btn {
+    position: relative; width: 100%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    border-radius: 999px; padding: 17px 0;
+    font: 700 16px/1 var(--font-jp);
+  }
+  .btn img { width: 20px; height: 20px; object-fit: contain; }
+  .btn.google { background: rgba(255,255,255,.94); color: #333; }
+  .btn.google::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 2px;
+    background: linear-gradient(100deg, #e8c44f, #ef2f7c 50%, #8b34d8);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+  }
+  .btn.apple { background: rgba(30,30,34,.72); color: #fff;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .btn.apple img { filter: brightness(0) invert(1); }
+  .terms {
+    text-align: center; font: 500 12px/1.7 var(--font-jp); color: rgba(255,255,255,.85);
+    text-shadow: 0 1px 6px rgba(0,0,0,.4);
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="screen">
+    <iframe class="bg" src="../handoff/UniverseQuest/UniverseQuest.html?screen" title="" aria-hidden="true" tabindex="-1"></iframe>
+    <div class="veil"></div>
+
+    <div class="card">
+      <div class="photo"><img src="../assets/images/auth_background.png" alt=""></div>
+      <div class="copy">
+        <div class="wordmark">Toopdbq</div>
+        <div class="lead">で新しい世界を<br>見つけてください</div>
+      </div>
+      <div class="actions">
+        <button class="btn google"><img src="../assets/images/logo_google.png" alt="">Googleアカウントで始める</button>
+        <button class="btn apple"><img src="../assets/images/logo_apple.png" alt="">Appleアカウントで始める</button>
+        <div class="terms">続行すると利用規約とプライバシーポリシーに<br>同意したことになります</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

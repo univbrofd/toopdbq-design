@@ -278,6 +278,23 @@
 
 <!-- ================================================================ -->
 <section class="flow">
+  <h2>アプリの画面だけ page（app/）</h2>
+  <p class="desc">タイトル・説明などの chrome を一切持たない<b>画面そのもの</b>の page 群。実装同等のインタラクション付き（フィード操作・シート・入力）。Remix はここから始めると余分な要素が混ざらない。</p>
+  <table class="inv">
+    <tr><th>page</th><th>内容</th></tr>
+    <tr><td><a href="app/App.html">app/App.html</a></td><td>アプリ全体（クエスト home 起動 → フィード / ビューア / タイムライン / プロフィール / チャット / ボードへ実遷移）</td></tr>
+    <tr><td><a href="app/QuestPast.html">app/QuestPast.html</a></td><td>過去日お題（フィード拡大・blur ロック列）で起動</td></tr>
+    <tr><td><a href="app/Splash.html">app/Splash.html</a> / <a href="app/Onboarding.html">app/Onboarding.html</a></td><td>起動面（splash はループ再生）/ オンボーディング 5 面</td></tr>
+    <tr><td><a href="app/StoryViewer.html">app/StoryViewer.html</a></td><td>投稿閲覧オーバーレイ（photo シーン）</td></tr>
+    <tr><td><a href="app/PostFlow.html">app/PostFlow.html</a></td><td>投稿フロー（撮影 → 編集 → サムネ → 提出）</td></tr>
+    <tr><td><a href="app/Profile.html">app/Profile.html</a> / <a href="app/ChatList.html">app/ChatList.html</a> / <a href="app/ChatRoom.html">app/ChatRoom.html</a></td><td>該当ビューを開いた状態で起動</td></tr>
+    <tr><td><a href="app/CircleCreate.html">app/CircleCreate.html</a></td><td>サークル作成（実地図 + レティクル + 範囲スライダー + シート。入力で作成ボタン活性）</td></tr>
+    <tr><td><a href="app/AuthOverlay.html">app/AuthOverlay.html</a> / <a href="app/Drafts.html">app/Drafts.html</a></td><td>ログインオーバーレイ / 下書き一覧</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ -->
+<section class="flow">
   <h2>未基準化 / 歴史資産</h2>
   <p class="desc">下段の「歴史資産」specimen は<b>現行アプリに存在しない</b>。起点にしない（Remix 元に選ばない）。</p>
   <table class="inv">

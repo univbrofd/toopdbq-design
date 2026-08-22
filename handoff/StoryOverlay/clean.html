@@ -196,5 +196,13 @@
     var saved = 'globe';
     try { saved = localStorage.getItem('storyoverlay-scene') || 'globe'; } catch (e) {}
     setScene(saved);
+
+    // screen-only (?screen[&scene=globe|photo]): トグルを隠し画面だけを表示（app/ 用）
+    var q = new URLSearchParams(location.search);
+    if (q.has('screen') || /\bscreen\b/.test(location.hash)) {
+      document.querySelector('.toggle').style.display = 'none';
+      document.querySelector('.frame').style.boxShadow = 'none';
+      setScene(q.get('scene') === 'globe' ? 'globe' : 'photo');
+    }
   </script>
 </body></html>

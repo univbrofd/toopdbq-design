@@ -121,9 +121,20 @@
   @media (prefers-reduced-motion: reduce) {
     .mark, .mark .logo, .boot .dots i, .splash.exit { animation: none !important; }
   }
+
+  /* screen-only mode (?screen / #screen): studio chrome を外し画面だけを全面に */
+  body.screen-only { padding: 0; gap: 0; background: #000; }
+  body.screen-only .replay { display: none; }
+  body.screen-only .phone {
+    width: min(100vw, calc(100dvh * 393 / 852)); height: 100dvh;
+    border-radius: 0; box-shadow: none;
+  }
 </style>
 </head>
 <body>
+<script>
+  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+</script>
   <div class="phone">
     <div class="screen">
 
@@ -183,6 +194,8 @@
     status.textContent = 'Starting up…';
     PHASES.forEach(([t, label]) => timers.push(setTimeout(() => { status.textContent = label; }, t)));
     timers.push(setTimeout(() => splash.classList.add('exit'), 3200));
+    // screen-only（app/ の画面だけページ）は常に splash が見えるようループ再生
+    if (document.body.classList.contains('screen-only')) timers.push(setTimeout(run, 5400));
   }
   document.getElementById('replay').addEventListener('click', run);
   run();
