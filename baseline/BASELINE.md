@@ -12,7 +12,8 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 
 | 日付 | 実装コミット | 範囲 |
 |---|---|---|
-| 2026-08-22 (2) | 05e361a7 + 未コミット作業ツリー | 全 4 スイート再撮影（8/22 昼の実装変更に追随）。旧 UC Q03-member / Q04-locked はドライバから撤去済みのため削除。Q04-past は「circle-04 not in homeCircles」でスイートが skip（撮影不能・要 driver/mock 調整） |
+| 2026-08-22 (3) | 05e361a7 + 未コミット作業ツリー | Q04-past 撮影成功。原因 = 新宿の circle-04 は渋谷と geohash セルが precision 4 で分かれ近傍 sweep に載らない → ドライバを関心経路（markInterest → reassert）へ修正して解決。quest 5 枚を最新ビルドで撮り直し |
+| 2026-08-22 (2) | 05e361a7 + 未コミット作業ツリー | 全 4 スイート再撮影(8/22 昼の実装変更に追随)。旧 UC Q03-member / Q04-locked はドライバから撤去済みのため削除 |
 | 2026-08-22 | 05e361a7 | 初回作成: onboarding / quest home / quest timeline / story viewer |
 
 ## 画面インベントリ
@@ -37,7 +38,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 | クエスト home（マップパネル: 域リング内サークル名・お題＋残り時間はマップ上部・カメラは右上・下はフィード） | `Universe/`（QuestFeedSheet / QuestBoard） | `handoff/UniverseQuest/UniverseQuest.html`（`?screen`） | `quest-Q00-boot`, `quest-Q02-collapsed` | ✅ 2026-08-22 |
 | クエスト feed 拡大（既定・マップは縮小トグル。上部にタイマー＋お題見出し） | 同上（`questFeedExpanded`） | 同上 | `quest-Q01-expanded` | ✅ |
 | 過去日お題＋エリア外＋ロック列（「エリアまで N km」ピル・右に blur ロックの日、日単位解錠 `canViewDay`） | 同上 | `handoff/UniverseQuestNoArea/UniverseQuestNoArea.html` | `quest-Q03-past` | ✅ |
-| 未提出エリア外サークルの初期表示（旧 Q04-locked 相当） | 同上 | 同上 | — | 🟡 撮影不能: スイートの circle-04 が homeCircles に載らず skip（要 driver/mock 調整） |
+| 未提出エリア外サークルの初期表示（初期中心 = 1 つ前の過去日。今日まで送ると blur + lock-note） | 同上 | 同上 | `quest-Q04-past` | ✅ |
 | クエスト → タイムライン（ピルで開く） | `Universe/` + `lib/feature/CircleStoryList/` | `handoff/CircleFooterTimeline/comp-circle-timeline.html` | `questtl-Q00-list`, `questtl-Q01-open`（2026-08-22） | 🟠 specimen 要照合 |
 
 ### StoryViewer（投稿閲覧）
