@@ -133,7 +133,7 @@
 </head>
 <body>
 <script>
-  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+  if (window.__APP_SCREEN__ || /[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
 </script>
   <div class="phone">
     <div class="screen">

@@ -18,7 +18,7 @@
   body.screen-only .phone { width:min(100vw, calc(100dvh * 402 / 874)); height:100dvh; border-radius:0; box-shadow:none; }
 </style>
 <script>
-  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+  if (window.__APP_SCREEN__ || /[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
 </script>
 <x-dc>
 <helmet>

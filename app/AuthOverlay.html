@@ -15,7 +15,7 @@
     position: relative; overflow: hidden; background: #0b0b10;
     width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh;
   }
-  .screen iframe.bg { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .screen img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .veil { position: absolute; inset: 0; background: rgba(0,0,0,.55); z-index: 2; }
 
   .card {
@@ -68,7 +68,7 @@
 </head>
 <body>
   <div class="screen">
-    <iframe class="bg" src="../handoff/UniverseQuest/UniverseQuest.html?screen" title="" aria-hidden="true" tabindex="-1"></iframe>
+    <img class="bg" src="../baseline/shots/quest-Q00-boot.jpg" alt="" aria-hidden="true">
     <div class="veil"></div>
 
     <div class="card">

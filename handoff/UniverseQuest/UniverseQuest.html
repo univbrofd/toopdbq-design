@@ -1545,7 +1545,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   body.screen-only .phone { width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh; border-radius: 0; box-shadow: none; }
 </style>
 <script>
-  if (/[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
+  if (window.__APP_SCREEN__ || /[?&]screen\b/.test(location.search) || /\bscreen\b/.test(location.hash)) document.body.classList.add('screen-only');
 </script>
 <div class="studio">
 
@@ -3338,6 +3338,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
      拡大表示（feed-max）で開く。右へスライドすると最新のお題に戻れる。 */
   (function () {
     const q = new URLSearchParams(location.search);
+    for (const [k, v] of Object.entries(window.__APP_PARAMS__ || {})) q.set(k, String(v));
     if (q.has('embed')) document.body.classList.add('embed');
     if (!q.has('circle')) return;
     const ci = Math.max(0, Math.min(CIRCLES.length - 1, parseInt(q.get('circle'), 10) || 0));
@@ -3523,7 +3524,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* ---- Deep link（app/ の画面だけページ用） ------------------------------
      ?view=profile|chatlist|chatroom : 該当ビューを開いた状態で起動する */
   (function () {
-    const v = new URLSearchParams(location.search).get('view');
+    const v = (window.__APP_PARAMS__ && window.__APP_PARAMS__.view) ||
+        new URLSearchParams(location.search).get('view');
     if (!v) return;
     setTimeout(() => {
       if (v === 'profile') document.getElementById('meBtn').click();

@@ -26,10 +26,15 @@
   text-transform: uppercase; vertical-align: 2px; }
 .studio { gap: 40px; }
 
-/* ?screen — chrome 無し・縦フルスクリーン */
-body.screen-only .studio { display: flex; flex-direction: column; gap: 0; }
-body.screen-only .scene-block { gap: 0; }
+/* ?screen — chrome 無し・縦フルスクリーン（1 画面 = 1 面のスナップスクロール） */
+body.screen-only { background: #000; }
+body.screen-only .studio { display: flex; flex-direction: column; gap: 0; padding: 0;
+  height: 100dvh; overflow-y: auto; scroll-snap-type: y mandatory; }
+body.screen-only .scene-block { gap: 0; scroll-snap-align: start; flex: none;
+  min-height: 100dvh; display: flex; align-items: center; justify-content: center; }
 body.screen-only .ob-head, body.screen-only .scene-cap { display: none; }
+body.screen-only .phone { width: min(100vw, calc(100dvh * 402 / 874)); height: 100dvh;
+  border-radius: 0; box-shadow: none; }
 
 /* ---- 地図フルブリード（UniverseQuest の #map ではなく overlay 用の全面版） ---- */
 .phone .screen { background: #f6f6f4; }
