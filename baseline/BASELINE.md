@@ -101,9 +101,9 @@ shots は `testPostFlow/shootStages.sh`（fake image_picker でカメラ回避�
 
 chrome（タイトル・説明・ベゼル）を一切表示しない**画面そのもの**の page 群。Remix の起点はここ。
 
-- `app/App.html`（全体・実遷移付き）/ `QuestPast` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = canonical specimen の **screen-only モード**（`?screen` + `?view=` deep link）への薄い iframe ラッパー（本体は handoff/ の単一ソースのまま）
-- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の新規 screen-only 実装（CircleCreate は実 MapLibre positron）
-- specimen 側の対応: UniverseQuest に `?view=` deep link、SplashView / StoryOverlay(clean) に screen-only モードを追加（Onboarding / UniversePostFlow は既存）
+- `app/App.html`（全体・実遷移付き）/ `QuestPast` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = **生成物（GENERATED・手編集禁止）**。アプリ repo の `scripts/design/gen_app_pages.mjs` が canonical specimen をコピーし、`<base>`（相対参照を元フォルダ基準で解決）と `window.__APP_SCREEN__` / `__APP_PARAMS__`（screen-only とビュー deep link の強制）を注入する。iframe / クエリ文字列に依存しないので静的プレビュー（Claude Design）でもそのまま描画される。**specimen を直したら再生成**
+- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の手書き screen-only 実装（CircleCreate は実 MapLibre positron）
+- specimen 側の対応: 各 specimen の screen-only 検出は `?screen` / `#screen` に加え `window.__APP_SCREEN__` を受ける。UniverseQuest は `?view=profile|chatlist|chatroom` deep link 対応
 
 ## 運用ルール
 

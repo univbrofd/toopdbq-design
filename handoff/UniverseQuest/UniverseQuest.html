@@ -1375,6 +1375,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   transition: transform .38s var(--ease-out);
 }
 .nav-push.on { transform: translateX(0); pointer-events: auto; }
+/* nav-push (profile / chat / board) が最前面のときは home のカメラ FAB を隠す (z 94 > 88) */
+.screen:has(.nav-push.on) .map-post { opacity: 0; pointer-events: none; }
 .nav-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 58px 16px 12px; }
 .nav-head h2 { font: 700 19px var(--font-jp); color: #fff; letter-spacing: .01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
