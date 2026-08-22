@@ -12,6 +12,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 
 | 日付 | 実装コミット | 範囲 |
 |---|---|---|
+| 2026-08-22 (4) | 05e361a7 + 未コミット作業ツリー | おすすめ起動画面の廃止を確認し 🗄 歴史資産へ（QuestRecommendSheet はどこからも未描画・起動はフィード直起動）。testSplash スイート新設で Splash を ✅ に |
 | 2026-08-22 (3) | 05e361a7 + 未コミット作業ツリー | Q04-past 撮影成功。原因 = 新宿の circle-04 は渋谷と geohash セルが precision 4 で分かれ近傍 sweep に載らない → ドライバを関心経路（markInterest → reassert）へ修正して解決。quest 5 枚を最新ビルドで撮り直し |
 | 2026-08-22 (2) | 05e361a7 + 未コミット作業ツリー | 全 4 スイート再撮影(8/22 昼の実装変更に追随)。旧 UC Q03-member / Q04-locked はドライバから撤去済みのため削除 |
 | 2026-08-22 | 05e361a7 | 初回作成: onboarding / quest home / quest timeline / story viewer |
@@ -24,17 +25,17 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
-| Splash | `lib/feature/Splash/` | `handoff/SplashView/comp-splash-view.html` | — | 🟡 shots 未撮影 |
+| Splash（blur 背景＋白ロゴ呼吸アニメ） | `lib/feature/Splash/` | `handoff/SplashView/comp-splash-view.html` | `splash-SP00`（2026-08-22） | ✅ |
 | Onboarding（ライト5面・実地図+blur焼き込み。①世界中のサークル俯瞰 ②クエストに挑戦 ③クエストの報酬=blur解錠 ④いいねが友情のきっかけ ⑤位置プリパーミッション） | `lib/feature/Onboarding/` | `handoff/Onboarding/Onboarding.html` | `onb-OB01..OB05`（2026-08-22） | ✅ |
 | Auth（ログイン） | `lib/feature/Auth/` | なし | — | ⬜ |
 
 ### Home = クエスト（アプリの主画面）
 
 実装はすべて `lib/feature/Universe/`（旧「circle home」は 2026-07-31 のクエスト刷新で全面置換済み）。
+起動は**クエストフィード直起動**（「エリア内 × 開催中のお題」で投稿数最多のサークルを先頭に据える。旧「おすすめ」起動画面は廃止 → 歴史資産）。
 
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
-| おすすめ（起動一発目 = 前日クエスト結果の 2 列 masonry） | `Universe/`（QuestRecommendSheet） | `handoff/UniverseQuestRecommend/UniverseQuestRecommend.html` | — | 🟡 shots 未撮影 |
 | クエスト home（マップパネル: 域リング内サークル名・お題＋残り時間はマップ上部・カメラは右上・下はフィード） | `Universe/`（QuestFeedSheet / QuestBoard） | `handoff/UniverseQuest/UniverseQuest.html`（`?screen`） | `quest-Q00-boot`, `quest-Q02-collapsed` | ✅ 2026-08-22 |
 | クエスト feed 拡大（既定・マップは縮小トグル。上部にタイマー＋お題見出し） | 同上（`questFeedExpanded`） | 同上 | `quest-Q01-expanded` | ✅ |
 | 過去日お題＋エリア外＋ロック列（「エリアまで N km」ピル・右に blur ロックの日、日単位解錠 `canViewDay`） | 同上 | `handoff/UniverseQuestNoArea/UniverseQuestNoArea.html` | `quest-Q03-past` | ✅ |
@@ -69,6 +70,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 | `handoff/UniverseCircle/UniverseCircle.html` | 旧 circle home（回転デッキ＋シート）。2026-07-31 撤去。部品の一部は投稿フローに残存 |
 | `handoff/UniverseView/UniverseView.html` | 旧地図 home（3D ピン + リール） |
 | `handoff/UniverseCircleGrid/` `handoff/UniverseCircleReel/` | 旧 home 派生の実験 |
+| `handoff/UniverseQuestRecommend/` | 旧おすすめ起動画面（前日クエスト結果の 2 列 masonry）。起動はフィード直起動に変更され廃止。`QuestRecommendSheet.dart` は widget 定義のみ残骸（未描画） |
 
 ## 運用ルール
 

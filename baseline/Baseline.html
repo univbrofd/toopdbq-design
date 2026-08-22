@@ -86,6 +86,12 @@
   <p class="desc">Splash（DI 初期化）→ 初回のみオンボーディング（ライト基調 5 面・実地図 WebView に blur 焼き込み・地図内テキストも L10n）→ ログイン → home。</p>
   <div class="cards">
     <div class="card">
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/splash-SP00.jpg" alt="SP00"><span class="uc">SP00</span></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>Splash</h3><p>blur 背景＋中央の白ロゴ（入場 fade+scale → 呼吸アニメ）。DI 初期化中に表示。</p>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Splash/</span><span class="ref"><b>specimen</b> handoff/SplashView/comp-splash-view.html</span></div>
+      </div>
+    </div>
+    <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB01-circle.jpg" alt="OB01"><span class="uc">OB01</span></div>
       <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>世界中のサークル</h3><p>俯瞰マップに多数の域リング。「だれでも、どこにでもつくれる」。</p></div>
     </div>
@@ -113,7 +119,7 @@
 <!-- ================================================================ -->
 <section class="flow">
   <h2>Home = クエスト（主画面）</h2>
-  <p class="desc">実装は lib/feature/Universe/。起動一発目は「おすすめ」（前日クエスト結果の 2 列 masonry）、タップでその日のフィードへ。home はフィード拡大が既定で、マップパネルは縮小トグルで開く。マップパネル＝域リング内にサークル名・お題＋残り時間はマップ上部・投稿カメラは右上（エリア外は「エリアまで N km」ピル）。縦スクロール＝サークル切替、横レール＝投稿（いいね順⇄新着順の双方向無限・いいね数はセル右上）。未達成お題は blur ロック、日単位で解錠（member は過去日閲覧可）。</p>
+  <p class="desc">実装は lib/feature/Universe/。起動はクエストフィード直起動（「エリア内 × 開催中のお題」で投稿数最多のサークルを先頭に。旧「おすすめ」起動画面は廃止）。home はフィード拡大が既定で、マップパネルは縮小トグルで開く。マップパネル＝域リング内にサークル名・お題＋残り時間はマップ上部・投稿カメラは右上（エリア外は「エリアまで N km」ピル）。縦スクロール＝サークル切替、横レール＝投稿（いいね順⇄新着順の双方向無限・いいね数はセル右上）。未達成お題は blur ロック、日単位で解錠（member は過去日閲覧可）。</p>
   <div class="cards">
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q00-boot.jpg" alt="Q00"><span class="uc">Q00</span></div>
@@ -134,7 +140,7 @@
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q04-past.jpg" alt="Q04"><span class="uc">Q04</span></div>
       <div class="body"><span class="badge ok">現行</span><h3>未提出エリア外サークル</h3><p>「エリアまで N km」ピル（縁までの距離）。初期中心は 1 つ前の過去日、今日まで送ると blur + lock-note。</p>
-        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Universe/（QuestFeedSheet / QuestBoard / QuestRecommendSheet）</span><span class="ref"><b>specimen</b> handoff/UniverseQuest/UniverseQuest.html（?screen）・UniverseQuestNoArea・UniverseQuestRecommend</span><span class="ref"><b>project 内</b> Universe-Quest.html</span></div>
+        <div class="refs"><span class="ref"><b>impl</b> lib/feature/Universe/（QuestFeedSheet / QuestBoard）</span><span class="ref"><b>specimen</b> handoff/UniverseQuest/UniverseQuest.html（?screen）・UniverseQuestNoArea</span><span class="ref"><b>project 内</b> Universe-Quest.html</span></div>
       </div>
     </div>
     <div class="card">
@@ -184,8 +190,6 @@
   <p class="desc">下段の「歴史資産」specimen は<b>現行アプリに存在しない</b>。起点にしない（Remix 元に選ばない）。</p>
   <table class="inv">
     <tr><th>画面</th><th>実装</th><th>specimen</th><th>状態</th></tr>
-    <tr><td>Splash</td><td><span class="path">lib/feature/Splash/</span></td><td><span class="path">handoff/SplashView/comp-splash-view.html</span></td><td><span class="badge todo">shots 未撮影</span></td></tr>
-    <tr><td>おすすめ（起動一発目）</td><td><span class="path">lib/feature/Universe/（QuestRecommendSheet）</span></td><td><span class="path">handoff/UniverseQuestRecommend/</span></td><td><span class="badge todo">shots 未撮影</span></td></tr>
     <tr><td>Auth（ログイン）</td><td><span class="path">lib/feature/Auth/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
     <tr><td>Chat（一覧/ルーム）</td><td><span class="path">lib/feature/Chat/</span></td><td><span class="path">handoff/ChatList/ ChatRoom/</span></td><td><span class="badge warn">実機未照合</span></td></tr>
     <tr><td>Profile</td><td><span class="path">lib/feature/Profile/</span></td><td>なし</td><td><span class="badge todo">未基準化</span></td></tr>
@@ -193,6 +197,7 @@
     <tr><td>旧 circle home（回転デッキ）</td><td>撤去済み（部品は投稿フローに残存）</td><td><span class="path">handoff/UniverseCircle/UniverseCircle.html・project 内 Universe-Circle.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
     <tr><td>旧地図 home（3D ピン＋リール）</td><td>撤去済み</td><td><span class="path">handoff/UniverseView/・project 内 UniverseView.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
     <tr><td>旧 home 派生実験</td><td>—</td><td><span class="path">handoff/UniverseCircleGrid/ UniverseCircleReel/・project 内 Universe-Circle-Grid.html 回転する円筒UI.dc.html</span></td><td><span class="badge hist">歴史資産</span></td></tr>
+    <tr><td>旧おすすめ起動画面（前日結果の 2 列 masonry）</td><td>廃止（QuestRecommendSheet.dart は未描画の残骸）</td><td><span class="path">handoff/UniverseQuestRecommend/・project 内 handoff/UniverseQuestRecommend/</span></td><td><span class="badge hist">歴史資産</span></td></tr>
   </table>
 </section>
 
