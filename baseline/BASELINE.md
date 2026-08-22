@@ -101,9 +101,10 @@ shots は `testPostFlow/shootStages.sh`（fake image_picker でカメラ回避�
 
 chrome（タイトル・説明・ベゼル）を一切表示しない**画面そのもの**の page 群。Remix の起点はここ。
 
-- `app/App.html`（全体・実遷移付き）/ `QuestPast` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = **生成物（GENERATED・手編集禁止）**。アプリ repo の `scripts/design/gen_app_pages.mjs` が canonical specimen をコピーし、`<base>`（相対参照を元フォルダ基準で解決）と `window.__APP_SCREEN__` / `__APP_PARAMS__`（screen-only とビュー deep link の強制）を注入する。iframe / クエリ文字列に依存しないので静的プレビュー（Claude Design）でもそのまま描画される。**specimen を直したら再生成**
-- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の手書き screen-only 実装（CircleCreate は実 MapLibre positron）
-- specimen 側の対応: 各 specimen の screen-only 検出は `?screen` / `#screen` に加え `window.__APP_SCREEN__` を受ける。UniverseQuest は `?view=profile|chatlist|chatroom` deep link 対応
+- **`app/App.html` = Flutter 実装そのもの（本命）**。Flutter web ビルド（全データ mock・全 repository/認証/位置/カメラを mock 化・カメラのファインダーは mock 動画）を R2 `design/app/<hash>/` から読むローダで、**アプリの全画面・全遷移が実装どおりに動く**（quest home / StoryViewer / 投稿フロー / Chat / Profile / menu）。生成 = GENERATED・手編集禁止:
+  `flutter build web --release --pwa-strategy=none --dart-define=MOCK_DATA=1` → `node scripts/design/upload_web_app_to_r2.mjs`（R2 アップ + ローダ生成）
+- `app/QuestPast.html` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = specimen ベースの screen-only 変種（`scripts/design/gen_app_pages.mjs` 生成・GENERATED）。**HTML 再現なので実装との差分がありうる**。単画面を静的に見たいときの参考。実装の正は App.html
+- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の手書き screen-only 実装（参考）
 
 ## 運用ルール
 
