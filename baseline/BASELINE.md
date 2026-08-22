@@ -12,6 +12,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 
 | 日付 | 実装コミット | 範囲 |
 |---|---|---|
+| 2026-08-22 (2) | 05e361a7 + 未コミット作業ツリー | 全 4 スイート再撮影（8/22 昼の実装変更に追随）。旧 UC Q03-member / Q04-locked はドライバから撤去済みのため削除。Q04-past は「circle-04 not in homeCircles」でスイートが skip（撮影不能・要 driver/mock 調整） |
 | 2026-08-22 | 05e361a7 | 初回作成: onboarding / quest home / quest timeline / story viewer |
 
 ## 画面インベントリ
@@ -23,7 +24,7 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
 | Splash | `lib/feature/Splash/` | `handoff/SplashView/comp-splash-view.html` | — | 🟡 shots 未撮影 |
-| Onboarding（ライト5面・実地図+blur焼き込み） | `lib/feature/Onboarding/` | `handoff/Onboarding/Onboarding.html` | `onb-OB01..OB05`（2026-08-20） | ✅ |
+| Onboarding（ライト5面・実地図+blur焼き込み。①世界中のサークル俯瞰 ②クエストに挑戦 ③クエストの報酬=blur解錠 ④いいねが友情のきっかけ ⑤位置プリパーミッション） | `lib/feature/Onboarding/` | `handoff/Onboarding/Onboarding.html` | `onb-OB01..OB05`（2026-08-22） | ✅ |
 | Auth（ログイン） | `lib/feature/Auth/` | なし | — | ⬜ |
 
 ### Home = クエスト（アプリの主画面）
@@ -33,17 +34,17 @@ Claude Design で機能を考えるときの**唯一の起点**。ここに載�
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
 | おすすめ（起動一発目 = 前日クエスト結果の 2 列 masonry） | `Universe/`（QuestRecommendSheet） | `handoff/UniverseQuestRecommend/UniverseQuestRecommend.html` | — | 🟡 shots 未撮影 |
-| クエスト home（マップパネル＋看板＋投稿カメラ＋フィード） | `Universe/`（QuestFeedSheet / QuestBoard） | `handoff/UniverseQuest/UniverseQuest.html`（`?screen`） | `quest-Q00-boot`, `quest-Q02-collapsed` | ✅ 2026-08-21 |
-| クエスト feed 拡大（既定・マップは縮小トグル） | 同上（`questFeedExpanded`） | 同上 | `quest-Q01-expanded` | ✅ |
-| 過去日お題（member 閲覧・日単位ロック） | 同上（`canViewDay`） | 同上 | `quest-Q03-member`, `quest-Q03-past` | ✅ |
-| 未達成ロック＋エリア外（blur・カメラ非活性「エリアまで N km」） | 同上 | `handoff/UniverseQuestNoArea/UniverseQuestNoArea.html` | `quest-Q04-locked` | ✅ |
-| クエスト → タイムライン（ピルで開く） | `Universe/` + `lib/feature/CircleStoryList/` | `handoff/CircleFooterTimeline/comp-circle-timeline.html` | `questtl-Q00-list`, `questtl-Q01-open` | 🟠 specimen 要照合 |
+| クエスト home（マップパネル: 域リング内サークル名・お題＋残り時間はマップ上部・カメラは右上・下はフィード） | `Universe/`（QuestFeedSheet / QuestBoard） | `handoff/UniverseQuest/UniverseQuest.html`（`?screen`） | `quest-Q00-boot`, `quest-Q02-collapsed` | ✅ 2026-08-22 |
+| クエスト feed 拡大（既定・マップは縮小トグル。上部にタイマー＋お題見出し） | 同上（`questFeedExpanded`） | 同上 | `quest-Q01-expanded` | ✅ |
+| 過去日お題＋エリア外＋ロック列（「エリアまで N km」ピル・右に blur ロックの日、日単位解錠 `canViewDay`） | 同上 | `handoff/UniverseQuestNoArea/UniverseQuestNoArea.html` | `quest-Q03-past` | ✅ |
+| 未提出エリア外サークルの初期表示（旧 Q04-locked 相当） | 同上 | 同上 | — | 🟡 撮影不能: スイートの circle-04 が homeCircles に載らず skip（要 driver/mock 調整） |
+| クエスト → タイムライン（ピルで開く） | `Universe/` + `lib/feature/CircleStoryList/` | `handoff/CircleFooterTimeline/comp-circle-timeline.html` | `questtl-Q00-list`, `questtl-Q01-open`（2026-08-22） | 🟠 specimen 要照合 |
 
 ### StoryViewer（投稿閲覧）
 
 | 画面 | 実装 | canonical specimen | shots | 状態 |
 |---|---|---|---|---|
-| StoryViewer（縦送り・横動画は回転フィット） | `lib/feature/StoryViewer/` | `handoff/StoryOverlay/comp-story-overlay.html`（オーバーレイ刷新は worktree 進行中） | `story-F00-portrait`, `story-F01-landscape`（2026-08-21） | ✅（overlay は 🟠） |
+| StoryViewer（縦送り・横動画は回転フィット） | `lib/feature/StoryViewer/` | `handoff/StoryOverlay/comp-story-overlay.html`（オーバーレイ刷新は worktree 進行中） | `story-F00-portrait`, `story-F01-landscape`（2026-08-22） | ✅（overlay は 🟠） |
 
 ### 投稿フロー
 

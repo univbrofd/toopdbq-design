@@ -62,8 +62,8 @@
   <h1>Toopdbq App Baseline</h1>
   <p class="sub">アプリの「今」。<b>一次情報は Flutter 実装</b>（repo <span style="font-family:var(--mono)">univbrofd/toopdbq</span> master）で、shots はその実機撮影（iPhone 17 sim・mock データ）。このページは閲覧専用の起点 — 新しい機能を考えるときはまずここで現状を掴み、対象画面の canonical specimen を Remix して始める。<b>このページ自体は編集しない</b>（実装が進んだらアプリ側の再基準化で更新される）。</p>
   <div class="meta">
-    <span class="pill">最終再基準化 <b>2026-08-22</b></span>
-    <span class="pill">実装コミット <b>05e361a7</b></span>
+    <span class="pill">最終再基準化 <b>2026-08-22 (2)</b></span>
+    <span class="pill">実装 <b>05e361a7 + 作業ツリー</b></span>
     <span class="pill">正 = Flutter 実装（このページ ＞ 過去の specimen / handoff）</span>
   </div>
 </header>
@@ -87,23 +87,23 @@
   <div class="cards">
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB01-circle.jpg" alt="OB01"><span class="uc">OB01</span></div>
-      <div class="body"><span class="badge ok">現行 2026-08-20</span><h3>サークル＝街の上の円</h3><p>実地図の上にサークル域リングを重ね、概念を最初に見せる。</p></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>世界中のサークル</h3><p>俯瞰マップに多数の域リング。「だれでも、どこにでもつくれる」。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB02-quest.jpg" alt="OB02"><span class="uc">OB02</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>クエスト＝サークルのお題</h3><p>サークルごとに 1 個のお題が出る、を説明。</p></div>
+      <div class="body"><span class="badge ok">現行</span><h3>クエストに挑戦</h3><p>1 サークルへズーム。リング内に Quest 看板（お題＋残り時間）とカメラ。「エリアの中から挑戦できる」。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB03-lock.jpg" alt="OB03"><span class="uc">OB03</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>未達成はロック</h3><p>自分が提出するまで他人のクエスト投稿は blur ロック。</p></div>
+      <div class="body"><span class="badge ok">現行</span><h3>クエストの報酬</h3><p>達成すると他の人の投稿が見れる（未達成は blur ロックのカードで表現）。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB04-unlock.jpg" alt="OB04"><span class="uc">OB04</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>提出で解錠</h3><p>エリア内で投稿を提出すると全員の投稿が見える。</p></div>
+      <div class="body"><span class="badge ok">現行</span><h3>いいねが友情のきっかけ</h3><p>投稿にいいね → チャットで会話が始まる例を見せる。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/onb-OB05-location.jpg" alt="OB05"><span class="uc">OB05</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>位置情報プリパーミッション</h3><p>OS ダイアログ前の理由説明。</p>
+      <div class="body"><span class="badge ok">現行</span><h3>位置情報プリパーミッション</h3><p>「あなたの現在地は他の人には見えません」— OS ダイアログ前の理由説明 →「はじめる」。</p>
         <div class="refs"><span class="ref"><b>impl</b> lib/feature/Onboarding/</span><span class="ref"><b>specimen</b> handoff/Onboarding/Onboarding.html</span></div>
       </div>
     </div>
@@ -113,31 +113,23 @@
 <!-- ================================================================ -->
 <section class="flow">
   <h2>Home = クエスト（主画面）</h2>
-  <p class="desc">実装は lib/feature/Universe/。起動一発目は「おすすめ」（前日クエスト結果の 2 列 masonry）、タップでその日のフィードへ。home はフィード拡大が既定で、マップパネル（サークル域リング＋クエスト看板＋投稿カメラ）は縮小トグルで開く。縦スクロール＝サークル切替、横レール＝投稿（いいね順⇄新着順の双方向無限）。未達成お題は blur ロック、日単位で解錠（member は過去日閲覧可）。</p>
+  <p class="desc">実装は lib/feature/Universe/。起動一発目は「おすすめ」（前日クエスト結果の 2 列 masonry）、タップでその日のフィードへ。home はフィード拡大が既定で、マップパネルは縮小トグルで開く。マップパネル＝域リング内にサークル名・お題＋残り時間はマップ上部・投稿カメラは右上（エリア外は「エリアまで N km」ピル）。縦スクロール＝サークル切替、横レール＝投稿（いいね順⇄新着順の双方向無限・いいね数はセル右上）。未達成お題は blur ロック、日単位で解錠（member は過去日閲覧可）。</p>
   <div class="cards">
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q00-boot.jpg" alt="Q00"><span class="uc">Q00</span></div>
-      <div class="body"><span class="badge ok">現行 2026-08-21</span><h3>マップパネル＋看板＋カメラ</h3><p>域リング内に Quest 看板（お題・残り時間）と投稿カメラ（エリア内=活性・ピンク波紋）。下はフィード先頭。</p></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>マップパネル＋お題＋カメラ</h3><p>域リング内はサークル名、お題＋残り時間はマップ上部、投稿カメラは右上。下はフィード先頭（いいね数はセル右上）。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q01-expanded.jpg" alt="Q01"><span class="uc">Q01</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>フィード拡大（既定）</h3><p>マップは上へたたまれフィード全高。列パッキングの FREE BOARD 表示。</p></div>
+      <div class="body"><span class="badge ok">現行</span><h3>フィード拡大（既定）</h3><p>マップは上へたたまれフィード全高。上部にタイマー＋お題見出し。列パッキングの FREE BOARD 表示。</p></div>
     </div>
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q02-collapsed.jpg" alt="Q02"><span class="uc">Q02</span></div>
       <div class="body"><span class="badge ok">現行</span><h3>縮小復帰</h3><p>トグルでマップパネルへ戻る。見ていたお題の位置は復元。</p></div>
     </div>
     <div class="card">
-      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q03-member.jpg" alt="Q03"><span class="uc">Q03</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>過去日お題（member）</h3><p>そのサークルに投稿歴があれば過去日は閲覧可。初期スクロールは「閲覧できる一番新しいお題」。</p></div>
-    </div>
-    <div class="card">
-      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q03-past.jpg" alt="Q03b"><span class="uc">Q03b</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>過去日レール</h3><p>日付見出しごとの横レール。</p></div>
-    </div>
-    <div class="card">
-      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q04-locked.jpg" alt="Q04"><span class="uc">Q04</span></div>
-      <div class="body"><span class="badge ok">現行</span><h3>ロック＋エリア外</h3><p>未達成セルは blur18 ロック。カメラは非活性（灰リム）＋「エリアまで N km」ピル（縁までの距離）。</p>
+      <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/quest-Q03-past.jpg" alt="Q03"><span class="uc">Q03</span></div>
+      <div class="body"><span class="badge ok">現行</span><h3>過去日＋エリア外＋ロック</h3><p>別サークルへ縦切替。エリア外は「エリアまで N km」ピル。初期中心は閲覧できる直近の過去日で、右隣の日は blur ロック列。未提出エリア外サークルの初期表示（旧 Q04）はスイート前提条件により撮影不能（🟡）。</p>
         <div class="refs"><span class="ref"><b>impl</b> lib/feature/Universe/（QuestFeedSheet / QuestBoard / QuestRecommendSheet）</span><span class="ref"><b>specimen</b> handoff/UniverseQuest/UniverseQuest.html（?screen）・UniverseQuestNoArea・UniverseQuestRecommend</span><span class="ref"><b>project 内</b> Universe-Quest.html</span></div>
       </div>
     </div>
@@ -161,7 +153,7 @@
   <div class="cards">
     <div class="card">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/story-F00-portrait.jpg" alt="F00"><span class="uc">F00</span></div>
-      <div class="body"><span class="badge ok">現行 2026-08-21</span><h3>縦（基本形）</h3><p>全画面メディア＋オーバーレイ。</p></div>
+      <div class="body"><span class="badge ok">現行 2026-08-22</span><h3>縦（基本形）</h3><p>全画面メディア＋オーバーレイ。</p></div>
     </div>
     <div class="card wide">
       <div class="shot"><img src="https://raw.githubusercontent.com/univbrofd/toopdbq-design/main/baseline/shots/story-F01-landscape.jpg" alt="F01"><span class="uc">F01</span></div>
