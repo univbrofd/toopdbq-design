@@ -13,6 +13,7 @@ Toopdbq（地理コミュニティ型ソーシャルアプリ）のデザイン�
 
 ## トップ階層
 
+- `baseline/` — **App Baseline = Flutter 実装を正とした起点**。`BASELINE.md`（画面インベントリ・現行/歴史資産の判定）＋ `Baseline.html`（Claude Design へ同期する起点 page）＋ `shots/`（現行実機ショット）。機能を考えるときはここから始め、Remix 元は BASELINE.md の canonical specimen を使う。再基準化はアプリ側 `/design-baseline`。
 - `assets/` — **共有アセットの単一ソース**（`icons/` `images/`）。1ファイル1コピー。per-View に複製しない。specimen は深さに応じた相対で参照（`handoff/{View}/x.html` → `../../assets/...`）。
 - `DesignSystem/` — foundation（トークンと美学の一次情報）。`colors_and_type.css`（役割トークン・**色の canonical**）/ `taste.md` / `USAGE_RULES.md` / `preview/`（コンポーネント specimen `comp-*.html` ＋カテゴリ束ね `batch*-*.html` ＋共有 `components.css` / `card.css`）/ `ui_kits/app/`（画面組み上げ）/ `_ds_manifest.json`（全索引）。
 - `handoff/{View}/` — 1 View = タスク単位フォルダ。`HANDOFF.md`（この repo 内で完結する spec）＋ その View 固有 specimen（`comp-*.html` / `clean.html`）＋ `shots/`。**foundation CSS・アセットは持たず共有を参照**（View 固有上書きが要るときだけ `{View}.css` に差分だけ）。
