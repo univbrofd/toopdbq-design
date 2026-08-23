@@ -1,7 +1,7 @@
 <!-- @dsCard group="Brief" -->
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GumPackage v3 — 上段を法定表示へ</title>
+<title>GumPackage v3.1 — 端いっぱいまで詰める</title>
 <style>
 :root{ --bg:#0d0d10; --fg:#e9e9ee; --dim:#9a9aa6; --dim2:#71717e; --line:#26262e;
        --accent:#ff3e88; --ok:#3ddc97; --ng:#ff6b6b; --warn:#ffd166;
@@ -67,11 +67,45 @@ table.t td{color:#c2c2ce;}
 @media (max-width:700px){ .zoom{zoom:2.1;} .zoom.geoz{zoom:1.9;} h1{font-size:20px;} }
 </style></head><body><div class="wrap">
 
-<p class="kicker">handoff / GumPackage — v3</p>
-<h1>板ガムパッケージ：上段をブランド帯から「法定表示」へ差し替える</h1>
+<p class="kicker">handoff / GumPackage — v3.1</p>
+<h1>板ガムパッケージ v3.1：まだ残っている四辺の余白を、端いっぱいまで詰め切る</h1>
 <p class="lede">仕様の正は同ディレクトリの <a href="HANDOFF.md">HANDOFF.md</a>。このページは<strong>設計を縛る実測</strong>だけを実寸で見せるもの。数値はすべて実測値で、推測は含まない。</p>
 
-<h2>1. 何が変わるか</h2>
+
+<h2>0. v3.1 — まず直すこと（余白の詰め切り）</h2>
+<p>v3（<code>GumPackage_v3.dc.html</code>）は上段の<strong>罫</strong>を trim 端まで通せている。ただし<strong>画面上はまだ四辺に余白が見える</strong>。8 案を artboard 実寸でレンダリングして計測した発生源は 4 つ。<strong>すべて潰すこと。</strong></p>
+<table class="t">
+<tr><th style="width:6%">#</th><th style="width:28%">発生源</th><th style="width:22%">実測</th><th>該当</th></tr>
+<tr><td>1</td><td><strong>artboard の塗り足しリング</strong></td><td class="ng">四辺 3mm</td><td>全案。<strong>画面上でいちばん「余白」に見えているのはこれ</strong>（詰めても消えない → 下の trim トグルで解決）</td></tr>
+<tr><td>2</td><td><strong>行単位のインセット</strong></td><td class="ng">左右 1.6mm</td><td><code>padding-right:1.6mm</code>（内容量の値）×10 / <code>padding:0.3mm 1.6mm 0</code>（アレルギー行）×4 / <code>margin:… 1.6mm</code>（栄養表）×4 / <code>padding:0 1.6mm</code>（2a/2b）×4</td></tr>
+<tr><td>3</td><td><strong>中段・下段の padding</strong></td><td class="ng">左右 0.4mm・下 0.4mm</td><td><code>padding:0 0.4mm</code>×8 / <code>padding:0 0.4mm 0.4mm</code>×6 / <code>padding:0 0 0.4mm</code>×2</td></tr>
+<tr><td>4</td><td><strong>上段の縦センタリング残り</strong></td><td class="ng">上 0.30–1.34 / 下 0.49–1.61mm</td><td><code>justify-content:center</code> の 6 案（4a/4b だけ 0/0）</td></tr>
+</table>
+<p>案別の<strong>上段・縦の使い残し</strong>： <code>1a 2.95mm / 1b 1.79 / 2b 1.45 / 3b 1.03 / 3a 0.79 / 2a 0.13 / 4a 0.00 / 4b 0.00</code>。<strong>1a は 3mm 近く余らせたまま級数 1.15mm で止まっている。</strong></p>
+
+<h3>契約</h3>
+<ul>
+<li><strong>内側インセットを全部 0 に。</strong> どの行・どのセルにも 1.6mm / 0.4mm / 0.3mm を残さない。文字と罫は trim の端に接する。表のセル内 <code>padding:0 0.3mm</code> も 0（列の区切りは罫だけで作る）。</li>
+<li><strong>上段は 18mm を使い切る。</strong> <code>justify-content:center</code> をやめ <code>space-between</code> に。上端の行は trim 上端、下端の行は上段の下端に接する。</li>
+<li><strong>使い残しは級数に回す。</strong> 詰め切ったうえで各案の級数を取り直す（<strong>1a を 1.15mm のままにしない</strong>）。目標は「はみ出し 0 かつ縦の空き 0」。</li>
+<li><strong>中段も端に。</strong> コピー左端＝trim 左端、QR 白チップ右端＝trim 右端（21mm 角は縮小しない）。上下も 22mm を使い切る。</li>
+<li><strong>下段も端に。</strong> 左端の文字＝trim 左端、<code>toopdbq.com</code>＝trim 右端、下端＝trim 下端。<strong>3a/3b の下段にある上方向の空き（実測 最大 7.89mm）も詰める。</strong></li>
+<li><strong>ベタ面・罫は塗り足しまで伸ばす。</strong> 横罫・縦罫を trim で止めず <code>-3mm</code>〜<code>+3mm</code> まで通す（断裁がずれても罫が途中で切れない）。<strong>文字だけは trim 端で止める</strong>（塗り足しに入れると切り落とされる）。</li>
+</ul>
+
+<h3>プレビューを trim 基準にする — これが「端いっぱいに見える」ための本体</h3>
+<p>塗り足し 3mm は<strong>断裁で落ちる領域</strong>なので、artboard（75×58mm）をそのまま表示している限り四辺に 3mm の帯が見え続ける。<strong>これは中身を詰めても消えない。</strong></p>
+<div class="flag"><b>trim トグルを追加すること（既定 ON）。</b> ON のとき <strong>69×52mm の仕上がりだけ</strong>を描く（<code>overflow:hidden</code> の枠を 69×52 にして中身を −3mm ずらす）。OFF で従来どおり 75×58mm の塗り足し込み表示。<strong>入稿用は OFF、見た目の確認は ON。</strong></div>
+
+<h3>端に何を置くか（断裁ズレ ±1mm）</h3>
+<p>余白ゼロは端 1mm が欠ける前提。<strong>この方針は変えない</strong>が、置くものだけ選ぶ：</p>
+<ul>
+<li><strong>端に来てよい</strong>：項目ラベル（名称・原材料名・製造者・製造所）、住所の末尾、罫</li>
+<li><strong>端から 1mm 以上内側</strong>：<code>●アレルギー物質（28品目）ゼラチン使用。</code> の全文、栄養成分の<strong>数値</strong>、QR</li>
+</ul>
+<div class="note">v3 はこれを「左右 1.6mm インセット」で実現していたが、<strong>行ごとに字下げすると見た目が階段状にガタつく</strong>（2a/2b で顕著）。代わりに、その行だけ字下げせず<strong>端に来る語順を文の側で調整</strong>するか、<strong>行頭・行末に欠けてよい語（ラベル等）を置いて吸収</strong>すること。</div>
+
+<h2>1. 何が変わるか（v3 からの前提・変更なし）</h2>
 <ul>
 <li><strong>面構成を微調整</strong>：仕上がり <strong>69 × 52mm</strong>（v2 は 65×52）。上段 <strong>18</strong>・中段 <strong>22</strong>・下段 <strong>12</strong> mm。塗り足し 3mm → artboard <strong>75 × 58mm</strong>。</li>
 <li><strong>上段を差し替え</strong>：ロゴ＋ワードマーク → <strong>法定表示 7 項目</strong>（名称 / 原材料名 / 内容量 / 製造者 / 製造所 / アレルギー / 栄養成分表示）。</li>
