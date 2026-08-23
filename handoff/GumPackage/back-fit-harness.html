@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>
+@import url('../../DesignSystem/colors_and_type.css');
+html,body{margin:0;background:#111;color:#eee;font-family:var(--font-latin);font-size:12px;}
+#stage{position:absolute;left:-4000px;top:0;}
+.box{width:69mm;font-family:var(--font-jp);color:#fff;}
+.box.en{font-family:var(--font-latin);}
+pre{padding:12px;line-height:1.5;}
+</style></head><body>
+<div id="stage"></div><pre id="out">measuring…</pre>
+<script>
+const JA = {
+  h:'なぜ、ガムを噛むと友達が増えるのか',
+  lead:'Toopdbq は、いまいる場所でつながるアプリです。同じ場所にいる人どうしだけが、その場所の話をします。',
+  steps:[
+    '表の QR を読む。いまいる場所のサークルに入ります。',
+    'サークルには、その場所のお題が出ています。たとえば「ガムを噛む」。',
+    'お題に答えて投稿するまで、ほかの人の投稿は見えません。',
+    '投稿した瞬間、同じ場所にいる人の投稿がぜんぶ開きます。'
+  ],
+  close:'だから、見ているだけの人がいない。ガムを一枚噛んで投稿すれば、話しかける口実はもうできています。'
+};
+const EN = {
+  h:'Why chewing gum makes friends',
+  lead:'Toopdbq connects you to the place you are standing in. Only the people inside that area can post there.',
+  steps:[
+    'Scan the QR on the front. You are now in the circle for this place.',
+    'The circle has a quest waiting. Today it is: chew gum.',
+    'Until you answer it with a post, everyone else’s posts stay locked.',
+    'The moment you post, every post from the people around you opens up.'
+  ],
+  close:'So nobody is only watching. Chew a stick, post it, and you already have a reason to say hello.'
+};
+
+// 1 レイアウト = 見出し + リード + 4ステップ(番号付) + 締め
+function build(d, en, base, hMul, w){
+  const b = document.createElement('div');
+  b.className = 'box' + (en?' en':'');
+  b.style.width = w + 'mm';
+  b.style.fontSize = base + 'mm';
+  b.style.lineHeight = '1.35';
+  let s = '';
+  s += '<div style="font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:-0.04em;">'+d.h+'</div>';
+  s += '<div style="margin-top:'+(base*0.7).toFixed(3)+'mm;font-weight:500;">'+d.lead+'</div>';
+  s += '<div style="margin-top:'+(base*0.8).toFixed(3)+'mm;display:flex;flex-direction:column;gap:'+(base*0.32).toFixed(3)+'mm;">';
+  d.steps.forEach((t,i)=>{
+    s += '<div style="display:flex;gap:'+(base*0.55).toFixed(3)+'mm;align-items:baseline;"><span style="flex:none;font-weight:900;">'+(i+1)+'</span><span style="flex:1;">'+t+'</span></div>';
+  });
+  s += '</div>';
+  s += '<div style="margin-top:'+(base*0.8).toFixed(3)+'mm;font-weight:700;">'+d.close+'</div>';
+  b.innerHTML = s;
+  return b;
+}
+const stage = document.getElementById('stage');
+function height(d, en, base, hMul, w){
+  const b = build(d, en, base, hMul, w);
+  stage.appendChild(b);
+  const h = b.getBoundingClientRect().height;
+  stage.removeChild(b);
+  return h;
+}
+const MM = (()=>{ const p=document.createElement('div'); p.style.width='100mm'; stage.appendChild(p); const v=p.getBoundingClientRect().width/100; stage.removeChild(p); return v; })();
+function maxFit(d, en, hMul, w, capMm){
+  let lo=0.8, hi=6.0;
+  for(let i=0;i<40;i++){
+    const mid=(lo+hi)/2;
+    if(height(d,en,mid,hMul,w)/MM <= capMm) lo=mid; else hi=mid;
+  }
+  return lo;
+}
+const lines=[];
+lines.push('1mm = '+MM.toFixed(4)+'px');
+lines.push('');
+lines.push('本文の最大級数（見出し=本文×hMul・行送り1.35・padding 0）');
+lines.push('cap = ブロックが収まる高さ(mm)。幅 w(mm)。');
+lines.push('');
+lines.push('lang  w(mm)  hMul  cap(mm)   本文max(mm)  見出し(mm)  総高(mm)');
+for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
+  for(const w of [69,58,49]){
+    for(const hMul of [2.4,2.0]){
+      for(const cap of [52,44,40,36]){
+        const b=maxFit(d,en,hMul,w,cap);
+        const h=height(d,en,b,hMul,w)/MM;
+        lines.push(`${lang}    ${String(w).padStart(2)}    ${hMul.toFixed(1)}   ${String(cap).padStart(2)}      ${b.toFixed(2)}        ${(b*hMul).toFixed(2)}       ${h.toFixed(2)}`);
+      }
+    }
+  }
+}
+// 見出し単体の最大幅（1行に収まる級数）
+lines.push('');
+lines.push('見出しを1行で入れたときの最大級数');
+for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
+  for(const w of [69,58,49]){
+    const p=document.createElement('div');
+    p.style.cssText='position:absolute;width:auto;white-space:nowrap;font-weight:900;letter-spacing:-0.04em;font-size:10mm;line-height:1.1;font-family:'+(en?'var(--font-latin)':'var(--font-jp)');
+    p.textContent=d.h; stage.appendChild(p);
+    const wpx=p.getBoundingClientRect().width; stage.removeChild(p);
+    lines.push(`${lang} w=${w}mm : ${(10*w*MM/wpx).toFixed(2)}mm で1行 (10mm 時の実幅 ${(wpx/MM).toFixed(1)}mm)`);
+  }
+}
+// 推奨構成での各ブロックの y 位置（折り線 18 / 40 / 44mm との衝突を見る）
+lines.push('');
+lines.push('各行の y 範囲（mm・trim 上端基準）と折り線 18/40/44 との衝突');
+for(const [lang,d,en,base,hMul] of [['JA',JA,false,2.13,2.4],['EN',EN,true,2.03,2.4]]){
+  const b=build(d,en,base,hMul,69);
+  b.style.position='absolute'; b.style.left='0'; b.style.top='0';
+  stage.appendChild(b);
+  const top=b.getBoundingClientRect().top;
+  lines.push(`-- ${lang} (本文${base}mm / 見出し${(base*hMul).toFixed(2)}mm / 幅69mm)`);
+  const walk=(el,label)=>{
+    const r=el.getBoundingClientRect();
+    const y0=(r.top-top)/MM, y1=(r.bottom-top)/MM;
+    const hit=[18,40,44].filter(f=>y0<f&&f<y1);
+    lines.push(`   ${label.padEnd(10)} y ${y0.toFixed(1)}–${y1.toFixed(1)}${hit.length?'   ← 折り線 '+hit.join('/')+'mm を跨ぐ':''}`);
+  };
+  const kids=[...b.children];
+  walk(kids[0],'見出し'); walk(kids[1],'リード');
+  [...kids[2].children].forEach((s,i)=>walk(s,'ステップ'+(i+1)));
+  walk(kids[3],'締め');
+  stage.removeChild(b);
+}
+// 各パートの文字数
+lines.push('');
+lines.push('文字数: JA 見出し'+JA.h.length+' / リード'+JA.lead.length+' / ステップ計'+JA.steps.join('').length+' / 締め'+JA.close.length+' = '+(JA.h+JA.lead+JA.steps.join('')+JA.close).length);
+lines.push('        EN 見出し'+EN.h.length+' / リード'+EN.lead.length+' / ステップ計'+EN.steps.join('').length+' / 締め'+EN.close.length+' = '+(EN.h+EN.lead+EN.steps.join('')+EN.close).length);
+document.getElementById('out').textContent = lines.join('\n');
+</script></body></html>
