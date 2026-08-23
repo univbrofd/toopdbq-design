@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+@import url('../../DesignSystem/colors_and_type.css');
+:root{
+  --grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iMC41NSIvPjwvc3ZnPg==");
+}
+body{margin:0;background:#0d0d10;}
+a{color:#ff3e88;text-decoration:none;}
+a:hover{color:#fff0a6;}
+@media print{
+  body{background:#fff;}
+  [data-zoom]{transform:none !important;}
+  [data-zoom-box]{width:71mm !important; height:58mm !important;}
+  [data-guides]{display:none !important;}
+  [data-screenonly]{display:none !important;}
+}
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:32px 36px 64px; font-family:var(--font-jp); color:var(--text-1); box-sizing:border-box;">
+
+<div data-screenonly="1" style="max-width:1180px; display:flex; flex-direction:column; gap:6px; margin-bottom:28px;">
+  <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v2 full bleed</div>
+  <div style="font-size:24px; font-weight:700;">世界一かっこいいガムの噛み方選手権！ — 板ガムパッケージ 8案</div>
+  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:74ch;">仕上がり 横65×縦52mm ／ artboard 71×58mm（塗り足し3mm）／ 面構成 上段19・中段22・下段11mm。安全余白は取らず、文字・面を trim ぎわまで使う設計に変更しています（端の余白は光学調整の 2mm のみ）。上段=メインコピー、中段=サブコピー＋[ロゴ] Toopdbq [QR]、下段=畳むと隠れる面。イエロー=折り線（上端から19mm・41mm）のみ<strong style="font-weight:700;">非印刷ガイド</strong>として残し（trim枠は表示から削除）、印刷時は自動的に消えます。4a は画面上のみ2.4倍で表示（印刷は実寸）。QR は同梱 <a href="qr/toopdbq_com.svg">qr/toopdbq_com.svg</a> をそのまま使用（dark-on-white・13.4mm角／白チップ15mm）。</div>
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#005f67"/><rect x="60" y="60" width="80" height="64" rx="6" fill="#ff3e88"/><text x="100" y="102" font-family="sans-serif" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">噛</text></svg></template>
+
+<div data-screenonly="1" style="max-width:1180px; margin:0 0 16px; font-size:13px; font-weight:400; line-height:1.7; color:var(--text-2);"><strong style="font-weight:700; color:var(--text-1);">turn 4 — 確定案</strong>：背景 2a ／ 上段 2b ／ 中段は右にQR最大（21mmチップ・svg19.6mm）。文字は trim ぎわ1.4mmまで最大化、左は2段（上=行動＋矢印、下=[ロゴ] Toopdbq）。</div>
+
+<section style="display:flex; flex-wrap:wrap; gap:34px 30px; align-items:flex-start; margin-bottom:56px;">
+
+<!-- 4a 確定案（QR最大・左2段）
+     狙い: 中段を「行動→入口」の一直線にする。左上で何をするかを言い切り、矢印でそのまま右のQRへ視線を渡す。
+     グラデは 2a のまま無回転＝明部は右下の下段へ落ち、QRの白チップとワードマークは暗部側に載る。
+     書体は上段 Noto 900 が主役、中段は 2.9mm/700 の1行と Pacifico のワードマークで役割を分ける。 -->
+<div id="4a" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">4a</span><span>確定案 — QR最大・左2段</span></div>
+  <div data-zoom-box="1" style="width:170.4mm; height:139.2mm;"><div data-zoom="1" data-screen-label="4a" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2.4); transform-origin:top left;">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:0.4mm 0.4mm 0; display:flex; align-items:center; gap:2.2mm;">
+        <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:12mm; width:auto; display:block; flex:none;">
+        <div style="font-family:var(--font-display); font-size:10.4mm; line-height:1; color:#fff; padding-bottom:2.2mm;">Toopdbq</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
+        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
+        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
+        <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div></div>
+</div>
+
+</section>
+
+<div data-screenonly="1" style="max-width:1180px; margin:0 0 16px; font-size:13px; font-weight:400; line-height:1.7; color:var(--text-2);"><strong style="font-weight:700; color:var(--text-1);">turn 3 — 中段バリエーション</strong>：背景は 2a（放射グラデ無回転＋grain）、上段は 2b（Noto 900 / 6.2mm 2行）に固定し、中段（19–41mm）だけを8通り。QRは全案 dark-on-white 13.4mm角。</div>
+
+<section style="display:flex; flex-wrap:wrap; gap:34px 30px; align-items:flex-start; margin-bottom:56px;">
+
+<!-- 3a グラスレール（2a の中段を基準形として据え置き）
+     狙い: サブコピーを上、ブランド3要素を1枚のガラスレールに載せて「読む→スキャン」の順路を1本にする。
+     グラデは無回転のまま。レールの黒ガラスがコピーの可読性を構造で担保し、QRの白が終着点になる。 -->
+<div id="3a" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3a</span><span>グラスレール</span></div>
+  <div data-screen-label="3a" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:1.4mm;">
+        <div style="font-size:2.8mm; font-weight:500; color:#fff;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm; padding:1.4mm 1.6mm; border-radius:2.4mm; background:rgba(8,8,12,0.42); backdrop-filter:blur(1.2mm) saturate(160%); border:0.3mm solid rgba(255,255,255,0.22);">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6.4mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5mm; line-height:1; color:#fff; padding-bottom:1.1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3b 左右反転（QR先出し）
+     狙い: 手渡しの持ち方＝左手親指が右下を隠す想定で、QRを左に振って指に隠れない位置へ。視線は QR → コピーの逆順。
+     ブランド行は右揃えにして、上段の左揃えコピーとの間に対角のリズムを作る。効果は面なしのフラット。 -->
+<div id="3b" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3b</span><span>左右反転（QR先出し）</span></div>
+  <div data-screen-label="3b" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; align-items:center; gap:2.4mm;">
+        <div style="width:15mm; height:15mm; flex:none; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; align-items:flex-end; gap:1.6mm; text-align:right;">
+          <div style="font-size:2.6mm; font-weight:500; line-height:1.35; color:#fff;">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <div style="display:flex; align-items:center; gap:1.6mm;">
+            <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.6mm; width:auto; display:block;">
+            <div style="font-family:var(--font-display); font-size:4.8mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3c 白パネル（右半分を塗り足しまで反転）
+     狙い: 中段の右2/3だけを白の紙面にして QR を「印刷物の窓」として扱う。反転面は配布現場でのスキャン確度が最も高い。
+     グラデは無回転のまま左側に残り、白ワードマークは地の暗部に、黒サブコピーは白面に置いて役割を分ける。 -->
+<div id="3c" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3c</span><span>白パネル反転</span></div>
+  <div data-screen-label="3c" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:26mm; top:22mm; width:45mm; height:22mm; background:#fff;"></div>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 1.8mm 0 2mm; display:flex; align-items:center; gap:2mm;">
+        <div style="width:19mm; flex:none; display:flex; flex-direction:column; align-items:flex-start; gap:1.2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6mm; width:auto; display:block; flex:none;">
+          <div style="font-family:var(--font-display); font-size:4.4mm; line-height:1; color:#fff;">Toopdbq</div>
+        </div>
+        <div style="flex:1; display:flex; align-items:center; gap:1.8mm;">
+          <div style="flex:1; font-size:2.4mm; font-weight:700; line-height:1.35; color:#08080b;">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:14mm; height:14mm; flex:none; display:block;">
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3d QR主役（18mm）
+     狙い: 中段を「スキャン面」と割り切り、QRを18mm まで上げて手元10cmでも一撃で読ませる。コピーは添え物に降格。
+     グラデは無回転。白チップの面積が最大の白＝視線の終着点になるため、脇のコピーは 2.4mm/400 に落とす。 -->
+<div id="3d" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3d</span><span>QR主役 18mm</span></div>
+  <div data-screen-label="3d" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; align-items:center; gap:2.4mm;">
+        <div style="width:20mm; height:20mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:18mm; height:18mm; display:block;"></div>
+        <div style="flex:1; display:flex; flex-direction:column; gap:1.4mm;">
+          <div style="font-size:2.4mm; font-weight:400; line-height:1.4; color:rgba(255,255,255,.9);">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <div style="display:flex; align-items:center; gap:1.4mm;">
+            <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5mm; width:auto; display:block;">
+            <div style="font-family:var(--font-display); font-size:4.2mm; line-height:1; color:#fff; padding-bottom:0.8mm;">Toopdbq</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3e 罫線区切り（折り線と韻を踏ませる）
+     狙い: 中段の上端に罫線を1本引いて上段コピーと縁を切り、折り線の構造をそのままデザインの分割線として見せる。
+     グラデは無回転。効果は罫線1本のみ＝引き算の案。QRチップは角丸を小さくして紙面の直線に合わせる。 -->
+<div id="3e" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3e</span><span>罫線区切り</span></div>
+  <div data-screen-label="3e" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:1.6mm 2mm 0; border-top:0.4mm solid rgba(255,255,255,.5); display:flex; align-items:flex-start; gap:2mm;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:1.4mm;">
+          <div style="font-size:2.7mm; font-weight:500; line-height:1.4; color:#fff;">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <div style="display:flex; align-items:center; gap:1.6mm;">
+            <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.6mm; width:auto; display:block;">
+            <div style="font-family:var(--font-display); font-size:4.6mm; line-height:1; color:#fff; padding-bottom:0.9mm;">Toopdbq</div>
+          </div>
+        </div>
+        <div style="width:16mm; height:16mm; flex:none; border-radius:0.8mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:14mm; height:14mm; display:block;"></div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff;">開いてくれてありがとう。ガムのゴミはこの紙で包んでね</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3f 手順ナンバリング
+     狙い: サブコピーを「撮る / 投稿する」の2手順に視覚分解し、Inter の番号で順路を明示。参加ハードルを最短で見せる。
+     グラデは無回転。番号は白のまま、装飾を足さずウェイトと配置だけで階層を作る。QRは手順の終点として右に置く。 -->
+<div id="3f" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3f</span><span>手順ナンバリング</span></div>
+  <div data-screen-label="3f" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; align-items:center; gap:2.2mm;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:1.2mm;">
+          <div style="font-size:2.5mm; font-weight:700; line-height:1.3; color:#fff;">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <div style="display:flex; gap:2.4mm;">
+            <div style="display:flex; align-items:baseline; gap:1mm;"><span style="font-family:var(--font-latin); font-size:2.6mm; font-weight:700; color:#fff;">01</span><span style="font-size:2.4mm; font-weight:400; color:rgba(255,255,255,.88);">撮る</span></div>
+            <div style="display:flex; align-items:baseline; gap:1mm;"><span style="font-family:var(--font-latin); font-size:2.6mm; font-weight:700; color:#fff;">02</span><span style="font-size:2.4mm; font-weight:400; color:rgba(255,255,255,.88);">投稿する</span></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:1.4mm; margin-top:0.6mm;">
+            <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5mm; width:auto; display:block;">
+            <div style="font-family:var(--font-display); font-size:4.2mm; line-height:1; color:#fff; padding-bottom:0.8mm;">Toopdbq</div>
+          </div>
+        </div>
+        <div style="width:16mm; height:16mm; flex:none; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:14mm; height:14mm; display:block;"></div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3g 黒帯フルブリード
+     狙い: 中段まるごとを黒帯にして、畳んだとき見える41mmの下半分を「情報の棚」に固定する。帯の中で3要素を横一列に整列。
+     グラデは無回転で上段と下段にだけ残り、帯がコントラストの床になる。可読性は面で担保、影・枠は足さない。 -->
+<div id="3g" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3g</span><span>黒帯フルブリード</span></div>
+  <div data-screen-label="3g" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:0; top:22mm; width:71mm; height:22mm; background:#08080b;"></div>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 1.8mm; display:flex; align-items:center; gap:2mm;">
+        <div style="flex:1; display:flex; flex-direction:column; gap:1.6mm;">
+          <div style="font-size:2.6mm; font-weight:500; line-height:1.35; color:#fff;">ガムを噛んでいる姿を<br>撮って投稿するだけ</div>
+          <div style="display:flex; align-items:center; gap:1.6mm;">
+            <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.4mm; width:auto; display:block;">
+            <div style="font-family:var(--font-display); font-size:4.6mm; line-height:1; color:#fff; padding-bottom:0.9mm;">Toopdbq</div>
+          </div>
+        </div>
+        <div style="width:16mm; height:16mm; flex:none; border-radius:1.2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:14mm; height:14mm; display:block;"></div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 3h 3分割（ロゴ｜コピー｜QR）
+     狙い: 中段を3カラムに割り、左＝出自、中＝行動、右＝入口と役割を1列ずつ与える。畳んだ状態で情報が横一列に読める。
+     グラデは無回転。区切りは細い縦罫2本だけ（0.3mm）で、面や影は足さない。ワードマークは縦積みで幅を節約。 -->
+<div id="3h" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3h</span><span>3分割カラム</span></div>
+  <div data-screen-label="3h" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; align-items:center; gap:2mm;">
+        <div style="width:12mm; flex:none; display:flex; flex-direction:column; align-items:flex-start; gap:1mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.2mm; width:auto; display:block; flex:none;">
+          <div style="font-family:var(--font-display); font-size:3.4mm; line-height:1; color:#fff;">Toopdbq</div>
+        </div>
+        <div style="flex:1; padding:0 1.6mm; border-left:0.3mm solid rgba(255,255,255,.45); border-right:0.3mm solid rgba(255,255,255,.45); font-size:2.2mm; font-weight:500; line-height:1.45; color:#fff;">ガムを噛んで<br>いる姿を撮って<br>投稿するだけ</div>
+        <div style="width:15mm; height:15mm; flex:none; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+</section>
+
+<div data-screenonly="1" style="max-width:1180px; margin:0 0 16px; font-size:13px; font-weight:400; line-height:1.7; color:var(--text-2);"><strong style="font-weight:700; color:var(--text-1);">turn 2 — スタイル8案</strong>（背景・上段も含めて振ったもの）</div>
+
+<section style="display:flex; flex-wrap:wrap; gap:34px 30px; align-items:flex-start;">
+
+<!-- 2a ブランドグラス
+     狙い: 上段はコピーだけを塗り足しまで通し、中段の [ロゴ] Toopdbq [QR] を1枚の liquid glass レールに乗せて導線を1本化。
+     グラデは無回転＝明部(#fff0a6)を右下の下段側へ落とし、上段の大きな白文字は teal〜紫の暗部に載せる。
+     書体は Noto Sans JP 900 の2行組。「！」まで含めて主役1つ、サブは 500 に落として競合させない。 -->
+<div id="2a" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2a</span><span>ブランドグラス</span></div>
+  <div data-screen-label="2a" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:5.6mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.03em; text-shadow:0 0.4mm 1mm rgba(0,0,0,.45);">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:1.4mm;">
+        <div style="font-size:2.8mm; font-weight:500; color:#fff;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm; padding:1.4mm 1.6mm; border-radius:2.4mm; background:rgba(8,8,12,0.42); backdrop-filter:blur(1.2mm) saturate(160%); border:0.3mm solid rgba(255,255,255,0.22);">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6.4mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5mm; line-height:1; color:#fff; padding-bottom:1.1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2b ミニマル
+     狙い: 上段を文字だけで埋め切る。行を trim 端から端まで通し、余白は行間だけに持たせて遠目の塊を最大化。
+     グラデは放射を-90°回転＋1.6倍で明部を左下へ逃がし、白の大判文字を暗部だけに乗せる（grain なしのフラット1枚）。
+     書体は Noto Sans JP 900、字間を詰めて2行。中段は罫線1本＋ブランド行のみで静かに。 -->
+<div id="2b" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2b</span><span>ミニマル</span></div>
+  <div data-screen-label="2b" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(-90deg) scale(1.6);"></div>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:6.2mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.05em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:2mm;">
+        <div style="font-size:2.8mm; font-weight:400; color:rgba(255,255,255,.86); padding-bottom:1.6mm; border-bottom:0.3mm solid rgba(255,255,255,.36);">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:4.8mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:400; color:#fff;">開いてくれてありがとう。ガムのゴミはこの紙で包んでね</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2c タイポグラフィポスター
+     狙い: 上段を紙面と見立て、「世界一」と「選手権！」でウェイト差をつけた4行の階段組み。文字が図版になる案。
+     グラデは linear を180°回転して明部を右下の下段へ。白文字は teal 暗部側、trim ぎわまで文字を通す。
+     書体は Noto Sans JP 400/700/900 混植。サブは小さく1行、ブランド行は下辺に押し付けて紙面の重心を上に置く。 -->
+<div id="2c" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2c</span><span>タイポポスター</span></div>
+  <div data-screen-label="2c" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful-linear); transform:rotate(180deg);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:30mm 30mm; opacity:.14; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:5.4mm; line-height:1.1; color:#fff; letter-spacing:-0.04em;"><span style="font-weight:900;">世界一</span><span style="font-weight:400;">かっこいい</span><br><span style="font-weight:400;">ガムの</span><span style="font-weight:900;">噛み方選手権！</span></div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:1.6mm;">
+        <div style="font-size:2.6mm; font-weight:500; color:rgba(255,255,255,.88); letter-spacing:0.01em;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:flex-end; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.6mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5.4mm; line-height:1; color:#fff;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:500; line-height:1.4; color:#fff;">投稿先 toopdbq.com ／ お題「かっこよくガムを噛め」<br>審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2d ストリート（ステッカー・ラフ）
+     狙い: 上段のコピーを黒帯ステッカーで塗り足しの外まで貫通させ、街の掲示物の速度感を出す。可読性は黒面で構造的に担保。
+     グラデは放射を90°回転＋1.5倍で明部を左下へ。地の色は帯の隙間からだけ鳴らす。
+     書体は Noto Sans JP 900 を詰め、「！」を別ウェイトで足す。サブは白チップの反転で順路に見せる。 -->
+<div id="2d" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2d</span><span>ストリート</span></div>
+  <div data-screen-label="2d" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(90deg) scale(1.5);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:24mm 24mm; opacity:.2; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:0; top:3mm; width:71mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.4mm 0 0; display:flex; flex-direction:column; justify-content:center; gap:1mm;">
+        <div style="align-self:flex-start; background:#08080b; padding:1.2mm 2.6mm 1.2mm 4.8mm; transform:rotate(-1.2deg); font-size:4.9mm; font-weight:900; line-height:1.08; color:#fff; letter-spacing:-0.03em; white-space:nowrap;">世界一かっこいい</div>
+        <div style="align-self:flex-start; background:#08080b; padding:1.2mm 2.6mm 1.2mm 4.8mm; transform:rotate(0.7deg); font-size:4.9mm; font-weight:900; line-height:1.08; color:#fff; letter-spacing:-0.04em; white-space:nowrap;">ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 4.8mm; display:flex; flex-direction:column; justify-content:center; gap:1.6mm;">
+        <div style="align-self:flex-start; background:#fff; padding:0.8mm 1.8mm; font-size:2.5mm; font-weight:700; color:#08080b; white-space:nowrap;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6.4mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1mm; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 0.6mm 0 rgba(8,8,12,.55);"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 4.8mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.3mm; font-weight:700; color:#fff;">開いた人だけの追い込み: 噛む前に一度、鏡を見ておけ。</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2e レトロ駄菓子
+     狙い: 上段を塗り足しまで届くクリーム地の看板にし、活版風の黒文字で「選手権！」を素朴に張り出す。
+     グラデは放射を2倍に拡大して中段・下段だけに残し、明部は右下へ。白抜き細文字を使わないので CMYK でも潰れない。
+     書体は Noto Sans JP 900。装飾はミシン目の点線1本だけ＝効果の引き算。 -->
+<div id="2e" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2e</span><span>レトロ駄菓子</span></div>
+  <div data-screen-label="2e" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:scale(2);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:28mm 28mm; opacity:.22; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:0; top:0; width:71mm; height:22mm; background:#fdf6e3;"></div>
+    <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.4mm dotted rgba(8,8,12,.32);"></div>
+    <div style="position:absolute; left:0; top:3mm; width:71mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 4.8mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:5.6mm; font-weight:900; line-height:1.16; color:#08080b; letter-spacing:-0.03em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 4.8mm; display:flex; flex-direction:column; justify-content:flex-end; gap:1.6mm;">
+        <div style="font-size:2.7mm; font-weight:700; color:#fff;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6.2mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:0.8mm; background:#fff; border:0.4mm solid #08080b; box-sizing:border-box; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 4.8mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.3mm; font-weight:700; color:#fff; white-space:nowrap;">当たりハズレなし、全員エントリー可。</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2f ポップ
+     狙い: 「選手権！」の！を白い丸に置き換えて遠目のシルエットを作る。上段は文字と丸の2要素だけで構成。
+     グラデは放射を1.3倍で中央寄せ、明部は右下角へ。丸と QR チップの白が同じ大きさで韻を踏む。
+     書体は Noto Sans JP 900、字面を詰めて丸に寄せる。影なし・面のみの1効果。 -->
+<div id="2f" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2f</span><span>ポップ</span></div>
+  <div data-screen-label="2f" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:scale(1.3);"></div>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; align-items:center; gap:2mm;">
+        <div style="font-size:5mm; font-weight:900; line-height:1.14; color:#fff; letter-spacing:-0.04em;">世界一かっこいい<br>ガムの噛み方選手権</div>
+        <div style="margin-left:auto; width:14mm; height:14mm; flex:none; border-radius:9999px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:9mm; font-weight:900; line-height:1; color:#08080b;">！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:1.6mm;">
+        <div style="align-self:flex-start; padding:0.9mm 2mm; border-radius:9999px; background:#fff; font-size:2.5mm; font-weight:700; color:#08080b; white-space:nowrap;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6.4mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:5mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="display:flex; gap:1.4mm; align-items:center; flex-wrap:wrap;">
+          <span style="padding:0.7mm 1.6mm; border-radius:9999px; background:#fff; font-size:2.2mm; font-weight:700; color:#08080b;">キレ</span>
+          <span style="padding:0.7mm 1.6mm; border-radius:9999px; background:#fff; font-size:2.2mm; font-weight:700; color:#08080b;">目線</span>
+          <span style="padding:0.7mm 1.6mm; border-radius:9999px; background:#fff; font-size:2.2mm; font-weight:700; color:#08080b;">余裕</span>
+          <span style="font-size:2.2mm; font-weight:500; color:#fff;">この3点で審査します。</span>
+        </div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2g スイスグリッド（白面）
+     狙い: 上段を白の紙面として塗り足しまで全面に置き、選手権名を左揃えで淡々と。配布現場の可読性を最優先した案。
+     グラデは linear を180°回転して中段以下に回し、明部は下段側へ。白面と地の境界＝折り線が構造として見える。
+     書体は Noto Sans JP 700 の見出しに Inter の番号を併走。「！」は同ウェイトで抑え、騒がせない。 -->
+<div id="2g" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2g</span><span>スイスグリッド</span></div>
+  <div data-screen-label="2g" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful-linear); transform:rotate(180deg) scale(1.4);"></div>
+    <div style="position:absolute; left:0; top:0; width:71mm; height:22mm; background:#fff;"></div>
+    <div style="position:absolute; left:0; top:3mm; width:71mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 4.8mm 0; display:flex; flex-direction:column; justify-content:center; gap:1.4mm;">
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:700; letter-spacing:.1em; color:#ff3e88;">01</div>
+        <div style="font-size:5mm; font-weight:700; line-height:1.18; color:#08080b; letter-spacing:-0.03em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:1.6mm 4.8mm 0; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="font-size:2.7mm; font-weight:500; color:#fff;">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm;">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:6mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:4.8mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 4.8mm 1.5mm; display:flex; align-items:flex-end; justify-content:space-between; gap:2mm;">
+        <div style="font-size:2.2mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
+        <div style="font-family:var(--font-latin); font-size:2.2mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+<!-- 2h ミニマル（余白主役）
+     狙い: 2b の「大きさ」ではなく「間」で押す。上段は3行に割って行間を大きく取り、残りは全部余白として持たせる。
+     グラデは放射を180°回転＋2.6倍で明部を画面外へ逃がし、teal〜紫の暗部だけを地にして白文字を最大限安全に。
+     書体は Noto Sans JP 700。QR は罫線で中段に区切って置き、ブランド行を最小構成にする。 -->
+<div id="2h" style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2h</span><span>ミニマル（余白）</span></div>
+  <div data-screen-label="2h" style="position:relative; width:71mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card);">
+    <div style="position:absolute; left:-14.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(180deg) scale(2.6);"></div>
+    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:32mm 32mm; opacity:.12; mix-blend-mode:overlay;"></div></sc-if>
+    <div style="position:absolute; left:3mm; top:3mm; width:65mm; height:52mm; display:flex; flex-direction:column;">
+      <div style="height:19mm; box-sizing:border-box; padding:1.5mm 2mm 0; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:4.2mm; font-weight:700; line-height:1.5; color:#fff; letter-spacing:-0.01em;">世界一かっこいい<br>ガムの噛み方選手権！</div>
+      </div>
+      <div style="height:22mm; box-sizing:border-box; padding:0 2mm; display:flex; flex-direction:column; justify-content:center; gap:2.2mm;">
+        <div style="font-size:2.6mm; font-weight:400; color:rgba(255,255,255,.82);">ガムを噛んでいる姿を撮って投稿するだけ</div>
+        <div style="display:flex; align-items:center; gap:2mm; padding-top:2mm; border-top:0.3mm solid rgba(255,255,255,.3);">
+          <img src="../../assets/images/logo_toopdbq.png" alt="" style="height:5.6mm; width:auto; display:block;">
+          <div style="font-family:var(--font-display); font-size:4.6mm; line-height:1; color:#fff; padding-bottom:1mm;">Toopdbq</div>
+          <div style="margin-left:auto; width:15mm; height:15mm; border-radius:1.6mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:13.4mm; height:13.4mm; display:block;"></div>
+        </div>
+      </div>
+      <div style="height:11mm; box-sizing:border-box; padding:0 2mm 1.5mm; display:flex; align-items:flex-end;">
+        <div style="font-size:2.2mm; font-weight:400; color:rgba(255,255,255,.9);">開いてくれてありがとう。ガムのゴミはこの紙で包んでね</div>
+      </div>
+    </div>
+    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+      <div style="position:absolute; left:0; top:22mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:44mm; width:71mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+    </div></sc-if>
+  </div>
+</div>
+
+</section>
+
+<div data-screenonly="1" style="margin-top:40px; max-width:1180px; font-size:12px; font-weight:400; line-height:1.8; color:var(--text-2);">
+  <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">印刷申し送り</div>
+  安全余白なしの full bleed 設計。文字・面は trim ぎわ（端 2mm 前後）まで使い、2d / 2e / 2g は面を塗り足しの外まで通しています。断裁ズレ ±1mm を見込み、文字の縁は trim から 1.5mm 以上内側で止めています。<br>
+  QR は 8案すべて dark-on-white（同梱 svg 無改変・13.4mm角／白チップ15mm・quiet zone 内包）。<code style="font-family:var(--font-latin);">qr/toopdbq_com_white.svg</code> はリポジトリ上で dark 版とバイト同一のため使用不可。<br>
+  白文字はグラデ暗部（teal 〜 紫）側のみ。#ff3e88 は 2g の番号1箇所だけ。最小文字 2.2mm、最細罫線 0.3mm。旧版（コピーA–D 準拠）は <code style="font-family:var(--font-latin);">GumPackage_v1.dc.html</code> に保存。
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      guides: this.props.guides ?? true,
+      grain: this.props.grain ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>
