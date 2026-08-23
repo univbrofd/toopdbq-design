@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<!-- @dsCard group="Handoff" name="GumPackage v3 — 法定表示帯 8案" viewport="1480x1200" subtitle="仕上がり 69×52mm / artboard 75×58mm / 上段18・中段22・下段12mm ・ 上段=法定表示（白文字・padding0・別地なし）JA4案+EN4案・中段は v2 確定案 4a のまま" -->
+<!-- @dsCard group="Handoff" name="GumPackage v3.2 — 採用案 1a / 1b" viewport="1180x760" subtitle="採用1レイアウトのJA/EN 2面 ・ 上段18=法定表示（罫線あり・グラデnone）/ 中段22 / 下段12（可視4＋デッド8）× 69mm" -->
 <helmet>
 <meta name="design_doc_mode" content="canvas">
 <style>
@@ -20,7 +20,8 @@ a{color:#ff3e88;text-decoration:none;}
 a:hover{color:#fff0a6;}
 @media print{
   body{background:#fff;}
-  [data-zoom]{transform:none !important;}
+  [data-view]{transform:none !important; width:75mm !important; height:58mm !important;}
+  [data-artboard]{left:0 !important; top:0 !important;}
   [data-zoom-box]{width:75mm !important; height:58mm !important;}
   [data-guides]{display:none !important;}
   [data-screenonly]{display:none !important;}
@@ -30,343 +31,123 @@ a:hover{color:#fff0a6;}
 
 <div style="min-height:100vh; padding:32px 36px 64px; font-family:var(--font-jp); color:var(--text-1); box-sizing:border-box;">
 
-<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#005f67"/><rect x="20" y="34" width="160" height="2" fill="#fff"/><rect x="20" y="52" width="160" height="2" fill="#fff"/><rect x="20" y="70" width="160" height="2" fill="#fff"/><rect x="26" y="100" width="148" height="54" rx="4" fill="#ff3e88"/><text x="100" y="140" font-family="sans-serif" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">v3</text></svg></template>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#005f67"/><rect x="0" y="30" width="200" height="2" fill="#fff"/><rect x="0" y="48" width="200" height="2" fill="#fff"/><rect x="0" y="66" width="200" height="2" fill="#fff"/><rect x="22" y="94" width="156" height="52" rx="4" fill="#ff3e88"/><text x="100" y="133" font-family="sans-serif" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">v3.2</text><rect x="0" y="164" width="200" height="1.5" fill="#00e5ff"/></svg></template>
 
 <div data-screenonly="1" style="max-width:1180px; display:flex; flex-direction:column; gap:6px; margin-bottom:26px;">
-  <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v3 legal band</div>
-  <div style="font-size:24px; font-weight:700;">板ガムパッケージ — 上段を法定表示へ差し替え（日本語4案／英語4案）</div>
-  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:78ch;">仕上がり 横69×縦52mm ／ artboard 75×58mm（塗り足し3mm）／ 面構成 上段18・中段22・下段12mm（全案固定）。上段＝法定表示7項目を<strong style="font-weight:700;">padding 0・セーフエリアなし</strong>で trim の端いっぱいまで、白文字＋白罫のみ。<strong style="font-weight:700;">白パネル・スクリムは一切敷かず、背景はグラデ1枚のまま</strong>で、潰れ対策は「級数（構造C）」と「グラデの向き」の2つだけで取っています。中段＝v2 確定案 <a href="GumPackage.dc.html">4a</a> のまま（5.6mm/900/-0.06em・QR白チップ21mm・svg19.6mm・gap1.6mm／幅65→69mm の +4mm はコピー側の余白へ、QRは縮小せず）。QRは同梱 <a href="qr/toopdbq_com.svg">qr/toopdbq_com.svg</a> を無改変・dark-on-white・実寸19.6mm。イエロー破線＝折り線（trim上端から18mm・40mm）の<strong style="font-weight:700;">非印刷ガイド</strong>。画面上は全案2倍表示（印刷は実寸）。</div>
+  <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v3.2 採用案</div>
+  <div style="font-size:24px; font-weight:700;">板ガムパッケージ — 採用レイアウト 1a（日本語）／ 1b（英語）</div>
+  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:78ch;">採用は ①罫線あり・グラデ none の1レイアウトのみ。以後この JA/EN 2面だけを進行します（2a/2b・3a/3b・4a/4b は破棄、構造C＝栄養成分表示を下段へ逃がす案も下段の可視域が4mmしかないため成立せず破棄）。<strong style="font-weight:700;">下段12mm を 可視4mm ＋ デッド8mm に分割</strong>し、可視4mm には一文だけ（padding 0・trim 左右端に接地・必ず1行）、デッド8mm は封入部で完成品では誰の目にも触れないため背景グラデ＋grain のみで文字・罫・ロゴを一切置いていません。プレビューは既定で trim 基準（69×52mm）。Tweaks の「trim表示」OFF で塗り足し込み 75×58mm。QRは同梱 <a href="qr/toopdbq_com.svg">qr/toopdbq_com.svg</a> を無改変・dark-on-white・19.6mm。画面上は2倍表示。</div>
 </div>
 
 <div data-screenonly="1" style="max-width:1180px; display:flex; flex-direction:column; gap:8px; margin-bottom:26px; padding:13px 16px; border-left:3px solid #ff3e88; background:#17131a; border-radius:0 6px 6px 0; font-size:12.5px; line-height:1.75; color:var(--text-2);">
-  <div style="font-weight:700; color:#ffb3d0;">申し送り 4点（握りつぶさず案の中で扱ったもの）</div>
-  <div><strong style="font-weight:700; color:var(--text-1);">1. グラデの向きは3案 rotate(200deg) scale(1.8)、<a href="#1a">1a</a>/<a href="#1b">1b</a> だけ none。</strong> 上段左端の白文字コントラストは none で 2.77:1（実測最悪値）、200deg/1.8 で 5.37:1。左端が実際どう見えるかを判断できるよう、罫線あり案（①）だけ現行4aの無回転で出しています。</div>
-  <div><strong style="font-weight:700; color:var(--text-1);">2. 余白ゼロ＝端1mmは断裁ズレ（±1mm）で欠ける前提。</strong> 端に来るのは項目ラベル・住所の末尾など<strong style="font-weight:700; color:var(--text-1);">欠けても意味が壊れない語</strong>だけ。「●アレルギー物質…」と栄養成分の数値は左右 1.6mm 以上内側に寄せ、断裁ズレでも欠けない位置に固定しています（罫は端まで通す）。</div>
-  <div><strong style="font-weight:700; color:var(--text-1);">3. Toopdbqの署名が QR と下段の toopdbq.com だけになる。</strong> 上段からロゴ＋ワードマークが消え、中段は現状維持のため。1a/1b の下段にワードマークを戻した案を混ぜてあります（他6案は戻していない＝比較用）。<strong style="font-weight:700; color:var(--text-1);">法定表示帯の中にはロゴを置いていません</strong>（帯に「製造者 株式会社ロッテ」が入るため製造者の誤認を招く）。</div>
-  <div><strong style="font-weight:700; color:var(--text-1);">4. 構造C（<a href="#3a">3a</a>/<a href="#3b">3b</a>）は要判断。</strong> 栄養成分表示を下段へ逃がすと上段を 1.15→1.65mm（+43%）に上げられる唯一のレバーですが、<strong style="font-weight:700; color:var(--text-1);">下段は畳むと隠れる面</strong>です。表示は購入者が見られる状態である必要があるため、「折り位置で栄養成分表示が隠れてよいか」は法務確認が前提。隠せない結論なら ①②④（いずれも上段1.15mm）に戻す想定です。</div>
+  <div style="font-weight:700; color:#ffb3d0;">申し送り</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">署名は QR と一文中の toopdbq@gmail.com の2つだけ。</strong> 下段にあった「審査基準…」・Pacifico のワードマーク・toopdbq.com は撤去しました（復活させていません）。法定表示帯の中に Toopdbq のマークは置きません（帯に「製造者 株式会社ロッテ」が入るため製造者の誤認を招く）。</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">1b は中段まで含めて全文英語。</strong> 中段は "Chew gum," / "make friends." の2行（5.6mm/900/-0.06em/nowrap・Inter）。使える幅 46.40mm に対し 27.7 / 33.2mm で収まります（"Chew some gum, / make some friends." は 47.7mm で不可）。英字は全大文字にしていません。</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">HANDOFF.md は上書きしていません。</strong> GitHub raw を取得しましたが内容は v1（65×52mm・19/22/11mm）のままで、プロジェクト側のコピーと同一、v3.1/v3.2 の追補も含まれていませんでした（差分ゼロ）。raw を更新いただければ反映します。</div>
 </div>
 
 <section style="display:flex; flex-wrap:wrap; gap:34px 30px; align-items:flex-start; margin-bottom:44px;">
 
-<!-- 1a ①罫線あり（JA・グラデ none）
-     狙い: ロッテ実物に近い密度感。白ヘアライン0.3mm(rgba 255,255,255,.55)で7項目を横罫に切り、罫は trim の端まで通す。padding 0。
-     級数は構造Aの実測上限 1.15mm。padding を撤廃しても行数×行送りで量子化されるため JA は 1.15mm から上がらず、そのぶん行間と罫に配分した。
-     グラデ向きは唯一の none＝現行4aのまま。上段左端 2.77:1 が実物でどう見えるかを判定するための基準案。下段にワードマークを戻したのもこの案だけ。 -->
+<!-- 1a 採用案（JA・①罫線あり・グラデ none）
+     詰めた結果: 上段の本文 1.40mm（v3 の 1.15mm から取り直し）・上段の縦の空き 0.00mm（space-between・padding 0・内側インセット0）。
+     下段の分割: 40–44mm の可視4mm に一文のみ（2.05mm・1行・trim 左右端に接地）、44–52mm のデッド8mm は背景のみで無地。
+     グラデ向きは none（現行 1a のまま）。横罫と栄養表の外枠は塗り足し ±3mm まで通し、文字だけ trim 端で止めています。 -->
 <div id="1a" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">1a</span><span>罫線あり・JA — 1.15mm / グラデ none（2.77:1 判定用）/ 下段にワードマーク</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="1a" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">1a</span><span>採用案・JA — 上段1.40mm / 空き0 / 下段 可視4mm＋デッド8mm</span></div>
+  <div data-zoom-box="1" style="width:{{ bw }}; height:{{ bh }};"><div data-view="1" style="position:relative; overflow:hidden; width:{{ vw }}; height:{{ vh }}; transform:scale(2); transform-origin:top left; box-shadow:var(--shadow-card);">
+    <div data-artboard="1" data-screen-label="1a" style="position:absolute; left:{{ vo }}; top:{{ vo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
     <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
     <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
     <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-size:1.15mm; line-height:1.24; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ ja.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
-        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding:0.3mm 1.6mm 0; font-weight:700;">{{ ja.a }}</div>
-        <div style="margin:0.3mm 1.6mm 0; display:flex; border:0.3mm solid rgba(255,255,255,.55); border-left:none;">
-          <div style="width:18mm; flex:none; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.4mm; font-weight:700;">{{ ja.nt }}</div>
+      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; font-size:1.40mm; line-height:1.2; color:#fff;">
+        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none; margin-right:1.6mm;">{{ ja.q }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
+        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0; text-align:center; font-weight:700;">{{ ja.a }}</div>
+        <div style="margin:0 -3mm; display:flex; border-top:0.3mm solid rgba(255,255,255,.55); border-bottom:0.3mm solid rgba(255,255,255,.55);">
+          <div style="width:3mm; flex:none;"></div>
+          <div style="width:19mm; flex:none; font-weight:700;">{{ ja.nt }}</div>
           <sc-for list="{{ ja.nu }}" as="c" hint-placeholder-count="6">
-            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.3mm; text-align:center;"><div style="font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
+            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); text-align:center;"><div style="white-space:nowrap; font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
           </sc-for>
+          <div style="width:3mm; flex:none;"></div>
         </div>
       </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
+      <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
+        <div style="flex:1; text-align:center; font-size:6.7mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
         <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
       </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="display:flex; flex-direction:column; gap:0.6mm;">
-          <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-          <div style="font-family:var(--font-display); font-size:4mm; line-height:1.55; color:#fff;">Toopdbq</div>
-        </div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
+        <div style="width:100%; font-size:2.05mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">このパッケージは toopdbq@gmail.com によるオリジナルデザインです。</div>
       </div>
+      <div style="height:8mm; box-sizing:border-box;"></div>
     </div>
     <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
       <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
       <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:47mm; width:75mm; border-top:0.2mm dashed rgba(0,229,255,.95);"></div>
     </div></sc-if>
-  </div></div>
+  </div></div></div>
 </div>
 
-<!-- 1b ①罫線あり（EN・グラデ none）
-     狙い: 1a と同一レイアウトの英語版。英文は同内容で38%長い（259em→358em）が、padding を撤廃した効果は EN 側にだけ効く。
-     級数は 1.15mm。padding 0.8mm 時代の EN 1.05mm から一段上がり、結果として JA と EN が同じ 1.15mm に揃った（ペアで級数が揃うのはこの構造だけ）。
-     グラデ向きは 1a と同じ none。ラテン文字は縦線が細く 2.77:1 の左端では最初に沈むため、判定は 1b を基準に見るのが厳しい側。 -->
+<!-- 1b 採用案（EN・①罫線あり・グラデ none）
+     詰めた結果: 上段の本文 1.30mm（38%長い英文ぶん JA 1.40mm から一段下）・上段の縦の空き 0.00mm。日本語は1文字も残していません。
+     下段の分割: 可視4mm に英文一文のみ（2.40mm・1行・trim 左右端に接地）、デッド8mm は無地。中段は "Chew gum," / "make friends."（5.6mm/900/-0.06em）。
+     グラデ向きは none（1a と対）。項目ラベルと栄養表の見出しは折返し禁止で、列の値のベースラインを全列で揃えています。 -->
 <div id="1b" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">1b</span><span>罫線あり・EN — 1.15mm / グラデ none</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="1b" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">1b</span><span>採用案・EN — 上段1.30mm / 空き0 / 全文英語</span></div>
+  <div data-zoom-box="1" style="width:{{ bw }}; height:{{ bh }};"><div data-view="1" style="position:relative; overflow:hidden; width:{{ vw }}; height:{{ vh }}; transform:scale(2); transform-origin:top left; box-shadow:var(--shadow-card);">
+    <div data-artboard="1" data-screen-label="1b" style="position:absolute; left:{{ vo }}; top:{{ vo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
     <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
     <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
     <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-family:var(--font-latin); font-size:1.15mm; line-height:1.24; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; font-weight:700;">{{ en.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ en.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
-        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding:0.3mm 1.6mm 0; font-weight:700;">{{ en.a }}</div>
-        <div style="margin:0.3mm 1.6mm 0; display:flex; border:0.3mm solid rgba(255,255,255,.55); border-left:none;">
-          <div style="width:18mm; flex:none; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.4mm; font-weight:700;">{{ en.nt }}</div>
+      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; font-family:var(--font-latin); font-size:1.30mm; line-height:1.2; color:#fff;">
+        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lq }}</span><span style="flex:none; margin-right:1.6mm;">{{ en.q }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
+        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
+        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0; text-align:center; font-weight:700;">{{ en.a }}</div>
+        <div style="margin:0 -3mm; display:flex; border-top:0.3mm solid rgba(255,255,255,.55); border-bottom:0.3mm solid rgba(255,255,255,.55);">
+          <div style="width:3mm; flex:none;"></div>
+          <div style="width:21mm; flex:none; font-weight:700;">{{ en.nt }}</div>
           <sc-for list="{{ en.nu }}" as="c" hint-placeholder-count="6">
-            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.3mm; text-align:center;"><div style="font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
+            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); text-align:center;"><div style="white-space:nowrap; font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
           </sc-for>
+          <div style="width:3mm; flex:none;"></div>
         </div>
       </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
+      <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
+        <div style="flex:1; text-align:center; font-family:var(--font-latin); font-size:6.7mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">Chew gum,<br>make friends.</div>
         <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
       </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="display:flex; flex-direction:column; gap:0.6mm;">
-          <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-          <div style="font-family:var(--font-display); font-size:4mm; line-height:1.55; color:#fff;">Toopdbq</div>
-        </div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
+      <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
+        <div style="width:100%; font-family:var(--font-latin); font-size:2.40mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">This package is an original design by toopdbq@gmail.com.</div>
       </div>
+      <div style="height:8mm; box-sizing:border-box;"></div>
     </div>
     <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
       <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
       <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+      <div style="position:absolute; left:0; top:47mm; width:75mm; border-top:0.2mm dashed rgba(0,229,255,.95);"></div>
     </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 2a ②罫線なし（JA・グラデ 200deg/1.8）
-     狙い: 罫を1本も引かず、ラベル700・値400のウェイト差と行送り（項目間0.55mm・項目内0）だけで7項目を切る。栄養は罫なしの1行に畳む。
-     級数は 1.35mm。罫と罫上下の padding（計6本ぶん）が消えた高さをそのまま級数に回せるため、構造Aの 1.15mm より上げられる（罫線ありとの差がそのまま級数差になる）。
-     グラデ向きは rotate(200deg) scale(1.8)＝上段左端 2.77→5.37:1。罫で可読性を稼げない案なので、地の暗さで稼ぐのが前提。 -->
-<div id="2a" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2a</span><span>罫線なし・JA — 1.35mm / グラデ 200deg・1.8（5.37:1）</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="2a" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-size:1.35mm; line-height:1.28; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ ja.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.55mm;"><span style="flex:none; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.55mm;"><span style="flex:none; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
-        <div style="margin-top:0.55mm; padding:0 1.6mm; font-weight:700;">{{ ja.a }}</div>
-        <div style="margin-top:0.55mm; padding:0 1.6mm;">{{ ja.inl }}</div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-    </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 2b ②罫線なし（EN・グラデ 200deg/1.8）
-     狙い: 2a と同一レイアウトの英語版。ラテン文字は語間で切れるため、罫なしでもラベル700が拾いやすい＝この軸は EN のほうが成立しやすい。
-     級数は 1.25mm（罫の撤去で 1.15mm から一段上がるが、38%の字数差ぶん JA 1.35mm には届かない）。栄養は「/」区切りの1行に畳み、数値だけ端から1.6mm 内側へ。
-     グラデ向きは rotate(200deg) scale(1.8)。細い縦線が沈むラテン文字ほど地の暗さが効くため、この軸ではペアとも回転を必須にしている。 -->
-<div id="2b" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">2b</span><span>罫線なし・EN — 1.25mm / グラデ 200deg・1.8</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="2b" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-family:var(--font-latin); font-size:1.25mm; line-height:1.28; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; font-weight:700;">{{ en.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ en.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.55mm;"><span style="flex:none; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.55mm;"><span style="flex:none; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
-        <div style="margin-top:0.55mm; padding:0 1.6mm; font-weight:700;">{{ en.a }}</div>
-        <div style="margin-top:0.55mm; padding:0 1.6mm;">{{ en.inl }}</div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-    </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 3a ③構造C（JA・栄養を下段へ・グラデ 200deg/1.8）
-     狙い: 上段から栄養成分表示だけを抜いて下段12mmへ移し、残る5項目を最大級数で読ませる。上段は罫を1本ずつ、下段は罫線表のまま。
-     級数は構造Cの実測上限 1.65mm（padding 0）。1.15→1.65mm＝+43%で、白抜きの潰れに対して唯一まともに効くレバー。下段の表は1.65mm。
-     グラデ向きは rotate(200deg) scale(1.8)。判断点: 下段は畳むと隠れる面（申し送り4）。級数を取るか可視性を取るかのトレードオフを可視化した案。 -->
-<div id="3a" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3a</span><span>構造C・JA — 上段1.65mm / 栄養は下段 / グラデ 200deg・1.8</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="3a" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-size:1.65mm; line-height:1.24; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ ja.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
-        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding:0.3mm 1.6mm 0; font-weight:700;">{{ ja.a }}</div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0 0.4mm; display:flex; flex-direction:column; justify-content:center; gap:0.6mm; overflow:hidden; font-size:1.65mm; line-height:1.24; color:#fff;">
-        <div style="margin:0 1.6mm; display:flex; border:0.3mm solid rgba(255,255,255,.55); border-left:none;">
-          <div style="width:22mm; flex:none; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.4mm; font-weight:700;">{{ ja.nt }}</div>
-          <sc-for list="{{ ja.nu }}" as="c" hint-placeholder-count="6">
-            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.3mm; text-align:center;"><div style="font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
-          </sc-for>
-        </div>
-        <div style="display:flex; justify-content:space-between; gap:1.6mm; padding:0 0.4mm; font-size:2.1mm; font-weight:500;"><span style="white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</span><span style="font-family:var(--font-latin); font-weight:600;">toopdbq.com</span></div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,62,136,.95);"></div>
-    </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 3b ③構造C（EN・栄養を下段へ・グラデ 200deg/1.8）
-     狙い: 3a と同一レイアウトの英語版。上段は5項目、下段は6列の罫線表。列見出しが長い英文でも列幅は決め打ちせず等幅で組む。
-     級数は構造Cの実測上限 1.45mm（JA 1.65mm より一段小さい＝38%の字数差はここで吸収）。下段の表は 1.4mm。
-     グラデ向きは rotate(200deg) scale(1.8)。判断点は 3a と同じ（栄養成分表示が畳むと隠れる面に入る）。 -->
-<div id="3b" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">3b</span><span>構造C・EN — 上段1.45mm / 栄養は下段 / グラデ 200deg・1.8</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="3b" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:center; overflow:hidden; font-family:var(--font-latin); font-size:1.45mm; line-height:1.24; color:#fff;">
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; font-weight:700;">{{ en.Lq }}</span><span style="flex:none; padding-right:1.6mm;">{{ en.q }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding-top:0.3mm;"><span style="flex:none; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
-        <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
-        <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin-top:0.3mm; padding:0.3mm 1.6mm 0; font-weight:700;">{{ en.a }}</div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0 0.4mm; display:flex; flex-direction:column; justify-content:center; gap:0.6mm; overflow:hidden; font-family:var(--font-latin); font-size:1.4mm; line-height:1.24; color:#fff;">
-        <div style="margin:0 1.6mm; display:flex; border:0.3mm solid rgba(255,255,255,.55); border-left:none;">
-          <div style="width:22mm; flex:none; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.4mm; font-weight:700;">{{ en.nt }}</div>
-          <sc-for list="{{ en.nu }}" as="c" hint-placeholder-count="6">
-            <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding:0 0.3mm; text-align:center;"><div style="font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
-          </sc-for>
-        </div>
-        <div style="display:flex; justify-content:space-between; gap:1.6mm; padding:0 0.4mm; font-size:2.1mm; font-weight:500;"><span style="font-family:var(--font-jp); white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</span><span style="font-weight:600;">toopdbq.com</span></div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,62,136,.95);"></div>
-    </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 4a ④2カラム（JA・グラデ 200deg/1.8）
-     狙い: 上段を縦罫1本で左右に割り、長い原材料名を左カラムに閉じ込めて右カラムの行数を減らす。栄養は右下に罫なしで1行。
-     級数は 1.30mm。1カラム時の 1.15mm より上げられるのは、行の折返し回数がカラム内で吸収され総行数が減るため（構造Cを使わずに稼げる唯一の手）。
-     グラデ向きは rotate(200deg) scale(1.8)。縦罫は白0.3mm＝この案の唯一の罫。左端に来るのは項目ラベルだけで、数値と●アレルギーは端から1.6mm 内側。 -->
-<div id="4a" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">4a</span><span>2カラム・JA — 1.30mm / グラデ 200deg・1.8</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="4a" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; gap:1.2mm; overflow:hidden; font-size:1.30mm; line-height:1.26; color:#fff;">
-        <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:center;">
-          <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none;">{{ ja.q }}</span></div>
-          <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.5mm;"><span style="flex:none; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
-        </div>
-        <div style="flex:0 0 27mm; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding-left:1.2mm; display:flex; flex-direction:column; justify-content:center;">
-          <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
-          <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.4mm;"><span style="flex:none; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
-          <div style="margin-top:0.5mm; padding-right:1.6mm; font-weight:700;">{{ ja.a }}</div>
-          <div style="margin-top:0.5mm; padding-right:1.6mm;">{{ ja.inl }}</div>
-        </div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-    </div></sc-if>
-  </div></div>
-</div>
-
-<!-- 4b ④2カラム（EN・グラデ 200deg/1.8）
-     狙い: 4a と同一レイアウトの英語版。左カラムに Ingredients、右カラムに Manufacturer / Plant / Allergens / Nutrition を積む。
-     級数は 1.20mm。英文は38%長く左カラムの折返しが増えるため、JA 1.30mm から一段落として2カラムの利得を確保した。
-     グラデ向きは rotate(200deg) scale(1.8)。縦罫1本のみ、Regular 以上のウェイト固定（Light は白抜きで最初に消えるため未使用）。 -->
-<div id="4b" style="display:flex; flex-direction:column; gap:10px;">
-  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3); white-space:nowrap;"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">4b</span><span>2カラム・EN — 1.20mm / グラデ 200deg・1.8</span></div>
-  <div data-zoom-box="1" style="width:150mm; height:116mm;"><div data-zoom="1" data-screen-label="4b" style="position:relative; width:75mm; height:58mm; overflow:hidden; background:#005f67; box-shadow:var(--shadow-card); transform:scale(2); transform-origin:top left;">
-    <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful); transform:rotate(200deg) scale(1.8);"></div>
-    <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-    <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
-      <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; gap:1.2mm; overflow:hidden; font-family:var(--font-latin); font-size:1.20mm; line-height:1.26; color:#fff;">
-        <div style="flex:1 1 0; min-width:0; display:flex; flex-direction:column; justify-content:center;">
-          <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; font-weight:700;">{{ en.Lq }}</span><span style="flex:none;">{{ en.q }}</span></div>
-          <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.5mm;"><span style="flex:none; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
-        </div>
-        <div style="flex:0 0 27mm; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); padding-left:1.2mm; display:flex; flex-direction:column; justify-content:center;">
-          <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
-          <div style="display:flex; gap:1.0mm; align-items:baseline; margin-top:0.4mm;"><span style="flex:none; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
-          <div style="margin-top:0.5mm; padding-right:1.6mm; font-weight:700;">{{ en.a }}</div>
-          <div style="margin-top:0.5mm; padding-right:1.6mm;">{{ en.inl }}</div>
-        </div>
-      </div>
-      <div style="height:22mm; box-sizing:border-box; padding:0 0.4mm; display:flex; align-items:center; gap:1.6mm;">
-        <div style="flex:1; font-size:5.6mm; font-weight:900; line-height:1.12; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">ガムを噛んで<br>友達を増やそう</div>
-        <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
-      </div>
-      <div style="height:12mm; box-sizing:border-box; padding:0 0.4mm 0.4mm; display:flex; align-items:flex-end; justify-content:space-between; gap:1.6mm;">
-        <div style="font-size:2.5mm; font-weight:500; color:#fff; white-space:nowrap;">審査基準: 噛み方のキレ ・ 目線 ・ 余裕</div>
-        <div style="font-family:var(--font-latin); font-size:2.5mm; font-weight:600; color:#fff;">toopdbq.com</div>
-      </div>
-    </div>
-    <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
-      <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-      <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
-    </div></sc-if>
-  </div></div>
+  </div></div></div>
 </div>
 
 </section>
 
 <div data-screenonly="1" style="max-width:1180px; font-size:12px; font-weight:400; line-height:1.85; color:var(--text-2);">
-  <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">印刷申し送り</div>
-  面構成は全8案で 上段18 / 中段22 / 下段12mm × 幅69mm 固定、artboard 75×58mm（塗り足し3mm）。折り線は trim 上端から18mm・40mm。上段は padding 0・セーフエリアなしで、罫は trim の端まで通しています。<br>
-  法定表示帯は全案<strong style="font-weight:700;">白文字・白罫のみ／別地なし</strong>。罫は rgba(255,255,255,.55) の 0.3mm、ウェイトは Regular 以上（Light 未使用）、下段の小文字は 2.1mm を下限。3.0–3.3pt 相当の白抜きが潰れる方向のリスクは、級数（構造C・1.65mm）とグラデ回転（左端 2.77→5.37:1）の2つだけで取っています。<br>
-  グラデは 1a/1b が none（現行4aのまま・上段左端 2.77:1）、2a/2b・3a/3b・4a/4b が rotate(200deg) scale(1.8)（同 5.37:1・中段 3.21→4.05）。背景はいずれも <code style="font-family:var(--font-latin);">--gradient-colorful</code> 1枚のみ。<br>
-  級数の実測結果：①罫線あり JA 1.15 / EN 1.15（padding 撤廃の効果は EN だけに出てペアで揃う）・②罫線なし JA 1.35 / EN 1.25（罫と罫上下の余白ぶんを級数に回せる）・③構造C JA 1.65 / EN 1.45・④2カラム JA 1.30 / EN 1.20。いずれも上段18mm にはみ出し0で実測確認済み。<br>
-  QR は8案すべて同梱 <code style="font-family:var(--font-latin);">qr/toopdbq_com.svg</code> を無改変・dark-on-white・実寸19.6mm（白チップ21mm・quiet zone 内包）。中段は v2 確定案 4a と同値で、幅 +4mm はコピー側の余白に回しています。<br>
-  <strong style="font-weight:700; color:var(--text-1);">フレーバー差し替え</strong>：Tweaks の「フレーバー」でラムネ／梅を切り替え。栄養成分表示は列数を決め打ちせず配列から等幅で組むため 6列（ラムネ）・5列（梅）とも崩れません。<strong style="font-weight:700; color:#ffb3d0;">梅の法定表示の文字列（原材料名・栄養値・アレルギー）は HANDOFF.md に記載がなく、未支給プレースホルダのままです。</strong>実値をもらえれば差し替えます。
+  <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">印刷申し送り（v3.2）</div>
+  面構成は 上段18 / 中段22 / 下段12mm（可視4＋デッド8）× 幅69mm、artboard 75×58mm（塗り足し3mm）。折り線は trim 上端から18mm・40mm（イエロー破線）、<strong style="font-weight:700;">可視／デッド境界は trim 上端から44mm（シアン破線）</strong>。いずれも非印刷ガイドで、印刷時とガイドOFFで消えます。<br>
+  下段-デッド 44–52mm は封入部で完成品では見えないため、背景グラデ（＋grain）だけで文字・罫・ロゴを一切置いていません。下段-可視 40–44mm は一文のみ・padding 0・1行固定（JA 2.05mm / EN 2.40mm＝実測上限、2行にすると最小級数でも4mmを超えるため）。<br>
+  上段は space-between で18mmを使い切り（縦の空き0・はみ出し0）、内側インセットは全廃、列の区切りは罫だけ。横罫と栄養表の外枠は左右 ±3mm の塗り足しまで通し、文字は trim 端で止めています。罫は rgba(255,255,255,.55) の 0.3mm、ウェイトは Regular 以上。<br>
+  中段はコピー左端＝trim左端／QR白チップ右端＝trim右端（21mm角のまま・svg 19.6mm・quiet zone 内包）。グラデは2面とも <code style="font-family:var(--font-latin);">--gradient-colorful</code> 無回転（none）。白パネル・スクリムなし。<br>
+  <strong style="font-weight:700; color:var(--text-1);">Tweaks</strong>：「trim表示」ON（既定）＝仕上がり69×52mmのみ描画／OFF＝塗り足し込み75×58mm（入稿確認用）。「フレーバー」でラムネ／梅を切替（栄養表は列幅を決め打ちせず等幅なので6列・5列とも崩れません）。<strong style="font-weight:700; color:#ffb3d0;">梅の法定表示の文字列は HANDOFF.md に記載がなく、未支給プレースホルダのままです。</strong>
 </div>
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;flavor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ramune&quot;,&quot;ume&quot;],&quot;default&quot;:&quot;ramune&quot;,&quot;tsType&quot;:&quot;'ramune' | 'ume'&quot;,&quot;section&quot;:&quot;フレーバー&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;trim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;flavor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ramune&quot;,&quot;ume&quot;],&quot;default&quot;:&quot;ramune&quot;,&quot;tsType&quot;:&quot;'ramune' | 'ume'&quot;,&quot;section&quot;:&quot;フレーバー&quot;}}">
 const DATA = {
   ramune: {
     ja: {
@@ -427,9 +208,15 @@ class Component extends DCLogic {
   }
   renderVals() {
     const f = DATA[this.props.flavor] ? this.props.flavor : 'ramune';
+    const trim = this.props.trim ?? true;
     return {
       guides: this.props.guides ?? true,
       grain: this.props.grain ?? true,
+      bw: trim ? '138mm' : '150mm',
+      bh: trim ? '104mm' : '116mm',
+      vw: trim ? '69mm' : '75mm',
+      vh: trim ? '52mm' : '58mm',
+      vo: trim ? '-3mm' : '0mm',
       ja: this.build(DATA[f].ja, '　'),
       en: this.build(DATA[f].en, ' / ')
     };
