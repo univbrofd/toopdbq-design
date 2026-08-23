@@ -4,22 +4,21 @@
 <title>GumPackage v3 — 上段を法定表示へ</title>
 <style>
 :root{ --bg:#0d0d10; --fg:#e9e9ee; --dim:#9a9aa6; --dim2:#71717e; --line:#26262e;
-       --accent:#ff3e88; --ok:#3ddc97; --ng:#ff6b6b;
+       --accent:#ff3e88; --ok:#3ddc97; --ng:#ff6b6b; --warn:#ffd166;
        --jp:"Hiragino Sans","Noto Sans JP","Yu Gothic",system-ui,sans-serif;
-       --lat:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif; }
+       --lat:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+       --grain:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iMC41NSIvPjwvc3ZnPg==");
+       --grad:radial-gradient(135% 135% at 112% 108%,#fff0a6 5%,#bfcc96 15%,#80a787 25%,#40837f 35%,#005f67 45%,#60566f 54%,#804e78 62%,#bf4680 71%,#ff3e88 80%,#e86f6d 90%,#d0a052 100%); }
 *{box-sizing:border-box;}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--jp);
-     font-size:14px;line-height:1.75;-webkit-text-size-adjust:100%;}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--jp);font-size:14px;line-height:1.75;-webkit-text-size-adjust:100%;}
 .wrap{max-width:960px;margin:0 auto;padding:36px 22px 80px;}
 h1{font-size:24px;line-height:1.35;margin:0 0 6px;font-weight:700;}
-.kicker{font-family:var(--lat);font-size:11px;font-weight:600;letter-spacing:.12em;
-        color:var(--dim2);text-transform:none;margin:0 0 10px;}
+.kicker{font-family:var(--lat);font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--dim2);margin:0 0 10px;}
 h2{font-size:16px;margin:38px 0 10px;font-weight:700;padding-top:14px;border-top:1px solid var(--line);}
 h3{font-size:13.5px;margin:22px 0 6px;font-weight:700;color:#cfcfd8;}
-p{margin:0 0 12px;color:#c9c9d4;}
-.lede{color:var(--dim);font-size:13px;}
-ul{margin:0 0 12px;padding-left:1.15em;color:#c9c9d4;}
-li{margin:3px 0;}
+h3 em{font-style:normal;color:var(--dim2);font-weight:400;}
+p{margin:0 0 12px;color:#c9c9d4;} .lede{color:var(--dim);font-size:13px;}
+ul{margin:0 0 12px;padding-left:1.15em;color:#c9c9d4;} li{margin:3px 0;}
 code{font-family:var(--lat);font-size:.88em;background:#1a1a21;padding:1px 5px;border-radius:4px;color:#e6c8ff;}
 strong{color:#fff;font-weight:700;}
 a{color:var(--accent);text-decoration:none;} a:hover{color:#fff0a6;}
@@ -27,47 +26,43 @@ table.t{border-collapse:collapse;width:100%;margin:6px 0 16px;font-size:12.5px;}
 table.t th,table.t td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top;}
 table.t th{background:#16161c;color:#fff;font-weight:700;}
 table.t td{color:#c2c2ce;}
-.ok{color:var(--ok);font-weight:700;} .ng{color:var(--ng);font-weight:700;}
+.ok{color:var(--ok);font-weight:700;} .ng{color:var(--ng);font-weight:700;} .warn{color:var(--warn);font-weight:700;}
 .flag{border-left:3px solid var(--accent);background:#17131a;padding:11px 14px;margin:0 0 12px;border-radius:0 6px 6px 0;}
 .flag b{color:#ffb3d0;}
-.note{border-left:3px solid #3a3a48;background:#141419;padding:10px 14px;margin:0 0 14px;
-      border-radius:0 6px 6px 0;font-size:12.5px;color:var(--dim);}
-
-/* ---- 実寸プレビュー ---- */
+.note{border-left:3px solid #3a3a48;background:#141419;padding:10px 14px;margin:0 0 14px;border-radius:0 6px 6px 0;font-size:12.5px;color:var(--dim);}
 .scale{overflow-x:auto;padding:2px 0 6px;}
-.zoom{zoom:3.4;width:fit-content;}
-.zoom.geoz{zoom:2.55;}
-.cap{font-size:12px;color:#b6b6c2;margin:16px 0 5px;font-weight:600;}
-.cap em{font-style:normal;color:var(--dim2);font-weight:400;}
-.band{width:69mm;height:18mm;background:#fff;color:#08080b;padding:0.8mm 1.0mm;
-      display:flex;flex-direction:column;overflow:hidden;font-size:1.15mm;line-height:1.22;}
-.band.knock{background:#0a6b73;color:#fff;}
-.band.big{font-size:1.6mm;}
-.band.en{font-family:var(--lat);font-size:1.05mm;}
-.lower{width:69mm;height:12mm;background:#fff;color:#08080b;padding:0.8mm 1.0mm;
-       display:flex;flex-direction:column;justify-content:center;font-size:1.6mm;line-height:1.22;overflow:hidden;}
-.r{display:flex;gap:1.0mm;align-items:baseline;}
-.lb{flex:none;font-weight:700;} .vl{flex:1;}
-.hr{border-top:0.3mm solid rgba(8,8,12,.4);margin-top:0.25mm;padding-top:0.25mm;}
-.knock .hr{border-color:rgba(255,255,255,.55);}
-.alg{font-weight:700;color:#c8102e;} .knock .alg{color:#ffdbe2;}
+.zoom{zoom:3.4;width:fit-content;} .zoom.geoz{zoom:2.55;}
+
+/* ---- 上段プレビュー: グラデ地に白文字・padding 0 ---- */
+.band{position:relative;width:69mm;height:18mm;overflow:hidden;color:#fff;
+      display:flex;flex-direction:column;padding:0;font-size:1.15mm;line-height:1.22;}
+.band.big{font-size:1.65mm;}
+.band.en{font-family:var(--lat);}
+.band>.bg{position:absolute;left:-3mm;top:-3mm;width:75mm;height:58mm;background:#005f67;}
+.band>.bg>i{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;background:var(--grad);display:block;}
+.band>.fg{position:relative;display:flex;flex-direction:column;}
+.lower{position:relative;width:69mm;height:12mm;overflow:hidden;color:#fff;padding:0;
+       display:flex;flex-direction:column;justify-content:center;font-size:1.65mm;line-height:1.22;}
+.lower>.bg{position:absolute;left:-3mm;top:-43mm;width:75mm;height:58mm;background:#005f67;}
+.lower>.bg>i{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;background:var(--grad);display:block;}
+.lower>.fg{position:relative;}
+.r{display:flex;gap:1.0mm;align-items:baseline;} .lb{flex:none;font-weight:700;} .vl{flex:1;}
+.hr{border-top:0.3mm solid rgba(255,255,255,.55);margin-top:0.25mm;padding-top:0.25mm;}
 .band table,.lower table{border-collapse:collapse;width:100%;margin-top:0.25mm;}
-.band td,.band th,.lower td,.lower th{border:0.3mm solid rgba(8,8,12,.4);padding:0 0.4mm;
+.band td,.band th,.lower td,.lower th{border:0.3mm solid rgba(255,255,255,.55);padding:0 0.4mm;
       text-align:center;font-weight:400;line-height:1.2;}
-.knock td,.knock th{border-color:rgba(255,255,255,.55);}
 .band th,.lower th{font-weight:700;}
+.band>.bg>u,.lower>.bg>u{position:absolute;inset:0;display:block;background-image:var(--grain);background-size:35mm 35mm;opacity:.16;mix-blend-mode:overlay;}
+.rot > .bg > i{transform:rotate(200deg) scale(1.8);}
 
 /* ---- ジオメトリ図 ---- */
-.geo{width:75mm;height:58mm;position:relative;background:#005f67;overflow:hidden;
-     font-size:1.6mm;color:#fff;font-family:var(--lat);}
-.geo .grad{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;
-     background:radial-gradient(circle at 62% 74%,#fff0a6 0%,#ff8a5c 18%,#ff3e88 40%,#a63cc4 62%,#5b3fb8 78%,#1d6f86 90%,#005f67 100%);}
+.geo{width:75mm;height:58mm;position:relative;background:#005f67;overflow:hidden;font-size:1.6mm;color:#fff;font-family:var(--lat);}
+.geo .grad{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;background:var(--grad);}
 .geo .trim{position:absolute;left:3mm;top:3mm;width:69mm;height:52mm;display:flex;flex-direction:column;}
-.geo .bd{box-sizing:border-box;display:flex;align-items:center;justify-content:center;
-     border:0.25mm dashed rgba(255,255,255,.55);}
-.geo .b1{height:18mm;background:rgba(255,255,255,.9);color:#08080b;border-color:rgba(255,62,136,.9);}
+.geo .bd{box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:0.25mm dashed rgba(255,255,255,.6);}
+.geo .b1{height:18mm;border-color:rgba(255,62,136,.95);border-width:0.4mm;}
 .geo .b2{height:22mm;} .geo .b3{height:12mm;}
-.geo .tag{font-size:1.5mm;font-weight:700;}
+.geo .tag{font-size:1.5mm;font-weight:700;text-shadow:0 0.2mm 0.5mm rgba(0,0,0,.5);}
 .geo .bleed{position:absolute;inset:0;outline:0.25mm dashed rgba(0,229,255,.7);outline-offset:-0.125mm;}
 @media (max-width:700px){ .zoom{zoom:2.1;} .zoom.geoz{zoom:1.9;} h1{font-size:20px;} }
 </style></head><body><div class="wrap">
@@ -80,6 +75,8 @@ table.t td{color:#c2c2ce;}
 <ul>
 <li><strong>面構成を微調整</strong>：仕上がり <strong>69 × 52mm</strong>（v2 は 65×52）。上段 <strong>18</strong>・中段 <strong>22</strong>・下段 <strong>12</strong> mm。塗り足し 3mm → artboard <strong>75 × 58mm</strong>。</li>
 <li><strong>上段を差し替え</strong>：ロゴ＋ワードマーク → <strong>法定表示 7 項目</strong>（名称 / 原材料名 / 内容量 / 製造者 / 製造所 / アレルギー / 栄養成分表示）。</li>
+<li><strong>上段に別地を敷かない</strong>：背景は<strong>全体と同じグラデ 1 枚のまま</strong>、<strong>文字を全部白にするだけ</strong>。白パネル・スクリムは使わない。</li>
+<li><strong>端の余白（セーフエリア）を撤廃</strong>：<code>padding: 0</code> で trim の端いっぱいまで使う。</li>
 <li><strong>中段は現状維持</strong>（v2 確定案 4a のまま。幅 65→69mm の再フィットだけ）。</li>
 <li><strong>日本語版と英語版の両方</strong>を作る。</li>
 </ul>
@@ -87,7 +84,7 @@ table.t td{color:#c2c2ce;}
 <div class="scale"><div class="zoom geoz"><div class="geo">
   <div class="grad"></div>
   <div class="trim">
-    <div class="bd b1"><span class="tag">上段 18 × 69 — 法定表示（差し替え）</span></div>
+    <div class="bd b1"><span class="tag">上段 18 × 69 — 法定表示（差し替え・余白ゼロ）</span></div>
     <div class="bd b2"><span class="tag">中段 22 × 69 — 4a のまま</span></div>
     <div class="bd b3"><span class="tag">下段 12 × 69 — 畳むと隠れる</span></div>
   </div>
@@ -95,48 +92,71 @@ table.t td{color:#c2c2ce;}
 </div></div></div>
 <p class="note">シアン破線 = artboard（塗り足し込み 75×58mm）。白破線 = 折り線（trim 上端から 18mm・40mm）。ピンク枠 = 今回差し替える帯。いずれも非印刷ガイド。</p>
 
-<h2>2. 設計を縛る実測 — 69×18mm に本文は何 mm まで載るか</h2>
-<p>7 項目を<strong>はみ出し 0</strong> で組める最大級数を二分探索した結果（padding 上下 0.8 / 左右 1.0mm、line-height 1.22、罫 0.3mm）。再現ハーネス = <a href="fit-harness.html">fit-harness.html</a>。</p>
-
+<h2>2. 実測① — 余白を撤廃しても級数は増えない</h2>
+<p>7 項目を<strong>はみ出し 0</strong> で組める最大級数を、padding を変えながら二分探索した結果（幅 69mm・枠 18mm、line-height 1.22、罫 0.3mm）。再現ハーネス = <a href="fit-harness.html">fit-harness.html</a>。</p>
 <table class="t">
-<tr><th style="width:44%">構造</th><th>日本語</th><th>英語</th></tr>
-<tr><td><strong>A. 全部入り（栄養＝罫線表）</strong></td><td><span class="ok">1.15mm</span>（3.3pt）実高 17.72mm</td><td><span class="ok">1.05mm</span>（3.0pt）実高 17.90mm</td></tr>
-<tr><td>B. 全部入り（栄養＝罫線なし inline 1 行）</td><td>1.20mm</td><td>1.20mm</td></tr>
-<tr><td><strong>C. 栄養成分表示だけ下段へ逃がす</strong></td><td><span class="ok">1.60mm</span>（4.5pt）実高 17.54mm</td><td><span class="ok">1.40mm</span></td></tr>
-<tr><td>いずれも 1.8mm 以上</td><td class="ng">入らない</td><td class="ng">入らない</td></tr>
+<tr><th style="width:40%">構造</th><th>padding 0.8mm</th><th>padding 0（端いっぱい・今回の指定）</th></tr>
+<tr><td><strong>A. 全部入り（栄養＝罫線表）</strong></td><td>JA 1.15mm / EN 1.05mm</td><td><span class="ok">JA 1.15mm / EN 1.15mm</span></td></tr>
+<tr><td><strong>C. 栄養成分表示だけ下段へ逃がす</strong></td><td>JA 1.65mm / EN 1.40mm</td><td><span class="ok">JA 1.65mm / EN 1.45mm</span></td></tr>
 </table>
-
 <ul>
-<li>英文は同内容で<strong>日本語より 38% 字数が多い</strong>（259em → 358em）。<strong>EN を先に成立させて JA を合わせる</strong>ほうが破綻しない。</li>
-<li>1.05–1.15mm = <strong>3.0–3.3pt</strong>。<strong>白抜きでは確実に潰れる</strong>（既存の印刷制約「白抜き細文字 &lt;5pt 禁止」に抵触）。法定表示帯は<strong>白 or クリーム地に K100</strong> が既定。</li>
-<li>参考写真のロッテ実物は白抜きだが、<strong>名称〜アレルギーと栄養成分表示を別々の面に分けている</strong>ため 1 面あたりの密度が我々の半分以下。同じ見た目を 1 面 18mm でやると 3.3pt の白抜きになる。</li>
-<li>級数を上げる唯一有効なレバーが <strong>C</strong>（JA 1.15 → 1.60mm・+39%）。</li>
+<li>制約が<strong>「行数 × 行送り」で量子化されている</strong>ため、上下 1.6mm を削っても 1 行分に届かない。<strong>JA は 1.15mm のまま変わらない。</strong></li>
+<li>効くのは英語版だけ（1.05 → 1.15mm）。その結果 <strong>JA と EN が同じ 1.15mm に揃う</strong>ので、ペア組みは楽になる。</li>
+<li>端いっぱいにする価値は級数ではなく<strong>見た目（ポスター的な全面使い）</strong>の側にある。</li>
+<li>級数を上げる唯一有効なレバーは <strong>構造 C</strong>（JA 1.15 → <strong>1.65mm・+43%</strong>）。</li>
 </ul>
 
-<h3>A. 日本語・全部入り <em>— 本文 1.15mm。実寸 69×18mm を 3.4 倍表示</em></h3>
-<div class="scale"><div class="zoom"><div class="band" id="ja1"></div></div></div>
+<h2>3. 実測② — 白文字が載る土台の明暗</h2>
+<p>4a の背景（<code>--gradient-colorful</code> 無回転 ＋ grain 0.16）を artboard 実寸でレンダリングし、各帯を 1mm 刻み × 7 行でサンプルした白文字のコントラスト比。再現ハーネス = <a href="contrast-harness.html">contrast-harness.html</a>。</p>
+<table class="t">
+<tr><th>帯</th><th>白文字 最悪 CR</th><th>平均</th><th>最悪地点</th></tr>
+<tr><td><strong>上段 0–18mm</strong></td><td><span class="ng">2.77 : 1</span></td><td>4.69 : 1</td><td>x=0mm, y=0.5mm（左上・rgb(222,132,98) の橙明部）</td></tr>
+<tr><td>中段 18–40mm</td><td>3.21 : 1</td><td>—</td><td>x=0mm 付近</td></tr>
+<tr><td>下段 40–52mm</td><td>3.58 : 1</td><td>—</td><td>x=0mm 付近</td></tr>
+</table>
+<p>上段の横プロファイル： <code>x0mm:3.0 / 10mm:3.2 / 20mm:3.6 / 30mm:4.2 / 40mm:5.0 / 50mm:5.7 / 60mm:6.2</code></p>
+<p><strong>現行の無回転グラデのままだと、上段は左側ほど白文字が弱い。</strong>行頭のラベル（<code>名称</code> <code>原材料名</code> <code>製造者</code>）が全部そこに来るので、<strong>一番読ませたい列が一番不利</strong>になる。</p>
+<p>背景を 1 枚のまま（別地を敷かず）<strong>向きだけ変えて</strong>改善できる：</p>
+<table class="t">
+<tr><th>グラデ transform</th><th>上段 最悪 CR</th><th>上段 平均</th><th>中段 最悪</th></tr>
+<tr><td><code>none</code>（現行 4a）</td><td><span class="ng">2.77</span></td><td>4.69</td><td>3.21</td></tr>
+<tr><td><code>rotate(180deg) scale(1.6)</code></td><td>4.35</td><td>6.49</td><td>3.43</td></tr>
+<tr><td><code>rotate(180deg) scale(2.4)</code></td><td>5.04</td><td>6.43</td><td>4.26</td></tr>
+<tr><td><strong><code>rotate(200deg) scale(1.8)</code></strong></td><td><span class="ok">5.37</span></td><td><span class="ok">6.70</span></td><td><span class="ok">4.05</span></td></tr>
+</table>
+<p><strong>→ <code>rotate(200deg) scale(1.8)</code> が最良</strong>（上段の最悪値が 2.77 → 5.37 でほぼ 2 倍、中段も 3.21 → 4.05 で改善）。背景は依然グラデ 1 枚なので「上段の背景を全体と一緒にする」指定と両立する。</p>
 
-<h3>B. 英語・全部入り <em>— 本文 1.05mm。同条件で JA より一段小さい</em></h3>
-<div class="scale"><div class="zoom"><div class="band en" id="en1"></div></div></div>
+<h2>4. 実寸プレビュー（69×18mm を 3.4 倍表示）</h2>
 
-<h3>C. 日本語・栄養成分表示を下段へ <em>— 本文 1.6mm まで拡大できる（上段＋下段）</em></h3>
-<div class="scale"><div class="zoom"><div class="band big" id="ja3"></div><div style="height:1mm"></div><div class="lower" id="low3"></div></div></div>
+<h3>A-1. 日本語 1.15mm ・ グラデ <em>none</em>（現行のまま）<em> — 左端のラベルが橙明部に乗る</em></h3>
+<div class="scale"><div class="zoom"><div class="band" id="ja_none"></div></div></div>
 
-<h3>D. 日本語・白抜き <em>— 参考写真と同じ見た目。3.3pt の白抜き＝潰れる想定の比較用</em></h3>
-<div class="scale"><div class="zoom"><div class="band knock" id="ja4"></div></div></div>
+<h3>A-2. 日本語 1.15mm ・ グラデ <em>rotate(200deg) scale(1.8)</em><em> — 上段が暗部に入る</em></h3>
+<div class="scale"><div class="zoom"><div class="band rot" id="ja_rot"></div></div></div>
 
-<h2>3. 判断が要るフラグ</h2>
-<div class="flag"><b>1. ロゴが package から消える。</b> 上段からロゴ＋ワードマークが無くなり、中段は現状維持なので、Toopdbq の署名は QR と下段の <code>toopdbq.com</code> だけになる。ブランド面としてこれでよいか、案の中で提示すること（下段に小さくワードマークを戻す案を 1 つ混ぜる等）。</div>
-<div class="flag"><b>2. 法定表示帯の中に Toopdbq のロゴを置かない。</b> 帯には <code>製造者 株式会社ロッテ</code> が明記される。同じ枠内に Toopdbq のマークを並べると<strong>製造者の誤認</strong>を招く。戻すなら帯の外（中段・下段）に置く。</div>
-<div class="flag"><b>3. 英語版は参考訳。</b> 日本の食品表示法が要求するのは日本語表示。英語版は併記・補助であり日本語版を置き換えない。英語版単独配布を想定するなら日本語表示も同じ面に残す構成にする。</div>
-<div class="flag"><b>4. 栄養成分表示を「畳むと隠れる下段」に置いてよいか</b>（構造 C）。表示は購入者が見られる状態である必要があるため判断が要る。案としては出しつつ、この論点をコメントに明記すること。</div>
+<h3>B. 英語 1.15mm ・ 同 transform <em>— padding 0 で JA と同級に揃う</em></h3>
+<div class="scale"><div class="zoom"><div class="band en rot" id="en_rot"></div></div></div>
 
-<h2>4. 出すもの</h2>
+<h3>C. 日本語 1.65mm ・ 栄養成分表示を下段へ <em>— 級数を +43% 稼ぐ唯一の手</em></h3>
+<div class="scale"><div class="zoom"><div class="band big rot" id="ja_c"></div><div style="height:1mm"></div><div class="lower rot" id="low_c"></div></div></div>
+
+<h2>5. 判断が要るフラグ</h2>
+<div class="flag"><b>1. 3.0–3.3pt の白抜きは潰れる方向のリスクがある。</b> 既存の印刷制約「白抜き細文字 &lt;5pt 禁止」に該当する。<strong>承知のうえで白文字統一にするのが今回の指定</strong>なので、潰れ対策は<strong>級数を上げる（構造 C）</strong>と<strong>地を暗くする（グラデ回転）</strong>の 2 つで取る。白パネルや半透明スクリムで逃げないこと。罫線も白（<code>rgba(255,255,255,.55)</code> 目安）で 0.3mm 以上、ウェイトは Regular 以上（Light は白抜きで最初に消える）。</div>
+<div class="flag"><b>2. 余白ゼロ＝端 1mm の文字は欠ける前提。</b> 断裁ズレは実務上 ±1mm。欠けても意味が壊れない語（住所の末尾等）を端に置き、<code>●アレルギー物質…</code> のような欠けてはいけない行と数値は端から離すこと。</div>
+<div class="flag"><b>3. ロゴが package から消える。</b> 上段からロゴ＋ワードマークが無くなり中段は現状維持なので、Toopdbq の署名は QR と下段の <code>toopdbq.com</code> だけになる。ブランド面としてこれでよいか案の中で提示すること（下段に小さくワードマークを戻す案を 1 つ混ぜてよい）。</div>
+<div class="flag"><b>4. 法定表示帯の中に Toopdbq のロゴを置かない。</b> 帯には <code>製造者 株式会社ロッテ</code> が明記される。同じ枠内に Toopdbq のマークを並べると<strong>製造者の誤認</strong>を招く。戻すなら帯の外（中段・下段）に。</div>
+<div class="flag"><b>5. 英語版は参考訳。</b> 日本の食品表示法が要求するのは日本語表示。英語版は併記・補助であり日本語版を置き換えない。</div>
+<div class="flag"><b>6. 栄養成分表示を「畳むと隠れる下段」に置いてよいか</b>（構造 C）。表示は購入者が見られる状態である必要があるため判断が要る。案としては出しつつ、この論点をコメントに明記すること。</div>
+
+<h2>6. 出すもの</h2>
 <ul>
 <li><strong>日本語 4 案 ＋ 英語 4 案 = 計 8 案。</strong> 同じ番号の JA/EN はペア（同一レイアウトの言語違い）。</li>
-<li>探索軸（4 案で全部使う・似た案を 2 つ出さない）：<strong>①白帯フル幅</strong> / <strong>②クリーム地の札</strong> / <strong>③構造 C（栄養を下段へ）</strong>必須 / <strong>④白抜き（参考写真そのまま）</strong>比較用に 1 案だけ。</li>
-<li>全案とも面構成 18/22/12 × 69mm 固定、中段は 4a のまま、QR 19.6mm、折り線ガイドあり。</li>
-<li>もう 1 フレーバー（梅ガム）へ差し替え可能な構造にする。<strong>栄養表は 6 列（ラムネ）と 5 列（梅）の両方で崩れないこと</strong>（列幅を決め打ちしない）。</li>
+<li>地色は全案共通（グラデ 1 枚＋白文字）なので、<strong>組み方の軸</strong>で振る（4 案で全部使う・似た案を 2 つ出さない）：
+  <strong>①罫線あり（実物準拠・白ヘアライン）</strong> / <strong>②罫線なし（級数差と行間だけで切る）</strong> /
+  <strong>③構造 C（栄養を下段へ・1.65mm）</strong>必須 / <strong>④2 カラム（左右に割って行数を減らす）</strong>。</li>
+<li><strong>1〜4 のうち 1 案だけグラデを <code>none</code>（現行 4a のまま）で出す。</strong>上段左端 CR 2.77:1 が実際どう見えるか判断したい。残りは <code>rotate(200deg) scale(1.8)</code>。</li>
+<li>全案とも面構成 18/22/12 × 69mm 固定、上段 <code>padding:0</code>、中段は 4a のまま、QR 19.6mm、折り線ガイドあり。</li>
+<li>もう 1 フレーバー（梅ガム）へ差し替え可能な構造に。<strong>栄養表は 6 列（ラムネ）と 5 列（梅）の両方で崩れないこと</strong>（列幅を決め打ちしない）。</li>
 </ul>
 <p class="lede">項目の値（一字一句）・中段/下段/背景の実値・印刷制約・Smell test はすべて <a href="HANDOFF.md">HANDOFF.md</a> に。</p>
 
@@ -159,13 +179,14 @@ const head=D=>`
  <div class="r hr"><span class="lb">${D.L.i}</span><span class="vl">${D.i}</span></div>
  <div class="r hr"><span class="lb">${D.L.m}</span><span class="vl">${D.m}</span></div>
  <div class="r"><span class="lb">${D.L.p}</span><span class="vl">${D.p}</span></div>
- <div class="r hr alg"><span>${D.a}</span></div>`;
+ <div class="r hr"><span>${D.a}</span></div>`;
 const tbl=D=>`<table><tr><th colspan="6" style="text-align:left">${D.nt}</th></tr>
- <tr>${D.hd.map(h=>'<th>'+h+'</th>').join('')}</tr>
- <tr>${D.vs.map(v=>'<td>'+v+'</td>').join('')}</tr></table>`;
-ja1.innerHTML=head(JA)+tbl(JA);
-en1.innerHTML=head(EN)+tbl(EN);
-ja3.innerHTML=head(JA); low3.innerHTML=tbl(JA);
-ja4.innerHTML=head(JA)+tbl(JA);
+ <tr>${D.hd.map(h=>'<th>'+h+'</th>').join('')}</tr><tr>${D.vs.map(v=>'<td>'+v+'</td>').join('')}</tr></table>`;
+const fill=(el,html)=>{ el.innerHTML='<div class="bg"><i></i><u></u></div><div class="fg">'+html+'</div>'; };
+fill(ja_none, head(JA)+tbl(JA));
+fill(ja_rot,  head(JA)+tbl(JA));
+fill(en_rot,  head(EN)+tbl(EN));
+fill(ja_c,    head(JA));
+fill(low_c,   tbl(JA));
 </script>
 </div></body></html>
