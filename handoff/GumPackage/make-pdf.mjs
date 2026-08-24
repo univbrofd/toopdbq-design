@@ -158,7 +158,11 @@ function shell(pages, pw, ph) {
 @import url('../../DesignSystem/colors_and_type.css');
 :root{ --grain:${GRAIN}; }
 @page{ size:${W}mm ${H}mm; margin:0; }
-html,body{margin:0;padding:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+html,body{margin:0;padding:0;background:#fff;font-family:var(--font-jp,'Noto Sans JP',sans-serif);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+/* dc ページでは var(--font-jp) が artboard の祖先に載っている。artboard だけ抜くと継承が切れて
+   ヒラギノ(埋め込み不可・別書体)で組まれるため、版面のルートで明示的に指定し直す。 */
+:root{ --font-latin:'Inter','Noto Sans JP',sans-serif; }
+/* system-ui を外す。Inter に無い字 (● 等) が macOS の SF NS に落ちて PDF に system font が混ざるのを防ぐ。 */
 .page{position:relative;width:${W}mm;height:${H}mm;overflow:hidden;break-after:page;}
 .page:last-child{break-after:auto;}
 .art{position:absolute;left:${ORG_PX}px;top:${ORG_PX}px;width:${pw}mm;height:${ph}mm;}
@@ -212,13 +216,37 @@ function a3Doc(front, back, lang) {
   return shell(a3Page(front, false, head + ' &mdash; FRONT') + a3Page(back, true, head + ' &mdash; BACK (mirrored)'), A3W, A3H);
 }
 
+/* ---------- webfont の待ち ----------
+   colors_and_type.css は Inter / Noto Sans JP を入れ子 @import で引く。未使用の face は
+   登録すらされないので document.fonts.ready だけでは待てない。実体を要求してから check() で確かめる。 */
+const FACES = [
+  ['400 10mm "Noto Sans JP"'], ['500 10mm "Noto Sans JP"'], ['700 10mm "Noto Sans JP"'],
+  ['800 10mm "Noto Sans JP"'], ['900 10mm "Noto Sans JP"'],
+  ['400 10mm Inter'], ['500 10mm Inter'], ['700 10mm Inter'], ['900 10mm Inter'],
+  ['400 10mm Pacifico'],
+].map(a => a[0]);
+const WARM = `(async () => {
+  const specs = ${JSON.stringify(FACES)};
+  await Promise.all(specs.map(s => document.fonts.load(s, 'Toopdbq 渋谷で写真を投稿して')));
+  await document.fonts.ready;
+  await new Promise(r => setTimeout(r, 800));
+  await document.fonts.ready;
+})()`;
+const PROBE = `(async () => {
+  const specs = ${JSON.stringify(FACES)};
+  const miss = specs.filter(s => !document.fonts.check(s, 'Toopdbq 渋谷'));
+  return { ok: miss.length === 0, status: document.fonts.status, faces: document.fonts.size, miss };
+})()`;
+
 /* ---------- printToPDF ---------- */
 async function toPdf(file, wmm, hmm, out) {
   [wmm, hmm] = [wmm + M * 2, hmm + M * 2];
   return withPage(BASE + '.build/' + file, async send => {
-    await new Promise(r => setTimeout(r, 6000));
-    await send('Runtime.evaluate', { expression: 'document.fonts.ready', awaitPromise: true });
-    await new Promise(r => setTimeout(r, 1500));
+    await send('Runtime.evaluate', { expression: WARM, awaitPromise: true, returnByValue: true });
+    const fw = await send('Runtime.evaluate', { expression: PROBE, awaitPromise: true, returnByValue: true });
+    const st = fw.result?.result?.value;
+    if (!st || !st.ok) throw new Error('webfonts not ready for ' + file + ': ' + JSON.stringify(st));
+    console.log('    fonts', JSON.stringify(st));
     const r = await send('Page.printToPDF', {
       paperWidth: wmm * MM2IN, paperHeight: hmm * MM2IN,
       marginTop: 0, marginBottom: 0, marginLeft: 0, marginRight: 0,
