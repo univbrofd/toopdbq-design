@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+@import url('../../DesignSystem/colors_and_type.css');
+:root{
+  --grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iMC41NSIvPjwvc3ZnPg==");
+}
+body{margin:0;background:#0d0d10;}
+a{color:#ff3e88;text-decoration:none;}
+a:hover{color:#fff0a6;}
+@media print{
+  body{background:#fff;}
+  [data-view]{transform:none !important; width:75mm !important; height:58mm !important;}
+  [data-artboard]{left:0 !important; top:0 !important;}
+  [data-zoom-box]{width:75mm !important; height:58mm !important;}
+  [data-guides]{display:none !important;}
+  [data-screenonly]{display:none !important;}
+}
+</style>
+</helmet>
+
+<div style="min-height:100vh; padding:32px 36px 64px; font-family:var(--font-jp); color:var(--text-1); box-sizing:border-box;">
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#005f67"/><circle cx="132" cy="150" r="120" fill="#ff3e88" opacity=".85"/><text x="18" y="62" font-family="sans-serif" font-size="30" font-weight="900" fill="#fff">v4.4</text><text x="18" y="98" font-family="sans-serif" font-size="20" font-weight="700" fill="#fff">裏面</text><rect x="0" y="128" width="200" height="2" fill="#fff0a6"/><rect x="0" y="168" width="200" height="2" fill="#00e5ff"/></svg></template>
+
+<div data-screenonly="1" style="max-width:1240px; display:flex; flex-direction:column; gap:6px; margin-bottom:24px;">
+  <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v4.4 裏面（1c 採用）</div>
+  <div style="font-size:24px; font-weight:700;">裏面 — 1c 採用・本文 2.50mm（最大）</div>
+  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:80ch;">正面 1a / 1b は v3.2 のまま未変更です。1c（大見出し・段落間を締めた型）を採用し、新しい文言で <strong style="font-weight:700;">65×48mm の枠からはみ出さない最大の級数</strong>に上げました。上限を決めているのは縦ではなく<strong style="font-weight:700;">行の幅</strong>で、本文は <strong style="font-weight:700;">2.36mm → 2.50mm</strong>。これが 65×48mm に入る最大で、行幅（最長 26 字 = 64.9mm）と縦（最下端 49.35mm・枠の下端まで 0.65mm）が同時に限界です。<strong style="font-weight:700;">代わりに「本文の頭を折り線 18mm より下」の条件を外しました</strong>——本文1 の 1 行目が 18mm を跨ぎます（見出しは跨いでいません）。見出しは 2 行目「今日のお題で友達ができる」12 字が 64.1mm で、5.60mm が上限のままです。画面上は 2 倍表示。</div>
+</div>
+
+<section style="display:flex; flex-direction:column; gap:40px; margin-bottom:44px;">
+
+<!-- 1a（v4.4・旧 1c 採用） 大見出し・段落間を締めた型／級数は枠いっぱい — 実測（trim 上端基準・mm）
+     JA: 本文 2.50mm / 600 / 行送り 1.55、見出し 5.60mm（本文×2.24）・800・2 行・行送り 1.08・letter-spacing -0.045em。
+         見出し 2.66–14.75 / 本文1 16.95–24.70 / 本文2 26.10–49.35。ブロック総高 46.69mm・上の空き 2.66mm / 下（52mm まで）2.65mm。最下端 y = 49.35mm。
+         指定改行はすべて 1 行に収まる（本文の最長行 26 字 = 64.9mm ＝ 行長 65mm ぎりぎり / 見出し 2 行目 64.1mm）。自動折り返しは 1 か所もない。
+         見出しは 18mm を跨いでいない（下端 14.75 < 18）。ただし<本文1 の 2 行目が折り線 18mm に載る>（16.95–24.70 の中の 20.83–24.70 が 2 行目、1 行目 16.95–20.83 が 18mm を跨ぐ）。級数を最大化するために「本文の頭を 18mm より下」の条件を外した結果。
+         最下端 49.35mm ＝ 44mm からの糊代に 5.35mm、枠の下端 50mm まで残り 0.65mm。行幅・縦の両方が同時に限界で、これが 65×48mm に入る最大級数。
+     EN: 本文を 6 段落の新コピーに差し替え。本文 2.50mm / 600 / 行送り 1.30 / letter-spacing -0.02em・段落間 1.1mm、見出し 3.30mm・800・2 行・行送り 1.08。
+         見出し 2.64–9.76 / 本文 11.36–49.36（自動折り返しで計 10 行：2 / 2 / 1 / 2 / 2 / 1）。ブロック総高 46.72mm・上下の空き 各 2.64mm。最下端 y = 49.36mm。
+         本文 2.50mm が上限。2.55mm に上げると段落 4 が 3 行に割れて合計 11 行になり、枠の下端 50mm を越える（行幅ではなく行数と縦が上限を決めている）。見出しは 2 行目 40 字が 62.2mm で 3.30mm が行幅の上限。
+         見出しは 18mm を跨いでいない（下端 9.76 < 18）。本文は 18mm・40mm の折り目に行が載り、44mm からの糊代に 5.4mm 入る（JA と同様）。 -->
+<div id="1a" style="display:flex; flex-direction:column; gap:12px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3);"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">1a</span><span style="font-family:var(--font-jp);">採用案 — 見出し JA 5.60mm / 本文 2.50mm。行幅と縦が同時に限界の最大級数。本文1 の 1 行目が 18mm の折り目に載る。</span></div>
+  <div style="display:flex; flex-wrap:wrap; gap:26px;">
+
+  <div style="display:flex; flex-direction:column; gap:7px;">
+    <div data-screenonly="1" style="font-family:var(--font-latin); font-size:10.5px; font-weight:600; color:var(--text-3);">JA</div>
+    <div data-zoom-box="1" style="width:{{ bw }}; height:{{ bh }};"><div data-view="1" style="position:relative; overflow:hidden; width:{{ vw }}; height:{{ vh }}; transform:scale(2); transform-origin:top left; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="JA" style="position:absolute; left:{{ vo }}; top:{{ vo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div data-frame="1" style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; color:#fff; text-align:center; text-wrap:pretty;">
+          <div data-blk="head" style="position:absolute; left:0; top:0.66mm; width:65mm; font-size:5.6mm; font-weight:800; line-height:1.08; letter-spacing:-0.045em; text-shadow:0 0.25mm 0.5mm rgba(0,0,0,.28);">渋谷にいる今だけ、<br>今日のお題で友達ができる</div>
+          <div data-blk="b1" style="position:absolute; left:0; top:14.95mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.55;">
+            <div style="white-space:nowrap;">今日渋谷で遊んでいる人の投稿だけが載る</div>
+            <div style="white-space:nowrap;">渋谷からしか投稿できないソーシャルアプリを作ってます</div>
+          </div>
+          <div data-blk="b2" style="position:absolute; left:0; top:24.10mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.55;">
+            <div style="white-space:nowrap;">毎日お題が出る。それに乗せてカメラで撮影して投稿する</div>
+            <div style="white-space:nowrap;">いいねから、知らない人とも会話が始まる。</div>
+            <div style="white-space:nowrap;">同じ趣味の友達、帰りに寄れる飲み友。</div>
+            <div style="white-space:nowrap;">恋人探しアプリではないけど、運命的な出会いもあるかも</div>
+            <div style="white-space:nowrap;">普段では交わらない人とのきっかけが欲しい人の</div>
+            <div style="white-space:nowrap;">ソーシャルプラットフォーム。</div>
+          </div>
+        </div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+          <div style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; outline:0.2mm dashed rgba(255,255,255,.4);"></div>
+          <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+          <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+          <div style="position:absolute; left:0; top:47mm; width:75mm; border-top:0.2mm dashed rgba(0,229,255,.95);"></div>
+        </div></sc-if>
+      </div>
+    </div></div>
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:7px;">
+    <div data-screenonly="1" style="font-family:var(--font-latin); font-size:10.5px; font-weight:600; color:var(--text-3);">EN</div>
+    <div data-zoom-box="1" style="width:{{ bw }}; height:{{ bh }};"><div data-view="1" style="position:relative; overflow:hidden; width:{{ vw }}; height:{{ vh }}; transform:scale(2); transform-origin:top left; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="EN" style="position:absolute; left:{{ vo }}; top:{{ vo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div data-frame="1" style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; color:#fff; font-family:var(--font-latin); text-align:center; text-wrap:pretty;">
+          <div data-blk="head" style="position:absolute; left:0; top:0.64mm; width:65mm; font-size:3.3mm; font-weight:800; line-height:1.08; letter-spacing:-0.03em; text-shadow:0 0.25mm 0.5mm rgba(0,0,0,.28);">Only while you're in Shibuya,<br>today's prompt can lead to a new friend.</div>
+          <div data-blk="b" style="position:absolute; left:0; top:9.36mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.3; letter-spacing:-0.02em; display:flex; flex-direction:column; gap:1.1mm;">
+            <div>Your feed only shows people in Shibuya today. You can only post while you're here.</div>
+            <div>A new prompt drops every day. Take a photo and post it. A like can turn into a chat with someone new.</div>
+            <div>Same interests. Someone nearby to grab a drink with.</div>
+            <div>It's not a dating app, but you might meet someone special.</div>
+            <div>For people looking to connect with someone they'd never meet otherwise.</div>
+            <div>Unexpected connections, only in Shibuya.</div>
+          </div>
+        </div>
+        <sc-if value="{{ guides }}" hint-placeholder-val="{{ true }}"><div data-guides="1" style="position:absolute; inset:0; pointer-events:none;">
+          <div style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; outline:0.2mm dashed rgba(255,255,255,.4);"></div>
+          <div style="position:absolute; left:0; top:21mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+          <div style="position:absolute; left:0; top:43mm; width:75mm; border-top:0.2mm dashed rgba(255,240,166,.95);"></div>
+          <div style="position:absolute; left:0; top:47mm; width:75mm; border-top:0.2mm dashed rgba(0,229,255,.95);"></div>
+        </div></sc-if>
+      </div>
+    </div></div>
+  </div>
+
+  </div>
+</div>
+
+</section>
+
+<div data-screenonly="1" style="max-width:1240px; font-size:12px; font-weight:400; line-height:1.85; color:var(--text-2);">
+  <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">印刷申し送り（v4.4 裏面・1c 採用）</div>
+  仕上がり 69×52mm・artboard 75×58mm（塗り足し 3mm）。文字枠は trim 基準 <strong style="font-weight:700;">left 2mm / top 2mm・65×48mm</strong>（白破線＝非印刷）。ガイドは <strong style="font-weight:700;">18mm・40mm（イエロー破線＝折り線）</strong>と <strong style="font-weight:700;">44mm（シアン破線＝糊代の始まり）</strong>で、guides OFF と印刷時に消えます。<br>
+  <strong style="font-weight:700;">JA 本文 2.50mm が最大です。</strong>行幅は最長 26 字で 64.9mm（65mm まで 0.1mm）、縦は最下端 49.35mm（枠の下端 50mm まで 0.65mm）。どちらも余裕がありません。<strong style="font-weight:700;">本文1 の 1 行目が折り線 18mm を跨ぎます</strong>（級数を上げるために折り目回避を外した判断。見出しは跨いでいません）。JA 見出し 5.60mm は 2 行目 12 字が 64.1mm で行幅いっぱい。EN はコピー未変更のため本文 2.12mm 据え置き（最長行 64.9mm）、見出しのみ 5.20mm に上げています。<br>
+  見出しは JA / EN とも折り線 18mm を跨いでいません。EN は新コピー（6 段落・自動折り返しで 10 行）に差し替え、本文 2.50mm・見出し 3.30mm・最下端 49.36mm です。<strong style="font-weight:700;">本文2 の最下端は 49.35mm で、44mm からの糊代に 5.35mm 入ります</strong>（ダイライン確定後に要確認。浅くするには級数を下げるか、本文2 の行数を減らす必要があります）。本文左端のコントラストは実測 3.2–4.0:1 で、対処は本文 600 のみ（白パネル・スクリム・グラデ回転なし）。QR・Pacifico のワードマーク・toopdbq.com・法定表示・製造者表記・kicker・番号・ラベル・アイコン・罫はありません。<strong style="font-weight:700;">Tweaks</strong>：trim / guides / grain。
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;trim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const trim = this.props.trim ?? true;
+    return {
+      guides: this.props.guides ?? true,
+      grain: this.props.grain ?? true,
+      bw: trim ? '138mm' : '150mm',
+      bh: trim ? '104mm' : '116mm',
+      vw: trim ? '69mm' : '75mm',
+      vh: trim ? '52mm' : '58mm',
+      vo: trim ? '-3mm' : '0mm'
+    };
+  }
+}
+</script>
+</body>
+</html>
