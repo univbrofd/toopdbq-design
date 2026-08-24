@@ -39,6 +39,8 @@ a:hover{color:#fff0a6;}
            折り線は表・裏とも trim 上端から 18mm と 40mm。縦軸反転なら折り線は表裏で同じ y に来る（＝正しい）。
            横軸で裏返す（上下反転・短辺とじ）と裏が上下逆になり折り線が 12mm / 34mm にズレるため不可。
            このシートでは表と裏を貫く 1 本の折り線ガイド（イエロー）を引いてあり、表裏の折り線が同じ高さに来ていることが目で確認できる。
+
+     v5.2: 表の中段コピーの上に [ロゴ] Toopdbq のロックアップを中央揃えで追加。下段 4mm の一文の 180° 回転は取りやめ、正立に戻した。
            糊代の始まり 44mm（シアン）も表裏を貫いて 1 本で引いている。 -->
 
 <div style="min-height:100vh; padding:32px 36px 64px; font-family:var(--font-jp); color:var(--text-1); box-sizing:border-box;">
@@ -54,7 +56,7 @@ a:hover{color:#fff0a6;}
 <div data-screenonly="1" style="max-width:1300px; display:flex; flex-direction:column; gap:8px; margin-bottom:28px; padding:13px 16px; border-left:3px solid #00e5ff; background:#11181c; border-radius:0 6px 6px 0; font-size:12.5px; line-height:1.75; color:var(--text-2);">
   <div style="font-weight:700; color:#9fe8f2;">両面印刷の反転軸 — 縦軸で裏返す（左右反転／長辺とじ）</div>
   <div>折り線は表・裏とも trim 上端から <strong style="font-weight:700; color:var(--text-1);">18mm と 40mm</strong>。<strong style="font-weight:700; color:var(--text-1);">縦軸反転（長辺とじ）なら折り線は表裏で同じ y に来ます。これが正しい指定です。</strong>横軸で裏返す（上下反転／短辺とじ）と裏面が上下逆になり、折り線が 12mm と 34mm にズレるため<strong style="font-weight:700; color:#ffb3d0;">不可</strong>です。シート上の 1 本通しの折り線ガイドで、表裏が同じ高さに来ていることを確認してください。</div>
-  <div><strong style="font-weight:700; color:var(--text-1);">表の下段 4mm の一文は 180° 回転しています。</strong>巻いて背面に回ったときに正しく読める向きにするための仕様で、ミスではありません。このシート上では上下逆に見えますが直さないでください。</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">表の下段 4mm の一文は v5.2 で正立に戻しました。</strong>巻いて背面に回ったときの向きより、シート上でそのまま読めることを優先する判断です。</div>
   <div><strong style="font-weight:700; color:var(--text-1);">裏面の本文は糊代（44–52mm）に 5.35mm 入っています。</strong>糊代ガイド（44mm・シアン）を表裏とも引いてあります。表側の 44–52mm はデッド帯で無地なので、進入しているのは裏面の本文だけです。</div>
 </div>
 
@@ -88,11 +90,11 @@ a:hover{color:#fff0a6;}
             </div>
           </div>
           <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
-            <div style="flex:1; text-align:center; font-size:4.10mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">渋谷の中で写真を投稿して<br>新しい出会いを見つけよう</div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.4mm;"><div style="display:flex; align-items:center; gap:1.2mm;"><img src="../../assets/images/logo_toopdbq.png" alt="" style="height:4mm; width:auto; display:block;"><div style="font-family:var(--font-display); font-size:3.8mm; line-height:1; color:#fff; padding-bottom:0.9mm;">Toopdbq</div></div><div style="text-align:center; font-size:4.10mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">渋谷の中で写真を投稿して<br>新しい出会いを見つけよう</div></div>
             <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
           </div>
           <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
-            <div style="width:100%; font-size:2.05mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">このパッケージは toopdbq@gmail.com によるオリジナルデザインです。</div>
+            <div style="width:100%; font-size:2.05mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap;">このパッケージは toopdbq@gmail.com によるオリジナルデザインです。</div>
           </div>
           <div style="height:8mm; box-sizing:border-box;"></div>
         </div>
@@ -126,7 +128,7 @@ a:hover{color:#fff0a6;}
   </div></div>
 
   <div data-screenonly="1" style="display:flex; gap:16mm; font-size:11.5px; line-height:1.65; color:var(--text-2);">
-    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・JA</strong> — 上段18mm=法定表示 1.40mm（縦の空き0）／中段22mm=新コピー 4.10mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.05mm・<strong style="font-weight:700; color:#ffb3d0;">180°回転は仕様</strong>）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm は帯の境界と一致し、跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・JA</strong> — 上段18mm=法定表示 1.40mm（縦の空き0）／中段22mm=新コピー 4.10mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.05mm・正立）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm は帯の境界と一致し、跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
     <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・JA</strong> — 見出し 5.60mm（2.66–14.75mm）／本文 2.50mm。枠 65×48mm（trim 基準 left 2 / top 2mm）。最下端 y=49.35mm。<strong style="font-weight:700; color:#ffd9a6;">折り線 18mm は本文1 の 1 行目が跨ぐ／40mm は本文2 の行が載る</strong>（級数最大化の判断・見出しは跨がず）。糊代 44mm から 5.35mm 進入。</div>
   </div>
 </div>
@@ -160,11 +162,11 @@ a:hover{color:#fff0a6;}
             </div>
           </div>
           <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
-            <div style="flex:1; text-align:center; font-family:var(--font-latin); font-size:4.40mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">Post photos in Shibuya,<br>find someone new.</div>
+            <div style="flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.4mm;"><div style="display:flex; align-items:center; gap:1.2mm;"><img src="../../assets/images/logo_toopdbq.png" alt="" style="height:4mm; width:auto; display:block;"><div style="font-family:var(--font-display); font-size:3.8mm; line-height:1; color:#fff; padding-bottom:0.9mm;">Toopdbq</div></div><div style="text-align:center; font-family:var(--font-latin); font-size:4.40mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">Post photos in Shibuya,<br>find someone new.</div></div>
             <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
           </div>
           <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
-            <div style="width:100%; font-family:var(--font-latin); font-size:2.40mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">This package is an original design by toopdbq@gmail.com.</div>
+            <div style="width:100%; font-family:var(--font-latin); font-size:2.40mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap;">This package is an original design by toopdbq@gmail.com.</div>
           </div>
           <div style="height:8mm; box-sizing:border-box;"></div>
         </div>
@@ -194,7 +196,7 @@ a:hover{color:#fff0a6;}
   </div></div>
 
   <div data-screenonly="1" style="display:flex; gap:16mm; font-size:11.5px; line-height:1.65; color:var(--text-2);">
-    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・EN</strong> — 上段18mm=法定表示 1.30mm（縦の空き0・全文英語）／中段22mm=新コピー 4.40mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.40mm・<strong style="font-weight:700; color:#ffb3d0;">180°回転は仕様</strong>）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm を跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・EN</strong> — 上段18mm=法定表示 1.30mm（縦の空き0・全文英語）／中段22mm=新コピー 4.40mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.40mm・正立）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm を跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
     <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・EN</strong> — 見出し 3.30mm（2.64–9.76mm）／本文 2.50mm・6 段落 10 行（<strong style="font-weight:700; color:#ffd9a6;">実データは新コピー・2.50mm</strong>）。枠 65×48mm。最下端 y=49.36mm。折り線 18 / 40mm に本文の行が載る（見出しは跨がず）。糊代 44mm から 5.36mm 進入。</div>
   </div>
 </div>
@@ -207,7 +209,7 @@ a:hover{color:#fff0a6;}
   <strong style="font-weight:700; color:var(--text-1);">表の中段コピーのみ差し替え済み（v5.1）。それ以外は並べただけで編集していません。</strong>中段は JA「渋谷の中で写真を投稿して／新しい出会いを見つけよう」・EN「Post photos in Shibuya, / find someone new.」に変更。文字数が増えたため <strong style="font-weight:700;">6.7mm → JA 4.10mm / EN 4.40mm</strong>（使える幅 46.40mm に対し JA 最長行 46.24mm・EN 45.93mm＝ともに 1 行に収まる上限）。行送りは 1.16、ウェイト 900・letter-spacing -0.06em・QR 位置と帯の高さは不変。表＝v3.2 の 1a / 1b（上段18=法定表示 / 中段22=コピー＋QR / 下段12＝可視4＋デッド8。上段 JA 1.40 / EN 1.30mm、中段コピーは v5.1 で差し替え・JA 4.10 / EN 4.40mm、下段一文 JA 2.05 / EN 2.40mm）、裏＝v4.4 の JA / EN（65×48mm・trim 基準 left 2 / top 2mm の中央揃え、本文 2.50mm、見出し JA 5.60 / EN 3.30mm）。両面とも artboard 75×58mm / trim 69×52mm、背景は <code style="font-family:var(--font-latin);">--gradient-colorful</code> 無回転 ＋ grain .16。<br>
   <strong style="font-weight:700; color:var(--text-1);">版面</strong>：1 面 75×58mm を横に 2 面、塗り足しを重ねないため間隔 8mm → 1 言語 158×58mm。JA / EN 2 段・段間 12mm → <strong style="font-weight:700;">158×128mm</strong>。trim トグル ON では各面 69×52mm のみ描画 → 1 言語 146×52mm・全体 146×116mm。トンボは入れていません。<br>
   <strong style="font-weight:700; color:var(--text-1);">反転軸は縦軸（左右反転／長辺とじ）。</strong>折り線は表・裏とも trim 上端から 18mm・40mm で、縦軸反転なら表裏で同じ y に来ます（シート上の通しガイドで確認可）。横軸反転（上下反転／短辺とじ）は裏が上下逆になり折り線が 12 / 34mm にズレるため不可。糊代の始まり 44mm（シアン）も表裏を貫いて 1 本。<br>
-  <strong style="font-weight:700; color:#ffb3d0;">表の下段 4mm の一文が上下逆に見えるのは仕様です</strong>（巻いて背面に回ったときに正しく読める向き）。<strong style="font-weight:700; color:#ffb3d0;">裏面 v4.4 の申し送りにあった「EN は 2.12mm 据え置き」は誤りで、実データは新コピー・本文 2.50mm・見出し 3.30mm です</strong>（このシートのキャプションは実データ側に合わせています）。<br>
+  <strong style="font-weight:700; color:var(--text-1);">v5.2</strong>：表の中段コピーの上に [ロゴ] Toopdbq のロックアップを中央揃えで追加（マーク 4mm ＋ Pacifico 3.8mm、コピーとの間隔 1.4mm）。下段 4mm の一文の 180° 回転は取りやめ、正立に戻しました。<strong style="font-weight:700; color:#ffb3d0;">裏面 v4.4 の申し送りにあった「EN は 2.12mm 据え置き」は誤りで、実データは新コピー・本文 2.50mm・見出し 3.30mm です</strong>（このシートのキャプションは実データ側に合わせています）。<br>
   <strong style="font-weight:700; color:var(--text-1);">Tweaks</strong>：trim / guides / grain / lang（ja・en・both、既定 both）。
 </div>
 
