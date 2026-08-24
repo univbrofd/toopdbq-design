@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+@import url('../../DesignSystem/colors_and_type.css');
+:root{
+  --grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMTQwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC45IiBudW1PY3RhdmVzPSIzIi8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9IjE0MCIgaGVpZ2h0PSIxNDAiIGZpbHRlcj0idXJsKCNuKSIgb3BhY2l0eT0iMC41NSIvPjwvc3ZnPg==");
+}
+body{margin:0;background:#0d0d10;}
+a{color:#ff3e88;text-decoration:none;}
+a:hover{color:#fff0a6;}
+@media print{
+  body{background:#fff;}
+  [data-view]{transform:none !important;}
+  [data-zoom-box]{width:auto !important; height:auto !important;}
+  [data-guides]{display:none !important;}
+  [data-screenonly]{display:none !important;}
+}
+</style>
+</helmet>
+
+<!-- v5 — 表裏を並べた 1 枚（入稿確認シート）
+     新しいデザインは作っていない。確定済みの表（GumPackage_v3.dc.html の 1a/1b）と裏（GumPackageBack.dc.html の JA/EN）を、
+     級数・位置・文言を一切変えずにそのまま配置しただけのシート。
+
+     版面: 1 面 = artboard 75×58mm（trim 69×52 ＋ 塗り足し 3mm）。左＝表 / 右＝裏を横に並べ、塗り足しを重ねないため間隔 8mm。
+           1 言語ぶん 158×58mm。JA / EN の 2 段、段間 12mm → 全体 158×128mm。
+           trim トグル ON のときは各面 69×52mm のみを描き、1 言語ぶん 146×52mm・全体 146×116mm。画面上は 2 倍表示。
+
+     両面印刷の反転軸（必須指定）: 縦軸で裏返す（左右反転・長辺とじ）。
+           折り線は表・裏とも trim 上端から 18mm と 40mm。縦軸反転なら折り線は表裏で同じ y に来る（＝正しい）。
+           横軸で裏返す（上下反転・短辺とじ）と裏が上下逆になり折り線が 12mm / 34mm にズレるため不可。
+           このシートでは表と裏を貫く 1 本の折り線ガイド（イエロー）を引いてあり、表裏の折り線が同じ高さに来ていることが目で確認できる。
+           糊代の始まり 44mm（シアン）も表裏を貫いて 1 本で引いている。 -->
+
+<div style="min-height:100vh; padding:32px 36px 64px; font-family:var(--font-jp); color:var(--text-1); box-sizing:border-box;">
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect width="200" height="200" fill="#005f67"/><rect x="10" y="46" width="84" height="60" rx="4" fill="#ff3e88"/><rect x="106" y="46" width="84" height="60" rx="4" fill="#fff0a6"/><rect x="0" y="62" width="200" height="3" fill="#fff"/><rect x="0" y="92" width="200" height="3" fill="#fff"/><text x="100" y="146" font-family="sans-serif" font-size="30" font-weight="900" fill="#fff" text-anchor="middle">v5</text><text x="100" y="176" font-family="sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">表 + 裏</text></svg></template>
+
+<div data-screenonly="1" style="max-width:1300px; display:flex; flex-direction:column; gap:6px; margin-bottom:24px;">
+  <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v5 入稿確認シート</div>
+  <div style="font-size:24px; font-weight:700;">表・裏 1 枚並べ — JA / EN 2 段</div>
+  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:82ch;">確定した 2 面を実寸で並べただけのシートです。<strong style="font-weight:700;">新しいデザイン・新しい文言はありません</strong>（表＝v3.2 の <a href="GumPackage_v3.dc.html">1a / 1b</a>、裏＝v4.4 の <a href="GumPackageBack.dc.html">JA / EN</a> をそのまま配置。級数・位置・文言は作り直していません）。左＝表 / 右＝裏、上段＝JA / 下段＝EN。1 面 = artboard 75×58mm（trim 69×52 ＋ 塗り足し 3mm）、面間 8mm・段間 12mm で <strong style="font-weight:700;">158×128mm</strong>（trim 表示 ON では 1 言語 146×52mm・全体 146×116mm）。折り線 18 / 40mm と糊代 44mm は<strong style="font-weight:700;">表裏を貫く 1 本のガイド</strong>で引いてあり、表裏の折り線が同じ y に来ていることが目で見えます。トンボは入れていません（塗り足し外枠と折り線ガイドで足ります）。画面上は 2 倍表示。</div>
+</div>
+
+<div data-screenonly="1" style="max-width:1300px; display:flex; flex-direction:column; gap:8px; margin-bottom:28px; padding:13px 16px; border-left:3px solid #00e5ff; background:#11181c; border-radius:0 6px 6px 0; font-size:12.5px; line-height:1.75; color:var(--text-2);">
+  <div style="font-weight:700; color:#9fe8f2;">両面印刷の反転軸 — 縦軸で裏返す（左右反転／長辺とじ）</div>
+  <div>折り線は表・裏とも trim 上端から <strong style="font-weight:700; color:var(--text-1);">18mm と 40mm</strong>。<strong style="font-weight:700; color:var(--text-1);">縦軸反転（長辺とじ）なら折り線は表裏で同じ y に来ます。これが正しい指定です。</strong>横軸で裏返す（上下反転／短辺とじ）と裏面が上下逆になり、折り線が 12mm と 34mm にズレるため<strong style="font-weight:700; color:#ffb3d0;">不可</strong>です。シート上の 1 本通しの折り線ガイドで、表裏が同じ高さに来ていることを確認してください。</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">表の下段 4mm の一文は 180° 回転しています。</strong>巻いて背面に回ったときに正しく読める向きにするための仕様で、ミスではありません。このシート上では上下逆に見えますが直さないでください。</div>
+  <div><strong style="font-weight:700; color:var(--text-1);">裏面の本文は糊代（44–52mm）に 5.35mm 入っています。</strong>糊代ガイド（44mm・シアン）を表裏とも引いてあります。表側の 44–52mm はデッド帯で無地なので、進入しているのは裏面の本文だけです。</div>
+</div>
+
+<section style="display:flex; flex-direction:column; gap:{{ rowGap }}; margin-bottom:44px;">
+
+<!-- JA 段: 左＝表 1a（v3.2 のまま）/ 右＝裏 JA（v4.4 のまま）。折り線・糊代ガイドは 2 面を貫く 1 本。 -->
+<sc-if value="{{ showJa }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3);"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">JA</span><span style="font-family:var(--font-jp);">左＝表（v3.2 / 1a）・右＝裏（v4.4 / JA）</span></div>
+
+  <div data-zoom-box="1" style="width:{{ zw }}; height:{{ zh }};"><div data-view="1" style="position:relative; width:{{ rowW }}; height:{{ fh }}; transform:scale(2); transform-origin:top left;">
+
+    <div style="position:absolute; left:0; top:0; width:{{ fw }}; height:{{ fh }}; overflow:hidden; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="JA-表" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
+          <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; font-size:1.40mm; line-height:1.2; color:#fff;">
+            <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Ln }}</span><span style="flex:1;">{{ ja.n }}</span><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lq }}</span><span style="flex:none; margin-right:1.6mm;">{{ ja.q }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Li }}</span><span style="flex:1;">{{ ja.i }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lm }}</span><span style="flex:1;">{{ ja.m }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ ja.Lp }}</span><span style="flex:1;">{{ ja.p }}</span></div>
+            <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0; text-align:center; font-weight:700;">{{ ja.a }}</div>
+            <div style="margin:0 -3mm; display:flex; border-top:0.3mm solid rgba(255,255,255,.55); border-bottom:0.3mm solid rgba(255,255,255,.55);">
+              <div style="width:3mm; flex:none;"></div>
+              <div style="width:19mm; flex:none; font-weight:700;">{{ ja.nt }}</div>
+              <sc-for list="{{ ja.nu }}" as="c" hint-placeholder-count="6">
+                <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); text-align:center;"><div style="white-space:nowrap; font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
+              </sc-for>
+              <div style="width:3mm; flex:none;"></div>
+            </div>
+          </div>
+          <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
+            <div style="flex:1; text-align:center; font-size:4.10mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">渋谷の中で写真を投稿して<br>新しい出会いを見つけよう</div>
+            <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
+          </div>
+          <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
+            <div style="width:100%; font-size:2.05mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">このパッケージは toopdbq@gmail.com によるオリジナルデザインです。</div>
+          </div>
+          <div style="height:8mm; box-sizing:border-box;"></div>
+        </div>
+        <sc-if value="{{ showTrimRect }}" hint-placeholder-val="{{ false }}"><div data-guides="1" style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; outline:0.2mm dashed rgba(255,255,255,.45); pointer-events:none;"></div></sc-if>
+      </div>
+    </div>
+
+    <div style="position:absolute; left:{{ x2 }}; top:0; width:{{ fw }}; height:{{ fh }}; overflow:hidden; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="JA-裏" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div data-frame="1" style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; color:#fff; text-align:center; text-wrap:pretty;">
+          <div data-blk="head" style="position:absolute; left:0; top:0.66mm; width:65mm; font-size:5.6mm; font-weight:800; line-height:1.08; letter-spacing:-0.045em; text-shadow:0 0.25mm 0.5mm rgba(0,0,0,.28);">渋谷にいる今だけ、<br>今日のお題で友達ができる</div>
+          <div data-blk="b1" style="position:absolute; left:0; top:14.95mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.55;">
+            <div style="white-space:nowrap;">今日渋谷で遊んでいる人の投稿だけが載る</div>
+            <div style="white-space:nowrap;">渋谷からしか投稿できないソーシャルアプリを作ってます</div>
+          </div>
+          <div data-blk="b2" style="position:absolute; left:0; top:24.10mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.55;">
+            <div style="white-space:nowrap;">毎日お題が出る。それに乗せてカメラで撮影して投稿する</div>
+            <div style="white-space:nowrap;">いいねから、知らない人とも会話が始まる。</div>
+            <div style="white-space:nowrap;">同じ趣味の友達、帰りに寄れる飲み友。</div>
+            <div style="white-space:nowrap;">恋人探しアプリではないけど、運命的な出会いもあるかも</div>
+            <div style="white-space:nowrap;">普段では交わらない人とのきっかけが欲しい人の</div>
+            <div style="white-space:nowrap;">ソーシャルプラットフォーム。</div>
+          </div>
+        </div>
+        <sc-if value="{{ showTrimRect }}" hint-placeholder-val="{{ false }}"><div data-guides="1" style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; outline:0.2mm dashed rgba(255,255,255,.45); pointer-events:none;"></div></sc-if>
+      </div>
+    </div>
+
+  </div></div>
+
+  <div data-screenonly="1" style="display:flex; gap:16mm; font-size:11.5px; line-height:1.65; color:var(--text-2);">
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・JA</strong> — 上段18mm=法定表示 1.40mm（縦の空き0）／中段22mm=新コピー 4.10mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.05mm・<strong style="font-weight:700; color:#ffb3d0;">180°回転は仕様</strong>）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm は帯の境界と一致し、跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・JA</strong> — 見出し 5.60mm（2.66–14.75mm）／本文 2.50mm。枠 65×48mm（trim 基準 left 2 / top 2mm）。最下端 y=49.35mm。<strong style="font-weight:700; color:#ffd9a6;">折り線 18mm は本文1 の 1 行目が跨ぐ／40mm は本文2 の行が載る</strong>（級数最大化の判断・見出しは跨がず）。糊代 44mm から 5.35mm 進入。</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- EN 段: 左＝表 1b（v3.2 のまま）/ 右＝裏 EN（v4.4 のまま・本文 2.50mm の新コピー）。 -->
+<sc-if value="{{ showEn }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex; flex-direction:column; gap:10px;">
+  <div data-screenonly="1" style="display:flex; gap:10px; align-items:baseline; font-family:var(--font-latin); font-size:11px; font-weight:600; color:var(--text-3);"><span style="padding:2px 7px; border-radius:9999px; background:var(--gradient-colorful-linear); color:#fff;">EN</span><span style="font-family:var(--font-jp);">左＝表（v3.2 / 1b）・右＝裏（v4.4 / EN）</span></div>
+
+  <div data-zoom-box="1" style="width:{{ zw }}; height:{{ zh }};"><div data-view="1" style="position:relative; width:{{ rowW }}; height:{{ fh }}; transform:scale(2); transform-origin:top left;">
+
+    <div style="position:absolute; left:0; top:0; width:{{ fw }}; height:{{ fh }}; overflow:hidden; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="EN-表" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; display:flex; flex-direction:column;">
+          <div style="height:18mm; box-sizing:border-box; padding:0; display:flex; flex-direction:column; justify-content:space-between; overflow:hidden; font-family:var(--font-latin); font-size:1.30mm; line-height:1.2; color:#fff;">
+            <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Ln }}</span><span style="flex:1;">{{ en.n }}</span><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lq }}</span><span style="flex:none; margin-right:1.6mm;">{{ en.q }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Li }}</span><span style="flex:1;">{{ en.i }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline; border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lm }}</span><span style="flex:1;">{{ en.m }}</span></div>
+            <div style="display:flex; gap:1.0mm; align-items:baseline;"><span style="flex:none; white-space:nowrap; font-weight:700;">{{ en.Lp }}</span><span style="flex:1;">{{ en.p }}</span></div>
+            <div style="border-top:0.3mm solid rgba(255,255,255,.55); margin:0 -3mm; padding:0.2mm 3mm 0; text-align:center; font-weight:700;">{{ en.a }}</div>
+            <div style="margin:0 -3mm; display:flex; border-top:0.3mm solid rgba(255,255,255,.55); border-bottom:0.3mm solid rgba(255,255,255,.55);">
+              <div style="width:3mm; flex:none;"></div>
+              <div style="width:21mm; flex:none; font-weight:700;">{{ en.nt }}</div>
+              <sc-for list="{{ en.nu }}" as="c" hint-placeholder-count="6">
+                <div style="flex:1 1 0; min-width:0; border-left:0.3mm solid rgba(255,255,255,.55); text-align:center;"><div style="white-space:nowrap; font-weight:700;">{{ c.h }}</div><div>{{ c.v }}</div></div>
+              </sc-for>
+              <div style="width:3mm; flex:none;"></div>
+            </div>
+          </div>
+          <div style="height:22mm; box-sizing:border-box; padding:0; display:flex; align-items:center; gap:1.6mm;">
+            <div style="flex:1; text-align:center; font-family:var(--font-latin); font-size:4.40mm; font-weight:900; line-height:1.16; color:#fff; letter-spacing:-0.06em; white-space:nowrap; text-shadow:0 0.4mm 0.8mm rgba(0,0,0,.35);">Post photos in Shibuya,<br>find someone new.</div>
+            <div style="width:21mm; height:21mm; flex:none; border-radius:2mm; background:#fff; display:flex; align-items:center; justify-content:center;"><img src="qr/toopdbq_com.svg" alt="toopdbq.com" style="width:19.6mm; height:19.6mm; display:block;"></div>
+          </div>
+          <div style="height:4mm; box-sizing:border-box; padding:0; display:flex; align-items:center; overflow:hidden;">
+            <div style="width:100%; font-family:var(--font-latin); font-size:2.40mm; line-height:1.22; font-weight:500; color:#fff; white-space:nowrap; transform:rotate(180deg);">This package is an original design by toopdbq@gmail.com.</div>
+          </div>
+          <div style="height:8mm; box-sizing:border-box;"></div>
+        </div>
+        <sc-if value="{{ showTrimRect }}" hint-placeholder-val="{{ false }}"><div data-guides="1" style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; outline:0.2mm dashed rgba(255,255,255,.45); pointer-events:none;"></div></sc-if>
+      </div>
+    </div>
+
+    <div style="position:absolute; left:{{ x2 }}; top:0; width:{{ fw }}; height:{{ fh }}; overflow:hidden; box-shadow:var(--shadow-card);">
+      <div data-artboard="1" data-screen-label="EN-裏" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
+        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
+        <div data-frame="1" style="position:absolute; left:5mm; top:5mm; width:65mm; height:48mm; color:#fff; font-family:var(--font-latin); text-align:center; text-wrap:pretty;">
+          <div data-blk="head" style="position:absolute; left:0; top:0.64mm; width:65mm; font-size:3.3mm; font-weight:800; line-height:1.08; letter-spacing:-0.03em; text-shadow:0 0.25mm 0.5mm rgba(0,0,0,.28);">Only while you're in Shibuya,<br>today's prompt can lead to a new friend.</div>
+          <div data-blk="b" style="position:absolute; left:0; top:9.36mm; width:65mm; font-size:2.5mm; font-weight:600; line-height:1.3; letter-spacing:-0.02em; display:flex; flex-direction:column; gap:1.1mm;">
+            <div>Your feed only shows people in Shibuya today. You can only post while you're here.</div>
+            <div>A new prompt drops every day. Take a photo and post it. A like can turn into a chat with someone new.</div>
+            <div>Same interests. Someone nearby to grab a drink with.</div>
+            <div>It's not a dating app, but you might meet someone special.</div>
+            <div>For people looking to connect with someone they'd never meet otherwise.</div>
+            <div>Unexpected connections, only in Shibuya.</div>
+          </div>
+        </div>
+        <sc-if value="{{ showTrimRect }}" hint-placeholder-val="{{ false }}"><div data-guides="1" style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; outline:0.2mm dashed rgba(255,255,255,.45); pointer-events:none;"></div></sc-if>
+      </div>
+    </div>
+
+  </div></div>
+
+  <div data-screenonly="1" style="display:flex; gap:16mm; font-size:11.5px; line-height:1.65; color:var(--text-2);">
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・EN</strong> — 上段18mm=法定表示 1.30mm（縦の空き0・全文英語）／中段22mm=新コピー 4.40mm 2行＋QR 19.6mm／下段12mm=可視4（一文 2.40mm・<strong style="font-weight:700; color:#ffb3d0;">180°回転は仕様</strong>）＋デッド8（無地）。最下端 y=44.00mm。折り線 18 / 40mm を跨ぐ文字はゼロ。糊代 44–52mm への進入なし。</div>
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・EN</strong> — 見出し 3.30mm（2.64–9.76mm）／本文 2.50mm・6 段落 10 行（<strong style="font-weight:700; color:#ffd9a6;">実データは新コピー・2.50mm</strong>）。枠 65×48mm。最下端 y=49.36mm。折り線 18 / 40mm に本文の行が載る（見出しは跨がず）。糊代 44mm から 5.36mm 進入。</div>
+  </div>
+</div>
+</sc-if>
+
+</section>
+
+<div data-screenonly="1" style="max-width:1300px; font-size:12px; font-weight:400; line-height:1.85; color:var(--text-2);">
+  <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">申し送り（v5 入稿確認シート）</div>
+  <strong style="font-weight:700; color:var(--text-1);">表の中段コピーのみ差し替え済み（v5.1）。それ以外は並べただけで編集していません。</strong>中段は JA「渋谷の中で写真を投稿して／新しい出会いを見つけよう」・EN「Post photos in Shibuya, / find someone new.」に変更。文字数が増えたため <strong style="font-weight:700;">6.7mm → JA 4.10mm / EN 4.40mm</strong>（使える幅 46.40mm に対し JA 最長行 46.24mm・EN 45.93mm＝ともに 1 行に収まる上限）。行送りは 1.16、ウェイト 900・letter-spacing -0.06em・QR 位置と帯の高さは不変。表＝v3.2 の 1a / 1b（上段18=法定表示 / 中段22=コピー＋QR / 下段12＝可視4＋デッド8。上段 JA 1.40 / EN 1.30mm、中段コピーは v5.1 で差し替え・JA 4.10 / EN 4.40mm、下段一文 JA 2.05 / EN 2.40mm）、裏＝v4.4 の JA / EN（65×48mm・trim 基準 left 2 / top 2mm の中央揃え、本文 2.50mm、見出し JA 5.60 / EN 3.30mm）。両面とも artboard 75×58mm / trim 69×52mm、背景は <code style="font-family:var(--font-latin);">--gradient-colorful</code> 無回転 ＋ grain .16。<br>
+  <strong style="font-weight:700; color:var(--text-1);">版面</strong>：1 面 75×58mm を横に 2 面、塗り足しを重ねないため間隔 8mm → 1 言語 158×58mm。JA / EN 2 段・段間 12mm → <strong style="font-weight:700;">158×128mm</strong>。trim トグル ON では各面 69×52mm のみ描画 → 1 言語 146×52mm・全体 146×116mm。トンボは入れていません。<br>
+  <strong style="font-weight:700; color:var(--text-1);">反転軸は縦軸（左右反転／長辺とじ）。</strong>折り線は表・裏とも trim 上端から 18mm・40mm で、縦軸反転なら表裏で同じ y に来ます（シート上の通しガイドで確認可）。横軸反転（上下反転／短辺とじ）は裏が上下逆になり折り線が 12 / 34mm にズレるため不可。糊代の始まり 44mm（シアン）も表裏を貫いて 1 本。<br>
+  <strong style="font-weight:700; color:#ffb3d0;">表の下段 4mm の一文が上下逆に見えるのは仕様です</strong>（巻いて背面に回ったときに正しく読める向き）。<strong style="font-weight:700; color:#ffb3d0;">裏面 v4.4 の申し送りにあった「EN は 2.12mm 据え置き」は誤りで、実データは新コピー・本文 2.50mm・見出し 3.30mm です</strong>（このシートのキャプションは実データ側に合わせています）。<br>
+  <strong style="font-weight:700; color:var(--text-1);">Tweaks</strong>：trim / guides / grain / lang（ja・en・both、既定 both）。
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;trim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ja&quot;,&quot;en&quot;,&quot;both&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'ja' | 'en' | 'both'&quot;,&quot;section&quot;:&quot;表示&quot;}}">
+const DATA = {
+  ja: {
+    Ln:'名称', Lq:'内容量', Li:'原材料名', Lm:'製造者', Lp:'製造所',
+    n:'チューインガム', q:'9枚',
+    i:'ぶどう糖（国内製造）、砂糖、還元パラチノース、水あめ、植物油脂、ゼラチン、ウーロン茶抽出物／ガムベース、酸味料、軟化剤、加工でん粉、香料、着色料（クチナシ、紅花黄）、甘味料（アセスルファムK）、増粘多糖類、ヘスペリジン',
+    m:'株式会社ロッテ　〒160-0023 東京都新宿区西新宿3-20-1',
+    p:'株式会社ロッテ 狭山工場　埼玉県狭山市新狭山1-2-1',
+    a:'●アレルギー物質（28品目）ゼラチン使用。',
+    nt:'栄養成分表示（1パック9枚当り）',
+    hd:['熱量','蛋白質','脂質','炭水化物','食塩相当量','ぶどう糖'],
+    vs:['78kcal','0g','0g','20.5g','0.004g','10.0g']
+  },
+  en: {
+    Ln:'Product name', Lq:'Net content', Li:'Ingredients', Lm:'Manufacturer', Lp:'Plant',
+    n:'Chewing Gum', q:'9 sticks',
+    i:'Glucose (produced in Japan), sugar, reduced palatinose, starch syrup, vegetable oil, gelatin, oolong tea extract / gum base, acidulant, softener, modified starch, flavoring, coloring (gardenia, safflower yellow), sweetener (acesulfame K), thickening polysaccharide, hesperidin',
+    m:'Lotte Co., Ltd.  3-20-1 Nishi-Shinjuku, Shinjuku-ku, Tokyo 160-0023, Japan',
+    p:'Lotte Co., Ltd. Sayama Plant  1-2-1 Shin-Sayama, Sayama-shi, Saitama, Japan',
+    a:'●Allergens (28 designated items): contains gelatin.',
+    nt:'Nutrition Facts (per pack / 9 sticks)',
+    hd:['Energy','Protein','Fat','Carb.','Salt equiv.','Glucose'],
+    vs:['78 kcal','0 g','0 g','20.5 g','0.004 g','10.0 g']
+  }
+};
+
+class Component extends DCLogic {
+  build(src) {
+    return Object.assign({}, src, { nu: src.hd.map((h, k) => ({ h: h, v: src.vs[k] })) });
+  }
+  renderVals() {
+    const trim = this.props.trim ?? true;
+    const lang = ['ja','en','both'].indexOf(this.props.lang) >= 0 ? this.props.lang : 'both';
+    return {
+      guides: this.props.guides ?? true,
+      grain: this.props.grain ?? true,
+      showTrimRect: (this.props.guides ?? true) && !trim,
+      showJa: lang !== 'en',
+      showEn: lang !== 'ja',
+      fw: trim ? '69mm' : '75mm',
+      fh: trim ? '52mm' : '58mm',
+      fo: trim ? '-3mm' : '0mm',
+      x2: trim ? '77mm' : '83mm',
+      rowW: trim ? '146mm' : '158mm',
+      zw: trim ? '292mm' : '316mm',
+      zh: trim ? '104mm' : '116mm',
+      capW: trim ? '138mm' : '150mm',
+      rowGap: '24mm',
+      foldA: trim ? '18mm' : '21mm',
+      foldB: trim ? '40mm' : '43mm',
+      glue: trim ? '44mm' : '47mm',
+      ja: this.build(DATA.ja),
+      en: this.build(DATA.en)
+    };
+  }
+}
+</script>
+</body>
+</html>
