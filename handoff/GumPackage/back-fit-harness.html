@@ -12,13 +12,13 @@ pre{padding:12px;line-height:1.5;}
 /* v4.1 裏面: 見出し + 本文2段落だけ。中央揃え・面の中心に配置。 */
 const JA = {
   h:'渋谷にいる今だけ、今日のお題で友達ができる',
-  p:['このアプリは、渋谷にいるときしか投稿できない。今、この交差点に立っている人の話だけが載る。',
-     '毎朝お題が出る。それに乗せて一本出す。いいねから、知らない人とも会話が始まる。同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。']
+  p:['このアプリは、渋谷にいる時しか投稿できない\n今日渋谷で遊んでいる人の投稿だけが載る。',
+     '毎日お題が出る。それに乗せてカメラで撮影して投稿する。\nいいねから、知らない人とも会話が始まる。\n同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。']
 };
 const EN = {
   h:'In Shibuya, today only \u2014 a quest that makes friends',
-  p:['You can only post while you are in Shibuya. Only the people at this crossing show up here.',
-     'A quest every morning. Post one thing to answer it. A like starts a conversation with a stranger \u2014 a friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.']
+  p:['You can only post while you are in Shibuya\nOnly posts from people out in Shibuya today show up here.',
+     'A quest every day. Answer it with a photo you shoot right there.\nA like is where a conversation with a stranger starts.\nA friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.']
 };
 
 function build(d, en, base, hMul, w, lh){
@@ -30,7 +30,7 @@ function build(d, en, base, hMul, w, lh){
   let s = '';
   s += '<div style="font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.18;letter-spacing:-0.03em;">'+d.h+'</div>';
   d.p.forEach(function(t,i){
-    s += '<div style="margin-top:'+(base*(i===0?1.5:1.0)).toFixed(3)+'mm;font-weight:600;">'+t+'</div>';
+    s += '<div style="margin-top:'+(base*(i===0?1.5:1.0)).toFixed(3)+'mm;font-weight:600;">'+t.split('\n').join('<br>')+'</div>';
   });
   b.innerHTML = s;
   return b;
@@ -72,7 +72,7 @@ lines.push('');
 lines.push('■ 収まる最大級数（裏面は全面 69x52mm を使う / 中央揃え / 見出し=本文*hMul）');
 lines.push('lang  行長mm  行送り  hMul  cap   本文max   見出し   総高    0-52の上下余白 各');
 for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
-  for(const w of [69,65,63]){
+  for(const w of [69,67,65]){
     for(const lh of [1.55,1.5,1.45]){
       for(const hMul of [1.8,1.6]){
         for(const cap of [52,48,46,44]){

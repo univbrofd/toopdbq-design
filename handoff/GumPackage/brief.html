@@ -1,7 +1,7 @@
 <!-- @dsCard group="Brief" -->
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GumPackage v4.2 — 裏面</title>
+<title>GumPackage v4.3 — 裏面</title>
 <style>
 :root{ --bg:#0d0d10; --fg:#e9e9ee; --dim:#9a9aa6; --dim2:#71717e; --line:#26262e;
        --accent:#ff3e88; --ok:#3ddc97; --ng:#ff6b6b; --warn:#ffd166;
@@ -84,8 +84,8 @@ table.t td{color:#c2c2ce;}
 .back>.bg>i{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;background:var(--grad);display:block;}
 .back>.bg>u{position:absolute;inset:0;display:block;background-image:var(--grain);background-size:35mm 35mm;opacity:.16;mix-blend-mode:overlay;}
 .back>.fg{position:absolute;left:2mm;top:2mm;width:65mm;height:48mm;display:flex;flex-direction:column;
-  justify-content:center;text-align:center;font-size:2.73mm;line-height:1.55;}
-.back.en>.fg{font-family:var(--lat);font-size:2.51mm;}
+  justify-content:center;text-align:center;font-size:2.41mm;line-height:1.55;}
+.back.en>.fg{font-family:var(--lat);font-size:2.12mm;}
 .back .hd{font-size:1.8em;font-weight:900;line-height:1.18;letter-spacing:-0.03em;}
 .back .p1{margin-top:1.5em;font-weight:600;}
 .back .p2{margin-top:1.0em;font-weight:600;}
@@ -107,14 +107,14 @@ table.t td{color:#c2c2ce;}
 @media (max-width:700px){ .zoom{zoom:2.1;} .zoom.geoz{zoom:1.9;} h1{font-size:20px;} }
 </style></head><body><div class="wrap">
 
-<p class="kicker">handoff / GumPackage — v4.2（裏面）</p>
-<h1>板ガムパッケージ v4.2：裏面をつくる — 全面 69×52mm を一枚で、見出しと本文だけ</h1>
+<p class="kicker">handoff / GumPackage — v4.3（裏面）</p>
+<h1>板ガムパッケージ v4.3：裏面をつくる — 全面 69×52mm を一枚で、見出しと本文だけ</h1>
 <p class="lede">仕様の正は同ディレクトリの <a href="HANDOFF.md">HANDOFF.md</a>。このページは<strong>設計を縛る実測</strong>だけを実寸で見せるもの。数値はすべて実測値で、推測は含まない。<br>
 <strong>正面（1a / 1b）は v3.2 で確定済み。</strong>以下 §0A が今回の依頼（裏面）で、§0 以降は確定した正面の記録。</p>
 
 
 
-<h2>0A. 裏面（v4.2）— 全面 69×52mm を一枚で、見出し ＋ 本文だけ、中央揃え</h2>
+<h2>0A. 裏面（v4.3）— 全面 69×52mm を一枚で、見出し ＋ 本文だけ、中央揃え</h2>
 
 <p>正面の裏。<strong>正面の段割り（上段18 / 中段22 / 下段12）は裏面には持ち込まない。69×52mm を一枚としてフルに使う。</strong>要素は<strong>見出しと本文の 2 つだけ</strong>。<strong>中央揃えで、面の中心に、上下左右のバランスを取って置く</strong>。背景は<strong>正面とまったく同じ</strong>（<code>--gradient-colorful</code> 無回転・同じオフセット・grain .16）。JA / EN の 2 面。</p>
 
@@ -142,29 +142,49 @@ table.t td{color:#c2c2ce;}
 </p>
 <p><strong>面を下まで使うのはコントラスト上むしろ有利。</strong> 悪いのは左上だけで、y が下がるほど良くなる（y=44–52 の帯は最小でも 3.5–4.4:1）。中央揃えは行が左右端まで届かないので、最悪帯に文字が入る頻度もさらに下がる。それでも長い行の左端は 3.2–4.0:1 に落ちるので、<strong>本文のウェイトは 600</strong> にする（線が太ると実効コントラストが上がり、印刷での白抜きの潰れにも効く）。白パネル・スクリム・グラデの回転は「背景は正面と同じ」の指定に反するので使わない。</p>
 
-<h3>実測③ <em>— 収まる級数（全面を使う効果）</em></h3>
-<p>支給コピーをそのまま流し、収まる最大級数を二分探索した（padding 0・見出し＝本文×1.8）。<code>cap</code> はブロックの高さ上限で、残りが上下の空きになる。</p>
+<h3>実測③ <em>— 収まる級数</em></h3>
+<p>支給コピー（改行位置も指定どおり）をそのまま流し、収まる最大級数を二分探索した（padding 0・見出し＝本文×1.8・行送り 1.55）。<code>cap</code> はブロックの高さ上限で、残りが上下の空きになる。</p>
 <table class="t">
-<tr><th>行長</th><th>行送り</th><th>cap</th><th>JA 本文 / 見出し</th><th>EN 本文 / 見出し</th><th>上下の空き 各</th></tr>
-<tr><td>65mm</td><td>1.55</td><td>52mm</td><td>2.83 / 5.09mm</td><td>2.72 / 4.89mm</td><td class="ng">0–1.1mm（端に触れる）</td></tr>
-<tr><td><strong>65mm</strong></td><td><strong>1.55</strong></td><td><strong>48mm</strong></td><td class="ok"><strong>2.73 / 4.91mm</strong></td><td class="ok"><strong>2.51 / 4.51mm</strong></td><td class="ok">2.0mm</td></tr>
-<tr><td>65mm</td><td>1.55</td><td>46mm</td><td>2.61 / 4.71mm</td><td>2.40 / 4.33mm</td><td>3.0mm</td></tr>
-<tr><td>69mm</td><td>1.55</td><td>48mm</td><td>2.73 / 4.91mm</td><td>2.51 / 4.51mm</td><td>2.0mm（左右の空きは 0）</td></tr>
-<tr><td class="dim">（参考）0–40mm に制限した前案</td><td>1.45</td><td>36mm</td><td>2.33 / 4.20mm</td><td>2.13 / 3.84mm</td><td>2.0mm</td></tr>
+<tr><th>行長</th><th>cap</th><th>JA 本文 / 見出し</th><th>EN 本文 / 見出し</th><th>上下の空き 各</th></tr>
+<tr><td>65mm</td><td>52mm</td><td>2.72 / 4.89mm</td><td>2.34 / 4.21mm</td><td class="ng">0mm（端に触れる）</td></tr>
+<tr><td><strong>65mm</strong></td><td><strong>48mm</strong></td><td class="ok"><strong>2.51 / 4.51mm</strong></td><td class="ok"><strong>2.30 / 4.13mm</strong></td><td class="ok">2.0mm</td></tr>
+<tr><td>67mm</td><td>48mm</td><td>2.51 / 4.51mm</td><td>2.36 / 4.25mm</td><td>2.0mm（左右は各 1mm）</td></tr>
+<tr><td>69mm</td><td>48mm</td><td>2.57 / 4.62mm</td><td>2.43 / 4.37mm</td><td>左右の空きが 0</td></tr>
 </table>
-<p><strong>推奨は 行長 65mm・行送り 1.55・見出し＝本文×1.8・ブロック高 48mm</strong>。このとき <strong>JA 本文 2.73mm / 見出し 4.91mm、EN 本文 2.51mm / 見出し 4.51mm</strong>。<strong>面を 52mm 全部使えるようにしたことで本文が 2.33 → 2.73mm（＋17%）</strong>になり、行送りも 1.45 → 1.55 に広げられた。<strong>下限は本文 2.0mm</strong>（白抜き 3pt を割ると印刷で潰れる）ので、余裕は十分ある。</p>
-<p class="lede">見出しは JA・EN とも 2 行に折れる。文字数は JA 172 字 / EN 417 字。<a href="back-fit-harness.html">back-fit-harness.html</a> で再測できる。</p>
-<div class="note"><strong>測るときの注意（実際に踏んだ）。</strong> Inter / Noto Sans JP は <code>colors_and_type.css</code> の入れ子 <code>@import</code> で後から届くため、<code>document.fonts.ready</code> だけでは待ち切れず、<strong>EN が fallback 字形のまま測れて 6% ずれる</strong>。ハーネスは実フォントで probe を描いてから二度待つようにしてある。</div>
+<p><strong>推奨は 行長 65mm・行送り 1.55・見出し＝本文×1.8・ブロック高 48mm</strong>。このとき <strong>JA 本文 2.51mm / 見出し 4.51mm、EN 本文 2.30mm / 見出し 4.13mm</strong>。上下左右の空きが均等に 2.0mm 残る。<strong>下限は本文 2.0mm</strong>（白抜き 3pt を割ると印刷で潰れる）。</p>
+<p class="lede">改行位置が指定されたことで行数が増え、前案（改行指定なし）の JA 2.73mm から <strong>2.51mm へ 8% 下がった</strong>。文字数は JA 179 字 / EN 448 字。<a href="back-fit-harness.html">back-fit-harness.html</a> で再測できる。</p>
 
-<h3>実測④ <em>— 紙の事情との重なり</em></h3>
-<p>推奨構成（行長 65mm・ブロック高 48mm・top 2mm）で組んだときの y 範囲。</p>
+<h3>実測④ <em>— 指定された改行を 1 行に収める級数（★ここが今回の結論）</em></h3>
+<p>推奨サイズ候補で、指定改行された各行の実幅を測ったところ、<strong>「毎日お題が出る。それに乗せてカメラで撮影して投稿する。」だけが行長を 2.7mm 超える</strong>（本文 2.51mm 時に 67.7mm）。そのまま組むと自動折り返しで 2 行になり、<strong>「る。」だけが次行に落ちて中央にぶら下がる</strong>。</p>
 <table class="t">
-<tr><th>ブロック</th><th>JA</th><th>EN</th><th>重なり</th></tr>
-<tr><td>見出し（2 行）</td><td class="ok">2.0–13.6</td><td class="ok">2.0–12.7</td><td class="ok">折り目にかからない</td></tr>
-<tr><td>本文 1</td><td>17.7–26.1</td><td>16.4–24.2</td><td class="warn">18mm の折り目に 1 行かかる</td></tr>
-<tr><td>本文 2</td><td>28.9–50.0</td><td>26.7–50.0</td><td class="warn">40mm の折り目、44mm からの糊代にかかる</td></tr>
+<tr><th>行</th><th>JA 実幅（本文 2.51mm 時）</th><th>EN 実幅（本文 2.30mm 時）</th></tr>
+<tr><td>本文1 – 1 行目</td><td>52.7mm</td><td>47.2mm</td></tr>
+<tr><td>本文1 – 2 行目</td><td>50.0mm</td><td class="warn">65.3mm ← 0.3mm 超</td></tr>
+<tr><td>本文2 – 1 行目</td><td class="warn">67.7mm ← <strong>2.7mm 超</strong></td><td class="warn">70.4mm ← 5.4mm 超</td></tr>
+<tr><td>本文2 – 2 行目</td><td>50.2mm</td><td>57.9mm</td></tr>
+<tr><td>本文2 – 3 行目</td><td colspan="2">167.9 / 193.5mm — 元から折り返す長文（ここだけは折り返して当然）</td></tr>
 </table>
-<p>面を全部使う以上これは避けられない。<strong>見出しだけは折り目にかからない位置に収まっている</strong>（JA 2.0–13.6mm・EN 2.0–12.7mm）ので、そこだけ崩さなければ実用上の問題は小さい。</p>
+<p><strong>級数を一段落として、指定改行を全部 1 行に収めるのが正解。</strong>失うのは JA 4% / EN 8% だけで、得るものが大きい。</p>
+<table class="t">
+<tr><th></th><th>そのまま折り返させる</th><th class="ok">1 行に収める（採用）</th></tr>
+<tr><td>JA 本文 / 見出し</td><td>2.51 / 4.51mm</td><td class="ok"><strong>2.41 / 4.33mm</strong></td></tr>
+<tr><td>EN 本文 / 見出し</td><td>2.30 / 4.13mm</td><td class="ok"><strong>2.12 / 3.82mm</strong></td></tr>
+<tr><td>「る。」の孤立</td><td class="ng">出る</td><td class="ok">出ない</td></tr>
+<tr><td>18mm の折り目</td><td class="ng">本文 1 がかかる</td><td class="ok">かからない（本文 1 は 18.7mm から始まる）</td></tr>
+<tr><td>44mm からの糊代</td><td class="ng">本文 2 が 50mm まで入る</td><td class="warn">JA 47.2 / EN 44.7mm まで（食い込みが小さい）</td></tr>
+</table>
+<p class="lede">最長の指定改行行はこの級数で JA 64.9mm / EN 65.0mm。<strong>行長 65mm ぎりぎりで成立している</strong>ので、<strong>コピーを 1 文字でも足すと級数を下げる必要がある</strong>。</p>
+
+<h3>実測⑤ <em>— 紙の事情との重なり</em></h3>
+<p>採用構成（行長 65mm・行送り 1.55・見出し＝本文×1.8・ブロックを 0–52mm の中心）で組んだときの y 範囲。</p>
+<table class="t">
+<tr><th>ブロック</th><th>JA（本文 2.41mm）</th><th>EN（本文 2.12mm）</th><th>重なり</th></tr>
+<tr><td>見出し（2 行）</td><td class="ok">4.8–15.1</td><td class="ok">7.3–16.3</td><td class="ok">折り目にかからない</td></tr>
+<tr><td>本文 1</td><td class="ok">18.7–26.1</td><td class="ok">19.5–26.1</td><td class="ok">18mm の折り目を越えた直後から始まる</td></tr>
+<tr><td>本文 2</td><td>28.5–47.2</td><td>28.2–44.7</td><td class="warn">40mm の折り目にかかり、44mm からの糊代に少し入る</td></tr>
+<tr><td>ブロック総高</td><td>42.34mm（上下の空き 各 4.83mm）</td><td>37.37mm（同 7.32mm）</td><td></td></tr>
+</table>
+<p><strong>18mm の折り目に文字が載らなくなったのは、この級数にした副産物。</strong>残るのは本文 2 の末尾が 40mm の折り目と 44mm からの糊代にかかること。面を全部使う指示どおりなので、そこは許容する。</p>
 
 <h3>実寸プレビュー <em>— 69×52mm を 3.4 倍表示</em></h3>
 <p>緑の破線＝文字を置く 65×48mm（上下左右の空き 各 2mm）。イエロー破線＝折り線 18 / 40mm、シアン破線＝糊代の始まり 44mm。いずれも非印刷ガイドで、印刷時とガイド OFF で消える。</p>
@@ -173,8 +193,8 @@ table.t td{color:#c2c2ce;}
   <div class="bg"><i></i><u></u></div>
   <div class="fg">
     <div class="hd">渋谷にいる今だけ、今日のお題で友達ができる</div>
-    <div class="p1">このアプリは、渋谷にいるときしか投稿できない。今、この交差点に立っている人の話だけが載る。</div>
-    <div class="p2">毎朝お題が出る。それに乗せて一本出す。いいねから、知らない人とも会話が始まる。同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。</div>
+    <div class="p1">このアプリは、渋谷にいる時しか投稿できない<br>今日渋谷で遊んでいる人の投稿だけが載る。</div>
+    <div class="p2">毎日お題が出る。それに乗せてカメラで撮影して投稿する。<br>いいねから、知らない人とも会話が始まる。<br>同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。</div>
   </div>
   <div class="fold" style="top:18mm;"></div>
   <div class="fold" style="top:40mm;"></div>
@@ -187,8 +207,8 @@ table.t td{color:#c2c2ce;}
   <div class="bg"><i></i><u></u></div>
   <div class="fg">
     <div class="hd">In Shibuya, today only &mdash; a quest that makes friends</div>
-    <div class="p1">You can only post while you are in Shibuya. Only the people at this crossing show up here.</div>
-    <div class="p2">A quest every morning. Post one thing to answer it. A like starts a conversation with a stranger &mdash; a friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.</div>
+    <div class="p1">You can only post while you are in Shibuya<br>Only posts from people out in Shibuya today show up here.</div>
+    <div class="p2">A quest every day. Answer it with a photo you shoot right there.<br>A like is where a conversation with a stranger starts.<br>A friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.</div>
   </div>
   <div class="fold" style="top:18mm;"></div>
   <div class="fold" style="top:40mm;"></div>
@@ -196,13 +216,14 @@ table.t td{color:#c2c2ce;}
   <div class="safe"></div>
 </div>
 </div></div>
-<p class="lede">上は「収まることの証明」。構図の自由度は<strong>見出しと本文の関係（級数差・段落間の空き・見出しの折り位置・見出しと本文の距離）</strong>にある。守るのは 65×48mm・中央揃え・級数の下限・コピーの一字一句だけ。</p>
+<p class="lede">上は「収まることの証明」。構図の自由度は<strong>見出しと本文の関係（級数差・段落間の空き・見出しの折り位置・見出しと本文の距離）</strong>にある。守るのは 65×48mm・中央揃え・級数の下限・コピーの一字一句と改行位置だけ。</p>
 
 <h3>判断が要るフラグ（裏面）</h3>
-<div class="flag"><b>① コピーが渋谷限定になった。</b> 「渋谷にいる今だけ」「この交差点に立っている人」と地名が本文に入ったので、<strong>このパッケージは渋谷でしか配れない</strong>。他の場所で配るなら刷り分けが要る。地名だけ差し替えられる版下にしておくか、渋谷専用と割り切るかを決めておきたい。</div>
-<div class="flag"><b>② 英語版のコピーは未確定。</b> 支給されたのは日本語だけ。上の EN は日本語から起こした<strong>下訳</strong>。正式な英文が決まったら差し替える。国内配布だけなら EN 面を作らない判断もある。</div>
-<div class="flag"><b>③ 本文の下 6mm ほどが糊代（44–52mm）に入る。</b> 面を全部使う指示どおりに組んだ結果。フラップの糊がどこに当たるかはダイライン次第で、その部分の文字は隠れるか、開封で破れる可能性がある。<strong>読ませたい一文（「きっかけが欲しい人の場所だ。」）が最後に来るので、そこが 44mm 以下に収まっているかだけ確認したい。</strong></div>
-<div class="flag"><b>④ Toopdbq の名前が本文に出てこない。</b> 「このアプリ」としか書かれていないので、名前を知る手掛かりは QR と、正面の下段にある <code>toopdbq@gmail.com</code> だけになる。見出し＋本文だけというシンプルさを優先するならこのままでよい。</div>
+<div class="flag"><b>① コピーが渋谷限定になった。</b> 「渋谷にいる今だけ」「今日渋谷で遊んでいる人」と地名が本文に入ったので、<strong>このパッケージは渋谷でしか配れない</strong>。他の場所で配るなら刷り分けが要る。地名だけ差し替えられる版下にしておくか、渋谷専用と割り切るかを決めておきたい。</div>
+<div class="flag"><b>② 英語版のコピーは未確定。</b> 支給されたのは日本語だけ。上の EN は日本語から起こした<strong>下訳</strong>で、改行位置も日本語に合わせてある。正式な英文が決まったら差し替える。国内配布だけなら EN 面を作らない判断もある。</div>
+<div class="flag"><b>③ 本文1の 1 行目に句点が無い。</b> 「渋谷にいる時しか投稿できない」で改行し、2 行目の末尾だけ「載る。」と句点で閉じている。支給どおりに組むので<strong>そのまま</strong>にするが、意図した表記かだけ確認したい。</div>
+<div class="flag"><b>④ 本文の下 6mm ほどが糊代（44–52mm）に入る。</b> 面を全部使う指示どおりに組んだ結果。フラップの糊がどこに当たるかはダイライン次第で、その部分の文字は隠れるか、開封で破れる可能性がある。<strong>最後の一文（「きっかけが欲しい人の場所だ。」）が 44mm 以下に収まっているかだけ確認したい。</strong></div>
+<div class="flag"><b>⑤ Toopdbq の名前が本文に出てこない。</b> 「このアプリ」としか書かれていないので、名前を知る手掛かりは QR と、正面の下段にある <code>toopdbq@gmail.com</code> だけになる。見出し＋本文だけというシンプルさを優先するならこのままでよい。</div>
 
 <script>
 (function(){
