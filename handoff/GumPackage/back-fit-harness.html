@@ -9,119 +9,137 @@ pre{padding:12px;line-height:1.5;}
 </style></head><body>
 <div id="stage"></div><pre id="out">measuring…</pre>
 <script>
+/* コピーの正は lib/l10n/app_{ja,en}.arb の onb1–onb5（オンボーディング5面）。
+   ここを勝手に書き換えない。arb が変わったらこちらを追随させる。 */
 const JA = {
+  kicker:'Toopdbq',
   h:'なぜ、ガムを噛むと友達が増えるのか',
-  lead:'Toopdbq は、いまいる場所でつながるアプリです。同じ場所にいる人どうしだけが、その場所の話をします。',
   steps:[
-    '表の QR を読む。いまいる場所のサークルに入ります。',
-    'サークルには、その場所のお題が出ています。たとえば「ガムを噛む」。',
-    'お題に答えて投稿するまで、ほかの人の投稿は見えません。',
-    '投稿した瞬間、同じ場所にいる人の投稿がぜんぶ開きます。'
+    {l:'世界中のサークル', b:'だれでも、どこにでもつくれるコミュニティーサークル。'},
+    {l:'クエストに挑戦',   b:'サークルからクエストが発生する。エリアの中から挑戦できる。'},
+    {l:'クエストの報酬',   b:'達成すると、他の人の投稿が見れる。'},
+    {l:'いいねが友情のきっかけ', b:'投稿にいいねすると、会話のきっかけができる。'}
   ],
-  close:'だから、見ているだけの人がいない。ガムを一枚噛んで投稿すれば、話しかける口実はもうできています。'
+  close:'現在地は他の人には見えません。近くのサークルを探すためだけに使います。'
 };
 const EN = {
+  kicker:'Toopdbq',
   h:'Why chewing gum makes friends',
-  lead:'Toopdbq connects you to the place you are standing in. Only the people inside that area can post there.',
   steps:[
-    'Scan the QR on the front. You are now in the circle for this place.',
-    'The circle has a quest waiting. Today it is: chew gum.',
-    'Until you answer it with a post, everyone else’s posts stay locked.',
-    'The moment you post, every post from the people around you opens up.'
+    {l:'Circles, everywhere',       b:'Community circles anyone can start, anywhere.'},
+    {l:'Take on a quest',           b:'Circles run quests. Join them from inside the area.'},
+    {l:'The quest reward',          b:'Finish it, and everyone else’s posts open up.'},
+    {l:'A like starts a friendship',b:'Like a post, and a conversation can begin.'}
   ],
-  close:'So nobody is only watching. Chew a stick, post it, and you already have a reason to say hello.'
+  close:'Your location is never shown to others. We only use it to find nearby circles.'
 };
 
-// 1 レイアウト = 見出し + リード + 4ステップ(番号付) + 締め
-function build(d, en, base, hMul, w){
+function build(d, en, base, hMul, w, mode){
+  mode = mode || 'A';
   const b = document.createElement('div');
   b.className = 'box' + (en?' en':'');
   b.style.width = w + 'mm';
   b.style.fontSize = base + 'mm';
   b.style.lineHeight = '1.35';
   let s = '';
-  s += '<div style="font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:-0.04em;">'+d.h+'</div>';
-  s += '<div style="margin-top:'+(base*0.7).toFixed(3)+'mm;font-weight:500;">'+d.lead+'</div>';
-  s += '<div style="margin-top:'+(base*0.8).toFixed(3)+'mm;display:flex;flex-direction:column;gap:'+(base*0.32).toFixed(3)+'mm;">';
+  s += '<div style="font-size:'+(base*1.2).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:.06em;">'+d.kicker+'</div>';
+  s += '<div style="margin-top:'+(base*0.35).toFixed(3)+'mm;font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:-0.04em;">'+d.h+'</div>';
+  s += '<div style="margin-top:'+(base*0.9).toFixed(3)+'mm;display:flex;flex-direction:column;gap:'+(base*0.45).toFixed(3)+'mm;">';
   d.steps.forEach((t,i)=>{
-    s += '<div style="display:flex;gap:'+(base*0.55).toFixed(3)+'mm;align-items:baseline;"><span style="flex:none;font-weight:900;">'+(i+1)+'</span><span style="flex:1;">'+t+'</span></div>';
+    var inner = mode==='A' ? '<b style="font-weight:900;">'+t.l+'</b><br><span style="font-weight:600;">'+t.b+'</span>'
+              : mode==='B' ? '<b style="font-weight:900;">'+t.l+'</b><span style="font-weight:600;"> '+t.b+'</span>'
+              : '<b style="font-weight:900;">'+t.l+'</b>';
+    s += '<div style="display:flex;gap:'+(base*0.55).toFixed(3)+'mm;align-items:baseline;">'
+       + '<span style="flex:none;font-weight:900;font-size:'+(base*1.35).toFixed(3)+'mm;line-height:1;">'+(i+1)+'</span>'
+       + '<span style="flex:1;">'+inner+'</span>'
+       + '</div>';
   });
   s += '</div>';
-  s += '<div style="margin-top:'+(base*0.8).toFixed(3)+'mm;font-weight:700;">'+d.close+'</div>';
+  s += '<div style="margin-top:'+(base*0.9).toFixed(3)+'mm;font-weight:600;">'+d.close+'</div>';
   b.innerHTML = s;
   return b;
 }
 const stage = document.getElementById('stage');
-function height(d, en, base, hMul, w){
-  const b = build(d, en, base, hMul, w);
+function height(d, en, base, hMul, w, mode){
+  const b = build(d, en, base, hMul, w, mode);
   stage.appendChild(b);
   const h = b.getBoundingClientRect().height;
   stage.removeChild(b);
   return h;
 }
 const MM = (()=>{ const p=document.createElement('div'); p.style.width='100mm'; stage.appendChild(p); const v=p.getBoundingClientRect().width/100; stage.removeChild(p); return v; })();
-function maxFit(d, en, hMul, w, capMm){
-  let lo=0.8, hi=6.0;
+function maxFit(d, en, hMul, w, capMm, mode){
+  let lo=0.8, hi=7.0;
   for(let i=0;i<40;i++){
     const mid=(lo+hi)/2;
-    if(height(d,en,mid,hMul,w)/MM <= capMm) lo=mid; else hi=mid;
+    if(height(d,en,mid,hMul,w,mode)/MM <= capMm) lo=mid; else hi=mid;
   }
   return lo;
 }
+/* Inter / Noto Sans JP は colors_and_type.css の入れ子 @import 経由で後から届く。
+   fonts.ready だけでは未要求のフェイスを待てず、EN が fallback 字形のまま測れて 6% ずれる。
+   実際に使う font-family で probe を描いてから二度待つ。 */
+function fontsWarm(){
+  var probes = ['var(--font-latin)','var(--font-jp)'].map(function(f){
+    var p=document.createElement('div');
+    p.style.cssText='position:absolute;left:-9999px;top:0;font-weight:900;font-size:10mm;font-family:'+f;
+    p.textContent='Toopdbq あア漢 Wg'; document.body.appendChild(p); return p;
+  });
+  return document.fonts.ready
+    .then(function(){ return new Promise(function(r){ setTimeout(r,1200); }); })
+    .then(function(){ return document.fonts.ready; })
+    .then(function(){ probes.forEach(function(p){ p.remove(); }); });
+}
+fontsWarm().then(function(){
 const lines=[];
 lines.push('1mm = '+MM.toFixed(4)+'px');
 lines.push('');
-lines.push('本文の最大級数（見出し=本文×hMul・行送り1.35・padding 0）');
-lines.push('cap = ブロックが収まる高さ(mm)。幅 w(mm)。');
+lines.push('構造別の最大級数（全幅69mm・cap40mm・行送り1.35・padding 0）');
+lines.push('  A = ラベルを改行して本文  /  B = ラベルと本文を同じ行  /  C = ラベルだけ（本文なし）');
 lines.push('');
-lines.push('lang  w(mm)  hMul  cap(mm)   本文max(mm)  見出し(mm)  総高(mm)');
-for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
-  for(const w of [69,58,49]){
+lines.push('mode lang  hMul  本文max(mm)  見出し(mm)  総高(mm)');
+for(const mode of ['A','B','C']){
+  for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
     for(const hMul of [2.4,2.0]){
-      for(const cap of [52,44,40,36]){
-        const b=maxFit(d,en,hMul,w,cap);
-        const h=height(d,en,b,hMul,w)/MM;
-        lines.push(`${lang}    ${String(w).padStart(2)}    ${hMul.toFixed(1)}   ${String(cap).padStart(2)}      ${b.toFixed(2)}        ${(b*hMul).toFixed(2)}       ${h.toFixed(2)}`);
-      }
+      const b=maxFit(d,en,hMul,69,40,mode);
+      const h=height(d,en,b,hMul,69,mode)/MM;
+      lines.push(` ${mode}   ${lang}   ${hMul.toFixed(1)}    ${b.toFixed(2)}        ${(b*hMul).toFixed(2)}       ${h.toFixed(2)}`);
     }
   }
 }
-// 見出し単体の最大幅（1行に収まる級数）
 lines.push('');
-lines.push('見出しを1行で入れたときの最大級数');
+lines.push('見出しを1行で入れたときの最大級数（全幅69mm）');
 for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
-  for(const w of [69,58,49]){
-    const p=document.createElement('div');
-    p.style.cssText='position:absolute;width:auto;white-space:nowrap;font-weight:900;letter-spacing:-0.04em;font-size:10mm;line-height:1.1;font-family:'+(en?'var(--font-latin)':'var(--font-jp)');
-    p.textContent=d.h; stage.appendChild(p);
-    const wpx=p.getBoundingClientRect().width; stage.removeChild(p);
-    lines.push(`${lang} w=${w}mm : ${(10*w*MM/wpx).toFixed(2)}mm で1行 (10mm 時の実幅 ${(wpx/MM).toFixed(1)}mm)`);
-  }
+  const p=document.createElement('div');
+  p.style.cssText='position:absolute;width:auto;white-space:nowrap;font-weight:900;letter-spacing:-0.04em;font-size:10mm;line-height:1.1;font-family:'+(en?'var(--font-latin)':'var(--font-jp)');
+  p.textContent=d.h; stage.appendChild(p);
+  const wpx=p.getBoundingClientRect().width; stage.removeChild(p);
+  lines.push(`${lang} : ${(10*69*MM/wpx).toFixed(2)}mm で1行 (10mm 時の実幅 ${(wpx/MM).toFixed(1)}mm)`);
 }
-// 推奨構成での各ブロックの y 位置（折り線 18 / 40 / 44mm との衝突を見る）
 lines.push('');
 lines.push('各行の y 範囲（mm・trim 上端基準）と折り線 18/40/44 との衝突');
-for(const [lang,d,en,base,hMul] of [['JA',JA,false,2.13,2.4],['EN',EN,true,2.03,2.4]]){
-  const b=build(d,en,base,hMul,69);
+for(const [lang,d,en,hMul,mode] of [['JA',JA,false,2.4,'B'],['EN',EN,true,2.4,'B']]){
+  const base=maxFit(d,en,hMul,69,40,mode);
+  const b=build(d,en,base,hMul,69,mode);
   b.style.position='absolute'; b.style.left='0'; b.style.top='0';
   stage.appendChild(b);
   const top=b.getBoundingClientRect().top;
-  lines.push(`-- ${lang} (本文${base}mm / 見出し${(base*hMul).toFixed(2)}mm / 幅69mm)`);
+  lines.push(`-- ${lang} mode ${mode} (本文${base.toFixed(2)}mm / 見出し${(base*hMul).toFixed(2)}mm / 幅69mm / cap40)`);
   const walk=(el,label)=>{
     const r=el.getBoundingClientRect();
     const y0=(r.top-top)/MM, y1=(r.bottom-top)/MM;
     const hit=[18,40,44].filter(f=>y0<f&&f<y1);
-    lines.push(`   ${label.padEnd(10)} y ${y0.toFixed(1)}–${y1.toFixed(1)}${hit.length?'   ← 折り線 '+hit.join('/')+'mm を跨ぐ':''}`);
+    lines.push(`   ${label.padEnd(12)} y ${y0.toFixed(1)}–${y1.toFixed(1)}${hit.length?'   ← 折り線 '+hit.join('/')+'mm を跨ぐ':''}`);
   };
   const kids=[...b.children];
-  walk(kids[0],'見出し'); walk(kids[1],'リード');
+  walk(kids[0],'kicker'); walk(kids[1],'見出し');
   [...kids[2].children].forEach((s,i)=>walk(s,'ステップ'+(i+1)));
   walk(kids[3],'締め');
   stage.removeChild(b);
 }
-// 各パートの文字数
+const cnt=d=>(d.kicker+d.h+d.steps.map(s=>s.l+s.b).join('')+d.close).length;
 lines.push('');
-lines.push('文字数: JA 見出し'+JA.h.length+' / リード'+JA.lead.length+' / ステップ計'+JA.steps.join('').length+' / 締め'+JA.close.length+' = '+(JA.h+JA.lead+JA.steps.join('')+JA.close).length);
-lines.push('        EN 見出し'+EN.h.length+' / リード'+EN.lead.length+' / ステップ計'+EN.steps.join('').length+' / 締め'+EN.close.length+' = '+(EN.h+EN.lead+EN.steps.join('')+EN.close).length);
+lines.push('文字数: JA '+cnt(JA)+' / EN '+cnt(EN)+'（EN は JA の '+(cnt(EN)/cnt(JA)).toFixed(2)+' 倍）');
 document.getElementById('out').textContent = lines.join('\n');
+});
 </script></body></html>
