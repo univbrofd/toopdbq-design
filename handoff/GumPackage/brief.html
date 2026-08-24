@@ -1,7 +1,7 @@
 <!-- @dsCard group="Brief" -->
 <!DOCTYPE html><html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GumPackage v4 — 裏面をつくる</title>
+<title>GumPackage v4.1 — 裏面</title>
 <style>
 :root{ --bg:#0d0d10; --fg:#e9e9ee; --dim:#9a9aa6; --dim2:#71717e; --line:#26262e;
        --accent:#ff3e88; --ok:#3ddc97; --ng:#ff6b6b; --warn:#ffd166;
@@ -78,25 +78,22 @@ table.t td{color:#c2c2ce;}
 .dead>.bg>u{position:absolute;inset:0;display:block;background-image:var(--grain);background-size:35mm 35mm;opacity:.16;mix-blend-mode:overlay;}
 .geo .b3a{height:4mm;border-color:rgba(61,220,151,.95);border-width:0.4mm;}
 .geo .b3b{height:8mm;border-style:dotted;border-color:rgba(255,255,255,.35);}
-/* ---- 裏面プレビュー（v4） ---- */
-.back{position:relative;width:69mm;height:52mm;overflow:hidden;color:#fff;font-size:1.98mm;line-height:1.35;}
-.back.en{font-family:var(--lat);font-size:2.00mm;}
+/* ---- 裏面プレビュー（v4.1・中央揃え） ---- */
+.back{position:relative;width:69mm;height:52mm;overflow:hidden;color:#fff;}
 .back>.bg{position:absolute;left:-3mm;top:-3mm;width:75mm;height:58mm;background:#005f67;}
 .back>.bg>i{position:absolute;left:-12.5mm;top:-21mm;width:100mm;height:100mm;background:var(--grad);display:block;}
 .back>.bg>u{position:absolute;inset:0;display:block;background-image:var(--grain);background-size:35mm 35mm;opacity:.16;mix-blend-mode:overlay;}
-.back>.fg{position:relative;}
-.back .kick{font-size:1.2em;font-weight:900;line-height:1.1;letter-spacing:.06em;}
-.back .hd{margin:0.69mm 0 0;font-size:2.4em;font-weight:900;line-height:1.1;letter-spacing:-0.04em;}
-.back .st{margin:1.78mm 0 0;display:flex;flex-direction:column;gap:0.89mm;}
-.back .st>div{display:flex;gap:.55em;align-items:baseline;}
-.back .st>div>b{flex:none;font-weight:900;font-size:1.35em;line-height:1;}
-.back .st span b{font-weight:900;}
-.back .st span span{font-weight:600;}
-.back .close{margin:1.78mm 0 0;font-weight:600;}
+.back>.fg{position:absolute;left:2mm;top:2mm;width:65mm;height:36mm;display:flex;flex-direction:column;
+  justify-content:center;text-align:center;font-size:2.33mm;line-height:1.45;}
+.back.en>.fg{font-family:var(--lat);font-size:2.13mm;}
+.back .hd{font-size:1.8em;font-weight:900;line-height:1.18;letter-spacing:-0.03em;}
+.back .p1{margin-top:1.5em;font-weight:600;}
+.back .p2{margin-top:1.0em;font-weight:600;}
 .back .deadzone{position:absolute;left:0;top:40mm;width:69mm;height:12mm;
   background:repeating-linear-gradient(45deg,rgba(0,0,0,.34) 0 1.1mm,rgba(0,0,0,.10) 1.1mm 2.2mm);}
 .back .fold{position:absolute;left:0;width:69mm;border-top:0.25mm dashed rgba(255,240,166,.95);}
 .back .glue{position:absolute;left:0;top:44mm;width:69mm;border-top:0.25mm dashed rgba(0,229,255,.95);}
+.back .safe{position:absolute;left:2mm;top:2mm;width:65mm;height:36mm;outline:0.2mm dashed rgba(61,220,151,.75);}
 /* ---- コントラスト地図 ---- */
 .cmap{position:relative;width:69mm;height:52mm;overflow:hidden;font-family:var(--lat);}
 .cmap>.bg{position:absolute;left:-3mm;top:-3mm;width:75mm;height:58mm;background:#005f67;}
@@ -110,132 +107,102 @@ table.t td{color:#c2c2ce;}
 @media (max-width:700px){ .zoom{zoom:2.1;} .zoom.geoz{zoom:1.9;} h1{font-size:20px;} }
 </style></head><body><div class="wrap">
 
-<p class="kicker">handoff / GumPackage — v4（裏面）</p>
-<h1>板ガムパッケージ v4：裏面をつくる — 一枚もので、サービスと「なぜガムを噛むと友達が増えるのか」を説明する</h1>
+<p class="kicker">handoff / GumPackage — v4.1（裏面）</p>
+<h1>板ガムパッケージ v4.1：裏面をつくる — 見出しと本文だけ、中央揃えで面の中心に</h1>
 <p class="lede">仕様の正は同ディレクトリの <a href="HANDOFF.md">HANDOFF.md</a>。このページは<strong>設計を縛る実測</strong>だけを実寸で見せるもの。数値はすべて実測値で、推測は含まない。<br>
 <strong>正面（1a / 1b）は v3.2 で確定済み。</strong>以下 §0A が今回の依頼（裏面）で、§0 以降は確定した正面の記録。</p>
 
 
 
-<h2>0A. 裏面（v4）— 今回つくるもの</h2>
+<h2>0A. 裏面（v4.1）— 見出し ＋ 本文だけ、中央揃え</h2>
 
-<p>正面の裏。<strong>段に区分けせず、69×52mm を一枚として</strong>組む。載せるのは<strong>アプリのオンボーディング 5 面が説明していること</strong>を、簡潔にした形。背景は<strong>正面とまったく同じ</strong>（<code>--gradient-colorful</code> 無回転・同じオフセット・grain .16）。JA / EN の 2 面。</p>
+<p>正面の裏。<strong>段に区分けせず、69×52mm を一枚として</strong>組む。要素は<strong>見出しと本文の 2 つだけ</strong>。<strong>中央揃えで、面の中心に、上下左右のバランスを取って置く</strong>。背景は<strong>正面とまったく同じ</strong>（<code>--gradient-colorful</code> 無回転・同じオフセット・grain .16）。JA / EN の 2 面。</p>
 
-<div class="note"><strong>コピーの正はアプリ側</strong>（<code>lib/l10n/app_ja.arb</code> / <code>app_en.arb</code> の <code>onb1</code>–<code>onb5</code>）。下に転記した文字列はそこから起こしたもので、<strong>言い換え・意訳をしない</strong>。正面は 上段=法定表示 / 中段=コピー＋QR / 下段=一文 という 3 段の役割分担だったが、<strong>裏面はその割り方を持ち込まない</strong>。ただし紙は同じところで折れるので、折り目の扱いだけは避けて通れない。</div>
-
-<h3>オンボーディング 5 面 → 裏面 <em>— 何をどう畳んだか</em></h3>
-<table class="t">
-<tr><th>面</th><th>アプリの文言（JA）</th><th>裏面での扱い</th></tr>
-<tr><td>onb1</td><td>世界中の<b>サークル</b> / だれでも、どこにでもつくれるコミュニティーサークル</td><td>ステップ 1</td></tr>
-<tr><td>onb2</td><td><b>クエスト</b>に挑戦 / サークルからクエストが発生する。エリアの中から挑戦できる。</td><td>ステップ 2</td></tr>
-<tr><td>onb3</td><td>クエストの<b>報酬</b> / クエストを達成すると、他の人の投稿が見れる。</td><td>ステップ 3</td></tr>
-<tr><td>onb4</td><td><b>いいね</b>が友情のきっかけ / 投稿にいいねすると、会話のきっかけができる</td><td>ステップ 4</td></tr>
-<tr><td>onb5</td><td>あなたの現在地は<b>他の人には見えません</b> / 位置情報は、近くのサークルを探したり…</td><td>締めの 1 行に圧縮</td></tr>
-</table>
-<p>ステップ 1→4 がそのまま「なぜガムを噛むと友達が増えるのか」の答えになっている（サークル → クエスト → 達成で他人の投稿が開く → いいねが会話になる）。見出しだけが正面のコピーと呼応させるための追加行。</p>
+<div class="note">前ラウンドまでの「番号付き 4 ステップ（オンボーディング要約）」は<strong>破棄</strong>。今回はコピーが支給されたので、それをそのまま流す。構成要素を増やさない（kicker・番号・ラベル・アイコン・罫を足さない）。</div>
 
 <h3>実測① <em>— 使える面は 69×52mm ではなく 69×40mm</em></h3>
-<p>紙を裏返しても横方向の折り線は上端からの距離が変わらない。<strong>trim 上端から 18mm と 40mm で折れ、40–52mm は巻いたときに内側へ入る</strong>（うち 44–52mm は糊代）。つまり裏面で読ませられるのは <strong>y = 0–40mm の 69×40mm</strong>。40mm 以降に置いた文字は、完成品では誰も読めないか、開封で破れる。</p>
+<p>紙を裏返しても横方向の折り線は上端からの距離が変わらない。<strong>trim 上端から 18mm と 40mm で折れ、44–52mm は糊代</strong>。裏面で安全に読ませられるのは <strong>y = 0–40mm の 69×40mm</strong>。</p>
 <table class="t">
 <tr><th>帯</th><th>y（trim 上端から）</th><th>裏面での扱い</th></tr>
 <tr><td>読ませる面</td><td>0–40mm</td><td class="ok">ここに全部入れる</td></tr>
-<tr><td>折り線①</td><td>18mm</td><td class="warn">行がここに載るとインクが割れる。17–19mm は行の禁止帯</td></tr>
+<tr><td>折り線①</td><td>18mm</td><td class="warn">折り目。<strong>見出しは絶対に跨がせない</strong>（本文の行が 1 本跨ぐのは避けられない）</td></tr>
 <tr><td>折り線②</td><td>40mm</td><td class="warn">下端。ここで切り上げる</td></tr>
-<tr><td>内側 / 糊代</td><td>40–52mm</td><td class="ng">文字を置かない（背景グラデ＋grain だけ）</td></tr>
+<tr><td>糊代</td><td>44–52mm</td><td class="ng">文字を置かない（背景グラデ＋grain だけ）</td></tr>
 </table>
+<div class="note"><strong>40–44mm を使わないのは安全側に倒しているから。</strong> ダイラインが未確定で、フラップの糊がどこに当たるかが確定していない。確定したらこの 4mm を本文に回せる（級数が 0.1mm ほど上がる）。</div>
 
 <h3>実測② <em>— 白文字が置ける場所は「右下がりの対角線」で決まる</em></h3>
 <p>正面と同じ背景を trim 69×52mm で切り出し、5×4mm セルごとに白文字とのコントラスト比（WCAG 相対輝度）を実測した。<strong>最悪は左上角の 2.66:1</strong>（オレンジ rgb(224,132,101)）、最良は中央右の 7.2:1。低い側は左上に固まっていて、<strong>境界は (50mm, 0) から (10mm, 48mm) へ走る対角線</strong>。</p>
 <div class="scale"><div class="zoom geoz"><div class="cmap" id="cmap"><div class="bg"><i></i></div></div></div></div>
 <p class="legend">
   <span><i style="background:rgba(0,0,0,.42)"></i>&lt; 3.0：白文字は避ける</span>
-  <span><i style="background:rgba(0,0,0,.20)"></i>3.0–4.5：大きい文字（4.9mm 以上・900）だけ</span>
+  <span><i style="background:rgba(0,0,0,.20)"></i>3.0–4.5：大きい文字（3.8mm 以上・900）だけ</span>
   <span><i style="background:transparent;outline:1px solid #444"></i>≥ 4.5：本文級数を置いてよい</span>
 </p>
-<table class="t">
-<tr><th>文字</th><th>要るコントラスト</th><th>実測で満たせる場所</th></tr>
-<tr><td>見出し 4.7mm 以上・900</td><td>3.0:1（WCAG 大文字）</td><td>左上角 (x&lt;10, y&lt;8) 以外はどこでも可。<strong>見出しの 1 文字目をその角に置かない</strong></td></tr>
-<tr><td>本文 約 2mm</td><td>4.5:1</td><td class="warn">対角線の右下のみ。全幅 69mm で流すと左端が 3.2–4.0:1 で足りない</td></tr>
-</table>
-<div class="flag"><b>ここが唯一の設計上の妥協点。</b> 背景を変えない（＝指定どおり正面と同一）以上、本文の左端は 3.2–4.0:1 に落ちる。逃げ道は 3 つで、<strong>推奨は ①＋②</strong>：<br>
-① 本文のウェイトを <strong>600</strong> にする（線が太ると実効コントラストが上がり、印刷での白抜きの潰れにも効く）。<br>
-② 行頭の番号「1〜4」を <strong>900・本文の 1.35 倍</strong>にして左端に置く（低コントラスト帯に来るのは大きい文字だけになる）。<br>
-③ 本文ブロックを右に寄せる。<span class="ng">級数が落ちて逆効果なので採らない</span>。<br>
-白パネル・スクリム・グラデの回転はいずれも「背景は正面と同じ」の指定に反するので使わない。</div>
+<p><strong>中央揃えはこの地図と相性がいい。</strong> 行が左右の端まで届かないので、最悪帯（左上の x&lt;10）に文字が入る頻度が下がる。それでも長い行の左端は 3.2–4.0:1 に落ちるので、<strong>本文のウェイトは 600</strong> にする（線が太ると実効コントラストが上がり、印刷での白抜きの潰れにも効く）。白パネル・スクリム・グラデの回転は「背景は正面と同じ」の指定に反するので使わない。</p>
 
-<h3>実測③ <em>— 構造で級数が 2 割変わる</em></h3>
-<p>同じコピーでも、ラベル（onb の見出し）と本文の並べ方で入る級数が変わる。全幅 69mm・高さ 40mm・行送り 1.35・padding 0 で二分探索した。</p>
+<h3>実測③ <em>— 収まる級数（中央揃え・行長と行送りのスイープ）</em></h3>
+<p>支給コピーをそのまま流し、収まる最大級数を二分探索した（padding 0・見出し＝本文×1.8）。<code>cap</code> はブロックの高さ上限で、残りが 0–40mm 内の上下の空きになる。</p>
 <table class="t">
-<tr><th>構造</th><th>JA 本文 / 見出し</th><th>EN 本文 / 見出し</th><th>判定</th></tr>
-<tr><td>A ラベルを改行して本文</td><td>1.76 / 4.24mm</td><td>1.86 / 4.45mm</td><td class="ng">行数が倍になり最も小さい</td></tr>
-<tr><td><strong>B ラベルと本文を同じ行</strong></td><td class="ok">1.98 / 4.76mm</td><td class="ok">2.00 / 4.80mm</td><td class="ok">採用。JA と EN がほぼ一致する</td></tr>
-<tr><td>C ラベルだけ（本文を捨てる）</td><td>2.11 / 5.07mm</td><td>2.14 / 5.14mm</td><td class="warn">一番読めるが説明が消える</td></tr>
+<tr><th>行長</th><th>行送り</th><th>cap</th><th>JA 本文 / 見出し</th><th>EN 本文 / 見出し</th><th>上下の空き 各</th></tr>
+<tr><td>69mm</td><td>1.45</td><td>40mm</td><td>2.56 / 4.60mm</td><td>2.37 / 4.26mm</td><td class="ng">0.3mm（詰まりすぎ）</td></tr>
+<tr><td><strong>65mm</strong></td><td><strong>1.45</strong></td><td><strong>36mm</strong></td><td class="ok"><strong>2.33 / 4.20mm</strong></td><td class="ok"><strong>2.13 / 3.84mm</strong></td><td class="ok">2.0mm</td></tr>
+<tr><td>65mm</td><td>1.45</td><td>34mm</td><td>2.20 / 3.96mm</td><td>2.01 / 3.62mm</td><td>3.0mm</td></tr>
+<tr><td>63mm</td><td>1.50</td><td>36mm</td><td>2.29 / 4.12mm</td><td>2.09 / 3.76mm</td><td>2.0mm</td></tr>
 </table>
-<p>採るのは <strong>B</strong>。<strong>本文 1.95mm 以上・見出し 4.7mm 以上</strong>を下限とする（これ以下は白抜き 3pt を割って印刷で潰れる）。<strong>JA と EN がほぼ同じ級数に収束する</strong>のは、対で並べたときに見た目が揃うので都合がいい。見出しを 1 行で通すなら JA 4.24 / EN 4.45mm が上限なので、<strong>見出しは 2 行に折る</strong>。文字数は JA 186 字 / EN 373 字（EN は 2.01 倍）。<a href="back-fit-harness.html">back-fit-harness.html</a> で再測できる。</p>
-<div class="note"><strong>測るときの注意（実際に踏んだ）。</strong> Inter / Noto Sans JP は <code>colors_and_type.css</code> の入れ子 <code>@import</code> で後から届くため、<code>document.fonts.ready</code> だけでは待ち切れず、<strong>EN が fallback 字形のまま測れて 6% ずれる</strong>（1.88mm と出る）。ハーネスは実フォントで probe を描いてから二度待つようにしてある。</div>
+<p><strong>推奨は 行長 65mm・行送り 1.45・見出し＝本文×1.8・cap 36mm</strong>。ブロックを 0–40mm の中心に置くと上下に各 2.0mm、左右に各 2.0mm の空きが均等に残る。このとき <strong>JA 本文 2.33mm / 見出し 4.20mm、EN 本文 2.13mm / 見出し 3.84mm</strong>。<strong>下限は本文 2.0mm</strong>（白抜き 3pt を割ると印刷で潰れる）。前ラウンドの 4 ステップ構成（本文 1.98mm）より読みやすくなっている。</p>
+<p class="lede">見出しは JA・EN とも 2 行に折れる（行長 65mm・4.2mm 時）。文字数は JA 172 字 / EN 417 字。<a href="back-fit-harness.html">back-fit-harness.html</a> で再測できる。</p>
+<div class="note"><strong>測るときの注意（実際に踏んだ）。</strong> Inter / Noto Sans JP は <code>colors_and_type.css</code> の入れ子 <code>@import</code> で後から届くため、<code>document.fonts.ready</code> だけでは待ち切れず、<strong>EN が fallback 字形のまま測れて 6% ずれる</strong>。ハーネスは実フォントで probe を描いてから二度待つようにしてある。</div>
 
-<h3>実測④ <em>— 行が折り目に載るか</em></h3>
-<p>構造 B・全幅 69mm・高さ 40mm で組んだときの各行の y 範囲。<strong>JA・EN とも 1 か所が折り線①（18mm）を跨ぐ</strong>ので、そこだけ送りか改行位置を調整する。</p>
+<h3>実測④ <em>— 折り目に何が載るか</em></h3>
+<p>推奨構成（行長 65mm・cap 36mm・0–40mm の中心）で組んだときの y 範囲。</p>
 <table class="t">
-<tr><th>ブロック</th><th>JA（本文 1.98mm）</th><th>EN（本文 2.00mm）</th></tr>
-<tr><td>Toopdbq</td><td>0.0–2.6</td><td>0.0–2.6</td></tr>
-<tr><td>見出し（2 行）</td><td>3.3–13.8</td><td>3.3–13.9</td></tr>
-<tr><td>ステップ 1</td><td class="warn">15.5–21.2 ← 18mm を跨ぐ</td><td class="warn">15.7–18.9 ← 18mm を跨ぐ</td></tr>
-<tr><td>ステップ 2</td><td>22.0–27.6</td><td>19.8–23.1</td></tr>
-<tr><td>ステップ 3</td><td>28.5–31.5</td><td>23.9–27.2</td></tr>
-<tr><td>ステップ 4</td><td>32.4–35.3</td><td>28.1–31.3</td></tr>
-<tr><td>締め</td><td>37.1–39.7</td><td>33.1–38.5</td></tr>
+<tr><th>ブロック</th><th>JA</th><th>EN</th></tr>
+<tr><td>見出し（2 行）</td><td class="ok">2.0–11.9（18mm を跨がない）</td><td class="ok">2.0–11.1（跨がない）</td></tr>
+<tr><td>本文 1</td><td class="warn">15.4–22.2 ← 18mm を跨ぐ</td><td class="warn">14.7–21.2 ← 18mm を跨ぐ</td></tr>
+<tr><td>本文 2</td><td>24.5–38.0</td><td>23.9–38.0</td></tr>
 </table>
+<p><strong>本文の行が 1 本、折り目に載るのは避けられない</strong>（ブロックを縦に中央へ置く以上、18mm はブロックの内側に来る）。<strong>見出しだけは絶対に跨がせない</strong>こと。段落の間の空きが 18mm に重なるように送りを微調整できるなら、それが最善。</p>
 
 <h3>実寸プレビュー <em>— 69×52mm を 3.4 倍表示</em></h3>
-<p>構造 B で組んだもの。斜線の網は「文字を置かない 40–52mm」。イエロー破線＝折り線 18 / 40mm、シアン破線＝糊代の始まり 44mm。いずれも非印刷ガイド。</p>
+<p>緑の破線＝文字を置く 65×36mm（左右各 2mm・上下各 2mm の空き）。斜線の網は「文字を置かない 40–52mm」。イエロー破線＝折り線 18 / 40mm、シアン破線＝糊代の始まり 44mm。いずれも非印刷ガイド。</p>
 <div class="scale"><div class="zoom">
 <div class="back">
   <div class="bg"><i></i><u></u></div>
   <div class="fg">
-    <div class="kick">Toopdbq</div>
-    <div class="hd">なぜ、ガムを噛むと<br>友達が増えるのか</div>
-    <div class="st">
-      <div><b>1</b><span><b>世界中のサークル</b> <span>だれでも、どこにでもつくれるコミュニティーサークル。</span></span></div>
-      <div><b>2</b><span><b>クエストに挑戦</b> <span>サークルからクエストが発生する。エリアの中から挑戦できる。</span></span></div>
-      <div><b>3</b><span><b>クエストの報酬</b> <span>達成すると、他の人の投稿が見れる。</span></span></div>
-      <div><b>4</b><span><b>いいねが友情のきっかけ</b> <span>投稿にいいねすると、会話のきっかけができる。</span></span></div>
-    </div>
-    <div class="close">現在地は他の人には見えません。近くのサークルを探すためだけに使います。</div>
+    <div class="hd">渋谷にいる今だけ、今日のお題で友達ができる</div>
+    <div class="p1">このアプリは、渋谷にいるときしか投稿できない。今、この交差点に立っている人の話だけが載る。</div>
+    <div class="p2">毎朝お題が出る。それに乗せて一本出す。いいねから、知らない人とも会話が始まる。同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。</div>
   </div>
   <div class="deadzone"></div>
   <div class="fold" style="top:18mm;"></div>
   <div class="fold" style="top:40mm;"></div>
   <div class="glue"></div>
+  <div class="safe"></div>
 </div>
 </div></div>
 <div class="scale"><div class="zoom">
 <div class="back en">
   <div class="bg"><i></i><u></u></div>
   <div class="fg">
-    <div class="kick">Toopdbq</div>
-    <div class="hd">Why chewing gum<br>makes friends</div>
-    <div class="st">
-      <div><b>1</b><span><b>Circles, everywhere</b> <span>Community circles anyone can start, anywhere.</span></span></div>
-      <div><b>2</b><span><b>Take on a quest</b> <span>Circles run quests. Join them from inside the area.</span></span></div>
-      <div><b>3</b><span><b>The quest reward</b> <span>Finish it, and everyone else&rsquo;s posts open up.</span></span></div>
-      <div><b>4</b><span><b>A like starts a friendship</b> <span>Like a post, and a conversation can begin.</span></span></div>
-    </div>
-    <div class="close">Your location is never shown to others. We only use it to find nearby circles.</div>
+    <div class="hd">In Shibuya, today only &mdash; a quest that makes friends</div>
+    <div class="p1">You can only post while you are in Shibuya. Only the people at this crossing show up here.</div>
+    <div class="p2">A quest every morning. Post one thing to answer it. A like starts a conversation with a stranger &mdash; a friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.</div>
   </div>
   <div class="deadzone"></div>
   <div class="fold" style="top:18mm;"></div>
   <div class="fold" style="top:40mm;"></div>
   <div class="glue"></div>
+  <div class="safe"></div>
 </div>
 </div></div>
-<p class="lede">上は「収まることの証明」であって構図の指定ではない。<strong>対角線のコントラスト地図をどう使うかは設計判断に委ねる</strong>（見出しを右揃えにする、番号を大きく振る、ステップを 2 列にする等）。守るのは 69×40mm・折り目・級数の下限・コピーの一字一句だけ。</p>
+<p class="lede">上は「収まることの証明」。構図の自由度は<strong>見出しと本文の関係（級数差・段落間の空き・見出しの折り位置）</strong>にある。守るのは 65×36mm・中央揃え・級数の下限・コピーの一字一句だけ。</p>
 
 <h3>判断が要るフラグ（裏面）</h3>
-<div class="flag"><b>① 見出しだけがオンボーディング由来ではない。</b> ステップ 1–4 と締めは <code>onb1</code>–<code>onb5</code> そのままだが、<strong>「なぜ、ガムを噛むと友達が増えるのか」は正面のコピーと呼応させるための追加行</strong>。また今回のコピーは<strong>クエストの例に「ガムを噛む」を出していない</strong>（アプリ側の例は「今日一番の笑顔の写真」）。ガムと結び付けているのは見出しだけになる。</div>
-<div class="flag"><b>② Toopdbq の名前が出るのは裏面だけ。</b> 正面は v3.2 で Pacifico のワードマークを撤去したので、<strong>製品名が刷られるのはこの kicker 1 行だけ</strong>。消すと名前がどこにも無くなる。逆に、これを外せば本文が 1.98 → 2.01mm まで上がる（誤差の範囲なので外す価値は薄い）。</div>
-<div class="flag"><b>③ 本文 2.0mm は白抜き 3pt 前後。</b> 正面の下段一文と同水準で、印刷で潰れるかどうかの境目。これ以上コピーを増やすと級数が落ちる。</div>
-<div class="flag"><b>④ 裏面に QR を入れるか。</b> 既定は<strong>入れない</strong>（正面にある）。ただし裏面＝開封して初めて読む面なので、読み終えた直後に導線が無いとも言える。入れると読ませる面 69×40mm がさらに狭くなる。</div>
+<div class="flag"><b>① コピーが渋谷限定になった。</b> 「渋谷にいる今だけ」「この交差点に立っている人」と地名が本文に入ったので、<strong>このパッケージは渋谷でしか配れない</strong>。他の場所で配るなら刷り分けが要る。地名を差し替えられる形（版下で 1 語だけ差し替え）にしておくか、最初から渋谷専用と割り切るかを決めておきたい。</div>
+<div class="flag"><b>② 英語版のコピーは未確定。</b> 支給されたのは日本語だけ。上の EN は日本語から起こした<strong>下訳</strong>で、字数が JA の 2.42 倍あるぶん級数が 0.2mm 下がっている。正式な英文が決まったら差し替える。EN を作らない判断もある（配布が国内だけなら JA 1 面で足りる）。</div>
+<div class="flag"><b>③ Toopdbq の名前が本文に出てこない。</b> 「このアプリ」としか書かれていないので、名前を知る手掛かりは QR と、正面の下段にある <code>toopdbq@gmail.com</code> だけになる。見出し＋本文だけというシンプルさを優先するならこのままでよい。</div>
+<div class="flag"><b>④ 本文の行が 1 本、折り目に載る。</b> 縦の中心に置く以上避けられない。見出しだけは跨がせない。</div>
 
 <script>
 (function(){

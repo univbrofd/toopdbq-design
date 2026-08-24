@@ -3,87 +3,62 @@
 @import url('../../DesignSystem/colors_and_type.css');
 html,body{margin:0;background:#111;color:#eee;font-family:var(--font-latin);font-size:12px;}
 #stage{position:absolute;left:-4000px;top:0;}
-.box{width:69mm;font-family:var(--font-jp);color:#fff;}
+.box{font-family:var(--font-jp);color:#fff;text-align:center;}
 .box.en{font-family:var(--font-latin);}
 pre{padding:12px;line-height:1.5;}
 </style></head><body>
 <div id="stage"></div><pre id="out">measuring…</pre>
 <script>
-/* コピーの正は lib/l10n/app_{ja,en}.arb の onb1–onb5（オンボーディング5面）。
-   ここを勝手に書き換えない。arb が変わったらこちらを追随させる。 */
+/* v4.1 裏面: 見出し + 本文2段落だけ。中央揃え・面の中心に配置。 */
 const JA = {
-  kicker:'Toopdbq',
-  h:'なぜ、ガムを噛むと友達が増えるのか',
-  steps:[
-    {l:'世界中のサークル', b:'だれでも、どこにでもつくれるコミュニティーサークル。'},
-    {l:'クエストに挑戦',   b:'サークルからクエストが発生する。エリアの中から挑戦できる。'},
-    {l:'クエストの報酬',   b:'達成すると、他の人の投稿が見れる。'},
-    {l:'いいねが友情のきっかけ', b:'投稿にいいねすると、会話のきっかけができる。'}
-  ],
-  close:'現在地は他の人には見えません。近くのサークルを探すためだけに使います。'
+  h:'渋谷にいる今だけ、今日のお題で友達ができる',
+  p:['このアプリは、渋谷にいるときしか投稿できない。今、この交差点に立っている人の話だけが載る。',
+     '毎朝お題が出る。それに乗せて一本出す。いいねから、知らない人とも会話が始まる。同じ趣味の友達、帰りに寄れる飲み友。恋人がいない人は、それ以上になることもある。恋人探しのアプリではない。きっかけが欲しい人の場所だ。']
 };
 const EN = {
-  kicker:'Toopdbq',
-  h:'Why chewing gum makes friends',
-  steps:[
-    {l:'Circles, everywhere',       b:'Community circles anyone can start, anywhere.'},
-    {l:'Take on a quest',           b:'Circles run quests. Join them from inside the area.'},
-    {l:'The quest reward',          b:'Finish it, and everyone else’s posts open up.'},
-    {l:'A like starts a friendship',b:'Like a post, and a conversation can begin.'}
-  ],
-  close:'Your location is never shown to others. We only use it to find nearby circles.'
+  h:'In Shibuya, today only \u2014 a quest that makes friends',
+  p:['You can only post while you are in Shibuya. Only the people at this crossing show up here.',
+     'A quest every morning. Post one thing to answer it. A like starts a conversation with a stranger \u2014 a friend who shares your taste, someone to drink with on the way home. If you are single, it can turn into more. Not a dating app. A place for people who want a reason to start.']
 };
 
-function build(d, en, base, hMul, w, mode){
-  mode = mode || 'A';
+function build(d, en, base, hMul, w, lh){
   const b = document.createElement('div');
   b.className = 'box' + (en?' en':'');
   b.style.width = w + 'mm';
   b.style.fontSize = base + 'mm';
-  b.style.lineHeight = '1.35';
+  b.style.lineHeight = String(lh);
   let s = '';
-  s += '<div style="font-size:'+(base*1.2).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:.06em;">'+d.kicker+'</div>';
-  s += '<div style="margin-top:'+(base*0.35).toFixed(3)+'mm;font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.1;letter-spacing:-0.04em;">'+d.h+'</div>';
-  s += '<div style="margin-top:'+(base*0.9).toFixed(3)+'mm;display:flex;flex-direction:column;gap:'+(base*0.45).toFixed(3)+'mm;">';
-  d.steps.forEach((t,i)=>{
-    var inner = mode==='A' ? '<b style="font-weight:900;">'+t.l+'</b><br><span style="font-weight:600;">'+t.b+'</span>'
-              : mode==='B' ? '<b style="font-weight:900;">'+t.l+'</b><span style="font-weight:600;"> '+t.b+'</span>'
-              : '<b style="font-weight:900;">'+t.l+'</b>';
-    s += '<div style="display:flex;gap:'+(base*0.55).toFixed(3)+'mm;align-items:baseline;">'
-       + '<span style="flex:none;font-weight:900;font-size:'+(base*1.35).toFixed(3)+'mm;line-height:1;">'+(i+1)+'</span>'
-       + '<span style="flex:1;">'+inner+'</span>'
-       + '</div>';
+  s += '<div style="font-size:'+(base*hMul).toFixed(3)+'mm;font-weight:900;line-height:1.18;letter-spacing:-0.03em;">'+d.h+'</div>';
+  d.p.forEach(function(t,i){
+    s += '<div style="margin-top:'+(base*(i===0?1.5:1.0)).toFixed(3)+'mm;font-weight:600;">'+t+'</div>';
   });
-  s += '</div>';
-  s += '<div style="margin-top:'+(base*0.9).toFixed(3)+'mm;font-weight:600;">'+d.close+'</div>';
   b.innerHTML = s;
   return b;
 }
 const stage = document.getElementById('stage');
-function height(d, en, base, hMul, w, mode){
-  const b = build(d, en, base, hMul, w, mode);
+function height(d, en, base, hMul, w, lh){
+  const b = build(d, en, base, hMul, w, lh);
   stage.appendChild(b);
   const h = b.getBoundingClientRect().height;
   stage.removeChild(b);
   return h;
 }
 const MM = (()=>{ const p=document.createElement('div'); p.style.width='100mm'; stage.appendChild(p); const v=p.getBoundingClientRect().width/100; stage.removeChild(p); return v; })();
-function maxFit(d, en, hMul, w, capMm, mode){
-  let lo=0.8, hi=7.0;
+function maxFit(d, en, hMul, w, capMm, lh){
+  let lo=0.6, hi=7.0;
   for(let i=0;i<40;i++){
     const mid=(lo+hi)/2;
-    if(height(d,en,mid,hMul,w,mode)/MM <= capMm) lo=mid; else hi=mid;
+    if(height(d,en,mid,hMul,w,lh)/MM <= capMm) lo=mid; else hi=mid;
   }
   return lo;
 }
-/* Inter / Noto Sans JP は colors_and_type.css の入れ子 @import 経由で後から届く。
-   fonts.ready だけでは未要求のフェイスを待てず、EN が fallback 字形のまま測れて 6% ずれる。
-   実際に使う font-family で probe を描いてから二度待つ。 */
+/* Inter / Noto Sans JP は colors_and_type.css の入れ子 @import で後から届く。
+   fonts.ready だけでは未要求のフェイスを待てず EN が fallback 字形のまま測れて 6% ずれる。 */
 function fontsWarm(){
   var probes = ['var(--font-latin)','var(--font-jp)'].map(function(f){
     var p=document.createElement('div');
     p.style.cssText='position:absolute;left:-9999px;top:0;font-weight:900;font-size:10mm;font-family:'+f;
-    p.textContent='Toopdbq あア漢 Wg'; document.body.appendChild(p); return p;
+    p.textContent='Toopdbq abc'; document.body.appendChild(p); return p;
   });
   return document.fonts.ready
     .then(function(){ return new Promise(function(r){ setTimeout(r,1200); }); })
@@ -94,50 +69,55 @@ fontsWarm().then(function(){
 const lines=[];
 lines.push('1mm = '+MM.toFixed(4)+'px');
 lines.push('');
-lines.push('構造別の最大級数（全幅69mm・cap40mm・行送り1.35・padding 0）');
-lines.push('  A = ラベルを改行して本文  /  B = ラベルと本文を同じ行  /  C = ラベルだけ（本文なし）');
-lines.push('');
-lines.push('mode lang  hMul  本文max(mm)  見出し(mm)  総高(mm)');
-for(const mode of ['A','B','C']){
-  for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
-    for(const hMul of [2.4,2.0]){
-      const b=maxFit(d,en,hMul,69,40,mode);
-      const h=height(d,en,b,hMul,69,mode)/MM;
-      lines.push(` ${mode}   ${lang}   ${hMul.toFixed(1)}    ${b.toFixed(2)}        ${(b*hMul).toFixed(2)}       ${h.toFixed(2)}`);
+lines.push('■ 収まる最大級数（中央揃え / 見出し=本文*hMul / cap=ブロックの高さ上限）');
+lines.push('lang  行長mm  行送り  hMul  cap   本文max   見出し   総高    0-40の上下余白 各');
+for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
+  for(const w of [69,65,63]){
+    for(const lh of [1.5,1.45]){
+      for(const hMul of [1.8,1.6]){
+        for(const cap of [40,36,34]){
+          const b=maxFit(d,en,hMul,w,cap,lh);
+          const h=height(d,en,b,hMul,w,lh)/MM;
+          lines.push(lang+'    '+String(w).padStart(2)+'     '+lh.toFixed(2)+'   '+hMul.toFixed(1)+'   '+String(cap).padStart(2)+'   '+b.toFixed(2)+'mm    '+(b*hMul).toFixed(2)+'mm   '+h.toFixed(2)+'mm  '+((40-h)/2).toFixed(2)+'mm');
+        }
+      }
     }
   }
 }
 lines.push('');
-lines.push('見出しを1行で入れたときの最大級数（全幅69mm）');
-for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
-  const p=document.createElement('div');
-  p.style.cssText='position:absolute;width:auto;white-space:nowrap;font-weight:900;letter-spacing:-0.04em;font-size:10mm;line-height:1.1;font-family:'+(en?'var(--font-latin)':'var(--font-jp)');
-  p.textContent=d.h; stage.appendChild(p);
-  const wpx=p.getBoundingClientRect().width; stage.removeChild(p);
-  lines.push(`${lang} : ${(10*69*MM/wpx).toFixed(2)}mm で1行 (10mm 時の実幅 ${(wpx/MM).toFixed(1)}mm)`);
-}
-lines.push('');
-lines.push('各行の y 範囲（mm・trim 上端基準）と折り線 18/40/44 との衝突');
-for(const [lang,d,en,hMul,mode] of [['JA',JA,false,2.4,'B'],['EN',EN,true,2.4,'B']]){
-  const base=maxFit(d,en,hMul,69,40,mode);
-  const b=build(d,en,base,hMul,69,mode);
+lines.push('■ 各ブロックの y 範囲（0-40mm の中心に総高を centering）と折り線18mmとの衝突');
+for(const [lang,d,en,w,lh,hMul] of [['JA',JA,false,63,1.45,1.8],['EN',EN,true,63,1.45,1.8]]){
+  const base=maxFit(d,en,hMul,w,40,lh);
+  const b=build(d,en,base,hMul,w,lh);
   b.style.position='absolute'; b.style.left='0'; b.style.top='0';
   stage.appendChild(b);
+  const total=b.getBoundingClientRect().height/MM;
+  const off=(40-total)/2;
   const top=b.getBoundingClientRect().top;
-  lines.push(`-- ${lang} mode ${mode} (本文${base.toFixed(2)}mm / 見出し${(base*hMul).toFixed(2)}mm / 幅69mm / cap40)`);
+  lines.push('-- '+lang+' (行長'+w+'mm / 行送り'+lh+' / 本文'+base.toFixed(2)+'mm / 見出し'+(base*hMul).toFixed(2)+'mm / 総高'+total.toFixed(2)+'mm / 上下の余り各'+off.toFixed(2)+'mm)');
   const walk=(el,label)=>{
     const r=el.getBoundingClientRect();
-    const y0=(r.top-top)/MM, y1=(r.bottom-top)/MM;
-    const hit=[18,40,44].filter(f=>y0<f&&f<y1);
-    lines.push(`   ${label.padEnd(12)} y ${y0.toFixed(1)}–${y1.toFixed(1)}${hit.length?'   ← 折り線 '+hit.join('/')+'mm を跨ぐ':''}`);
+    const y0=(r.top-top)/MM+off, y1=(r.bottom-top)/MM+off;
+    const hit=[18,40].filter(f=>y0<f&&f<y1);
+    lines.push('   '+label.padEnd(10)+' y '+y0.toFixed(1)+'-'+y1.toFixed(1)+(hit.length?'   <- 折り線 '+hit.join('/')+'mm を跨ぐ':''));
   };
   const kids=[...b.children];
-  walk(kids[0],'kicker'); walk(kids[1],'見出し');
-  [...kids[2].children].forEach((s,i)=>walk(s,'ステップ'+(i+1)));
-  walk(kids[3],'締め');
+  walk(kids[0],'見出し'); walk(kids[1],'本文1'); walk(kids[2],'本文2');
   stage.removeChild(b);
 }
-const cnt=d=>(d.kicker+d.h+d.steps.map(s=>s.l+s.b).join('')+d.close).length;
+lines.push('');
+lines.push('■ 見出しの行数（行長63mm・letter-spacing -0.03em）');
+for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
+  for(const fs of [3.0,3.5,4.0,4.5]){
+    const p=document.createElement('div');
+    p.className='box'+(en?' en':'');
+    p.style.cssText+='width:63mm;font-size:'+fs+'mm;font-weight:900;line-height:1.18;letter-spacing:-0.03em;';
+    p.textContent=d.h; stage.appendChild(p);
+    const h=p.getBoundingClientRect().height/MM; stage.removeChild(p);
+    lines.push(lang+' '+fs.toFixed(1)+'mm -> 高さ'+h.toFixed(2)+'mm（約'+Math.round(h/(fs*1.18))+'行）');
+  }
+}
+const cnt=d=>(d.h+d.p.join('')).length;
 lines.push('');
 lines.push('文字数: JA '+cnt(JA)+' / EN '+cnt(EN)+'（EN は JA の '+(cnt(EN)/cnt(JA)).toFixed(2)+' 倍）');
 document.getElementById('out').textContent = lines.join('\n');
