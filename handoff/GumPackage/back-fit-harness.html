@@ -69,37 +69,37 @@ fontsWarm().then(function(){
 const lines=[];
 lines.push('1mm = '+MM.toFixed(4)+'px');
 lines.push('');
-lines.push('■ 収まる最大級数（中央揃え / 見出し=本文*hMul / cap=ブロックの高さ上限）');
-lines.push('lang  行長mm  行送り  hMul  cap   本文max   見出し   総高    0-40の上下余白 各');
+lines.push('■ 収まる最大級数（裏面は全面 69x52mm を使う / 中央揃え / 見出し=本文*hMul）');
+lines.push('lang  行長mm  行送り  hMul  cap   本文max   見出し   総高    0-52の上下余白 各');
 for(const [lang,d,en] of [['JA',JA,false],['EN',EN,true]]){
   for(const w of [69,65,63]){
-    for(const lh of [1.5,1.45]){
+    for(const lh of [1.55,1.5,1.45]){
       for(const hMul of [1.8,1.6]){
-        for(const cap of [40,36,34]){
+        for(const cap of [52,48,46,44]){
           const b=maxFit(d,en,hMul,w,cap,lh);
           const h=height(d,en,b,hMul,w,lh)/MM;
-          lines.push(lang+'    '+String(w).padStart(2)+'     '+lh.toFixed(2)+'   '+hMul.toFixed(1)+'   '+String(cap).padStart(2)+'   '+b.toFixed(2)+'mm    '+(b*hMul).toFixed(2)+'mm   '+h.toFixed(2)+'mm  '+((40-h)/2).toFixed(2)+'mm');
+          lines.push(lang+'    '+String(w).padStart(2)+'     '+lh.toFixed(2)+'   '+hMul.toFixed(1)+'   '+String(cap).padStart(2)+'   '+b.toFixed(2)+'mm    '+(b*hMul).toFixed(2)+'mm   '+h.toFixed(2)+'mm  '+((52-h)/2).toFixed(2)+'mm');
         }
       }
     }
   }
 }
 lines.push('');
-lines.push('■ 各ブロックの y 範囲（0-40mm の中心に総高を centering）と折り線18mmとの衝突');
-for(const [lang,d,en,w,lh,hMul] of [['JA',JA,false,63,1.45,1.8],['EN',EN,true,63,1.45,1.8]]){
-  const base=maxFit(d,en,hMul,w,40,lh);
+lines.push('■ 各ブロックの y 範囲（0-52mm の中心に総高を centering）と折り線18/40mm・糊代44mm');
+for(const [lang,d,en,w,lh,hMul,cap] of [['JA',JA,false,65,1.55,1.8,48],['EN',EN,true,65,1.55,1.8,48]]){
+  const base=maxFit(d,en,hMul,w,cap,lh);
   const b=build(d,en,base,hMul,w,lh);
   b.style.position='absolute'; b.style.left='0'; b.style.top='0';
   stage.appendChild(b);
   const total=b.getBoundingClientRect().height/MM;
-  const off=(40-total)/2;
+  const off=(52-total)/2;
   const top=b.getBoundingClientRect().top;
   lines.push('-- '+lang+' (行長'+w+'mm / 行送り'+lh+' / 本文'+base.toFixed(2)+'mm / 見出し'+(base*hMul).toFixed(2)+'mm / 総高'+total.toFixed(2)+'mm / 上下の余り各'+off.toFixed(2)+'mm)');
   const walk=(el,label)=>{
     const r=el.getBoundingClientRect();
     const y0=(r.top-top)/MM+off, y1=(r.bottom-top)/MM+off;
-    const hit=[18,40].filter(f=>y0<f&&f<y1);
-    lines.push('   '+label.padEnd(10)+' y '+y0.toFixed(1)+'-'+y1.toFixed(1)+(hit.length?'   <- 折り線 '+hit.join('/')+'mm を跨ぐ':''));
+    const hit=[18,40,44].filter(f=>y0<f&&f<y1);
+    lines.push('   '+label.padEnd(10)+' y '+y0.toFixed(1)+'-'+y1.toFixed(1)+(hit.length?'   <- '+hit.join('/')+'mm を跨ぐ':''));
   };
   const kids=[...b.children];
   walk(kids[0],'見出し'); walk(kids[1],'本文1'); walk(kids[2],'本文2');
