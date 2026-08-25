@@ -17,6 +17,9 @@ AR = TW / TH
 
 def trim_jpeg(path):
     im = Image.open(path).convert('RGB'); w, h = im.size
+    if abs(w/h - 75/58) < 0.01:                    # 塗り足し込みの絵から仕上がりだけ抜く
+        im = im.crop((round(w*3/75), round(h*3/58), round(w*72/75), round(h*55/58)))
+        w, h = im.size
     if w / h > AR: nw = int(round(h*AR)); nh = h; x0 = (w-nw)//2; y0 = 0
     else:          nw = w; nh = int(round(w/AR)); x0 = 0; y0 = (h-nh)//2
     buf = io.BytesIO()
@@ -81,14 +84,14 @@ def write_pdf(out, pages):
 
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.build', 'v6-src')
 outdir = sys.argv[1]
-for lang, fs in (('ja', ('ja-front-A.jpg', 'ja-back.png')), ('en', ('en-front-A.jpg', 'en-back.png'))):
+for lang, fs in (('ja', ('ja-front-S.jpg', 'ja-back-S.jpg')), ('en', ('en-front-S.jpg', 'en-back-S.jpg'))):
     pages = []
     for i, fn in enumerate(fs):
         jpg, w, h = trim_jpeg(os.path.join(SRC, fn))
         ops = ['q'] + page_ops(ccw=(i == 0)) + ['Q'] + marks() + label(
-            'Toopdbq GumPackage v7 %s %s - 69x52mm 16up - duplex: LONG-EDGE binding - cut on marks'
+            'Toopdbq GumPackage v8 %s %s - 69x52mm 16up - duplex: LONG-EDGE binding - cut on marks'
             % (lang.upper(), 'FRONT' if i == 0 else 'BACK'))
         pages.append((jpg, w, h, ops))
         print('  %s %-5s %dx%dpx  %.0f dpi  jpeg %.2fMB' % (lang, 'front' if i == 0 else 'back', w, h, w/TW*25.4, len(jpg)/1e6))
-    out = os.path.join(outdir, 'GumPackage-v7-%s-A4-16up.pdf' % lang)
+    out = os.path.join(outdir, 'GumPackage-v8-%s-A4-16up.pdf' % lang)
     print('=> %s  %.2fMB   grid %dx%d  margin %.1f / %.1f mm\n' % (out, write_pdf(out, pages)/1e6, COLS, ROWS, GX, GY))

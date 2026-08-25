@@ -12,6 +12,12 @@ MM2PT = 72.0 / 25.4
 def build_face(path):
     im = Image.open(path).convert('RGB')
     w, h = im.size
+    if abs(w/h - (TW+2*BL)/(TH+2*BL)) < 0.01:      # すでに塗り足し込み (75x58) の絵
+        nw = int(round(h*(TW+2*BL)/(TH+2*BL)))
+        im = im.crop(((w-nw)//2, 0, (w-nw)//2+nw, h))
+        buf = io.BytesIO()
+        im.save(buf, 'JPEG', quality=95, subsampling=0, optimize=True, dpi=(600, 600))
+        return buf.getvalue(), im.width, im.height, im.width/(TW+2*BL)*25.4*(TW+2*BL)/TW
     # cover-crop to 69:52
     if w / h > AR:                       # 横に長い -> 幅を削る
         nw = int(round(h * AR)); nh = h
@@ -81,8 +87,8 @@ def write_pdf(out, faces):
 # 元画像は .build/v6-src/（gitignore・生成 AI の出力そのまま）
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.build', 'v6-src')
 SETS = {
-  'ja': [('表', 'ja-front-A.jpg'), ('裏', 'ja-back.png')],
-  'en': [('表', 'en-front-A.jpg'), ('裏', 'en-back.png')],
+  'ja': [('表', 'ja-front-S.jpg'), ('裏', 'ja-back-S.jpg')],
+  'en': [('表', 'en-front-S.jpg'), ('裏', 'en-back-S.jpg')],
 }
 outdir = sys.argv[1]
 for lang, items in SETS.items():
@@ -92,6 +98,6 @@ for lang, items in SETS.items():
         faces.append((jpg, w, h, dpi))
         print('  %s-%s  %dx%dpx  trim %.0f dpi  jpeg %.2fMB  <- %s' %
               (lang, label, w, h, dpi, len(jpg)/1e6, fn))
-    out = os.path.join(outdir, 'GumPackage-v7-%s-69x52.pdf' % lang)
+    out = os.path.join(outdir, 'GumPackage-v8-%s-69x52.pdf' % lang)
     n = write_pdf(out, faces)
     print('=> %s  %.2fMB\n' % (out, n/1e6))
