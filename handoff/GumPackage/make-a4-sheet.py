@@ -81,14 +81,14 @@ def write_pdf(out, pages):
 
 SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.build', 'v6-src')
 outdir = sys.argv[1]
-for lang, fs in (('ja', ('ja-front.jpg', 'ja-back.png')), ('en', ('en-front.jpg', 'en-back.png'))):
+for lang, fs in (('ja', ('ja-front-A.jpg', 'ja-back.png')), ('en', ('en-front-A.jpg', 'en-back.png'))):
     pages = []
     for i, fn in enumerate(fs):
         jpg, w, h = trim_jpeg(os.path.join(SRC, fn))
         ops = ['q'] + page_ops(ccw=(i == 0)) + ['Q'] + marks() + label(
-            'Toopdbq GumPackage v6 %s %s - 69x52mm 16up - duplex: LONG-EDGE binding - cut on marks'
+            'Toopdbq GumPackage v7 %s %s - 69x52mm 16up - duplex: LONG-EDGE binding - cut on marks'
             % (lang.upper(), 'FRONT' if i == 0 else 'BACK'))
         pages.append((jpg, w, h, ops))
         print('  %s %-5s %dx%dpx  %.0f dpi  jpeg %.2fMB' % (lang, 'front' if i == 0 else 'back', w, h, w/TW*25.4, len(jpg)/1e6))
-    out = os.path.join(outdir, 'GumPackage-v6-%s-A4-16up.pdf' % lang)
+    out = os.path.join(outdir, 'GumPackage-v7-%s-A4-16up.pdf' % lang)
     print('=> %s  %.2fMB   grid %dx%d  margin %.1f / %.1f mm\n' % (out, write_pdf(out, pages)/1e6, COLS, ROWS, GX, GY))

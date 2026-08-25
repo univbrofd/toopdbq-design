@@ -81,8 +81,8 @@ def write_pdf(out, faces):
 # 元画像は .build/v6-src/（gitignore・生成 AI の出力そのまま）
 D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.build', 'v6-src')
 SETS = {
-  'ja': [('表', 'ja-front.jpg'), ('裏', 'ja-back.png')],
-  'en': [('表', 'en-front.jpg'), ('裏', 'en-back.png')],
+  'ja': [('表', 'ja-front-A.jpg'), ('裏', 'ja-back.png')],
+  'en': [('表', 'en-front-A.jpg'), ('裏', 'en-back.png')],
 }
 outdir = sys.argv[1]
 for lang, items in SETS.items():
@@ -92,6 +92,6 @@ for lang, items in SETS.items():
         faces.append((jpg, w, h, dpi))
         print('  %s-%s  %dx%dpx  trim %.0f dpi  jpeg %.2fMB  <- %s' %
               (lang, label, w, h, dpi, len(jpg)/1e6, fn))
-    out = os.path.join(outdir, 'GumPackage-v6-%s-69x52.pdf' % lang)
+    out = os.path.join(outdir, 'GumPackage-v7-%s-69x52.pdf' % lang)
     n = write_pdf(out, faces)
     print('=> %s  %.2fMB\n' % (out, n/1e6))
