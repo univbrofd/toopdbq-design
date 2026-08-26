@@ -73,7 +73,7 @@ async function grabFaces() {
     if (!v) throw new Error('artboard extract failed');
     const m = {};
     for (const a of JSON.parse(v)) m[a.label] = a.html;
-    for (const k of ['JA-表', 'JA-裏', 'EN-表', 'EN-裏']) if (!m[k]) throw new Error('missing ' + k);
+    if (!Object.keys(m).length) throw new Error('artboard not found (dc の描画待ちが足りない可能性)');
     return m;
   });
 }
@@ -238,6 +238,36 @@ const PROBE = `(async () => {
   return { ok: miss.length === 0, status: document.fonts.status, faces: document.fonts.size, miss };
 })()`;
 
+/* ---------- 面を 600dpi に焼く ----------
+   box-shadow / text-shadow の blur を Chrome がベクタ PDF に出すと透明グループ + SMask になり、
+   CoreGraphics 系 (プレビュー / Quick Look / 一部 RIP) が不透明な矩形で塗り潰す。ネオン装飾は
+   グローが本体で blur を 0 にできないので、面ごとラスタにして PDF に貼る。 */
+async function bakeFaces(file, tag) {
+  return withPage(BASE + '.build/' + file, async send => {
+    await send('Emulation.setDeviceMetricsOverride', { width: 700, height: 1000, deviceScaleFactor: 1, mobile: false });
+    await send('Runtime.evaluate', { expression: WARM, awaitPromise: true, returnByValue: true });
+    const fw = await send('Runtime.evaluate', { expression: PROBE, awaitPromise: true, returnByValue: true });
+    if (!fw.result?.result?.value?.ok) throw new Error('webfonts not ready for ' + file);
+    await new Promise(r => setTimeout(r, 600));
+    const r = await send('Runtime.evaluate', {
+      expression: `JSON.stringify([...document.querySelectorAll('.art')].map(e=>{const b=e.getBoundingClientRect();return{x:b.x+window.scrollX,y:b.y+window.scrollY,w:b.width,h:b.height}}))`,
+      returnByValue: true });
+    const rects = JSON.parse(r.result.result.value);
+    const out = [];
+    for (let i = 0; i < rects.length; i++) {
+      const c = rects[i];
+      const sh = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
+        clip: { x: c.x, y: c.y, width: c.w, height: c.h, scale: DPI / 96 } });
+      const data = sh.result?.result?.data ?? sh.result?.data;
+      if (!data) throw new Error('face capture failed ' + tag + i);
+      const p = join(BUILD, `face-${tag}-${i}.png`);
+      writeFileSync(p, Buffer.from(data, 'base64'));
+      out.push(p);
+    }
+    return out;
+  });
+}
+
 /* ---------- printToPDF ---------- */
 async function toPdf(file, wmm, hmm, out) {
   [wmm, hmm] = [wmm + M * 2, hmm + M * 2];
@@ -326,12 +356,16 @@ console.log('bg.png', (bgBytes / 1024).toFixed(0) + 'KB', `${DPI}dpi`, Math.roun
 const F = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, printSafeShadow(useBakedBg(v))]));
 console.log('faces:', Object.keys(F).join(' '));
 
-const jobs = [
-  ['single-ja.html', singleDoc(F['JA-表'], F['JA-裏']), TW + BL * 2, TH + BL * 2, 'GumPackage-ja-69x52.pdf', BL],
-  ['single-en.html', singleDoc(F['EN-表'], F['EN-裏']), TW + BL * 2, TH + BL * 2, 'GumPackage-en-69x52.pdf', BL],
-  ['a3-ja.html', a3Doc(F['JA-表'], F['JA-裏'], 'JA'), A3W, A3H, 'GumPackage-ja-A3.pdf', 0],
-  ['a3-en.html', a3Doc(F['EN-表'], F['EN-裏'], 'EN'), A3W, A3H, 'GumPackage-en-A3.pdf', 0],
-];
+// dc の lang トグルで出ている面だけ刷る。表裏が揃っている言語だけがジョブになる。
+const VER = process.env.GUM_VER ? process.env.GUM_VER + '-' : '';
+const jobs = [];
+for (const [lang, tag] of [['JA', 'ja'], ['EN', 'en']]) {
+  const [f, b] = [F[lang + '-表'], F[lang + '-裏']];
+  if (!f || !b) { console.log(`skip ${lang}: 表裏が揃っていない`); continue; }
+  jobs.push([`single-${tag}.html`, singleDoc(f, b), TW + BL * 2, TH + BL * 2, `GumPackage-${VER}${tag}-69x52.pdf`, BL]);
+  jobs.push([`a3-${tag}.html`, a3Doc(f, b, lang), A3W, A3H, `GumPackage-${VER}${tag}-A3.pdf`, 0]);
+}
+if (!jobs.length) throw new Error('刷れる面が無い');
 for (const [file, html, w, h, out, inset] of jobs) {
   writeFileSync(join(BUILD, file), html);
   const p = join(OUT, out);
@@ -339,5 +373,13 @@ for (const [file, html, w, h, out, inset] of jobs) {
   const n = setBoxes(p, w, h, inset);
   console.log(out, (readFileSync(p).length / 1024).toFixed(0) + 'KB',
     `${w}x${h}mm`, inset ? `Trim ${w - inset * 2}x${h - inset * 2}mm` : '', `(${n}p)`);
+  // 新デザイン (ネオン装飾) の面はこのベクタ PDF を入稿に使わないこと。box-shadow /
+  // text-shadow の blur が透明グループ + SMask になり、CoreGraphics 系が不透明な矩形で
+  // 塗り潰す。焼いた PNG から make-raster-pdf.py で作るラスタ版が入稿用。
+  if (file.startsWith('single-')) {
+    const tag = file.slice(7, -5);
+    const pngs = await bakeFaces(file, tag);
+    console.log('  baked', pngs.map(x => x.split('/').pop()).join(' '), `${DPI}dpi`);
+  }
 }
 process.exit(0);
