@@ -1,82 +1,80 @@
 #!/usr/bin/env python3
-# 69x52mm trim + 3mm bleed = 75x58mm. 供給画像 = trim 領域の絵。
-# trim にぴったり cover-crop し、塗り足しは端ピクセル引き伸ばしで作る（内容を1mmも切らない）。
-import io, sys, os
+"""画像 2 枚をそのまま両面 1 枚 (69x52mm) の入稿 PDF にする。
+
+供給画像 = 仕上がり (trim) の絵。cover で塗り足しを作ると絵の端が断裁で落ちるので、
+trim にぴったり収めてから塗り足し 3mm は端ピクセルの引き伸ばしで作る。
+これなら画像内の要素は 1mm も切られない。
+
+p1 = 表 / p2 = 裏。両ページとも正立で入れてあるので、横長 (69x52) の紙では
+**短辺とじ (左右反転)** を指定すると表裏の天地が揃う。長辺とじだと裏が上下逆になる。
+
+usage: python3 make-poster-pdf.py <表画像> <裏画像> [出力.pdf]
+"""
+import io, os, sys
 from PIL import Image
 
-TW, TH, BL = 69.0, 52.0, 3.0          # mm
+TW, TH, BL = 69.0, 52.0, 3.0          # 仕上がり / 塗り足し
 MW, MH = TW + 2*BL, TH + 2*BL          # 75 x 58
 AR = TW / TH
 MM2PT = 72.0 / 25.4
+SAFE = 3.0
 
 def build_face(path):
     im = Image.open(path).convert('RGB')
     w, h = im.size
-    if abs(w/h - (TW+2*BL)/(TH+2*BL)) < 0.01:      # すでに塗り足し込み (75x58) の絵
-        nw = int(round(h*(TW+2*BL)/(TH+2*BL)))
-        im = im.crop(((w-nw)//2, 0, (w-nw)//2+nw, h))
-        buf = io.BytesIO()
-        im.save(buf, 'JPEG', quality=95, subsampling=0, optimize=True, dpi=(600, 600))
-        return buf.getvalue(), im.width, im.height, im.width/(TW+2*BL)*25.4*(TW+2*BL)/TW
-    # cover-crop to 69:52
-    if w / h > AR:                       # 横に長い -> 幅を削る
-        nw = int(round(h * AR)); nh = h
-        x0 = (w - nw) // 2; y0 = 0
-    else:                                # 縦に長い -> 高さを削る
-        nw = w; nh = int(round(w / AR))
-        x0 = 0; y0 = (h - nh) // 2
+    if abs(w/h - MW/MH) < 0.008:                       # すでに塗り足し込み (75x58) の絵
+        return jpeg(im), im.width, im.height, im.width / MW * 25.4, 0.0
+    if w / h > AR:                                     # 横に長い -> 幅を削る
+        nw, nh = int(round(h * AR)), h
+        x0, y0 = (w - nw) // 2, 0
+        cut = (w - nw) / 2 / (w / TW)                  # 片側で落ちる mm
+    else:                                              # 縦に長い -> 高さを削る
+        nw, nh = w, int(round(w / AR))
+        x0, y0 = 0, (h - nh) // 2
+        cut = (h - nh) / 2 / (h / TH)
     trim = im.crop((x0, y0, x0 + nw, y0 + nh))
-    r = int(round(nw * BL / TW))         # 塗り足し ring (px)
+    r = int(round(nw * BL / TW))                       # 塗り足しリング (px)
     W, H = nw + 2*r, nh + 2*r
     cv = Image.new('RGB', (W, H))
     cv.paste(trim, (r, r))
-    # 端ピクセルを引き伸ばして塗り足しを作る
     cv.paste(trim.crop((0, 0, 1, nh)).resize((r, nh), Image.NEAREST), (0, r))
     cv.paste(trim.crop((nw-1, 0, nw, nh)).resize((r, nh), Image.NEAREST), (r+nw, r))
     cv.paste(trim.crop((0, 0, nw, 1)).resize((nw, r), Image.NEAREST), (r, 0))
     cv.paste(trim.crop((0, nh-1, nw, nh)).resize((nw, r), Image.NEAREST), (r, r+nh))
     for (sx, sy, dx, dy) in ((0,0,0,0), (nw-1,0,r+nw,0), (0,nh-1,0,r+nh), (nw-1,nh-1,r+nw,r+nh)):
         cv.paste(trim.crop((sx, sy, sx+1, sy+1)).resize((r, r), Image.NEAREST), (dx, dy))
+    return jpeg(cv), W, H, nw / TW * 25.4, cut
+
+def jpeg(im):
     buf = io.BytesIO()
-    cv.save(buf, 'JPEG', quality=95, subsampling=0, optimize=True, dpi=(600, 600))
-    return buf.getvalue(), W, H, nw / TW * 25.4   # dpi at trim
+    im.save(buf, 'JPEG', quality=95, subsampling=0, optimize=True, dpi=(600, 600))
+    return buf.getvalue()
 
 def write_pdf(out, faces):
-    objs = {}
-    n_pages = len(faces)
-    pages_kids = []
-    nxt = 3
-    page_objs = []
-    for i, (jpg, w, h, _) in enumerate(faces):
-        pg, img, cont = nxt, nxt+1, nxt+2
-        nxt += 3
-        pages_kids.append(pg)
-        page_objs.append((pg, img, cont, jpg, w, h))
+    objs, page_objs, kids, nxt = {}, [], [], 3
+    for _ in faces:
+        kids.append(nxt); page_objs.append((nxt, nxt+1, nxt+2)); nxt += 3
     W, H = MW*MM2PT, MH*MM2PT
-    t0, t1 = BL*MM2PT, BL*MM2PT
-    t2, t3 = (BL+TW)*MM2PT, (BL+TH)*MM2PT
+    t = (BL*MM2PT, BL*MM2PT, (BL+TW)*MM2PT, (BL+TH)*MM2PT)
     objs[1] = b'<< /Type /Catalog /Pages 2 0 R >>'
-    objs[2] = ('<< /Type /Pages /Kids [%s] /Count %d >>' %
-               (' '.join('%d 0 R' % k for k in pages_kids), n_pages)).encode()
-    for (pg, img, cont, jpg, w, h) in page_objs:
+    objs[2] = ('<< /Type /Pages /Kids [%s] /Count %d >>'
+               % (' '.join('%d 0 R' % k for k in kids), len(faces))).encode()
+    for (pg, img, cont), (jpg, w, h) in zip(page_objs, faces):
         objs[pg] = ('<< /Type /Page /Parent 2 0 R '
                     '/MediaBox [0 0 %.4f %.4f] /CropBox [0 0 %.4f %.4f] '
                     '/BleedBox [0 0 %.4f %.4f] /TrimBox [%.4f %.4f %.4f %.4f] '
                     '/Resources << /XObject << /Im0 %d 0 R >> >> /Contents %d 0 R >>'
-                    % (W, H, W, H, W, H, t0, t1, t2, t3, img, cont)).encode()
+                    % (W, H, W, H, W, H, *t, img, cont)).encode()
         objs[img] = (('<< /Type /XObject /Subtype /Image /Width %d /Height %d '
                       '/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode '
-                      '/Length %d >>\nstream\n' % (w, h, len(jpg))).encode()
-                     + jpg + b'\nendstream')
+                      '/Length %d >>\nstream\n' % (w, h, len(jpg))).encode() + jpg + b'\nendstream')
         cs = ('q %.4f 0 0 %.4f 0 0 cm /Im0 Do Q' % (W, H)).encode()
         objs[cont] = ('<< /Length %d >>\nstream\n' % len(cs)).encode() + cs + b'\nendstream'
     buf = bytearray(b'%PDF-1.7\n%\xe2\xe3\xcf\xd3\n')
     off = {}
     for k in sorted(objs):
-        off[k] = len(buf)
-        buf += ('%d 0 obj\n' % k).encode() + objs[k] + b'\nendobj\n'
-    xref = len(buf)
-    mx = max(objs) + 1
+        off[k] = len(buf); buf += ('%d 0 obj\n' % k).encode() + objs[k] + b'\nendobj\n'
+    xref, mx = len(buf), max(objs) + 1
     buf += ('xref\n0 %d\n' % mx).encode() + b'0000000000 65535 f \n'
     for k in range(1, mx):
         buf += ('%010d 00000 n \n' % off.get(k, 0)).encode()
@@ -84,20 +82,26 @@ def write_pdf(out, faces):
     open(out, 'wb').write(buf)
     return len(buf)
 
-# 元画像は .build/v6-src/（gitignore・生成 AI の出力そのまま）
-D = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.build', 'v6-src')
-SETS = {
-  'ja': [('表', 'ja-front-S.jpg'), ('裏', 'ja-back-S.jpg')],
-  'en': [('表', 'en-front-S.jpg'), ('裏', 'en-back-S.jpg')],
-}
-outdir = sys.argv[1]
-for lang, items in SETS.items():
-    faces = []
-    for label, fn in items:
-        jpg, w, h, dpi = build_face(os.path.join(D, fn))
-        faces.append((jpg, w, h, dpi))
-        print('  %s-%s  %dx%dpx  trim %.0f dpi  jpeg %.2fMB  <- %s' %
-              (lang, label, w, h, dpi, len(jpg)/1e6, fn))
-    out = os.path.join(outdir, 'GumPackage-v8-%s-69x52.pdf' % lang)
-    n = write_pdf(out, faces)
-    print('=> %s  %.2fMB\n' % (out, n/1e6))
+if len(sys.argv) < 3:
+    raise SystemExit(__doc__)
+HERE = os.path.dirname(os.path.abspath(__file__))
+out = sys.argv[3] if len(sys.argv) > 3 else os.path.join(HERE, 'pdf', 'GumPackage-poster-69x52.pdf')
+faces = []
+for label, path in (('表', sys.argv[1]), ('裏', sys.argv[2])):
+    if not os.path.exists(path):
+        raise SystemExit('見つからない: ' + path)
+    jpg, w, h, dpi, cut = build_face(path)
+    faces.append((jpg, w, h))
+    src = Image.open(path)
+    note = '塗り足し込みの絵をそのまま使用' if cut == 0 else \
+           ('69:52 に合わせて片側 %.2fmm を crop -> 塗り足しは端伸ばしで生成' % cut if cut > 0.005
+            else '塗り足しは端伸ばしで生成')
+    print('  %s  %dx%d px (%.3f)  -> trim %.0f dpi  jpeg %.2fMB  %s'
+          % (label, src.width, src.height, src.width/src.height, dpi, len(jpg)/1e6, note))
+    if dpi < 300:
+        print('     !! trim 実効 %.0f dpi。印刷は 350dpi 以上が望ましい' % dpi)
+os.makedirs(os.path.dirname(out), exist_ok=True)
+n = write_pdf(out, faces)
+print('=> %s  %.2fMB' % (out, n/1e6))
+print('   page %gx%gmm / Trim %gx%gmm / 塗り足し %gmm / 2 ページ (p1 表・p2 裏)' % (MW, MH, TW, TH, BL))
+print('   両面印刷は【短辺とじ（左右反転）】を指定すること。長辺とじだと裏が上下逆になる')
