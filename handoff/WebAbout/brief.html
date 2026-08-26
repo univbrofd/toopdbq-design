@@ -1,0 +1,185 @@
+<!-- @dsCard group="WebAbout" name="Web About — brief" subtitle="toopdbq.com のトップ下に足すサービス説明。実測・置換表・継ぎ目" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<title>WebAbout — brief</title>
+<style>
+  :root {
+    --ink:#111114; --ink2:rgba(0,0,0,.62); --ink3:rgba(0,0,0,.42);
+    --line:rgba(0,0,0,.12); --paper:#fbfbfa; --card:#fff;
+    --teal:#005f67; --pink:#ff3e88; --yellow:#fff0a6; --golden:#d0a052;
+    --gcl:linear-gradient(135deg,#fff0a6 0%,#005f67 38%,#ff3e88 70%,#d0a052 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
+    -webkit-font-smoothing:antialiased;padding:56px 64px 80px;line-height:1.7}
+  .wrap{max-width:1312px;margin:0 auto}
+  .eyebrow{font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--teal)}
+  h1{font-size:38px;font-weight:700;letter-spacing:.01em;margin:6px 0 10px}
+  .lead{font-size:16px;color:var(--ink2);max-width:760px}
+  .rule{height:3px;width:120px;background:var(--gcl);border-radius:2px;margin:22px 0 40px}
+  h2{font-size:19px;font-weight:700;margin:0 0 4px}
+  h2 .n{font-family:Inter,sans-serif;color:var(--pink);margin-right:10px}
+  section{margin:0 0 44px}
+  .sub{font-size:13px;color:var(--ink3);margin-bottom:18px}
+  .grid{display:grid;gap:24px}
+  .g2{grid-template-columns:402px 1fr}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  img{display:block;max-width:100%;border-radius:12px;border:1px solid var(--line)}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{text-align:left;padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);border-top:0}
+  td.k{width:34%;color:var(--ink2)}
+  td b{color:var(--ink)}
+  code{font-family:Inter,ui-monospace,monospace;font-size:12.5px;background:rgba(0,0,0,.05);
+    padding:1px 6px;border-radius:5px}
+  .sw{display:flex;gap:12px;flex-wrap:wrap}
+  .sw div{width:132px}
+  .sw i{display:block;height:56px;border-radius:12px;border:1px solid var(--line)}
+  .sw span{display:block;font-family:Inter,sans-serif;font-size:11.5px;color:var(--ink2);margin-top:7px}
+  .chapters{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .ch{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;
+    position:relative;overflow:hidden}
+  .ch .num{font-family:Inter,sans-serif;font-size:12px;font-weight:800;color:#fff;
+    width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--teal)}
+  .ch.late .num{background:var(--pink)}
+  .ch.edge .num{background:var(--gcl)}
+  .ch h3{font-size:14px;font-weight:700;margin:10px 0 6px;line-height:1.45}
+  .ch p{font-size:12px;color:var(--ink2);line-height:1.6}
+  .ch.peak{box-shadow:0 0 0 2px var(--pink) inset}
+  .ch.peak::after{content:"山";position:absolute;top:12px;right:12px;font-size:11px;
+    font-weight:700;color:var(--pink)}
+  .flags{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .flag{background:#fff;border:1px solid var(--line);border-left:4px solid var(--golden);
+    border-radius:12px;padding:16px 18px}
+  .flag b{display:block;font-size:14px;margin-bottom:4px}
+  .flag p{font-size:13px;color:var(--ink2)}
+  .no{background:#fff;border:1px solid var(--line);border-left:4px solid var(--pink);
+    border-radius:12px;padding:16px 20px;font-size:13.5px;color:var(--ink2)}
+  .no b{color:var(--ink)}
+  ul{margin:8px 0 0 20px;font-size:13.5px;color:var(--ink2)}
+  li{margin:4px 0}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .three .card h3{font-size:16px;margin-bottom:6px}
+  .three .card .ax{font-family:Inter,sans-serif;font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--teal);font-weight:700}
+  .three .card p{font-size:13px;color:var(--ink2);margin-top:8px}
+</style></head>
+<body><div class="wrap">
+
+  <div class="eyebrow">Toopdbq · web · handoff</div>
+  <h1>クエストって、なに？ — トップの下に足す説明セクション</h1>
+  <p class="lead">toopdbq.com のトップは今 100dvh で終わっていて、初めて来た人は何のサービスか分からないまま離れる。
+    その下にスクロールで現れる読み物を作る。仕様の正は <code>HANDOFF.md</code>（全文コピー・契約・フラグはそちら）。</p>
+  <div class="rule"></div>
+
+  <section>
+    <h2><span class="n">01</span>継ぎ目 — 担当範囲は赤線から下</h2>
+    <p class="sub">実測図。上は既存で再設計しない。402px カラムの中でそのまま下に続ける。</p>
+    <div class="grid g2">
+      <img src="shots/seam.jpg" alt="現行トップと About の継ぎ目（実測）">
+      <div class="card">
+        <table>
+          <tr><th>実測</th><th>効いてくるところ</th></tr>
+          <tr><td class="k"><b>カラム 402px 固定</b><br><code>@media (min-width:560px)</code> で 402px 中央・外側 <code>#0d0d0f</code></td>
+              <td>PC でも 2 カラムにならない。<b>デスクトップ専用レイアウトを作らない</b></td></tr>
+          <tr><td class="k"><b>About の開始 y = 874</b><br>map-panel 301 / strip-title 34 / board 残り</td>
+              <td>board は <code>overflow-x:auto</code> の横スクロール。縦スワイプを奪わない継ぎ目にする</td></tr>
+          <tr><td class="k"><b>今日はスクロールが存在しない</b><br><code>html,body{overflow:hidden}</code></td>
+              <td>「下に続く」ことを<b>視覚で示す責任がデザイン側</b>。見切れ / ヒント / 段差、案ごとに違う解を</td></tr>
+          <tr><td class="k"><b>予算</b><br>現行 54.7KB・FCP ≈ 1s</td>
+              <td>追加は <b>HTML+CSS 30KB / JS 3KB</b> 以内。below-the-fold・lazy 必須</td></tr>
+          <tr><td class="k"><b>アイコン PNG は純白 1 色</b>（実測 uniqRGB=1）<br><b>ロゴは白いバラ</b>（820×865・ほぼ白）</td>
+              <td>白地にそのまま置けない。着色は mask、ワードマークはテキスト + グラデ</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>使ってよい色 — これだけ</h2>
+    <p class="sub">現行トップにインライン済みの実値。新しい色を発明しない（参考紙面のオレンジは DS に無い）。</p>
+    <div class="sw">
+      <div><i style="background:#fff0a6"></i><span>#fff0a6 yellow</span></div>
+      <div><i style="background:#005f67"></i><span>#005f67 teal</span></div>
+      <div><i style="background:#ff3e88"></i><span>#ff3e88 pink</span></div>
+      <div><i style="background:#d0a052"></i><span>#d0a052 golden</span></div>
+      <div><i style="background:linear-gradient(135deg,#fff0a6 0%,#005f67 38%,#ff3e88 70%,#d0a052 100%)"></i><span>--gcl linear</span></div>
+      <div><i style="background:#fff"></i><span>#ffffff 地</span></div>
+      <div><i style="background:#101014"></i><span>#101014 tile-base</span></div>
+      <div><i style="background:rgba(0,0,0,.56)"></i><span>rgba(0,0,0,.56) 本文グレー</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>参考紙面から引き継ぐもの / 置き換えるもの</h2>
+    <p class="sub">配布用インフォグラフィックの<b>情報設計だけ</b>を引き継ぐ。見た目は Toopdbq のデザインシステムへ寄せる。</p>
+    <div class="card">
+      <table>
+        <tr><th>参考紙面がやっていること</th><th>Toopdbq ではこうする</th></tr>
+        <tr><td class="k">番号バッジ + 見出し + 本文 + 右に図 のカードを 8 枚</td><td><b>順序と粒度は踏襲</b>。402px 幅で成立する形に組み直す</td></tr>
+        <tr><td class="k">明るいティールの見出し</td><td><code>#005f67</code>（DS 実値。紙面より暗く沈んだ緑）</td></tr>
+        <tr><td class="k">番号のオレンジ <code>#f2762e</code></td><td><b>DS にオレンジは無い</b> → <code>#ff3e88</code> か <code>--gcl</code>。前半／後半で色を変える切替は踏襲可</td></tr>
+        <tr><td class="k">ストックイラスト（人物シルエット・カメラ・木）</td><td><b>実写真</b> <code>assets/sample/{reel,user,uv}</code> ＋ <b>実 UI 部品</b>（UniverseQuest / QuestBoard からコピー）</td></tr>
+        <tr><td class="k">ぼかし 4 枚 → ひらく の図</td><td><b>そのまま強い</b>。実写真 + <code>filter:blur()</code> + 鍵で再現。ここが全体の主役</td></tr>
+        <tr><td class="k">ピンドロップ風ロゴ</td><td>Toopdbq の正式マークではない。<b>不採用</b></td></tr>
+        <tr><td class="k">紙面なので全章が同じ密度</td><td>web はスクロール。<b>密度に強弱を付ける</b>（章 3 と章 5 が山）</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span>章の骨格</h2>
+    <p class="sub">コピーは <code>HANDOFF.md</code> に全文。一字一句このまま。語を足さない。</p>
+    <div class="chapters">
+      <div class="ch edge"><div class="num">◆</div><h3>ヒーロー</h3><p>クエストって、なに？ ＋ 一行の定義</p></div>
+      <div class="ch"><div class="num">1</div><h3>サークルは、地図の上にある「輪」</h3><p>地図の上の輪。EriaWall（光の壁）</p></div>
+      <div class="ch"><div class="num">2</div><h3>その輪から、お題が出ます</h3><p>お題 + カウントダウン（現行トップの実物）</p></div>
+      <div class="ch peak"><div class="num">3</div><h3>答えられるのは、輪の中にいる人だけ</h3><p>輪の内 / 外。外の人は答えられない</p></div>
+      <div class="ch"><div class="num">4</div><h3>答えかたは、カメラで撮るだけ</h3><p>撮る → 出す。カメラ FAB</p></div>
+      <div class="ch late peak"><div class="num">5</div><h3>自分が出すまで、ほかの人の答えは見えません</h3><p>ぼかし → ひらく。<b>この節が主役</b></p></div>
+      <div class="ch late"><div class="num">6</div><h3>ひらいたら、「いいね」が押せます</h3><p>投稿 1 枚 + いいね。人でなく投稿が主役</p></div>
+      <div class="ch late"><div class="num">7</div><h3>あなたがどこにいるかは、ほかの人には見えません</h3><p>使い道は 2 つだけ。地図に自分は出ない</p></div>
+      <div class="ch late"><div class="num">8</div><h3>つくった人から</h3><p>長文 5 段落。図は無し or 最小</p></div>
+      <div class="ch edge"><div class="num">◆</div><h3>クロージング</h3><p>一行の約束 ＋ CTA（フラグ①）</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>3 案 — 探索軸を散らす</h2>
+    <p class="sub">似た案を 2 つ出さない。3 案とも全 8 章 + ヒーロー + クロージングを含み、継ぎ目の解を持つ。</p>
+    <div class="three">
+      <div class="card"><div class="ax">A</div><h3>読み物</h3>
+        <p>文が主・図が従。静かで長い。章間は余白と細い罫だけ。1 章 = 1 スクリーン未満。画面いっぱいの図を使わない。</p></div>
+      <div class="card"><div class="ax">B</div><h3>スクロールテリング</h3>
+        <p>図が主・文が従。1 章 ≒ 1 画面。スクロールで図が変わる（ぼかしが取れる / 輪が閉じる）。<b>静止しても意味が通ること</b>。</p></div>
+      <div class="card"><div class="ax">C</div><h3>紙面カード</h3>
+        <p>参考紙面を web へ。番号バッジ + カードの積層。密度が高く一望できる。紙面の横並びをそのまま縮めない。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">06</span>判断が要るフラグ（握りつぶさず案の中で扱う）</h2>
+    <div class="flags">
+      <div class="flag"><b>① CTA</b><p>App Store 審査中・Google Play 未公開で<b>ストアリンクを今は張れない</b>。置かない / 文言だけ / トップへ戻す、のどれかを案ごとに。</p></div>
+      <div class="flag"><b>② クロージングの一文</b><p>「Toopdbq は、そのきっかけをつくるアプリです。」は参考紙面から採った文で支給テキストには無い。採用可否を提示する。</p></div>
+      <div class="flag"><b>③「つくった人から」の顔</b><p>紙面には人物イラストがあるが、DS には実写真しかなく本人写真も無い。<b>イラストは禁止</b>。置く / 置かないを案ごとに。</p></div>
+      <div class="flag"><b>④ 長さ</b><p>支給全文は約 1,700 字。全部読ませるか、章 8 を折りたたむか。トップ下の読み物としての許容量を案の差にする。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">07</span>置かないもの</h2>
+    <div class="no">
+      <b>デーティングアプリの記号</b>（向かい合う顔 / 中央のハート / マッチ / 性別・年齢・距離 / 人をスワイプ）、
+      <b>効果の 3 盛り</b>（枠 + 影 + グラデ同時）、<b>絵文字・ストックイラスト・新規 AI 画像</b>、
+      <b>白地に白アイコン / 白バラロゴ</b>、長文の不要な中央寄せ、事実でない社会的証明（「10,000 人が利用」等）。
+      <ul>
+        <li>実装先は素の静的 1 ファイル。<b>React / Tailwind / CDN / 外部 JS は使えない</b></li>
+        <li>初回ペイントに<b>画面サイズの <code>position:fixed</code> を置かない</b>（iOS Safari のバー裏描画がロード時に固定されるため）</li>
+        <li><code>prefers-reduced-motion:reduce</code> で全アニメ停止。それでも全章が読めること</li>
+      </ul>
+    </div>
+  </section>
+
+</div></body></html>
