@@ -61,8 +61,8 @@ a:hover{color:#fff0a6;}
 
 <div data-screenonly="1" style="max-width:1300px; display:flex; flex-direction:column; gap:6px; margin-bottom:24px;">
   <div style="font-family:var(--font-latin); font-size:11px; font-weight:600; letter-spacing:.12em; color:var(--text-3);">handoff / GumPackage — v5 入稿確認シート</div>
-  <div style="font-size:24px; font-weight:700;">表・裏 1 枚並べ — JA / EN 2 段</div>
-  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:82ch;">確定した 2 面を実寸で並べただけのシートです。<strong style="font-weight:700;">新しいデザイン・新しい文言はありません</strong>（表＝v3.2 の <a href="GumPackage_v3.dc.html">1a / 1b</a>、裏＝v4.4 の <a href="GumPackageBack.dc.html">JA / EN</a> をそのまま配置。級数・位置・文言は作り直していません）。左＝表 / 右＝裏、上段＝JA / 下段＝EN。1 面 = artboard 75×58mm（trim 69×52 ＋ 塗り足し 3mm）、面間 8mm・段間 12mm で <strong style="font-weight:700;">158×128mm</strong>（trim 表示 ON では 1 言語 146×52mm・全体 146×116mm）。折り線 18 / 40mm と糊代 44mm は<strong style="font-weight:700;">表裏を貫く 1 本のガイド</strong>で引いてあり、表裏の折り線が同じ y に来ていることが目で見えます。トンボは入れていません（塗り足し外枠と折り線ガイドで足ります）。画面上は 2 倍表示。</div>
+  <div style="font-size:24px; font-weight:700;">表・裏 1 枚並べ — EN 入稿シート</div>
+  <div style="font-size:13px; font-weight:400; color:var(--text-2); line-height:1.7; max-width:82ch;"><strong style="font-weight:700;">入稿するのは EN の 2 面だけです。</strong>左＝表（HTML で組んだネオン版）／右＝裏（全面ビジュアル）。1 面 = artboard 75×58mm（trim 69×52 ＋ 塗り足し 3mm）、面間 8mm で <strong style="font-weight:700;">158×58mm</strong>（trim 表示 ON では 146×52mm）。全テキストを trim の内側 3mm ＝ 63×46mm に収めてあります。JA の 2 面は入稿対象から外しましたが、コピー資産として残してあるので Tweaks の lang を ja / both にすれば表示されます（<strong style="font-weight:700; color:#ffd9a6;">JA はデザインが旧のままなので、そのまま刷ることはできません</strong>）。トンボは入れていません（塗り足し外枠で足ります）。画面上は 2 倍表示。</div>
 </div>
 
 <div data-screenonly="1" style="max-width:1300px; display:flex; flex-direction:column; gap:8px; margin-bottom:28px; padding:13px 16px; border-left:3px solid #00e5ff; background:#11181c; border-radius:0 6px 6px 0; font-size:12.5px; line-height:1.75; color:var(--text-2);">
@@ -241,7 +241,10 @@ a:hover{color:#fff0a6;}
 
 <div data-screenonly="1" style="max-width:1300px; font-size:12px; font-weight:400; line-height:1.85; color:var(--text-2);">
   <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">申し送り（v6 入稿確認シート）</div>
-  <strong style="font-weight:700; color:#9fe8f2;">v8：EN 裏を全面ビジュアルに差し替え（表と対のネオンサイン）。</strong>「Post the COOLEST photo of YOURSELF chewing gum.」は画像に焼き込み済みのため、<strong style="font-weight:700; color:#ffb3d0;">EN 裏の HTML テキスト（見出し＋本文 7 段落 11 行）はすべて削除した</strong>——アプリの説明文（渋谷にいる間だけ／毎日のお題／いいねから会話）はこの面から無くなる。情報として残したいなら、画像の余白に重ねるか JA 裏に寄せるかの判断が要る。<strong style="font-weight:700; color:#ffd9a6;">画像は塗り足し込みの 75:58（≒1.293）で作ること。</strong>trim ちょうど（69:52＝1.327）の絵を cover で敷くと、周囲 左右 3.7 / 上下 2.7mm 相当が断裁で落ちる。この面の安全域は HTML では測れないので、画像配置後にピクセル実測で確認する。<br>
+  <strong style="font-weight:700; color:#9fe8f2;">v9：入稿対象を EN の 2 面だけに確定。</strong>Tweaks の lang 既定を <code style="font-family:var(--font-latin);">en</code> にしたので、シートには EN 表・裏の 2 面しか出ない。JA の 2 面は HTML から消さずに残してある（コピー資産のため）が、<strong style="font-weight:700; color:#ffd9a6;">デザインが旧のままなので入稿には使えない</strong>。版面は 1 言語ぶんの <strong style="font-weight:700;">158×58mm</strong>（trim 表示 ON で 146×52mm）。<br>
+  <strong style="font-weight:700; color:var(--text-1);">裏面の説明文は復活させない方針で確定。</strong>何のアプリかは表面の QR とキャッチ（SHOW US YOUR COOLEST CHEW. ／ REWARD New friends in Shibuya ／ Shibuya-only quest!）に集約する。<br>
+  <strong style="font-weight:700; color:#ffb3d0;">EN 単独にしたことで、法定表示はこのパッケージ上から日本語が消える。</strong>国内で流通させる場合は日本語の一括表示が別途要るので、その時は JA 面を新デザインで作り直すか、日本語表示のシールを貼る運用になる。<br>
+  <strong style="font-weight:700; color:#9fe8f2;">v8：EN 裏を全面ビジュアルに差し替え（表と対のネオンサイン）。</strong>「Post the COOLEST photo of YOURSELF chewing gum.」は画像に焼き込み済みのため、<strong style="font-weight:700; color:#ffb3d0;">EN 裏の HTML テキスト（見出し＋本文 7 段落 11 行）はすべて削除した</strong>——アプリの説明文（渋谷にいる間だけ／毎日のお題／いいねから会話）はこの面から無くなる（<strong style="font-weight:700;">v9 で復活させない方針に確定</strong>）。<strong style="font-weight:700; color:#ffd9a6;">画像は塗り足し込みの 75:58（≒1.293）で作ること。</strong>trim ちょうど（69:52＝1.327）の絵を cover で敷くと、周囲 左右 3.7 / 上下 2.7mm 相当が断裁で落ちる。この面の安全域は HTML では測れないので、画像配置後にピクセル実測で確認する。<br>
   <strong style="font-weight:700; color:#9fe8f2;">v7：EN 表を新デザイン（バブルガム＋サイバー渋谷）に差し替え。</strong>差し替えたのは <strong style="font-weight:700;">EN 表の 1 面だけ</strong>で、JA 表・両裏は v6 のまま。帯構成（デッド8 / ロックアップ4 / 中段22 / 法定表示18）と折り線 12・34mm、糊代 44mm は動かしていないので、両面の折り位置は従来どおり合う。見出しは <strong style="font-weight:700;">SHOW US YOUR / COOLEST CHEW.</strong>、報酬文は「New friends in Shibuya」。装飾はネオン系（ピンクのピル枠＋水色のブラケット／ボックス枠）に統一し、法定表示の横罫線はボックス枠へ置き換えた。<strong style="font-weight:700; color:#ffb3d0;">背景イラスト en-front-bg.jpg は未配置</strong>——handoff/GumPackage/ 直下に置くと `background-image` が効いて下地の gradient と差し替わる（未配置でも破綻はしない）。<strong style="font-weight:700; color:#ffd9a6;">JA 表だけデザインが旧のままなので、揃えるなら JA も同じ処理が要る。</strong><br>
   <strong style="font-weight:700; color:#9fe8f2;">v6：印刷の安全域 3mm を全面適用（今回の変更はこれだけ。文言・帯構成・折り線は不変）。</strong>ラクスルの確認 PDF で「文字が切れます」と指摘された状態（法定表示の文字が trim 端 0mm から始まり、製造所の行は下へ 0.17mm はみ出していた）を解消した。trim 69×52mm の内側 3mm ＝ <strong style="font-weight:700;">63×46mm</strong> を版面とし、4 面すべてのテキスト・QR・ロゴをこの内側に入れてある（WebKit 実測・最小マージン 2.99mm＝3mm の px 量子化、安全域を割る要素 0 個）。<strong style="font-weight:700; color:#ffb3d0;">罫線だけは例外で、margin:0 -6mm で塗り足し端（artboard 0 / 75mm）まで伸ばしてある</strong>——断裁位置で罫線が途切れたり白が覗いたりしないための意図的な裁ち落としで、文字の見切れとは別物。<br>
   <strong style="font-weight:700; color:var(--text-1);">v6 で動かした値</strong>：法定表示帯 padding 0 → <strong style="font-weight:700;">左右3mm・下3.3mm（EN 3.1mm）</strong>／同帯の行送り 1.2 → <strong style="font-weight:700;">1.05</strong>／問い合わせ文とストアバッジ JA 1.40 → <strong style="font-weight:700;">1.15mm</strong>・EN 1.30 → <strong style="font-weight:700;">1.10mm</strong>（法定表示ではないので縮小した。<strong style="font-weight:700; color:#ffd9a6;">法定表示本体の級数 JA 1.40 / EN 1.30mm は 1 ミリも下げていない</strong>）／中段・ロックアップ帯 padding 0 → 左右3mm／右カラム 21 → 19mm／裏面の枠 65×48mm（trim 基準 2mm）→ <strong style="font-weight:700;">63×46mm（3mm）</strong>・見出し JA 5.60→5.30 / EN 3.30→3.20mm・本文 JA 2.30→2.17 / EN 2.20→2.12mm／栄養成分表示の項目内を nbsp で結合（単位だけが改行に落ちるのを防止）。<br>
@@ -257,7 +260,7 @@ a:hover{color:#fff0a6;}
 
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;trim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ja&quot;,&quot;en&quot;,&quot;both&quot;],&quot;default&quot;:&quot;both&quot;,&quot;tsType&quot;:&quot;'ja' | 'en' | 'both'&quot;,&quot;section&quot;:&quot;表示&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;trim&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;guides&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;grain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;入稿ガイド&quot;},&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ja&quot;,&quot;en&quot;,&quot;both&quot;],&quot;default&quot;:&quot;en&quot;,&quot;tsType&quot;:&quot;'ja' | 'en' | 'both'&quot;,&quot;section&quot;:&quot;表示&quot;}}">
 const DATA = {
   ja: {
     Ln:'名称', Lq:'内容量', Li:'原材料名', Lm:'製造者', Lp:'製造所',
@@ -292,7 +295,7 @@ class Component extends DCLogic {
   }
   renderVals() {
     const trim = this.props.trim ?? true;
-    const lang = ['ja','en','both'].indexOf(this.props.lang) >= 0 ? this.props.lang : 'both';
+    const lang = ['ja','en','both'].indexOf(this.props.lang) >= 0 ? this.props.lang : 'en';
     return {
       guides: this.props.guides ?? true,
       grain: this.props.grain ?? true,
