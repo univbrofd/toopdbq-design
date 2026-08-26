@@ -220,21 +220,10 @@ a:hover{color:#fff0a6;}
     </div>
 
     <div style="position:absolute; left:{{ x2 }}; top:0; width:{{ fw }}; height:{{ fh }}; overflow:hidden; box-shadow:var(--shadow-card);">
-      <div data-artboard="1" data-screen-label="EN-裏" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#005f67;">
-        <div style="position:absolute; left:-12.5mm; top:-21mm; width:100mm; height:100mm; background:var(--gradient-colorful);"></div>
-        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.16; mix-blend-mode:overlay;"></div></sc-if>
-        <div data-frame="1" style="position:absolute; left:6mm; top:6mm; width:63mm; height:46mm; color:#fff; font-family:var(--font-latin); text-align:center; text-wrap:pretty; display:flex; flex-direction:column; justify-content:center;">
-          <div data-blk="head" style="font-size:3.20mm; font-weight:800; line-height:1.06; letter-spacing:-0.03em; text-shadow:0 0.25mm 0.5mm rgba(0,0,0,.28);">Only while you're in Shibuya,<br>today's prompt can lead to a new friend.</div>
-          <div data-blk="b" style="margin-top:1.7mm; font-size:2.12mm; font-weight:600; line-height:1.26; letter-spacing:-0.02em; display:flex; flex-direction:column; gap:0.95mm;">
-            <div>Your feed only shows posts from people hanging out in Shibuya today.</div>
-            <div>You can only post while you're in Shibuya.</div>
-            <div>Every day, there's a new prompt. Take a photo and post it.</div>
-            <div>A like can start a conversation with someone you've never met.</div>
-            <div>Someone who shares your interests. Someone to grab a drink with on the way home.</div>
-            <div>It's not a dating app. But you might still meet someone unexpected.</div>
-            <div>A social app that gives you a reason to connect with people you'd never cross paths with otherwise.</div>
-          </div>
-        </div>
+      <div data-artboard="1" data-screen-label="EN-裏" style="position:absolute; left:{{ fo }}; top:{{ fo }}; width:75mm; height:58mm; overflow:hidden; background:#08090f;">
+        <div style="position:absolute; inset:0; background:var(--gradient-colorful);"></div>
+        <div style="position:absolute; inset:0; background-image:url('en-back-bg.jpg'); background-size:cover; background-position:50% 50%;"></div>
+        <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}"><div style="position:absolute; inset:0; background-image:var(--grain); background-size:35mm 35mm; opacity:.10; mix-blend-mode:overlay;"></div></sc-if>
         <sc-if value="{{ showTrimRect }}" hint-placeholder-val="{{ false }}"><div data-guides="1" style="position:absolute; left:3mm; top:3mm; width:69mm; height:52mm; outline:0.2mm dashed rgba(255,255,255,.45); pointer-events:none;"></div></sc-if>
       </div>
     </div>
@@ -243,7 +232,7 @@ a:hover{color:#fff0a6;}
 
   <div data-screenonly="1" style="display:flex; gap:16mm; font-size:11.5px; line-height:1.65; color:var(--text-2);">
     <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">表・EN</strong> — <strong style="font-weight:700; color:#9fe8f2;">v7 で新デザインに差し替えた面（JA 表は旧デザインのまま）。</strong>帯構成・折り線（12 / 34mm）・糊代は不変で、中身だけ入れ替えた。中段＝ピル「2-SECOND VIDEO QUEST」（ピンク枠 1.55mm）＋見出し <strong style="font-weight:700;">SHOW US YOUR / COOLEST CHEW.</strong>（4.55mm・900・水色ネオングロー・左揃え）＋REWARD ピル＋「New friends in Shibuya」2.70mm。右カラム 20mm＝「Shibuya-only quest!」ネオンバッジ 1.70mm ／ QR 11mm（四隅ブラケット 14mm 角）／ toopdbq.com ネオン枠 1.55mm。法定表示は横罫線をやめ <strong style="font-weight:700;">水色 0.18mm のボックス枠</strong>に変更したので、<strong style="font-weight:700; color:#ffd9a6;">この面は罫線の塗り足し延長が無くなり、枠ごと安全域 63×46mm の内側で完結する</strong>（断裁位置に枠線が乗らない）。級数は法定表示本体 1.30mm 据え置き・行送り 1.02、問い合わせ文とストアバッジ 1.10mm。実測の最小マージン 2.99mm・帯からの溢れ 0。<strong style="font-weight:700; color:#ffb3d0;">背景イラスト（en-front-bg.jpg）は未配置</strong>。この面と同階層に置けば下地の gradient と差し替わる。</div>
-    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・EN</strong> — 枠は JA と同じ 63×46mm。見出し 3.30 → <strong style="font-weight:700;">3.20mm</strong>（行送り 1.06）、本文 2.20 → <strong style="font-weight:700;">2.12mm</strong>（行送り 1.26・段間 0.95mm・見出しとの間隔 1.7mm）。実測の最小マージン 3.06mm。</div>
+    <div style="width:{{ capW }}; flex:none;"><strong style="font-weight:700; color:var(--text-1);">裏・EN</strong> — <strong style="font-weight:700; color:#9fe8f2;">v8 で全面ビジュアルに差し替え。</strong>コピー「Post the COOLEST photo of YOURSELF chewing gum.」は画像に焼き込まれているため、<strong style="font-weight:700; color:#ffb3d0;">この面は HTML のテキストを一切持たない</strong>（v7 までの見出し 3.20mm ＋ 本文 2.12mm・7 段落 11 行はすべて削除した）。背景は <code style="font-family:var(--font-latin);">en-back-bg.jpg</code> を artboard 75×58mm に cover で敷く。<strong style="font-weight:700; color:#ffd9a6;">安全域はもう HTML では測れない——画像の中の文字位置で決まる</strong>ので、画像を配置したうえでピクセル実測して確認すること。元画像が trim 69×52mm ちょうどの絵だと、cover で周囲（左右 3.7 / 上下 2.7mm 相当）が塗り足しに回って断裁で落ちる。<strong style="font-weight:700;">画像は塗り足し込みの 75:58（≒1.293）で作るのが正解</strong>。</div>
   </div>
 </div>
 </sc-if>
@@ -252,6 +241,7 @@ a:hover{color:#fff0a6;}
 
 <div data-screenonly="1" style="max-width:1300px; font-size:12px; font-weight:400; line-height:1.85; color:var(--text-2);">
   <div style="font-size:13px; font-weight:700; color:var(--text-1); margin-bottom:6px;">申し送り（v6 入稿確認シート）</div>
+  <strong style="font-weight:700; color:#9fe8f2;">v8：EN 裏を全面ビジュアルに差し替え（表と対のネオンサイン）。</strong>「Post the COOLEST photo of YOURSELF chewing gum.」は画像に焼き込み済みのため、<strong style="font-weight:700; color:#ffb3d0;">EN 裏の HTML テキスト（見出し＋本文 7 段落 11 行）はすべて削除した</strong>——アプリの説明文（渋谷にいる間だけ／毎日のお題／いいねから会話）はこの面から無くなる。情報として残したいなら、画像の余白に重ねるか JA 裏に寄せるかの判断が要る。<strong style="font-weight:700; color:#ffd9a6;">画像は塗り足し込みの 75:58（≒1.293）で作ること。</strong>trim ちょうど（69:52＝1.327）の絵を cover で敷くと、周囲 左右 3.7 / 上下 2.7mm 相当が断裁で落ちる。この面の安全域は HTML では測れないので、画像配置後にピクセル実測で確認する。<br>
   <strong style="font-weight:700; color:#9fe8f2;">v7：EN 表を新デザイン（バブルガム＋サイバー渋谷）に差し替え。</strong>差し替えたのは <strong style="font-weight:700;">EN 表の 1 面だけ</strong>で、JA 表・両裏は v6 のまま。帯構成（デッド8 / ロックアップ4 / 中段22 / 法定表示18）と折り線 12・34mm、糊代 44mm は動かしていないので、両面の折り位置は従来どおり合う。見出しは <strong style="font-weight:700;">SHOW US YOUR / COOLEST CHEW.</strong>、報酬文は「New friends in Shibuya」。装飾はネオン系（ピンクのピル枠＋水色のブラケット／ボックス枠）に統一し、法定表示の横罫線はボックス枠へ置き換えた。<strong style="font-weight:700; color:#ffb3d0;">背景イラスト en-front-bg.jpg は未配置</strong>——handoff/GumPackage/ 直下に置くと `background-image` が効いて下地の gradient と差し替わる（未配置でも破綻はしない）。<strong style="font-weight:700; color:#ffd9a6;">JA 表だけデザインが旧のままなので、揃えるなら JA も同じ処理が要る。</strong><br>
   <strong style="font-weight:700; color:#9fe8f2;">v6：印刷の安全域 3mm を全面適用（今回の変更はこれだけ。文言・帯構成・折り線は不変）。</strong>ラクスルの確認 PDF で「文字が切れます」と指摘された状態（法定表示の文字が trim 端 0mm から始まり、製造所の行は下へ 0.17mm はみ出していた）を解消した。trim 69×52mm の内側 3mm ＝ <strong style="font-weight:700;">63×46mm</strong> を版面とし、4 面すべてのテキスト・QR・ロゴをこの内側に入れてある（WebKit 実測・最小マージン 2.99mm＝3mm の px 量子化、安全域を割る要素 0 個）。<strong style="font-weight:700; color:#ffb3d0;">罫線だけは例外で、margin:0 -6mm で塗り足し端（artboard 0 / 75mm）まで伸ばしてある</strong>——断裁位置で罫線が途切れたり白が覗いたりしないための意図的な裁ち落としで、文字の見切れとは別物。<br>
   <strong style="font-weight:700; color:var(--text-1);">v6 で動かした値</strong>：法定表示帯 padding 0 → <strong style="font-weight:700;">左右3mm・下3.3mm（EN 3.1mm）</strong>／同帯の行送り 1.2 → <strong style="font-weight:700;">1.05</strong>／問い合わせ文とストアバッジ JA 1.40 → <strong style="font-weight:700;">1.15mm</strong>・EN 1.30 → <strong style="font-weight:700;">1.10mm</strong>（法定表示ではないので縮小した。<strong style="font-weight:700; color:#ffd9a6;">法定表示本体の級数 JA 1.40 / EN 1.30mm は 1 ミリも下げていない</strong>）／中段・ロックアップ帯 padding 0 → 左右3mm／右カラム 21 → 19mm／裏面の枠 65×48mm（trim 基準 2mm）→ <strong style="font-weight:700;">63×46mm（3mm）</strong>・見出し JA 5.60→5.30 / EN 3.30→3.20mm・本文 JA 2.30→2.17 / EN 2.20→2.12mm／栄養成分表示の項目内を nbsp で結合（単位だけが改行に落ちるのを防止）。<br>
