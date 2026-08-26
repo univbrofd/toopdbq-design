@@ -247,6 +247,20 @@
       "name": "Web About — brief",
       "subtitle": "toopdbq.com のトップ下に足すサービス説明。実測・置換表・継ぎ目",
       "viewport": "1440x900"
+    },
+    {
+      "path": "handoff/WebAbout/gallery.html",
+      "group": "WebAbout",
+      "name": "WebAbout — 紙面カード",
+      "subtitle": "採用案。番号バッジ + カードの積層。継ぎ目とフラグ 4 件の答え",
+      "viewport": "1360x1100"
+    },
+    {
+      "path": "handoff/WebAbout/WebAbout-c.html",
+      "group": "WebAbout",
+      "name": "WebAbout C — 紙面カード",
+      "subtitle": "番号バッジ + カードの積層。継ぎ目=カードの角が折の上に覗く。全 8 章 + ヒーロー + クロージング",
+      "viewport": "402x900"
     }
   ],
   "templates": [],

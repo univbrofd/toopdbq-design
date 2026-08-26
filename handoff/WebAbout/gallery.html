@@ -1,0 +1,75 @@
+<!-- @dsCard group="WebAbout" name="WebAbout — 紙面カード" subtitle="採用案。番号バッジ + カードの積層。継ぎ目とフラグ 4 件の答え" viewport="1360x1100" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WebAbout — 紙面カード</title>
+<style>
+:root{
+  --teal:#005f67;--pink:#ff3e88;--gcl:linear-gradient(135deg,#fff0a6 0%,#005f67 38%,#ff3e88 70%,#d0a052 100%);
+  --jp:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
+  --lat:"Inter",-apple-system,"Helvetica Neue",Arial,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d0f;color:#fff;font-family:var(--jp);-webkit-font-smoothing:antialiased;padding:40px 32px 64px}
+a{color:#fff}
+.wrap{max-width:1360px;margin:0 auto}
+.eyebrow{font:700 10px/1 var(--lat);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+h1{margin-top:8px;font-size:26px;font-weight:700}
+.bar{width:104px;height:3px;border-radius:2px;background:var(--gcl);margin:16px 0 10px}
+.lead{font-size:13.5px;line-height:1.8;color:rgba(255,255,255,.66);max-width:760px}
+.row{display:flex;gap:26px;flex-wrap:wrap;margin-top:34px;align-items:flex-start}
+.col{width:402px;flex:none}
+.meta{padding-bottom:12px}
+.meta .ax{font:800 11px/1 var(--lat);letter-spacing:.14em;color:var(--pink)}
+.meta h2{margin-top:8px;font-size:17px;font-weight:700}
+.meta p{margin-top:6px;font-size:12px;line-height:1.7;color:rgba(255,255,255,.6)}
+.flags{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.flags div{display:flex;gap:8px;font-size:11.5px;line-height:1.55;color:rgba(255,255,255,.72)}
+.flags b{flex:none;width:64px;font:700 10px/1.6 var(--lat);letter-spacing:.08em;color:rgba(255,255,255,.42)}
+.frame{width:402px;height:900px;border-radius:22px;overflow:hidden;background:#fff;
+  box-shadow:0 24px 70px rgba(0,0,0,.55)}
+iframe{width:402px;height:900px;border:0;display:block}
+.open{margin-top:10px;font:600 11px/1 var(--lat);letter-spacing:.06em;color:rgba(255,255,255,.6);text-decoration:none}
+.note{margin-top:40px;padding:16px 18px;border-left:2px solid var(--teal);
+  font-size:12.5px;line-height:1.85;color:rgba(255,255,255,.62);max-width:900px}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#005f67"/>
+  <ellipse cx="100" cy="104" rx="52" ry="26" fill="none" stroke="#ff3e88" stroke-width="5"/>
+  <circle cx="100" cy="66" r="5" fill="#fff0a6"/>
+  <text x="100" y="112" text-anchor="middle" font-family="Helvetica,Arial" font-size="26" font-weight="700" fill="#fff">Q?</text>
+</svg>
+</template>
+<div class="wrap">
+  <div class="eyebrow">Toopdbq · web · WebAbout</div>
+  <h1>クエストって、なに？ — 紙面カード</h1>
+  <div class="bar"></div>
+  <p class="lead">現行トップ（実測 402×874）を上に敷き、赤の破線から下が今回の担当範囲。カラムは 402px 単一固定で、この画面幅でも横に広がらない。コピーは HANDOFF.md の支給文のまま。</p>
+
+  <div class="row">
+    <div class="col">
+      <div class="meta">
+        <div class="ax">C</div>
+        <h2>紙面カード</h2>
+        <p>番号バッジ + カードの積層。前半ティール／後半ピンク。小図は 1fr/104px、山の章だけ幅いっぱい。継ぎ目はカードの角の見切れ。</p>
+        <div class="flags">
+          <div><b>① CTA</b><span>「アプリを入手」を置き、リンクは公開時に差す</span></div>
+          <div><b>② 一文</b><span>採用</span></div>
+          <div><b>③ 顔</b><span>本人写真を置く（48px 円・開発者名を併記）</span></div>
+          <div><b>④ 長さ</b><span>章 08 は 1 段落 + つづきを読む</span></div>
+        </div>
+      </div>
+      <div class="frame"><iframe src="WebAbout-c.html" title="案 C" loading="lazy"></iframe></div>
+      <a class="open" href="WebAbout-c.html" target="_blank">OPEN C ↗</a>
+    </div>
+  </div>
+
+  <p class="note">共通: 色は #fff0a6 / #005f67 / #ff3e88 / #d0a052 / #fff / 黒 α のみ。白アイコンは mask で着色、白バラロゴは使わない。画面サイズの position:fixed なし。画像は lazy/async、写真は assets/sample から。図の中の破線と Y=874 の赤破線は specimen 用の注記で、実装には載せない。</p>
+</div>
+</body>
+</html>
