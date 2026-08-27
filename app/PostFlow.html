@@ -473,7 +473,7 @@ html, body {
     go(s === 'confirm' ? 'editing' : s === 'editing' ? 'shooting' : 'shooting');
   });
 
-  // テキスト追加: 実装は編集に入った瞬間に入力ダイアログが自動で開く
+  // テキスト追加: 実装も編集入場では自動で開かず、この Tt から明示的に開く
   const placed = document.getElementById('placed');
   document.getElementById('tt').addEventListener('click', () => {
     const t = prompt('テキストを入力', placed.classList.contains('ph') ? '' : placed.textContent);
