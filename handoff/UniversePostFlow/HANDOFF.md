@@ -1,93 +1,78 @@
-# UniversePostFlow — 地球から投稿フロー（as-built 逆ハンドオフ）
+# UniversePostFlow — クエスト投稿フロー（as-built 逆ハンドオフ）
 
-Flutter で実装済みの「地球から投稿」フロー（投稿ボタン→現在地へ角度0降下→域内サークル選択→撮影→動画トリム→サムネ選択→投稿設定→投稿）の **as-built 実値**を捕捉。Claude Design にこの 4 画面を再現させ、Studio で web↔Flutter をピクセル比較するためのハンドオフ。
-（同フォルダ `UniversePostFlow.html` は元になった Claude Design「Earth Globe」specimen。本 HANDOFF は実装が落ちた後の実値を正とする。）
+Flutter で実装済みの投稿フローの **as-built 実値**。home のクエストカメラから入る
+**1 route・3 状態**（撮影 → 編集 → 確認）で、`StoryPostView` が全部を持つ。
+地図・サークル選択・位置情報は**この route に無い**（サークルは入口で確定済み）。
 
 - repo: `univbrofd/toopdbq-design`（`main`）/ raw base: `https://raw.githubusercontent.com/univbrofd/toopdbq-design/main`
-- 索引: `DesignSystem/_ds_manifest.json` / foundation: `DesignSystem/{USAGE_RULES.md,taste.md,colors_and_type.css,preview/}` / 共有アセット: `assets/icons/`・`assets/sample/`
-- 実装参考（別 repo `univbrofd/toopdbq`・リンクは渡さない）: `lib/feature/UniversePostFlow/`・`lib/feature/StoryVideoEdit/`
-- 現状スクショ（as-built・iPhone 17 sim 実機撮影）:
-  - `shots/current-circle-select.png` — 画面1 サークル選択（円形ステージ＋緑グロー＋浮遊する投稿カード＋サークルピル＋カメラボタン＋「エリア内」下シート）
-  - `shots/current-thumb.png` — 画面3 サムネ選択（**字幕トグル追加前**。字幕トグルはこれに足す）
-- **字幕トグル案（Claude Design 取り込み済み）**: `handoff/UniversePostFlow/comp-uvpost-thumb.dc.html`（配置A・B × Before/After / render: `shots/comp-uvpost-thumb.png`）。Flutter 具現化はこれを一次情報に `design-to-flutter` で。
+- foundation: `DesignSystem/{USAGE_RULES.md,taste.md,colors_and_type.css,preview/}` / 共有アセット: `assets/icons/`・`assets/sample/`
+- specimen: `handoff/UniversePostFlow/UniversePostFlow.html`（3 状態を切り替える live specimen。`?screen` で画面のみ全面）
+- 現状スクショ（as-built・mock web ビルド実測）:
+  - `shots/current-shooting.jpg` — 撮影
+  - `shots/current-editing.jpg` — 編集（テキスト）
+  - `shots/current-confirm.jpg` — 確認
+- 🗄 旧世代（2026-07 の「地球から投稿」フロー。**Remix 元にしない**）:
+  `shots/current-circle-select.png` / `shots/current-thumb.png` / `comp-uvpost-thumb.dc.html`
 
 ## スマホ配置文脈（必須）
 
-- 端末枠 = **iPhone 17 / iOS 最新（402×874・角丸55・Dynamic Island・statusbar 62 / home-ind 34）**。`preview/card.css` の `.phone` 既定を使う。各画面 1 ファイルの full-bleed specimen。
-- 1=地図の上に下シート、2/3=フルスクリーン編集、4=下シート（編集の上）。タップ範囲最小 44pt。
+- 端末枠 = **iPhone 17 / iOS 最新（402×874・角丸55・Dynamic Island・statusbar 62 / home-ind 34）**。
+- 3 状態とも**フルスクリーン**（下シートを持たない）。タップ範囲最小 44pt。
+- メディアは撮影・編集が `cover`、確認だけ**黒地に `contain`**（投稿前に何が写るかを確かめる画面なので実装が意図的に別扱い）。
 
 ## 共通トークン（実装値 → DS トークン）
 
-- テキスト: 見出し/本文 ≈ `--text-1`(#fff)、メタ ≈ `--text-3`(rgba .60)、補助 ≈ `--text-2`(rgba .78)。フォント `--font-jp`。
-- 角丸: 行/サムネ `--radius-sm`(12)〜`--radius-md`(16)、シート上端 `--radius-lg`(24)、ピル/トグル `--radius-pill`。
-- ガラス: 地図上の暗シートは `--lg-tint-dark`(rgba(8,8,12,.44)) + `--lg-blur`(14) 想定。
-- 主 CTA: 単色白（StoryPost Flow の monochrome 準拠。文字 #16161C）。
-- 絵文字なし・効果は 1 コンポーネント 1〜2 個。
+| 実装値 | トークン |
+|---|---|
+| `Color(0x0FFFFFFF)` ガラス面 | `--lg-tint` |
+| `Color(0x7008080C)` 明背景上の chrome | `--lg-tint-dark` |
+| blur 14 / saturate 1.6 | `--lg-blur` / `--lg-saturate` |
+| `colorfulLinearGradient` #FFF0A6→#005F67→#FF3E88→#D0A052（135°） | `--gradient-colorful-linear` |
+| いいね済み `#FF3E88` | `--primary` 系のピンク端 |
 
-## 画面 1 — サークル選択シート（comp-uvpost-place）
+## 全状態で共通 — クエストヘッダー（`WdQuestHeader`）
 
-> **現状 Before**: `shots/current-circle-select.png`（実機撮影）。記述と差異があればスクショを正とする（例: 下シートは grabber＋リストのみでヘッダテキストは無い / 選択中サークルの投稿カードが円形ステージ上に浮遊）。
+`top = safeTop + 17` / 左右 12。戻る 40×40 円（`--lg-tint-dark`・縁 rgba(255,255,255,.18) 0.75px・
+影 0 4px 12px rgba(0,0,0,.25)・アイコン 16）+ 中央カード + 右 40×40 の空きスロット。
 
-地図（角度0・現在地へ降下・**域内サークルのエリア円**=白 fill .08/選択 .22・line .4/.95、地図タイル dim 0.8）の上に下シート。
+- お題名: 18px / w700 / line-height 1.34 / letter-spacing 1% / 白 + **黒 1.4px 縁取り**（`paint-order: stroke fill`）
+- カウントダウン: 9px 下・**Inter 26px / w700 / tabular-nums** / 同じ縁取り。1s で自走
+- 締切超過は文言を「滑り込みセーフ」に差し替え **19px**。投稿はブロックしない
+- 背面 glow（カラーグラデ blur）は **home ヘッダー専用**。投稿フローでは敷かない
 
-- × キャンセル: 44×44（`WdIconButton` standart）、シート右上の上 12px。
-- シート: 下端 bottom 26 + SafeArea、左右 14。面 = `--lg-tint-dark`+blur（as-built は不透明 #0C0C10 95%・**要ガラス化**）、角丸 22(≈`--radius-lg`)、上向き影、grabber 40×5 rgba(255,255,255,.30)。
-- ヘッダ: 「入っているサークル」(`--text-1`,15,700) + 件数(白,15,800) / 右に 7px 白ドット+「現在地」(`--text-3`,10.5,500)。
-- 行（max-height 222・gap6）: padding 9/10、角丸14。**選択**= bg rgba(255,255,255,.13)+border rgba(255,255,255,.55) / 非選択 = bg rgba(255,255,255,.05) border なし。左 44×44 角丸12 サークル画像（`assets/sample/uv/` 等）、名前(`--text-1`,14,700)+「エリア内」ピル（bg rgba(255,255,255,.16)・白6px ドット・9/700）、メタ「半径{r}m · {N}人 · 中心まで{d}m」(`--text-3`,10,600)、右シェブロン（選択=白/非選択=rgba .47。**Material 直書き → DS シェブロンへ**）。
-- CTA: 単色白・高さ50・角丸14・カメラアイコン(黒20)+「ストーリーを投稿」(#16161C,15,700)。未選択時 opacity .5。
+## 状態 1 — 撮影（`shooting`）
 
-## 画面 2 — 動画トリム（comp-uvpost-trim）
+- フッターは `bottom = safeBottom + 2` の 1 行: `[112px 左スロット][12][シャッター 84][12][112px 右スロット]`
+- 写真 / 動画トグル: padding 3 / r9999 / 面 rgba(0,0,0,.35) / 縁 rgba(255,255,255,.15)。
+  セグは padding 12×6・13px w700。選択中 = 白面 + `#16161C`、非選択 = rgba(255,255,255,.82)
+- シャッター 84×84・白 4px 縁・4px の間・白い中身
+- 反転 47×47 の `--lg-tint` ガラス円（アイコン 24）
 
-フルスクリーン #0A0A0C。
+## 状態 2 — 編集（`editingFree`）
 
-- 上バー: × 44 + 「動画を編集」(白,16,700) + 44 spacer（top 60）。
-- プレビュー: 左右16・角丸18・黒・動画 cover（specimen は `assets/sample/reel/` か `media` 静止画で可）。
-- ラベル行: 「切り取り {m:ss}」(白,13,700・超過時 #FF6B6B) / 右「上限 1:00」(`--text-3`,11,600)。
-- トリムバー: 高さ54・バー #222226 角丸10・範囲外マスク rgba(0,0,0,.62)・選択窓 白3px border 角丸9・左右ハンドル 18px 白（外側角丸9・中央 4×20 #0A0A0C グリップ）。
-- CTA: 単色白「次へ」。選択尺 **≥60s で無効**（opacity .5・文言「1分未満に切り取ってください」）。
+- 入った瞬間にテキスト入力が自動で開く（プレースホルダ「テキストを入力」）
+- 置いた文字は**白 + 黒影のみ・面を持たない**
+- テキスト追加ボタン: 右端（画面幅 2%）・上下中央・55×55 の暗ガラス円「Tt」+ 右上に ＋ バッジ（22×22）
+- 確定 ✓: 下中央・55×55・暗ガラス面 + **colorful 1.5px リング**（面にグラデを透かせない）
 
-## 画面 3 — サムネイル選択（comp-uvpost-thumb）
+## 状態 3 — 確認（`confirming`）
 
-フルスクリーン #0A0A0C。
+- 下スクリム 260px（下 rgba(0,0,0,.6) → 上 透明）
+- サイドツール: 右 12・`bottom = 112`（サークルフッター直上）。上から アバター 47 → いいね → コメント、間 16。
+  数字は 11px w700 白。いいね済みはアイコンを `#FF3E88`・縁も同色（カウントは白のまま）
+- アクションバー: `bottom = 112` / 左 16 / **右 76**（サイドツールの rail を避ける）
+  - 投稿する = 高さ 47・**角丸 16**・colorful グラデ・チェックアイコン + 文字
+  - 12px 下に「下書き保存する」12px w500 白（面なし）
+- サークルフッター: 全幅・高さ **112**。カバー 48 円 + 名前 15px w700 + 説明 12px rgba(255,255,255,.72)。
+  タップでこの 1 件だけのタイムラインプレビュー（画面高 62%）
 
-- 上バー: ← 戻る + 「サムネイルを選択」。
-- プレビュー: 画面2と同じ枠（選択フレームを表示）。
-- 「表紙にするフレームを選択」(白,13,700)。
-- スクラブ帯: 高さ64・グラデ #2A2A30→#3A3A42 角丸10・プレイヘッド 36px 白 border3 角丸8 影（specimen は 8 フレーム strip で可）。
-- CTA: 単色白「投稿する」。
+## 投稿後
 
-### ★ 追加要望（NEW）— 字幕（キャプション）トグル
+`投稿する` → アップロードはバックグラウンド、画面はホームへ戻る。進捗バーは specimen では
+画面内に出しているが、実装ではホーム側に出る（`WdUploadProgressBar`）。
 
-この画面3に **字幕トグルを新設**したい（現状の as-built には無い。`shots/current-thumb.png` がトグル追加前の現状）。Claude Design に、現状を base に字幕トグルを足した案を起こさせる。
+## 直すべき逸脱 / 検討ポイント（Claude Design への相談）
 
-- **機能**: ON にすると、トリムで切り取った尺ぶんの動画音声を Whisper で文字起こし→翻訳→**字幕として動画に焼き込む**。OFF が既定。対象は「カットした尺だけ」（コスト・処理時間を最小化）。
-- **配置**: 「サムネ選択画面のどこか」。最適位置は Claude Design に提案させる。第一候補は本画面下部、スクラブ帯と「投稿する」CTA の間に 1 行（既存 `_optRow` と同じ作り）。第二候補は画面4 投稿設定シート内（3D 行の下）。両案を Before/After で見せてよい。
-- **行の作り（既存 `_optRow`/`_toggle` に厳密に揃える）**: 左にアイコン17px白 + タイトル(白,14.5,700)、下にサブ(`--text-3`,11.5)。右にトグル 48×28（ON= `--gradient-colorful`〔DS の `tg`〕/ OFF #555、knob 22、角丸 pill）。アイコンは字幕（CC/吹き出し）。`assets/icons/` に該当が無ければ DS トーンで新規（`icon_caption` 想定）。
-- **コピー案**: タイトル「字幕を付ける」／サブ「話した言葉を文字起こし・翻訳して字幕にします」。
-- **ON 時のサブ表示（提案して欲しい）**: 翻訳先言語の選択（例: 日本語 / English のピル）を行の下に展開する案。最小は ON/OFF のみでも可。
-- **処理コストの示唆**: ON で投稿時に文字起こし処理が数秒走る（Whisper）。投稿後の上部進捗（`post-progress`）に「字幕生成中…」段を足す余地も検討（必須ではない）。
-- **プレビューへの反映（任意）**: ON 時、上のプレビュー枠の下部に字幕テキストの見え方（焼き込み位置・帯）をダミーで示す案。
-
-## 画面 4 — 投稿設定シート（comp-uvpost-confirm）
-
-画面3の上に下シート。
-
-- scrim: rgba(0,0,0,.70)(≈`--scrim-strong`)。
-- シート: 面 #101014 96%・上角丸24・上 border rgba(255,255,255,.10)・padding 18/28+SafeArea・grabber 38×4。
-- 「投稿の設定」(白,17,700)。
-- 行（縦14）: 左にアイコン(17,白)+タイトル(白,14.5,700)、下にサブ(`--text-3`,11.5)。右にトグル 48×28（**ON= `--gradient-colorful`**（as-built は単色白・要修正）/ OFF #555、knob 22）。
-  - 「位置情報を付ける」(icon `pin`)= 既定 ON。
-  - 「3Dオブジェクトを生成」(icon `dashboard`)「サムネイルから3Dを生成します（位置情報オン時のみ）」= 既定 OFF・位置 OFF 時は不活性（opacity .45）。
-- CTA: 単色白「投稿する」+ 下に「キャンセル」(`--text-2`,14,600)。
-
-## 直すべき逸脱（DS 整合）
-
-- トグル ON を単色白 → `--gradient-colorful`（DS の `tg`）。
-- 地図上シート面を不透明 → `--lg-tint-dark`+`--lg-blur` のガラス。
-- シェブロンが Material 直書き → DS のシェブロン（CSS border 回転 or アイコン）。
-- グレーは場当たり hex を避け `--text-1/2/3`・`--lg-tint*` の役割トークンへ。
-
-## 成果物（Claude Design に作らせる）
-
-- `DesignSystem/preview/comp-uvpost-place.html` / `comp-uvpost-trim.html` / `comp-uvpost-thumb.html` / `comp-uvpost-confirm.html`。各先頭に `<!-- @dsCard group="UniversePost" -->`、`_ds_manifest.json` に登録。`.phone`(402×874) full-bleed で実配置描画。Before/After（as-built→DS整合）を併記。
-- **今回の主眼 = 字幕トグル**: Claude Design から **取り込み済み** → `comp-uvpost-thumb.dc.html`（render: `shots/comp-uvpost-thumb.png`）。配置A（画面3本体・スクラブ帯と CTA の間）＝**推奨**、配置B（画面4シート・3D 行の下）＝代替。ON でトグルが `--gradient-colorful` になり翻訳先言語ピル（日本語/English）が展開。次工程 = `design-to-flutter` で `StoryVideoEditView` の thumb ステージへ具現化。
+- 撮影の 写真/動画 トグルが左に寄っていて、シャッターとの視覚重心がやや非対称
+- 確認画面の「下書き保存する」が面を持たず、投稿ボタンの影に埋もれて弱い
+- 締切超過の「滑り込みセーフ」は文字サイズが落ちるだけで、切迫感の演出が無い
