@@ -107,6 +107,8 @@ html, body {
 }
 .qh-back img { width: 16px; height: 16px; }
 .qh-card { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+/* 撮影中はファインダーを塞がないよう中央を出さない（実装 showQuest:false） */
+.phone[data-stage="shooting"] .qh-card { opacity: 0; }
 /* 背面 glow は home ヘッダー専用（投稿フローは glow:false）。ここでは敷かない */
 .qh-title {
   font-family: var(--font-jp, var(--font-latin));
