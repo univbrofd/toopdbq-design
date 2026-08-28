@@ -191,10 +191,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    ============================================================ */
 .wd-circle-tool {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 72; height: var(--footer-h);
-  box-sizing: border-box;
+  box-sizing: border-box; pointer-events: none;
   display: flex; flex-direction: row; align-items: flex-end; gap: 10px;
   padding: 16px 14px calc(var(--safe-bottom) + 8px);
 }
+.wd-circle-tool > * { pointer-events: auto; }
 .wd-circle-tool .wd-icon-btn { flex: none; width: 44px; height: 44px; }
 .wd-circle-tool .wd-icon-btn img { width: 42%; height: 42%; object-fit: contain;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
@@ -544,6 +545,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .map-post.done .mp-mine { display: block; }
 /* リスト拡大中はマップごと引っ込む */
 .phone.feed-max .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+/* プッシュ画面（チャットリスト・チャットルーム・プロフィール等）表示中は隠す */
+.phone:has(.nav-push.on) .map-post,
+.phone:has(.tl-compose.on) .map-post,
+.phone:has(.nav-push.on) .app-header,
+.phone:has(.tl-compose.on) .app-header { opacity: 0; pointer-events: none; }
 /* 下のクエストを弱める画面下部スクリム */
 .feed-scrim { display: none; }
 .feed-scrim-unused {
@@ -651,6 +657,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .lock-note .lmeta {
   display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.lock-note .llabel, .story-fs .fs-lock .llabel {
+  font: 500 11px/1 var(--font-jp); color: var(--text-2); letter-spacing: .08em;
+  margin-bottom: -10px;
 }
 .lock-note .ldist {
   display: flex; align-items: baseline; gap: 5px;
@@ -985,8 +995,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .story-fs .fs-qp .fs-qp-body { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; }
 /* フルスクリーンでは Quest ラベルを出さない — タイトルとカウントダウンだけ */
 .story-fs .fs-qp .qp-eyebrow { display: none; }
-.story-fs .fs-qp .qp.urgent .qp-time { color: #08080b; }
-.qp-mount > .qp.urgent .qp-time { color: #08080b; }
+.story-fs .fs-qp .qp.urgent .qp-time { color: #fff; }
+.qp-mount > .qp.urgent .qp-time { color: #fff; }
 .story-fs .fs-qp .qp-title { margin-top: 0; }
 .story-fs .fs-back {
   flex: none; width: 40px; height: 40px; display: grid; place-items: center; padding: 0;
@@ -1082,17 +1092,22 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 /* 同じ表示を 2 枚重ね、後ろの 1 枚をぼかして奥行きを出す */
 .qp-back { position: absolute; inset: 0; transform: scale(1.06); transform-origin: 50% 50%;
   filter: blur(4px); opacity: .95; }
-/* 背面 — 太い白の輪郭線（ぼけたまま光の縁になる） */
+/* 背面 — テーマグラデーションの太い輪郭（ぼけて色の光の縁になる） */
 .qp-back .qp-title, .qp-back .qp-time, .qp-back .qp-until, .qp-back .qp-label {
-  -webkit-text-stroke: 3px rgba(255,255,255,.95); paint-order: stroke fill;
-  text-shadow: 0 2px 18px rgba(0,0,0,.45), 0 0 48px rgba(0,0,0,.35);
+  -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none;
 }
-/* 前面 — 細い黒の輪郭線で地図から切り離す */
+.qp-back { filter: blur(5px) saturate(1.35); opacity: 1; }
+/* 前面 — 白抜き文字。地図から切るのは薄い黒の影のみ */
 .qp-mount > .qp .qp-title, .qp-mount > .qp .qp-time, .qp-mount > .qp .qp-until {
-  color: #08080b; -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill;
+  color: #fff; -webkit-text-stroke: 0; 
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4);
 }
-.qp-mount > .qp .qp-label { -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill; }
-.qp-mount > .qp.cleared .qp-time { color: #08080b; }
+.qp-mount > .qp .qp-label { -webkit-text-stroke: 0; text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #fff; }
+.qp-mount > .qp.cleared .qp-time { color: #fff; }
 /* マップ上のマーカーではお題を 1 行に固定 — anchor:'center' のため
    折り返すとボックスが上下に伸び、ステータスバーと過去お題リストの
    両方にぶつかる（お題は qe-sheet でユーザーが編集できる）。 */
@@ -1107,7 +1122,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 @keyframes qp-float { to { transform: translateY(-8px); } }
 .qp-eyebrow { display: flex; align-items: center; justify-content: center; min-height: 16px; }
 .qp-label {
-  font-family: var(--font-latin); font-weight: 700; font-size: 17px; line-height: 1;
+  font-family: var(--font-latin); font-weight: 900; font-size: 17px; line-height: 1;
   letter-spacing: .02em;
   background: linear-gradient(90deg, #fff0a6 0%, #bfcc96 10%, #80a787 20%, #40837f 30%,
     #5d9ba1 40%, #8d8499 50%, #a97ba2 60%, #bf4680 70%, #ff3e88 80%, #e86f6d 90%, #d0a052 100%);
@@ -1115,13 +1130,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .qp.cleared .qp-label { background: none; -webkit-background-clip: border-box; background-clip: border-box;
   color: #6fae74; }
-.qp-title { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 700;
+.qp-title { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 900;
   font-size: 18px; line-height: 1.34; letter-spacing: .01em; color: #fff; text-wrap: balance; }
-.qp-time { text-shadow: var(--qp-shadow); margin-top: 9px; font-family: var(--font-latin); font-weight: 700;
+.qp-time { text-shadow: var(--qp-shadow); margin-top: 9px; font-family: var(--font-latin); font-weight: 900;
   font-size: 26px; line-height: 1; letter-spacing: .02em; color: #fff; font-variant-numeric: tabular-nums; }
-.qp.urgent .qp-time { color: var(--state-quest-active); }
+.qp.urgent .qp-time { color: #fff; }
 .qp.cleared .qp-time { font-size: 19px; color: #fff; }
-.qp-until { text-shadow: var(--qp-shadow); margin-top: 6px; font-family: var(--font-jp); font-weight: 500;
+.qp-until { text-shadow: var(--qp-shadow); margin-top: 6px; font-family: var(--font-jp); font-weight: 800;
   font-size: 13px; letter-spacing: .02em; color: #fff; }
 .maplibregl-marker { will-change: transform; }
 
@@ -1162,7 +1177,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .wd-circle-bar { cursor: pointer; }
 
 .tl-scrim {
-  position: absolute; inset: 0; z-index: 74; background: rgba(0,0,0,.55);
+  position: absolute; inset: 0; z-index: 74; background: transparent;
   opacity: 0; pointer-events: none; transition: opacity .3s var(--ease-out);
 }
 .tl-scrim.on { opacity: 1; pointer-events: auto; }
@@ -1284,7 +1299,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    中身は padding-top = セーフエリア分だけ下げて、可能な限り上に詰める。
    ============================================================ */
 .app-header {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 62;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 90;
   box-sizing: border-box;
   padding: var(--safe-top) 16px 20px;
   display: flex; align-items: center; justify-content: space-between;
@@ -1375,8 +1390,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   transition: transform .38s var(--ease-out);
 }
 .nav-push.on { transform: translateX(0); pointer-events: auto; }
-/* nav-push (profile / chat / board) が最前面のときは home のカメラ FAB を隠す (z 94 > 88) */
-.screen:has(.nav-push.on) .map-post { opacity: 0; pointer-events: none; }
 .nav-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 58px 16px 12px; }
 .nav-head h2 { font: 700 19px var(--font-jp); color: #fff; letter-spacing: .01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1534,6 +1547,349 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   NEW SPOT — 現在地がどのサークルにも属さないときの最終セクション
+   マップはエリアを描かず、ピンと設立ポップアップだけを立てる。
+   ============================================================ */
+.ns-mount { display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+.ns-pop { width: 262px; }
+.ns-pop > .qp .qp-title { white-space: normal; overflow: visible; text-overflow: clip; }
+/* 現在地ドット — 地図で一般的な青丸＋白リング＋拡散ハロ */
+.me-dot { position: relative; width: 18px; height: 18px; pointer-events: none; }
+.me-dot .core { position: absolute; inset: 0; border-radius: 50%; background: #1a73e8;
+  border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.45); }
+.me-dot .halo { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50%; background: rgba(26,115,232,.28); animation: meHalo 2.4s var(--ease-out) infinite; }
+@keyframes meHalo {
+  0% { transform: scale(1); opacity: .55; }
+  70% { transform: scale(3.4); opacity: 0; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+.qp-sub { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 800;
+  font-size: 13.5px; line-height: 1.5; letter-spacing: .01em; color: #fff; text-wrap: pretty; }
+.qp-back .qp-sub { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
+  background: var(--gradient-colorful-linear); -webkit-background-clip: text; background-clip: text;
+  color: transparent; text-shadow: none; }
+.ns-pin { width: 30px; height: 30px; }
+.ns-pin .pin-core img { width: 14px; height: 14px; filter: brightness(0) invert(1); }
+
+/* オンボーディング 1 枚 — 投稿でサークルを設立する流れ */
+.circle-strip.newspot { background: #fff; }
+.ns-onb { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
+  padding: 46px 20px calc(var(--footer-h) - 20px); gap: 26px; overflow: hidden; }
+/* 背景写真 — アスペクト比より面を埋めることを優先（cover）し、透過＋ブラーで文字を守る */
+.ns-onb .ns-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  object-position: 50% 38%; opacity: .9; filter: blur(10px) saturate(120%);
+  transform: scale(1.12); pointer-events: none; z-index: 0; }
+.ns-onb .ns-bg-veil { position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.72) 46%, rgba(255,255,255,.82)); }
+.ns-onb > .ns-lead, .ns-onb > .ns-steps, .ns-onb > .ns-cta { position: relative; z-index: 1; }
+.ns-lead { font: 800 15.5px/1.6 var(--font-jp); color: #0a0a0d; letter-spacing: .01em; }
+.ns-steps { display: flex; flex-direction: column; gap: 22px; }
+.ns-step { display: flex; align-items: flex-start; gap: 13px; }
+.ns-step .n { flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+  font: 900 15px var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; }
+.ns-step .sc { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ns-step b { font: 700 14px/1.35 var(--font-jp); color: #0a0a0d; }
+.ns-step span { font: 500 12.5px/1.6 var(--font-jp); color: rgba(10,10,13,.56); text-wrap: pretty; }
+.ns-vote { margin-top: 2px; padding: 12px 13px; border-radius: var(--radius-sm, 12px);
+  background: rgba(10,10,13,.05); font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.66); }
+.ns-vote b { font-weight: 800; color: #0a0a0d; }
+.ns-cta { margin-top: auto; flex: none; appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+  height: 52px; border-radius: var(--radius-pill); display: flex; align-items: center; justify-content: center;
+  gap: 9px; font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear);
+  box-shadow: 0 8px 24px rgba(255,62,136,.28); transition: transform .12s var(--ease-out); }
+.ns-cta:active { transform: scale(.975); }
+.ns-cta img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) invert(1); }
+
+/* 設立後の最終セクション */
+.ns-founded { position: absolute; inset: 0; display: flex; flex-direction: column;
+  padding: 44px 0 0; gap: 0; }
+.ns-founded .fphoto { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.ns-founded .fphoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ns-founded .fphoto .badge { position: absolute; left: 12px; top: 12px; padding: 5px 11px;
+  border-radius: var(--radius-pill); background: var(--gradient-colorful-linear);
+  font: 800 10.5px var(--font-latin); letter-spacing: .08em; color: #fff; }
+.ns-founded .frow { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 0; }
+.ns-founded .fname { font: 700 15px var(--font-jp); color: #0a0a0d; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ns-founded .fvote { margin-left: auto; flex: none; appearance: none; border: 0; cursor: pointer;
+  height: 36px; padding: 0 15px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 7px;
+  background: rgba(10,10,13,.06); font: 700 12px var(--font-jp); color: #0a0a0d; }
+.ns-founded .fvote img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) opacity(.6); }
+.ns-founded .fvote:active { transform: scale(.97); }
+.ns-founded .fmeta { flex: none; padding: 6px 16px 0; font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.55); }
+
+/* ============================================================
+   CREATE CIRCLE — 撮影 → エリア(最大1km) → クエスト → 名前
+   ============================================================ */
+#csView { background: #000; z-index: 90; }
+#csView[data-mode="cam"] .cs-form, #csView[data-mode="cam"] .cs-done { display: none; }
+#csView[data-mode="form"] .cs-cam, #csView[data-mode="form"] .cs-done { display: none; }
+#csView[data-mode="done"] .cs-cam, #csView[data-mode="done"] .cs-form { display: none; }
+.cs-cam { position: absolute; inset: 0; }
+.cs-cam .cs-vf { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cs-cam::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 26%, transparent 58%, rgba(0,0,0,.72) 100%); }
+.cs-cam-top { position: absolute; top: 56px; left: 14px; right: 14px; z-index: 3;
+  display: flex; align-items: center; gap: 10px; }
+.cs-x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: var(--glass-fill);
+  backdrop-filter: blur(var(--lg-blur)); -webkit-backdrop-filter: blur(var(--lg-blur)); }
+.cs-x img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-here { display: flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: var(--radius-pill);
+  background: var(--lg-tint); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  font: 700 11.5px var(--font-jp); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  box-shadow: inset 0 1px 0 var(--lg-specular-top); }
+.cs-here img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-cam-bot { position: absolute; bottom: 46px; left: 0; right: 0; z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.cs-hint { font: 700 13px/1.5 var(--font-jp); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); text-align: center; }
+.cs-shutter { width: 74px; height: 74px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  background: var(--gradient-colorful-linear); box-shadow: 0 0 0 5px rgba(255,255,255,.9), 0 10px 28px rgba(0,0,0,.5);
+  transition: transform .12s var(--ease-out); }
+.cs-shutter:active { transform: scale(.94); }
+
+.cs-form { position: absolute; inset: 0; display: flex; flex-direction: column; background: #fff; }
+.cs-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 64px 14px 10px; }
+.cs-back { flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(10,10,13,.06); }
+.cs-title { flex: 1 1 auto; text-align: center; font: 700 16px var(--font-jp); color: #0a0a0d; }
+.cs-step { flex: none; min-width: 38px; text-align: right; font: 700 11px var(--font-latin); color: rgba(10,10,13,.42);
+  font-variant-numeric: tabular-nums; }
+.cs-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 4px 18px 18px; }
+.cs-scroll::-webkit-scrollbar { display: none; }
+.cs-pane { display: none; }
+.cs-pane.on { display: block; }
+.cs-pane h3 { font: 800 19px/1.4 var(--font-jp); color: #0a0a0d; }
+.cs-pane .lede { margin-top: 7px; font: 500 12.5px/1.65 var(--font-jp); color: rgba(10,10,13,.58); text-wrap: pretty; }
+.cs-map { position: relative; margin-top: 16px; height: 214px; border-radius: var(--radius-md, 16px);
+  overflow: hidden; background: #0e0e12; display: grid; place-items: center; }
+.cs-map .base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5;
+  filter: grayscale(.7) brightness(.7); }
+.cs-ring { position: relative; border-radius: 50%; transition: width .18s var(--ease-out), height .18s var(--ease-out);
+  background: radial-gradient(closest-side, rgba(255,62,136,.10), rgba(255,62,136,.03));
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.85), 0 0 40px rgba(255,62,136,.35); }
+.cs-map .cs-pin { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gradient-colorful-linear); box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 4px 14px rgba(0,0,0,.55); }
+.cs-map .cs-pin img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-map .cap { position: absolute; left: 12px; bottom: 11px; font: 700 10.5px var(--font-latin);
+  letter-spacing: .06em; color: rgba(255,255,255,.72); }
+.cs-radius { margin-top: 16px; display: flex; align-items: baseline; gap: 5px; }
+.cs-radius .v { font: 900 40px/1 var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.cs-radius .u { font: 700 14px/1 var(--font-latin); color: rgba(10,10,13,.45); }
+.cs-slider { -webkit-appearance: none; appearance: none; width: 100%; margin-top: 10px; height: 4px;
+  border-radius: 99px; background: rgba(10,10,13,.12); outline: none; }
+.cs-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--gradient-colorful-linear); box-shadow: 0 2px 8px rgba(0,0,0,.28); cursor: pointer; }
+.cs-scale { margin-top: 8px; display: flex; justify-content: space-between;
+  font: 600 10.5px var(--font-latin); color: rgba(10,10,13,.42); }
+.cs-field { margin-top: 18px; display: flex; flex-direction: column; gap: 7px; }
+.cs-field label { font: 700 11px var(--font-latin); letter-spacing: .1em; text-transform: uppercase; color: rgba(10,10,13,.42); }
+.cs-field input, .cs-field textarea { appearance: none; border: 0; outline: none; resize: none; width: 100%;
+  padding: 13px 14px; border-radius: var(--radius-xs, 8px); background: rgba(10,10,13,.05);
+  font: 600 14.5px/1.55 var(--font-jp); color: #0a0a0d; }
+.cs-field input::placeholder, .cs-field textarea::placeholder { color: rgba(10,10,13,.3); font-weight: 500; }
+.cs-note { margin-top: 16px; padding: 13px 14px; border-radius: var(--radius-sm, 12px);
+  background: rgba(10,10,13,.05); font: 500 11.5px/1.65 var(--font-jp); color: rgba(10,10,13,.62); }
+.cs-note b { font-weight: 800; color: #0a0a0d; }
+.cs-foot { flex: none; padding: 8px 18px calc(var(--safe-bottom) + 10px); }
+.cs-next { width: 100%; height: 52px; border: 0; border-radius: var(--radius-pill); cursor: pointer;
+  font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear);
+  box-shadow: 0 8px 24px rgba(255,62,136,.26); transition: transform .12s var(--ease-out); }
+.cs-next:active { transform: scale(.985); }
+.cs-next:disabled { background: rgba(10,10,13,.12); color: rgba(10,10,13,.4); box-shadow: none; cursor: default; }
+
+.cs-done { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 20px calc(var(--safe-bottom) + 18px); background: #000; }
+.cs-done .dphoto { position: absolute; inset: 0; }
+.cs-done .dphoto img { width: 100%; height: 100%; object-fit: cover; }
+.cs-done .dphoto::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.2) 40%, rgba(0,0,0,.86) 100%); }
+.cs-done .dbody { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 9px; }
+.cs-done .dlbl { font: 900 12px var(--font-latin); letter-spacing: .1em;
+  background: var(--gradient-colorful-linear); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cs-done .dname { font: 900 27px/1.3 var(--font-jp); color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+.cs-done .dquest { font: 700 14px/1.5 var(--font-jp); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+.cs-done .dmeta { font: 600 11.5px var(--font-latin); color: rgba(255,255,255,.7); }
+.cs-done .dtk { margin-top: 4px; display: flex; align-items: center; gap: 8px; align-self: flex-start;
+  padding: 8px 13px; border-radius: var(--radius-pill); background: var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)); -webkit-backdrop-filter: blur(var(--lg-blur));
+  font: 700 11.5px var(--font-jp); color: #fff; }
+.cs-done .dtk img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-done .dgo { margin-top: 16px; width: 100%; height: 52px; border: 0; border-radius: var(--radius-pill);
+  cursor: pointer; font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear); }
+
+/* ============================================================
+   NAME VOTE — サークル名は投票で決まる
+   ============================================================ */
+#nvView { background: #fff; z-index: 91; }
+#nvView .nv-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 64px 14px 8px; }
+#nvView .nv-back { flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(10,10,13,.06); }
+#nvView .nv-htitle { flex: 1 1 auto; text-align: center; font: 700 16px var(--font-jp); color: #0a0a0d; }
+#nvView .nv-sp { flex: none; width: 38px; }
+.nv-now { padding: 6px 20px 0; }
+.nv-now .k { font: 700 10.5px var(--font-latin); letter-spacing: .1em; text-transform: uppercase; color: rgba(10,10,13,.42); }
+.nv-now .v { margin-top: 5px; font: 900 24px/1.35 var(--font-jp); color: #0a0a0d; }
+.nv-now .s { margin-top: 5px; font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.55); text-wrap: pretty; }
+.nv-tk { margin: 14px 20px 0; padding: 12px 14px; border-radius: var(--radius-sm, 12px);
+  display: flex; align-items: center; gap: 10px; background: rgba(10,10,13,.05); }
+.nv-tk.warn { background: rgba(255,62,136,.10); }
+.nv-tk img { width: 16px; height: 16px; object-fit: contain; filter: brightness(0) opacity(.55); }
+.nv-tk .t { font: 600 11.5px/1.55 var(--font-jp); color: rgba(10,10,13,.62); }
+.nv-tk .t b { font-weight: 800; color: #0a0a0d; }
+.nv-tk .n { margin-left: auto; font: 900 20px/1 var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; }
+.nv-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 14px 20px 8px; }
+.nv-list::-webkit-scrollbar { display: none; }
+.nv-row { display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid rgba(8,8,11,.08); will-change: transform; }
+.nv-row.no-tk { transform: translateX(4px); transition: transform .18s var(--ease-out); }
+.nv-row .rk { flex: none; width: 26px; text-align: right; font: 700 14px/1 var(--font-latin);
+  color: rgba(8,8,11,.4); font-variant-numeric: tabular-nums; }
+.nv-row.top .rk { background: linear-gradient(135deg,#fff0a6,#005f67 38%,#ff3e88 70%,#d0a052);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nv-row .col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.nv-row .nm { font: 700 15px/1.35 var(--font-jp); color: #0a0a0d; }
+.nv-row .by { font: 500 10.5px var(--font-latin); color: rgba(10,10,13,.42); }
+.nv-row .chip { align-self: flex-start; padding: 3px 9px; border-radius: var(--radius-pill);
+  background: var(--gradient-colorful-linear); font: 800 9.5px var(--font-latin); letter-spacing: .07em; color: #fff; }
+.nv-like { flex: none; display: flex; align-items: center; justify-content: center; gap: 7px;
+  min-width: 76px; height: 44px; padding: 0 14px;
+  border: 0; border-radius: var(--radius-pill); cursor: pointer; background: rgba(8,8,11,.06);
+  box-shadow: inset 0 0 0 1px rgba(8,8,11,.08);
+  font: 600 14px var(--font-latin); color: rgba(8,8,11,.56); font-variant-numeric: tabular-nums;
+  transition: background .16s ease, box-shadow .16s ease, transform .12s var(--ease-out); }
+.nv-like:active { transform: scale(.97); }
+.nv-like img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.nv-like.liked { background: #08080b; color: #fff; box-shadow: none; }
+.nv-like.liked img { filter: none; opacity: 1; }
+.nv-post { flex: none; display: flex; gap: 9px; padding: 10px 20px calc(var(--safe-bottom) + 12px);
+  border-top: 1px solid rgba(10,10,13,.07); }
+.nv-post input { flex: 1 1 auto; min-width: 0; appearance: none; border: 0; outline: none;
+  padding: 13px 14px; border-radius: var(--radius-pill); background: rgba(10,10,13,.05);
+  font: 600 14px var(--font-jp); color: #0a0a0d; }
+.nv-post input::placeholder { color: rgba(10,10,13,.3); font-weight: 500; }
+.nv-post button { flex: none; height: 46px; padding: 0 18px; border: 0; border-radius: var(--radius-pill);
+  cursor: pointer; font: 700 13.5px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear); }
+.nv-post button:disabled { background: rgba(10,10,13,.12); color: rgba(10,10,13,.4); cursor: default; }
+
+  .hd-circle { cursor: pointer; pointer-events: auto; }
+
+/* ============================================================
+   WdMemberStatus — サークル項目の左下。参加者アイコン＋タイムラインの投稿数。
+   タップでサークルタイムラインのモーダルシートを開く。
+   ============================================================ */
+.mstat { position: absolute; left: 12px; bottom: calc(var(--safe-bottom) + 10px); z-index: 74; pointer-events: auto;
+  appearance: none; border: 0; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 13px 0 8px; border-radius: var(--radius-pill);
+  background: var(--lg-tint, rgba(0,0,0,.51));
+  backdrop-filter: blur(var(--lg-blur, 14px)) saturate(var(--lg-saturate, 160%));
+  -webkit-backdrop-filter: blur(var(--lg-blur, 14px)) saturate(var(--lg-saturate, 160%));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top, rgba(255,255,255,.28)), 0 4px 14px rgba(0,0,0,.35);
+  transition: transform .12s var(--ease-out); }
+.mstat:active { transform: scale(.96); }
+.mstat .avs { display: flex; align-items: center; }
+.mstat .avs img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
+.mstat .avs img + img { margin-left: -9px; }
+.mstat .cnt { display: flex; align-items: baseline; gap: 3px; color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.mstat .cnt .v { font: 900 15px/1 var(--font-latin); font-variant-numeric: tabular-nums; }
+.mstat .cnt .u { font: 700 10px/1 var(--font-jp); opacity: .8; }
+/* 右下 — メニューアイコンをメッセージボタンの上に縦積み */
+.wd-circle-tool > .ct-stack { flex: none; margin-left: auto; display: flex; flex-direction: column;
+  align-items: center; gap: 10px; }
+
+/* good 残高 — ヘッダー左上の自分のアイコンの直下 */
+.me-wrap { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.me-good { display: flex; align-items: center; justify-content: center; gap: 2px; width: 44px; }
+.me-good img { width: 9px; height: 9px; object-fit: contain; filter: brightness(0) invert(1);
+  opacity: .9; }
+.me-good span { font: 800 9px/1 var(--font-latin); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 1px 3px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+
+/* サークル名が上に残る高さのシート */
+.tl-sheet.tall { top: calc(var(--map-h) + 8px); }
+/* この高さのときはヘッダー（名前・閉じる）なし — good ボタンだけ右上に残す */
+.tl-sheet.tall:not(.full) .tl-head { border-bottom: 0; padding: 0 14px 4px; }
+.tl-sheet.tall:not(.full) .tl-cover,
+.tl-sheet.tall:not(.full) .tl-hcol,
+.tl-sheet.tall:not(.full) .tl-close { display: none; }
+.tl-sheet.tall:not(.full) .tl-good { margin-left: auto; }
+.phone:has(.tl-sheet.on) .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+
+/* タイムライン右上の good ボタン */
+.tl-good { appearance: none; border: 0; cursor: pointer; flex: none; display: flex; align-items: center;
+  gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--radius-pill);
+  background: rgba(8,8,11,.06); transition: transform .12s var(--ease-out); }
+.tl-good:active { transform: scale(.95); }
+.tl-good img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.tl-good span { font: 800 12px/1 var(--font-latin); color: #08080b; font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   サークル名投票 ダイアログ
+   ============================================================ */
+.gv-veil { position: absolute; inset: 0; z-index: 94; display: flex; align-items: center;
+  justify-content: center; padding: 24px; background: rgba(0,0,0,.72); opacity: 0;
+  pointer-events: none; transition: opacity .2s var(--ease-out); }
+.gv-veil.on { opacity: 1; pointer-events: auto; }
+.gv-dlg { width: 100%; max-height: 78%; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--radius-md, 16px); background: #fff;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5); transform: scale(.96);
+  transition: transform .2s var(--ease-out); }
+.gv-veil.on .gv-dlg { transform: scale(1); }
+.gv-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(8,8,11,.08); }
+.gv-title { flex: 1 1 auto; font: 700 15px var(--font-jp); color: #08080b; }
+.gv-bal { flex: none; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px;
+  border-radius: var(--radius-pill); background: rgba(8,8,11,.06); }
+.gv-bal img { width: 12px; height: 12px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.gv-bal span { font: 800 11.5px/1 var(--font-latin); color: #08080b; font-variant-numeric: tabular-nums; }
+.gv-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.gv-list::-webkit-scrollbar { display: none; }
+.gv-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-bottom: 1px solid rgba(8,8,11,.08); will-change: transform; }
+.gv-row.shake { transform: translateX(4px); transition: transform .18s var(--ease-out); }
+.gv-row .rk { flex: none; width: 26px; text-align: right; font: 700 14px/1 var(--font-latin);
+  color: rgba(8,8,11,.4); font-variant-numeric: tabular-nums; }
+.gv-row.top .rk { background: linear-gradient(135deg,#fff0a6,#005f67 38%,#ff3e88 70%,#d0a052);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gv-row .col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gv-row .nm { font: 700 15px/1.35 var(--font-jp); color: #08080b; }
+.gv-row .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gv-row .by { font: 400 12px var(--font-latin); color: rgba(8,8,11,.56); }
+.gv-row.top .nm { color: #08080b; }
+.gv-row .chip { align-self: flex-start; margin-top: 2px; padding: 3px 9px;
+  border-radius: var(--radius-pill); background: var(--gradient-colorful-linear);
+  font: 800 9.5px var(--font-latin); letter-spacing: .07em; color: #fff; }
+.gv-btn { flex: none; appearance: none; border: 0; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 7px; min-width: 76px; height: 44px; padding: 0 14px;
+  border-radius: var(--radius-pill); background: rgba(8,8,11,.06);
+  box-shadow: inset 0 0 0 1px rgba(8,8,11,.08);
+  transition: background .16s ease, box-shadow .16s ease, transform .12s var(--ease-out); }
+.gv-btn:active { transform: scale(.97); }
+.gv-btn img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.gv-btn span { font: 600 14px/1 var(--font-latin); color: rgba(8,8,11,.56); font-variant-numeric: tabular-nums; }
+.gv-btn.voted { background: #08080b; box-shadow: none; }
+.gv-btn.voted img { filter: none; opacity: 1; }
+.gv-btn.voted span { color: #fff; }
+.gv-foot { flex: none; display: flex; gap: 9px; padding: 12px 16px 14px;
+  border-top: 1px solid rgba(8,8,11,.08); }
+.gv-foot input { flex: 1 1 auto; min-width: 0; appearance: none; border: 0; outline: none;
+  padding: 11px 13px; border-radius: var(--radius-pill); background: rgba(8,8,11,.05);
+  font: 600 13.5px var(--font-jp); color: #08080b; }
+.gv-foot input::placeholder { color: rgba(8,8,11,.3); font-weight: 500; }
+.gv-foot button { flex: none; height: 40px; padding: 0 16px; border: 0; cursor: pointer;
+  border-radius: var(--radius-pill); font: 700 13px var(--font-jp); color: #fff;
+  background: var(--gradient-colorful-linear); }
+.gv-foot button:disabled { background: rgba(8,8,11,.12); color: rgba(8,8,11,.4); cursor: default; }
+.gv-close { appearance: none; border: 0; width: 30px; height: 30px; border-radius: 50%; flex: none;
+  cursor: pointer; background: rgba(8,8,11,.06); display: grid; place-items: center; }
+.gv-close img { width: 11px; height: 11px; filter: brightness(0) opacity(.5); }
 </style>
 </head>
 <body>
@@ -1567,9 +1923,12 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
         <!-- APP HEADER — スクリムがそのままヘッダーの背景。左=ユーザー / 右=チャット -->
         <header class="app-header">
-          <button class="me-btn" id="meBtn" aria-label="プロフィール">
-            <img src="../../assets/sample/user/user007.jpg" alt="">
-          </button>
+          <div class="me-wrap">
+            <button class="me-btn" id="meBtn" aria-label="プロフィール">
+              <img src="../../assets/sample/user/user007.jpg" alt="">
+            </button>
+            <span class="me-good"><img src="../../assets/icons/icon_good.png" alt="good"><span id="meGood">x521</span></span>
+          </div>
           <span class="hd-circle" id="hdCircle">グラフィティマンの日常</span>
           <button class="chat-btn wd-icon-btn" id="searchBtn" aria-label="検索">
             <img src="../../assets/icons/icon_search.png" alt="">
@@ -1578,9 +1937,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
         <!-- WdCircleBar in the header — follows the vertically-active circle -->
         <div class="wd-circle-tool">
-          <button class="wd-icon-btn" id="fbList" type="button" aria-label="サークルのリスト">
-            <img src="../../assets/icons/icon_menu.png" alt="">
-          </button>
           <div class="wd-circle-bar">
             <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
             <div class="col">
@@ -1588,10 +1944,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
               <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
             </div>
           </div>
-          <button class="wd-icon-btn has-badge" id="chatBtn" aria-label="チャット" style="margin-left: auto;">
-            <img src="../../assets/icons/icon_comment.png" alt="">
-            <span class="wd-badge"><span>3</span></span>
-          </button>
+          <div class="ct-stack">
+            <button class="wd-icon-btn" id="fbList" type="button" aria-label="サークルのリスト">
+              <img src="../../assets/icons/icon_menu.png" alt="">
+            </button>
+            <button class="wd-icon-btn has-badge" id="chatBtn" aria-label="チャット">
+              <img src="../../assets/icons/icon_comment.png" alt="">
+              <span class="wd-badge"><span>3</span></span>
+            </button>
+          </div>
         </div>
 
         <!-- マップ右下 — 投稿ボタン / 投稿済みサムネイル -->
@@ -1685,6 +2046,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
               <span class="tl-nm" id="tlName">グラフィティマンの日常</span>
               <span class="tl-ds" id="tlDesc">タイムライン</span>
             </div>
+            <button class="tl-good" id="tlGood" type="button" aria-label="サークル名投票">
+              <img src="../../assets/icons/icon_good.png" alt=""><span id="tlGoodN">good</span>
+            </button>
             <button class="tl-close" id="tlClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
           </header>
           <div class="tl-list" id="tlList"></div>
@@ -1692,6 +2056,22 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
             <img src="../../assets/icons/icon_edit.png" alt="">
           </button>
         </section>
+
+        <!-- サークル名投票 ダイアログ -->
+        <div class="gv-veil" id="gvVeil" aria-hidden="true">
+          <div class="gv-dlg" role="dialog" aria-label="サークル名投票">
+            <header class="gv-head">
+              <span class="gv-title">サークル名投票</span>
+              <span class="gv-bal"><img src="../../assets/icons/icon_good.png" alt="good"><span id="gvBal">521</span></span>
+              <button class="gv-close" id="gvClose" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+            </header>
+            <div class="gv-list" id="gvList"></div>
+            <div class="gv-foot">
+              <input id="gvInput" type="text" placeholder="サークル名を投稿する">
+              <button id="gvSend" type="button" disabled>投稿</button>
+            </div>
+          </div>
+        </div>
 
         <!-- タイムラインへの投稿画面 -->
         <section class="tl-compose" id="tlCompose" aria-hidden="true">
@@ -1810,6 +2190,103 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
             <button class="wd-icon-btn color" id="crSend" aria-label="送信">
               <svg width="17" height="17" viewBox="0 0 24 24"><path d="M3.2 11.3 21 3l-7.8 18-2.7-7.4-7.3-2.3Z" fill="#fff"></path></svg>
             </button>
+          </div>
+        </section>
+
+        <!-- サークル設立 — 撮影 → エリア(最大1km) → クエスト → 名前 -->
+        <section class="nav-push" id="csView" data-mode="cam" aria-hidden="true">
+          <div class="cs-cam">
+            <img class="cs-vf" src="../../assets/sample/reel/reel006.jpg" alt="">
+            <div class="cs-cam-top">
+              <button class="cs-x" id="csClose" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+              <span class="cs-here"><img src="../../assets/icons/icon_near.png" alt="">どのサークルにも属さない場所です</span>
+            </div>
+            <div class="cs-cam-bot">
+              <span class="cs-hint">写真を撮ると、この場所が<br>サークルの中心になります</span>
+              <button class="cs-shutter" id="csShot" type="button" aria-label="撮影"></button>
+            </div>
+          </div>
+
+          <div class="cs-form">
+            <header class="cs-head">
+              <button class="cs-back" id="csBack" type="button" aria-label="戻る">
+                <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#0a0a0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="cs-title">サークルを設立</div>
+              <span class="cs-step" id="csStepLbl">1 / 3</span>
+            </header>
+            <div class="cs-scroll">
+              <section class="cs-pane on" data-pane="area">
+                <h3>エリアを決める</h3>
+                <p class="lede">撮影した場所が中心です。半径は最大 1km。エリアの中にいる人だけが投稿できます。</p>
+                <div class="cs-map">
+                  <img class="base" src="../../assets/sample/reel/reel006.jpg" alt="">
+                  <span class="cs-ring" id="csRing"></span>
+                  <span class="cs-pin"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>
+                  <span class="cap">YOUR LOCATION · CENTER</span>
+                </div>
+                <div class="cs-radius"><span class="v" id="csRv">400</span><span class="u" id="csRu">m</span></div>
+                <input class="cs-slider" id="csRad" type="range" min="100" max="1000" step="20" value="400">
+                <div class="cs-scale"><span>100m</span><span>1km (MAX)</span></div>
+              </section>
+
+              <section class="cs-pane" data-pane="quest">
+                <h3>クエストを決める</h3>
+                <p class="lede">サークルにはクエストが1つ。エリアの中で撮って投稿するとクリアになります。</p>
+                <div class="cs-field"><label>quest</label>
+                  <input id="csQt" type="text" placeholder="例）路地裏の壁画を見つける"></div>
+                <div class="cs-field"><label>description</label>
+                  <textarea id="csQd" rows="3" placeholder="クリアの条件を書く"></textarea></div>
+                <div class="cs-note">クリアすると<b>投票権が1つ</b>もらえます。投票権はサークル名の投票に使います。</div>
+              </section>
+
+              <section class="cs-pane" data-pane="name">
+                <h3>最初の名前をつける</h3>
+                <p class="lede">設立者のあなたが好きな名前をつけられます。</p>
+                <div class="cs-field"><label>circle name</label>
+                  <input id="csName" type="text" placeholder="例）宇田川の壁"></div>
+                <div class="cs-note">これ以降の名前は<b>投票で決まります</b>。誰でも名前を投稿でき、サークルにいる人がいいねを押して投票。<b>いいねが一番多い名前</b>がサークル名になります。</div>
+              </section>
+            </div>
+            <div class="cs-foot"><button class="cs-next" id="csNext" type="button">次へ</button></div>
+          </div>
+
+          <div class="cs-done">
+            <div class="dphoto"><img id="csDonePhoto" src="../../assets/sample/reel/reel006.jpg" alt=""></div>
+            <div class="dbody">
+              <span class="dlbl">CIRCLE FOUNDED</span>
+              <div class="dname" id="csDoneName">宇田川の壁</div>
+              <div class="dquest" id="csDoneQuest">路地裏の壁画を見つける</div>
+              <div class="dmeta" id="csDoneMeta">半径 400m · メンバー 1人</div>
+              <span class="dtk"><img src="../../assets/icons/icon_check.png" alt="">投稿でクリア — 投票権 ×1 を獲得</span>
+              <button class="dgo" id="csDoneGo" type="button">サークルを見る</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- サークル名の投票 -->
+        <section class="nav-push" id="nvView" aria-hidden="true">
+          <header class="nv-head">
+            <button class="nv-back" id="nvBack" type="button" aria-label="戻る">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#0a0a0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="nv-htitle">サークル名の投票</div>
+            <span class="nv-sp"></span>
+          </header>
+          <div class="nv-now">
+            <div class="k">current name</div>
+            <div class="v" id="nvNow">グラフィティマンの日常</div>
+            <div class="s" id="nvSub">いいねが一番多い名前がサークル名になります。</div>
+          </div>
+          <div class="nv-tk" id="nvTkRow">
+            <img src="../../assets/icons/icon_check.png" alt="">
+            <span class="t">投票権 — <b>クエストをクリアすると1つ</b>もらえます</span>
+            <span class="n" id="nvTk">1</span>
+          </div>
+          <div class="nv-list" id="nvList"></div>
+          <div class="nv-post">
+            <input id="nvInput" type="text" placeholder="サークル名を投稿する">
+            <button id="nvSend" type="button" disabled>投稿</button>
           </div>
         </section>
 
@@ -2068,7 +2545,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   fsQpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
   document.getElementById('fsQpBody').appendChild(fsQpMount);
   function tickHero() {
-    qpRender(qpMount, CIRCLES[active]);
+    if (typeof nsMode !== 'undefined' && nsMode) {
+      if (nsCreated) qpRender(qpMount, { cleared: false }, nsCreated.quest);
+    } else {
+      qpRender(qpMount, CIRCLES[active]);
+    }
     if (typeof fsCircle !== 'undefined' && fsCircle) {
       qpRender(fsQpMount, fsCircle, (typeof fsDay !== 'undefined' && fsDay) ? fsDay.quest : null);
     }
@@ -2161,6 +2642,21 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     inner.className = 'board-inner';
     rail.appendChild(inner);
     c.rail = rail; c.board = bd; c.inner = inner;
+
+    /* WdMemberStatus — 左下。参加者アイコン＋タイムラインの投稿数 */
+    const ms = document.createElement('button');
+    ms.type = 'button';
+    ms.className = 'mstat';
+    ms.setAttribute('aria-label', 'サークルタイムラインを開く');
+    ms.innerHTML = '<span class="avs">'
+      + c.posts.slice(0, 4).map((p) => '<img src="' + p.ava + '" alt="">').join('')
+      + '</span><span class="cnt"><span class="v"></span><span class="u">件の投稿</span></span>';
+    ms.addEventListener('click', () => {
+      active = CIRCLES.indexOf(c); renderBoard();
+      tlOpen(true);
+    });
+    c.mstat = ms;
+    strip.appendChild(ms);
 
     /* ---- FREE BOARD packing -------------------------------------------------
        ボードを「列」単位で埋める。列同士は X が重ならないので、列内のタイルを
@@ -2355,8 +2851,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const d = distTo(c);
     lock.innerHTML = '<span class="lscrim"></span>'
       + '<span class="lmeta">'
+      +   '<span class="lt">エリアに入って<br>クエストに挑戦してください</span>'
+      +   '<span class="llabel">エリアまで</span>'
       +   '<span class="ldist"><span class="v">' + d.val + '</span><span class="u">' + d.unit + '</span></span>'
-      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">地図アプリを開く</button>'
       + '</span>';
     lock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     wrap.appendChild(lock);
@@ -2551,8 +3049,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const dd = distTo(c);
     fsLock.innerHTML = '<span class="lscrim"></span>'
       + '<span class="lmeta">'
+      +   '<span class="lt">エリアに入って<br>クエストに挑戦してください</span>'
+      +   '<span class="llabel">エリアまで</span>'
       +   '<span class="ldist"><span class="v">' + dd.val + '</span><span class="u">' + dd.unit + '</span></span>'
-      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">地図アプリを開く</button>'
       + '</span>';
     fsLock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     qpRender(fsQpMount, c, day.quest);
@@ -2688,6 +3188,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (c.cleared) mpMineImg.src = c.myThumb || c.posts[0].img || c.cover;
   }
   document.getElementById('mpCam').addEventListener('click', () => {
+    if (nsMode) { if (!nsCreated) csOpen(); return; }
     if (CIRCLES[active].cleared) return;
     runUpload();
   });
@@ -2763,6 +3264,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     scrollT = setTimeout(() => {
       const stripH = (col.querySelector('.circle-strip')?.getBoundingClientRect().height) || col.clientHeight * 0.8;
       const i = Math.round(col.scrollTop / stripH);
+      if (i >= CIRCLES.length) { setNewSpot(true); return; }
+      setNewSpot(false);
       if (i !== active && CIRCLES[i]) {
         active = i;
         renderBoard();
@@ -2833,6 +3336,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (window.EarthMap && EarthMap.map) applyWallState(EarthMap.map, CIRCLES[active]);
     clearToast.classList.add('on');
     setTimeout(() => clearToast.classList.remove('on'), 2600);
+    awardTicket();
     c.setFocus();
   }
 
@@ -2960,18 +3464,20 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* 壁の状態 — 未クリア / 残り30分未満（scan 2.2s）/ クリア済み
      （cleared: --state-quest-cleared 単色・scan 停止・高さ 60%、壁は消さない） */
   const WALL_CLEARED = '#7cc47f';
+  const WALL_UNCLAIMED = '#9aa1ab';
   function applyWallState(map, c) {
     if (!c || !map.getLayer('area-wall-b0')) return;
     const cleared = !!c.cleared;
-    const color = cleared ? WALL_CLEARED : ['get', 'c'];
-    const H = wallH(c.radius) * (cleared ? 0.6 : 1);
+    const unclaimed = !!c.unclaimed;
+    const color = unclaimed ? WALL_UNCLAIMED : cleared ? WALL_CLEARED : ['get', 'c'];
+    const H = wallH(c.radius) * (unclaimed ? 0.72 : cleared ? 0.6 : 1);
     WALL_BANDS.forEach(b => {
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-color', color);
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-base', H * b[1]);
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-height', H * b[2]);
     });
     ['area-glow-wide', 'area-glow-mid'].forEach(id => {
-      if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', cleared ? WALL_CLEARED : ['get', 'c']);
+      if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', color);
     });
     [['lo', 0, 0.42], ['hi', 0.42, 0.80]].forEach(r => {
       if (!map.getLayer('area-rib-' + r[0])) return;
@@ -2981,13 +3487,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   }
 
 
-  function areaMove(map, C, R) {
+  function areaMove(map, C, R, st) {
     if (!map.getSource('area-disk')) return;
     map.getSource('area-disk').setData(disk(C, R));
     map.getSource('area-line').setData(wallLines(C, R));
     map.getSource('area-wall').setData(wallSegs(C, R));
     map.getSource('area-rib').setData(wallRibs(C, R));
-    applyWallState(map, CIRCLES[active]);
+    applyWallState(map, st || CIRCLES[active]);
   }
 
   // restart board + marker pulses together so they beat in sync
@@ -3115,6 +3621,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const c = tlCircle; if (!c) return;
     document.getElementById('tlName').textContent = c.name;
     document.getElementById('tlDesc').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
+    if (c.mstat) c.mstat.querySelector('.cnt .v').textContent = c.timeline.length;
     document.getElementById('tlCover').src = c.cover;
     tlList.innerHTML = '';
     c.timeline.forEach((e, i) => {
@@ -3128,8 +3635,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     tlSheet.classList.toggle('full', on);
     phone.classList.toggle('light-status', on || tlCompose.classList.contains('on'));
   }
-  function tlOpen() {
+  function tlOpen(tall) {
     tlCircle = CIRCLES[active];
+    tlSheet.classList.toggle('tall', !!tall);
     tlRender(false);
     tlSheet.setAttribute('aria-hidden', 'false');
     tlScrim.classList.add('on');
@@ -3140,7 +3648,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     tlSheet.classList.remove('on');
     tlScrim.classList.remove('on');
     tlSheet.setAttribute('aria-hidden', 'true');
-    setTimeout(() => tlFull(false), 300);
+    setTimeout(() => { tlFull(false); tlSheet.classList.remove('tall'); }, 300);
   }
 
   /* ---- クエストボード — WdQuestPostBoard の列パターン配置 -------------------
@@ -3332,6 +3840,421 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     tlList.scrollTop = 0;
   });
 
+  /* ==========================================================================
+     NEW SPOT — 現在地がどのサークルにも属していないとき
+     ・マップ: エリアを描かず、ピンと「設立できます」のポップアップだけ
+     ・リスト: 投稿がないので、代わりに投稿オンボーディングを 1 枚
+     ・設立フロー: 撮影 → エリア(最大1km) → クエスト → 名前
+     ・サークル名は以降 投票制（クエストクリアで得た投票権を消費していいね）
+     ========================================================================== */
+  var nsMode = false, nsCreated = null, tickets = 1;
+  const NS_CENTER = [139.70620, 35.65190];
+  const NS_RADIUS = 400;
+
+  // ---- 投票データ（既存サークル） -------------------------------------------
+  const NAME_IDEAS = [
+    [['グラフィティマンの日常', 'Pixel', 42], ['渋谷ペイント倶楽部', 'SunnyVi', 58], ['壁と夜と渋谷', 'Mocha', 31]],
+    [['原宿コミュニティ', 'Kawaii', 24], ['朝7時のキャットストリート', 'ZenGarden', 49], ['宮下パーク常連会', 'Starry', 18]],
+    [['道玄坂グループ', 'foodie', 37], ['替え玉は文化', 'o_cean', 66], ['坂の上のラーメン', 'Dreamy', 29]],
+  ];
+  CIRCLES.forEach((c, i) => {
+    c.votes = NAME_IDEAS[i].map(([name, by, likes], k) => ({ name, by, likes, liked: false, founder: k === 0 }));
+    c.votes[0].likes = Math.max.apply(null, c.votes.map((v) => v.likes)) + 7;   /* 現行名が1位 */
+  });
+
+  // ---- 最終セクション -------------------------------------------------------
+  const NS_STEPS = [
+    ['撮影する', '今いる場所でカメラを使って撮影。'],
+    ['クエストを考える', 'サークルのお題を自由に考えてください。'],
+    ['サークルに名前をつける', '最初の名前を自由に決めれる。<br>＊ただし、サークルの名前は投票制なので、変わる可能性があります。'],
+  ];
+  const nsStrip = document.createElement('div');
+  nsStrip.className = 'circle-strip newspot';
+  nsStrip.innerHTML = '<div class="strip-title"><div class="qnav">'
+    + '<button class="qn-i on" type="button"><span class="qn-t">サークルを設立する</span></button>'
+    + '</div></div>';
+  const nsBody = document.createElement('div');
+  nsStrip.appendChild(nsBody);
+  col.insertBefore(nsStrip, col.lastElementChild);
+
+  function nsRenderEmpty() {
+    nsBody.className = 'ns-onb';
+    nsBody.innerHTML = '<img class="ns-bg" src="../../assets/images/create_circle_bg.png" alt="">'
+      + '<span class="ns-bg-veil"></span>'
+      + '<div class="ns-lead">サークルの作り方</div>'
+      + '<div class="ns-steps">' + NS_STEPS.map((s, i) =>
+        '<div class="ns-step"><span class="n">' + (i + 1) + '</span>'
+        + '<span class="sc"><b>' + s[0] + '</b><span>' + s[1] + '</span></span></div>').join('') + '</div>';
+    nsStrip.querySelector('.qn-t').textContent = 'サークルを設立する';
+  }
+  function nsRenderFounded() {
+    const n = nsCreated;
+    nsBody.className = 'ns-founded';
+    nsBody.innerHTML = '<div class="fphoto"><img src="' + n.photo + '" alt="">'
+      + '<span class="badge">CLEARED · 1 / 1</span></div>'
+      + '<div class="frow"><span class="fname"></span>'
+      + '<button class="fvote" type="button"><img src="../../assets/icons/icon_like.png" alt="">名前を投票で決める</button></div>'
+      + '<div class="fmeta"></div>';
+    nsBody.querySelector('.fname').textContent = n.name;
+    nsBody.querySelector('.fmeta').textContent = '半径 ' + radLabel(n.radius)
+      + ' · メンバー 1人 · 投票権 ' + tickets + '個';
+    nsBody.querySelector('.fvote').addEventListener('click', () => nvOpen(n));
+    nsStrip.querySelector('.qn-t').textContent = n.quest.title;
+  }
+  const radLabel = (r) => (r >= 1000 ? '1.0km' : r + 'm');
+  nsRenderEmpty();
+
+  // ---- マップ側 ------------------------------------------------------------
+  function areaLayerIds() {
+    const ids = ['area-fill', 'area-glow-wide', 'area-glow-mid', 'area-rib-lo', 'area-rib-hi'];
+    WALL_BANDS.forEach((b) => ids.push('area-wall-' + b[0]));
+    return ids;
+  }
+  function areaVisible(on) {
+    const m = window.EarthMap && EarthMap.map; if (!m) return;
+    areaLayerIds().forEach((id) => {
+      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+    });
+  }
+  const NS_POP = '<div class="qp"><div class="qp-title"></div><div class="qp-sub"></div></div>';
+  let nsMarker = null, meMarker = null;
+  function nsMountEl() {
+    const el = document.createElement('div');
+    el.className = 'ns-mount';
+    el.innerHTML = '<div class="qp-mount ns-pop"><div class="qp-back">' + NS_POP + '</div>' + NS_POP + '</div>';
+    el.querySelectorAll('.qp-title').forEach((e) => { e.textContent = 'サークルを作成！'; });
+    el.querySelectorAll('.qp-sub').forEach((e) => { e.textContent = '今いる場所で写真と撮って、サークルを作成できます。'; });
+    return el;
+  }
+  function meDotEl() {
+    const el = document.createElement('div');
+    el.className = 'me-dot';
+    el.innerHTML = '<span class="halo"></span><span class="core"></span>';
+    return el;
+  }
+  function setNewSpot(on, force) {
+    if (nsMode === on && !force) return;
+    nsMode = on;
+    const map = window.EarthMap && EarthMap.map;
+    if (!on) {
+      if (nsMarker) { nsMarker.remove(); nsMarker = null; }
+      if (meMarker) { meMarker.remove(); meMarker = null; }
+      qpMount.style.display = '';
+      areaVisible(true);
+      renderBoard();
+      focusCircle();
+      return;
+    }
+    mapPost.classList.remove('done');
+    if (!map) return;
+    hdCircle.textContent = nsCreated ? nsCreated.name : 'この場所';
+    cbName.textContent = hdCircle.textContent;
+    cbDesc.textContent = nsCreated ? ('半径 ' + radLabel(nsCreated.radius) + ' · メンバー 1人')
+      : 'どのサークルにも属していません';
+    if (nsCreated) {
+      if (nsMarker) { nsMarker.remove(); nsMarker = null; }
+      if (meMarker) { meMarker.remove(); meMarker = null; }
+      qpMount.style.display = '';
+      areaVisible(true);
+      areaMove(map, nsCreated.center, nsCreated.radius);
+      placePopup(map, nsCreated.center);
+      tickHero();
+      map.stop();
+      map.easeTo({ center: nsCreated.center, zoom: questZoom(nsCreated.center, nsCreated.radius),
+        pitch: 60, bearing: 0, duration: 900, padding: { top: 70, bottom: 0 } });
+      return;
+    }
+    areaVisible(true);
+    qpMount.style.display = 'none';
+    areaMove(map, NS_CENTER, NS_RADIUS, { radius: NS_RADIUS, unclaimed: true });
+    if (!meMarker) {
+      meMarker = new maplibregl.Marker({ element: meDotEl(), anchor: 'center' })
+        .setLngLat(NS_CENTER).addTo(map);
+    }
+    if (!nsMarker) {
+      nsMarker = new maplibregl.Marker({ element: nsMountEl(), anchor: 'center', offset: [0, QP_OFFSET_Y] })
+        .setLngLat(NS_CENTER).addTo(map);
+    }
+    map.stop();
+    map.easeTo({ center: NS_CENTER, zoom: questZoom(NS_CENTER, NS_RADIUS), pitch: 60, bearing: 0,
+      duration: 900, padding: { top: 70, bottom: 0 } });
+  }
+
+  // ---- 設立フロー ----------------------------------------------------------
+  const csView = document.getElementById('csView');
+  const csNext = document.getElementById('csNext');
+  const csRad = document.getElementById('csRad');
+  const csQt = document.getElementById('csQt');
+  const csQd = document.getElementById('csQd');
+  const csNameIn = document.getElementById('csName');
+  const CS_PANES = ['area', 'quest', 'name'];
+  const CS_PHOTO = '../../assets/sample/reel/reel006.jpg';
+  let csPane = 0;
+
+  function csOpen() {
+    csPane = 0;
+    csQt.value = ''; csQd.value = ''; csNameIn.value = ''; csRad.value = 400;
+    csRadSync();
+    csView.dataset.mode = 'cam';
+    csView.classList.add('on');
+    csView.setAttribute('aria-hidden', 'false');
+    phone.classList.remove('light-status');
+  }
+  function csClose() {
+    csView.classList.remove('on');
+    csView.setAttribute('aria-hidden', 'true');
+    phone.classList.remove('light-status');
+  }
+  function csRadSync() {
+    const r = +csRad.value;
+    document.getElementById('csRv').textContent = r >= 1000 ? '1.0' : r;
+    document.getElementById('csRu').textContent = r >= 1000 ? 'km' : 'm';
+    const d = 54 + (r / 1000) * 156;
+    const ring = document.getElementById('csRing');
+    ring.style.width = d + 'px'; ring.style.height = d + 'px';
+  }
+  function csPaneSync() {
+    csView.dataset.mode = 'form';
+    phone.classList.add('light-status');
+    CS_PANES.forEach((k, i) => {
+      csView.querySelector('.cs-pane[data-pane="' + k + '"]').classList.toggle('on', i === csPane);
+    });
+    document.getElementById('csStepLbl').textContent = (csPane + 1) + ' / 3';
+    csNext.textContent = csPane === 2 ? 'サークルを設立する' : '次へ';
+    csValid();
+  }
+  function csValid() {
+    let ok = true;
+    if (csPane === 1) ok = !!csQt.value.trim();
+    if (csPane === 2) ok = !!csNameIn.value.trim();
+    csNext.disabled = !ok;
+  }
+  csRad.addEventListener('input', csRadSync);
+  csQt.addEventListener('input', csValid);
+  csNameIn.addEventListener('input', csValid);
+  document.getElementById('csClose').addEventListener('click', csClose);
+  document.getElementById('csShot').addEventListener('click', () => { csPane = 0; csPaneSync(); });
+  document.getElementById('csBack').addEventListener('click', () => {
+    if (csPane === 0) { csView.dataset.mode = 'cam'; phone.classList.remove('light-status'); return; }
+    csPane--; csPaneSync();
+  });
+  csNext.addEventListener('click', () => {
+    if (csNext.disabled) return;
+    if (csPane < 2) { csPane++; csPaneSync(); return; }
+    csFound();
+  });
+  function csFound() {
+    const r = +csRad.value;
+    const name = csNameIn.value.trim();
+    nsCreated = {
+      name, radius: r, center: NS_CENTER, photo: CS_PHOTO, isNew: true,
+      desc: '半径 ' + radLabel(r) + ' · メンバー 1人',
+      quest: { title: csQt.value.trim(), venue: 'この場所', spot: NS_CENTER,
+        date: jpDate(TODAY) + ' 19:00–23:00', desc: csQd.value.trim() },
+      votes: [{ name, by: 'Pixel', likes: 1, liked: false, founder: true }],
+    };
+    tickets++;
+    document.getElementById('csDonePhoto').src = CS_PHOTO;
+    document.getElementById('csDoneName').textContent = name;
+    document.getElementById('csDoneQuest').textContent = nsCreated.quest.title;
+    document.getElementById('csDoneMeta').textContent = '半径 ' + radLabel(r) + ' · メンバー 1人';
+    csView.dataset.mode = 'done';
+    phone.classList.remove('light-status');
+  }
+  document.getElementById('csDoneGo').addEventListener('click', () => {
+    csClose();
+    nsRenderFounded();
+    setNewSpot(true, true);
+    col.scrollTop = Math.max(0, nsStrip.offsetTop);
+  });
+
+  // ---- サークル名の投票 ----------------------------------------------------
+  const nvView = document.getElementById('nvView');
+  const nvList = document.getElementById('nvList');
+  const nvInput = document.getElementById('nvInput');
+  const nvSend = document.getElementById('nvSend');
+  let nvCircle = null;
+
+  function nvOpen(c) {
+    nvCircle = c || CIRCLES[active];
+    nvInput.value = ''; nvSend.disabled = true;
+    document.getElementById('nvTkRow').classList.remove('warn');
+    nvRender();
+    nvView.classList.add('on');
+    nvView.setAttribute('aria-hidden', 'false');
+    phone.classList.add('light-status');
+  }
+  function nvClose() {
+    nvView.classList.remove('on');
+    nvView.setAttribute('aria-hidden', 'true');
+    phone.classList.remove('light-status');
+  }
+  function awardTicket() {
+    tickets++;
+    if (nvView.classList.contains('on')) nvRender();
+    if (nsCreated && nsBody.classList.contains('ns-founded')) nsRenderFounded();
+  }
+  function nvRender() {
+    const c = nvCircle; if (!c) return;
+    // FLIP — 並び替えを滑らかに見せるため、描き直す前の行位置を控える
+    const prevPos = new Map();
+    nvList.querySelectorAll('.nv-row').forEach(r => prevPos.set(r.dataset.vote, r.getBoundingClientRect().top));
+    c.votes.sort((a, b) => (b.likes - a.likes) || String(a.name).localeCompare(String(b.name), 'ja'));
+    const top = c.votes[0];
+    if (c.name !== top.name) {
+      c.name = top.name;
+      if (c.isNew) { nsRenderFounded(); if (nsMode) setNewSpot(true, true); }
+      else if (!nsMode) renderBoard();
+    }
+    document.getElementById('nvNow').textContent = top.name;
+    document.getElementById('nvSub').textContent = c.votes.length
+      + '件の候補 · いいねが一番多い名前がサークル名になります。';
+    document.getElementById('nvTk').textContent = tickets;
+    nvList.innerHTML = '';
+    c.votes.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'nv-row' + (i === 0 ? ' top' : '');
+      row.dataset.vote = v.name;
+      row.innerHTML = '<span class="rk">' + (i + 1) + '</span>'
+        + '<span class="col"><span class="nm"></span>'
+        + '<span class="by"></span></span>'
+        + '<button class="nv-like' + (v.liked ? ' liked' : '') + '" type="button" aria-pressed="' + !!v.liked + '">'
+        + '<img src="../../assets/icons/icon_good.png" alt=""><span>' + v.likes + '</span></button>';
+      row.querySelector('.nm').textContent = v.name;
+      row.querySelector('.by').textContent = '@' + v.by.toLowerCase() + (v.founder ? ' · founder' : '');
+      row.querySelector('.nv-like').addEventListener('click', () => {
+        if (!v.liked && tickets <= 0) {
+          row.classList.add('no-tk');
+          document.getElementById('nvTkRow').classList.add('warn');
+          setTimeout(() => row.classList.remove('no-tk'), 400);
+          return;
+        }
+        v.liked = !v.liked;
+        v.likes += v.liked ? 1 : -1;
+        tickets += v.liked ? -1 : 1;
+        document.getElementById('nvTkRow').classList.remove('warn');
+        nvRender();
+      });
+      nvList.appendChild(row);
+    });
+    if (prevPos.size) {
+      nvList.querySelectorAll('.nv-row').forEach(r => {
+        const prev = prevPos.get(r.dataset.vote); if (prev == null) return;
+        const dy = prev - r.getBoundingClientRect().top; if (!dy) return;
+        r.style.transition = 'none';
+        r.style.transform = 'translateY(' + dy + 'px)';
+        requestAnimationFrame(() => {
+          r.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+          r.style.transform = 'translateY(0)';
+        });
+      });
+    }
+  }
+  nvInput.addEventListener('input', () => { nvSend.disabled = !nvInput.value.trim(); });
+  nvSend.addEventListener('click', () => {
+    const v = nvInput.value.trim(); if (!v || !nvCircle) return;
+    nvCircle.votes.push({ name: v, by: 'Pixel', likes: 0, liked: false });
+    nvInput.value = ''; nvSend.disabled = true;
+    nvRender();
+  });
+  document.getElementById('nvBack').addEventListener('click', nvClose);
+  hdCircle.addEventListener('click', () => {
+    if (nsMode) { if (nsCreated) gvOpen(nsCreated); return; }
+    gvOpen(CIRCLES[active]);
+  });
+
+  /* ---- good 残高 と サークル名投票ダイアログ -------------------------------- */
+  let goods = 521;
+  const gvVeil = document.getElementById('gvVeil');
+  const gvList = document.getElementById('gvList');
+  const gvInput = document.getElementById('gvInput');
+  const gvSend = document.getElementById('gvSend');
+  let gvCircle = null;
+
+  function goodSync() {
+    document.getElementById('meGood').textContent = 'x' + goods;
+    document.getElementById('gvBal').textContent = goods;
+  }
+  function msSync() {
+    CIRCLES.forEach((c) => {
+      if (c.mstat) c.mstat.querySelector('.cnt .v').textContent = c.timeline.length;
+    });
+  }
+  function gvOpen(c) {
+    gvCircle = c || tlCircle || CIRCLES[active];
+    gvInput.value = ''; gvSend.disabled = true;
+    gvRender();
+    gvVeil.classList.add('on');
+    gvVeil.setAttribute('aria-hidden', 'false');
+  }
+  function gvClose() {
+    gvVeil.classList.remove('on');
+    gvVeil.setAttribute('aria-hidden', 'true');
+  }
+  function gvRender() {
+    const c = gvCircle; if (!c) return;
+    const prevPos = new Map();
+    gvList.querySelectorAll('.gv-row').forEach(r => prevPos.set(r.dataset.vote, r.getBoundingClientRect().top));
+    c.votes.sort((a, b) => (b.likes - a.likes) || String(a.name).localeCompare(String(b.name), 'ja'));
+    const top = c.votes[0];
+    if (top && c.name !== top.name) {
+      c.name = top.name;
+      document.getElementById('tlName').textContent = c.name;
+      hdCircle.textContent = c.name;
+      cbName.textContent = c.name;
+      if (!nsMode) renderBoard();
+    }
+    goodSync();
+    gvList.innerHTML = '';
+    c.votes.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'gv-row' + (i === 0 ? ' top' : '');
+      row.dataset.vote = v.name;
+      row.innerHTML = '<span class="rk">' + (i + 1) + '</span>'
+        + '<span class="col"><span class="nm"></span><span class="by"></span></span>'
+        + '<button class="gv-btn' + (v.liked ? ' voted' : '') + '" type="button" aria-pressed="' + !!v.liked + '">'
+        + '<img src="../../assets/icons/icon_good.png" alt="good"><span>' + v.likes + '</span></button>';
+      row.querySelector('.nm').textContent = v.name;
+      row.querySelector('.by').textContent = '@' + String(v.by).toLowerCase() + (v.founder ? ' · founder' : '');
+      row.querySelector('.gv-btn').addEventListener('click', () => {
+        if (!v.liked && goods <= 0) {
+          row.classList.add('shake');
+          setTimeout(() => row.classList.remove('shake'), 400);
+          return;
+        }
+        v.liked = !v.liked;
+        v.likes += v.liked ? 1 : -1;
+        goods += v.liked ? -1 : 1;
+        gvRender();
+      });
+      gvList.appendChild(row);
+    });
+    if (prevPos.size) {
+      gvList.querySelectorAll('.gv-row').forEach(r => {
+        const prev = prevPos.get(r.dataset.vote); if (prev == null) return;
+        const dy = prev - r.getBoundingClientRect().top; if (!dy) return;
+        r.style.transition = 'none';
+        r.style.transform = 'translateY(' + dy + 'px)';
+        requestAnimationFrame(() => {
+          r.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+          r.style.transform = 'translateY(0)';
+        });
+      });
+    }
+  }
+  gvInput.addEventListener('input', () => { gvSend.disabled = !gvInput.value.trim(); });
+  gvSend.addEventListener('click', () => {
+    const v = gvInput.value.trim(); if (!v || !gvCircle) return;
+    gvCircle.votes.push({ name: v, by: 'Pixel', likes: 0, liked: false });
+    gvInput.value = ''; gvSend.disabled = true;
+    gvRender();
+  });
+  document.getElementById('gvClose').addEventListener('click', gvClose);
+  gvVeil.addEventListener('click', (ev) => { if (ev.target === gvVeil) gvClose(); });
+  document.getElementById('tlGood').addEventListener('click', () => gvOpen(tlCircle));
+  goodSync();
+  msSync();
+
   renderBoard();
   build();
 
@@ -3340,7 +4263,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
      拡大表示（feed-max）で開く。右へスライドすると最新のお題に戻れる。 */
   (function () {
     const q = new URLSearchParams(location.search);
-    for (const [k, v] of Object.entries(window.__APP_PARAMS__ || {})) q.set(k, String(v));
     if (q.has('embed')) document.body.classList.add('embed');
     if (!q.has('circle')) return;
     const ci = Math.max(0, Math.min(CIRCLES.length - 1, parseInt(q.get('circle'), 10) || 0));
@@ -3522,26 +4444,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   }
   document.getElementById('crSend').addEventListener('click', send);
   crInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
-
-  /* ---- Deep link（app/ の画面だけページ用） ------------------------------
-     ?view=profile|chatlist|chatroom : 該当ビューを開いた状態で起動する */
-  (function () {
-    const v = (window.__APP_PARAMS__ && window.__APP_PARAMS__.view) ||
-        new URLSearchParams(location.search).get('view');
-    if (!v) return;
-    setTimeout(() => {
-      if (v === 'profile') document.getElementById('meBtn').click();
-      else if (v === 'chatlist') document.getElementById('chatBtn').click();
-      else if (v === 'chatroom') {
-        document.getElementById('chatBtn').click();
-        const row = clList.querySelector('.cl-row');
-        if (row) row.click();
-      }
-    }, 700);
-  })();
 })();
 </script>
 
 </body>
 </html>
-
