@@ -56,9 +56,11 @@ html, body {
   --vw: 402px; --vh: 874px;
   --safe-top: 60px;                              /* SafeArea 上端インセット */
   --safe-bottom: 34px;                           /* SafeArea 下端（ホームインジケータ） */
-  --map-ratio: calc(3 / 4);
+  --map-ratio: calc(1 / 2);                      /* = 従来 3/4 の 2/3 */
   --map-r: 24px;                                 /* r */
   --map-gap: 34px;                               /* d = リストがマップに重なる量（= タイトル高）*/
+  --post-btm: calc(var(--safe-top) + 41px);      /* 投稿ボタンの下端 */
+  --mq-h: 54px;                                  /* マップ内クエストタイトルの 2 段ブロック高 */
   --map-h: calc(var(--vw) * var(--map-ratio));   /* h */
   --feed-h: calc(var(--vh) - var(--map-h) + var(--map-gap));                  /* lh */
   --feed-pad-top: 0px;                           /* a = タイトルをマップの下に完全に潜らせる */
@@ -517,22 +519,54 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    投稿可能 = カメラ（colorful gradient の WdIconButton）
    投稿済み = 自分の投稿サムネイル。過去のお題を見ている間は出さない。
    ============================================================ */
+/* 投稿ボタンは検索アイコン（左上）の対極 — マップ右上 */
 .map-post {
-  position: absolute; left: 0; right: 0; z-index: 94;   /* 最前面 */
-  bottom: auto; top: calc(var(--map-h) - 40px); height: 0;  /* マップView 内の下センター */
-  display: flex; align-items: center; justify-content: center;
+  position: absolute; left: auto; right: 14px; z-index: 95;
+  bottom: auto; top: var(--safe-top); height: 44px;
+  display: flex; align-items: center; justify-content: flex-end;
   transition: opacity .28s var(--ease-out), transform .3s var(--ease-out);
 }
-.map-post .mp-cam { width: 58px; height: 58px;
+/* QuestPopup(マップ) — エリア中心はサークル名のみ。
+   クエストタイトルはマップの下（.strip-title）で見せる。 */
+.qp-mount.qp-map { width: 340px; pointer-events: auto; cursor: pointer; }
+.qp-mount.qp-map .qp-eyebrow { display: none; }
+.qp-mount.qp-map .qp-title { display: none; }
+.qp-mount.qp-map .qp-back { display: none; }   /* カラフルな外廓でなく黒影で読ませる */
+.qp-mount.qp-map .qp-name { font-weight: 400; font-size: 20px; color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
+.qp-mount.qp-map .qp-time { display: none; }   /* カウントダウンは出さない */
+.qp-meta { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 0; }
+.qp-meta > span { display: flex; align-items: center; gap: 5px; }
+.qp-meta img { width: 13px; height: 13px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.qp-name { font: 400 15px var(--font-jp); color: #fff; white-space: nowrap;
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
+.qp-mount.qp-map .qp-time { margin-top: 6px; font-size: 21px; font-weight: 300; display: none; }
+.qp-back .qp-meta { visibility: visible; }
+.qp-back .qp-name { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.phone.feed-max .qp-mount.qp-map { opacity: 0; transition: opacity .28s var(--ease-out); }
+/* エリアの中心に浮かぶサークル名（旧・クエストタイトルの位置） */
+.area-name {
+  pointer-events: auto; cursor: pointer; text-align: center; max-width: 240px;
+  font: 700 18px/1.34 var(--font-jp); color: #0a0a0d; letter-spacing: .01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(255,255,255,.9), 0 0 10px rgba(255,255,255,.8), 0 0 22px rgba(255,255,255,.6);
+}
+.map-post .mp-cam { width: 38px; height: 38px;
   animation: mappulse 2.4s var(--ease-out) infinite; }
-.map-post .mp-cam img { width: 25px; height: 25px;
+/* 枚線はグラデーションでなく白 */
+.map-post .mp-cam::after { background: rgba(255,255,255,.9); }
+.map-post .mp-cam img { width: 19px; height: 19px;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
 @keyframes mappulse {
   0%   { box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow), 0 0 0 0 rgba(255,62,136,.34); }
   100% { box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow), 0 0 0 14px rgba(255,62,136,0); }
 }
 .map-post .mp-mine {
-  display: none; width: 54px; height: 54px; border-radius: 50%; overflow: hidden;
+  display: none; width: 38px; height: 38px; border-radius: 50%; overflow: hidden;
   padding: 0; border: 0; background: #101014; cursor: pointer;
   -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent;
   box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 4px 14px rgba(0,0,0,.4);
@@ -697,6 +731,34 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .lock-note .ldir img { width: 20px; height: 20px; object-fit: contain;
   filter: brightness(0) invert(1) opacity(.8); }
 
+/* マップ内のクエストタイトル — 「クエスト」ラベル + タイトルの 2 段。
+   ブロック中心を「投稿ボタン下端 〜 マップ下端」の中間に置く。 */
+.map-quest {
+  position: absolute; left: 0; right: 0; z-index: 93; pointer-events: none;
+  top: calc(var(--map-h) - var(--map-gap) - 4px - var(--mq-h));
+  height: var(--mq-h);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .28s var(--ease-out);
+}
+.mq-pop { width: calc(100% - 32px); }   /* 両脇 16px を確保 */
+.mq-pop .qp { animation: none; }
+.mq-pop .mq-cap {
+  display: block; font-family: var(--font-jp); font-weight: 500; font-size: 13px;
+  line-height: 1; letter-spacing: .18em;
+}
+.mq-pop .qp-title { margin-top: 5px; font-size: 26px; font-weight: 900;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qp-back .mq-cap { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
+  background: var(--gradient-colorful-linear);
+  -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.qp-mount > .qp .mq-cap { color: #fff; -webkit-text-stroke: 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
+.phone.feed-max .map-quest { opacity: 0; }
+.phone:has(.nav-push.on) .map-quest,
+.phone:has(.tl-compose.on) .map-quest,
+.phone:has(.tl-sheet.on) .map-quest { opacity: 0; }
+
+/* マップ内のクエストタイトルの下にリストが来る */
 .strip-title .qedit {
   position: absolute; right: 12px; top: 6px; z-index: 2;
   flex: none; pointer-events: auto; cursor: pointer; display: none;
@@ -1303,8 +1365,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   box-sizing: border-box;
   padding: var(--safe-top) 16px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,.62) 0%, rgba(0,0,0,.46) 34%, rgba(0,0,0,.20) 68%, rgba(0,0,0,0) 100%);
+  background: none;
   pointer-events: none;
 }
 .app-header > * { pointer-events: auto; }
@@ -1783,7 +1844,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    WdMemberStatus — サークル項目の左下。参加者アイコン＋タイムラインの投稿数。
    タップでサークルタイムラインのモーダルシートを開く。
    ============================================================ */
-.mstat { position: absolute; left: 12px; bottom: calc(var(--safe-bottom) + 10px); z-index: 74; pointer-events: auto;
+.mstat { position: absolute; left: 12px; bottom: 4px; z-index: 74; pointer-events: auto;
   appearance: none; border: 0; cursor: pointer; display: flex; align-items: center; gap: 8px;
   height: 40px; padding: 0 13px 0 8px; border-radius: var(--radius-pill);
   background: var(--lg-tint, rgba(0,0,0,.51));
@@ -1923,17 +1984,27 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
         <!-- APP HEADER — スクリムがそのままヘッダーの背景。左=ユーザー / 右=チャット -->
         <header class="app-header">
-          <div class="me-wrap">
-            <button class="me-btn" id="meBtn" aria-label="プロフィール">
-              <img src="../../assets/sample/user/user007.jpg" alt="">
-            </button>
-            <span class="me-good"><img src="../../assets/icons/icon_good.png" alt="good"><span id="meGood">x521</span></span>
-          </div>
-          <span class="hd-circle" id="hdCircle">グラフィティマンの日常</span>
           <button class="chat-btn wd-icon-btn" id="searchBtn" aria-label="検索">
             <img src="../../assets/icons/icon_search.png" alt="">
           </button>
+          <span class="hd-circle" id="hdCircle" hidden>グラフィティマンの日常</span>
         </header>
+
+        <!-- マップ下部センター — 投稿ボタン / 投稿済みサムネイル -->
+        <div class="map-post" id="mapPost">
+          <button class="mp-cam wd-icon-btn color" id="mpCam" type="button" aria-label="クエストを投稿">
+            <img src="../../assets/icons/icon_camera.png" alt="">
+          </button>
+          <button class="mp-mine" id="mpMine" type="button" aria-label="自分の投稿"><img alt=""></button>
+        </div>
+
+        <!-- マップ内下方 — クエストタイトル（ラベル + タイトルの 2 段） -->
+        <div class="map-quest" id="mapQuest">
+          <div class="qp-mount mq-pop">
+            <div class="qp-back"><div class="qp"><span class="mq-cap">クエスト</span><div class="qp-title mq-t"></div></div></div>
+            <div class="qp"><span class="mq-cap">クエスト</span><div class="qp-title mq-t"></div></div>
+          </div>
+        </div>
 
         <!-- WdCircleBar in the header — follows the vertically-active circle -->
         <div class="wd-circle-tool">
@@ -1952,16 +2023,16 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
               <img src="../../assets/icons/icon_comment.png" alt="">
               <span class="wd-badge"><span>3</span></span>
             </button>
+            <div class="me-wrap">
+              <button class="me-btn" id="meBtn" aria-label="プロフィール">
+                <img src="../../assets/sample/user/user007.jpg" alt="">
+              </button>
+              <span class="me-good"><img src="../../assets/icons/icon_good.png" alt="good"><span id="meGood">x521</span></span>
+            </div>
           </div>
         </div>
 
-        <!-- マップ右下 — 投稿ボタン / 投稿済みサムネイル -->
-        <div class="map-post" id="mapPost">
-          <button class="mp-cam wd-icon-btn color" id="mpCam" type="button" aria-label="クエストを投稿">
-            <img src="../../assets/icons/icon_camera.png" alt="">
-          </button>
-          <button class="mp-mine" id="mpMine" type="button" aria-label="自分の投稿"><img alt=""></button>
-        </div>
+        <!-- クエスト（WdQuestPopup）はエリア中心のマーカーとして JS が立てる -->
 
         <!-- POST FEED — quest pager × 16:8 landscape videos -->
         <div class="feed-sheet" id="feedSheet">
@@ -2468,12 +2539,24 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   const cbName = document.getElementById('cbName');
   const cbDesc = document.getElementById('cbDesc');
   const cbCover = document.getElementById('cbCover');
-  const hdCircle = document.getElementById('hdCircle');
+  const hdCircleEl = document.getElementById('hdCircle');
+  // サークル名はエリアの中心（マップ上のマーカー）に表示する
+  const areaNameEl = document.createElement('div');
+  areaNameEl.className = 'area-name';
+  areaNameEl.textContent = hdCircleEl.textContent;
+  const hdCircle = {
+    get textContent() { return areaNameEl.textContent; },
+    set textContent(v) { hdCircleEl.textContent = v; areaNameEl.textContent = v; },
+    addEventListener(...a) { hdCircleEl.addEventListener(...a); qpMount.addEventListener(...a); },
+  };
   // ---- WdQuestPopup — マップのエリア上空に直接浮かべる ----------------
   const qpMount = document.createElement('div');
-  qpMount.className = 'qp-mount';
+  qpMount.className = 'qp-mount qp-map';
   const qpBlock = '<div class="qp sm">'
     + '<div class="qp-eyebrow"><span class="qp-label">Quest</span></div>'
+    + '<div class="qp-meta">'
+    +   '<span><img src="../../assets/icons/icon_pin_location.png" alt=""><span class="qp-name"></span></span>'
+    + '</div>'
     + '<div class="qp-title"></div>'
     + '<div class="qp-time"></div>'
     + '</div>';
@@ -2488,9 +2571,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* offset Y: -28 = エリアの中心の少し上（DS の定位置）。過去お題リストは
      このボックスが残した帯に収める — ポップアップ側は動かさない。 */
   const QP_OFFSET_Y = -28;
+  /* pitch 60 では中心の lngLat がスクリーン上端寄りに投影されるため、
+     サークル名はエリア楕円の視覚中心まで下げる（ステータスバーに被らせない）。 */
+  const AREA_NAME_OFFSET_Y = 12;
+  // クエストはエリアの中心にマーカーとして立てる（画面平行）
   function placePopup(map, C) {
     if (!qpMarker) {
-      qpMarker = new maplibregl.Marker({ element: qpMount, anchor: 'center', offset: [0, QP_OFFSET_Y] })
+      qpMarker = new maplibregl.Marker({ element: qpMount, anchor: 'center',
+        pitchAlignment: 'viewport', rotationAlignment: 'viewport',
+        offset: [0, AREA_NAME_OFFSET_Y] })
         .setLngLat(C).addTo(map);
     } else {
       qpMarker.setLngLat(C);
@@ -2518,6 +2607,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const cards = mount.querySelectorAll('.qp');
     const put = (sel, txt) => mount.querySelectorAll(sel).forEach(e => { e.textContent = txt; });
     put('.qp-title', q.title);
+    put('.qp-name', c.name || (typeof hdCircleEl !== 'undefined' ? hdCircleEl.textContent : ''));
     cards.forEach(k => k.classList.remove('urgent', 'cleared'));
     if (!past && c.cleared) {
       cards.forEach(k => k.classList.add('cleared'));
@@ -2544,11 +2634,16 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   fsQpMount.className = 'qp-mount';
   fsQpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
   document.getElementById('fsQpBody').appendChild(fsQpMount);
+  const mqT = document.querySelectorAll('#mapQuest .mq-t');
+  const setMq = (v) => mqT.forEach((e) => { e.textContent = v; });
   function tickHero() {
     if (typeof nsMode !== 'undefined' && nsMode) {
       if (nsCreated) qpRender(qpMount, { cleared: false }, nsCreated.quest);
+      if (nsCreated) setMq(nsCreated.quest.title);
     } else {
       qpRender(qpMount, CIRCLES[active]);
+      const cq = (CIRCLES[active] && CIRCLES[active].quest) || {};
+      setMq(cq.title || '');
     }
     if (typeof fsCircle !== 'undefined' && fsCircle) {
       qpRender(fsQpMount, fsCircle, (typeof fsDay !== 'undefined' && fsDay) ? fsDay.quest : null);
@@ -2680,12 +2775,12 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (type === 'A' || type === 'AL') {
         // 一枚絵は縦・横で同じ幅。縦がボード高さに収まる幅を共通幅にする
         const w = Math.min(Math.round(H * P), MAXW);
-        t.push({ dx: 0, dy: 0, w, h: Math.round(w / (type === 'A' ? P : L)) });
+        t.push({ dx: 0, dy: 0, w, h: Math.round(w / (type === 'A' ? P : L)), k: type === 'A' ? 'P' : 'L' });
       } else if (type === 'C3') {
         // 横3枚 — 上下の余白をなくす（アスペクト比維持のまま最大高）
         const ah = Math.round((H - GAP * 2) / 3);
         const a = { h: ah, w: Math.round(ah * L) };
-        for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (a.h + GAP) * i, w: a.w, h: a.h });
+        for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (a.h + GAP) * i, w: a.w, h: a.h, k: 'L' });
       } else if (type === 'H' || type === 'I') {
         // 横1 + 縦3 — 列高にちょうど収まる幅（MAXW で頭打ちにしない）
         const wb = Math.round((H - GAP * 2.125) / 3.4653);
@@ -2693,29 +2788,30 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         const colW = wb * 3 + GAP * 2;
         const lh = Math.round(colW / L);
         if (type === 'H') {
-          t.push({ dx: 0, dy: 0, w: colW, h: lh });
-          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: lh + GAP, w: wb, h: hb });
+          t.push({ dx: 0, dy: 0, w: colW, h: lh, k: 'L' });
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: lh + GAP, w: wb, h: hb, k: 'P' });
         } else {
-          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb });
-          t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh });
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh, k: 'L' });
         }
       } else if (type === 'B' || type === 'C') {
         const ar = type === 'B' ? P : L;
         const ah = Math.round((H - GAP) / 2);
         const a = type === 'C' ? { h: ah, w: Math.round(ah * L) } : fit(ah, ar);
-        t.push({ dx: 0, dy: 0, w: a.w, h: a.h });
-        t.push({ dx: 0, dy: a.h + GAP, w: a.w, h: a.h });
+        const ak = type === 'B' ? 'P' : 'L';
+        t.push({ dx: 0, dy: 0, w: a.w, h: a.h, k: ak });
+        t.push({ dx: 0, dy: a.h + GAP, w: a.w, h: a.h, k: ak });
       } else if (type === 'F' || type === 'G') {
         // 縦1 + 横1 は同じ幅。共通幅 w に対し h = w/P + w/L + GAP = H
         const w = Math.min(Math.round((H - GAP) / (1 / P + 1 / L)), MAXW);
         const p1 = { w, h: Math.round(w / P) };
         const l1 = { w, h: Math.round(w / L) };
         if (type === 'F') {
-          t.push({ dx: 0, dy: 0, w, h: p1.h });
-          t.push({ dx: 0, dy: p1.h + GAP, w, h: l1.h });
+          t.push({ dx: 0, dy: 0, w, h: p1.h, k: 'P' });
+          t.push({ dx: 0, dy: p1.h + GAP, w, h: l1.h, k: 'L' });
         } else {
-          t.push({ dx: 0, dy: 0, w, h: l1.h });
-          t.push({ dx: 0, dy: l1.h + GAP, w, h: p1.h });
+          t.push({ dx: 0, dy: 0, w, h: l1.h, k: 'L' });
+          t.push({ dx: 0, dy: l1.h + GAP, w, h: p1.h, k: 'P' });
         }
       } else {
         const hb = Math.round((H - GAP * 1.5625) / 1.6328);
@@ -2723,13 +2819,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         const colW = wb * 2 + GAP;
         const ht = Math.round(colW * P);
         if (type === 'D') {
-          t.push({ dx: 0, dy: 0, w: colW, h: ht });
-          t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb });
-          t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb });
+          t.push({ dx: 0, dy: 0, w: colW, h: ht, k: 'L' });
+          t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb, k: 'P' });
+          t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb, k: 'P' });
         } else {
-          t.push({ dx: 0, dy: 0, w: wb, h: hb });
-          t.push({ dx: wb + GAP, dy: 0, w: wb, h: hb });
-          t.push({ dx: 0, dy: hb + GAP, w: colW, h: ht });
+          t.push({ dx: 0, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: wb + GAP, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: ht, k: 'L' });
         }
       }
       return t;
@@ -2739,7 +2835,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
     // ひとつのお題の投稿を 1 列分だけ置く。次に使う投稿の index を返す
     function addColumnFrom(posts, idx, day) {
-      const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34);
+      const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34) + 4;
       const H = rail.clientHeight - PT;
       if (H <= 40) return posts.length;
       const remain = posts.length - idx;
@@ -2752,25 +2848,43 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       }
       if (!type) { type = TYPES_SPARSE[c.colIdx % TYPES_SPARSE.length]; c.colIdx++; }
       const tiles = layoutColumn(type, H).slice(0, remain);
-      // 列幅は画面幅の 90% まで。超える列は比率を保って縮小し、上下は中央寄せ
-      const cap = Math.round(rail.clientWidth * 0.9);
+      // 列幅は画面幅の 145% まで許可 — 横スクロールボードなので、幅より
+      // 「列高 = H を埋める」ことを優先する（上下に余白を残さない）
+      const cap = Math.round(rail.clientWidth * 1.45);
       const rawW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       if (rawW > cap) {
         const k = cap / rawW;
         tiles.forEach((t) => {
           t.dx = Math.round(t.dx * k); t.dy = Math.round(t.dy * k);
-          t.w = Math.round(t.w * k); t.h = Math.round(t.h * k);
+          t.w = Math.round(t.w * k);
         });
       }
+      /* 比率スナップ — 幅を基準に h を 9:16 / 16:9 に厳密に合わせ、行を再積みする。
+         横並びの整列（dx / w）は触らないので列内の継ぎ目はずれない。 */
+      const snap = () => {
+        tiles.forEach((t) => { t.h = Math.max(1, Math.round(t.w * (t.k === 'P' ? 1 / P : 1 / L))); });
+        const rows = [...new Set(tiles.map((t) => t.dy))].sort((a, b) => a - b);
+        let y = 0;
+        rows.forEach((ry) => {
+          const row = tiles.filter((t) => t.dy === ry);
+          row.forEach((t) => { t._ny = y; });
+          y += Math.max.apply(null, row.map((t) => t.h)) + GAP;
+        });
+        tiles.forEach((t) => { t.dy = t._ny; delete t._ny; });
+      };
+      snap();
       const colW0 = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used0 = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       // 縦の余りを埋める — 比率を保ったまま列高が H になるまで拡大（幅は cap まで）
       if (used0 > 0 && used0 < H) {
         const k2 = Math.min(H / used0, cap / colW0);
-        if (k2 > 1.001) tiles.forEach((t) => {
-          t.dx = Math.round(t.dx * k2); t.dy = Math.round(t.dy * k2);
-          t.w = Math.round(t.w * k2); t.h = Math.round(t.h * k2);
-        });
+        if (k2 > 1.001) {
+          tiles.forEach((t) => {
+            t.dx = Math.round(t.dx * k2); t.dy = Math.round(t.dy * k2);
+            t.w = Math.round(t.w * k2);
+          });
+          snap();
+        }
       }
       const colW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
@@ -3369,7 +3483,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return '#' + m(r) + m(g) + m(b);
   }
   function segColor(i) { return WALL_PAL[Math.min(WALL_PAL.length - 1, Math.round(i / WALL_N * (WALL_PAL.length - 1)))]; }
-  function wallH(R) { return Math.max(160, R * 0.39); }
+  function wallH(R) { return Math.max(80, R * 0.195); }
   /* カーテン面のフェード（DS: 下 66% → 34% で 36% → 70% で 14% → 上 0%）を
      10 バンドの押し出しでなめらかに近似し、最上部に天端リムを乗せる。 */
   const WALL_BANDS = (function () {
@@ -3529,7 +3643,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (EM.setCenter) EM.setCenter(C);
       map.stop();
       const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
-        padding: { top: 70, bottom: 0 } };
+        padding: { top: 0, bottom: 60 } };
       if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
     } catch (err) { console.warn('circle focus:', err); }
   }
@@ -3961,7 +4075,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       tickHero();
       map.stop();
       map.easeTo({ center: nsCreated.center, zoom: questZoom(nsCreated.center, nsCreated.radius),
-        pitch: 60, bearing: 0, duration: 900, padding: { top: 70, bottom: 0 } });
+        pitch: 60, bearing: 0, duration: 900, padding: { top: 0, bottom: 60 } });
       return;
     }
     areaVisible(true);
@@ -3977,7 +4091,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     }
     map.stop();
     map.easeTo({ center: NS_CENTER, zoom: questZoom(NS_CENTER, NS_RADIUS), pitch: 60, bearing: 0,
-      duration: 900, padding: { top: 70, bottom: 0 } });
+      duration: 900, padding: { top: 0, bottom: 60 } });
   }
 
   // ---- 設立フロー ----------------------------------------------------------
