@@ -10,6 +10,8 @@
 <!-- MapLibre GL JS — the real rendering engine (positron + globe projection) -->
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" />
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<!-- <image-slot> — 報酬の写真はユーザーがドロップして差し替える -->
+<script src="image-slot.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -60,7 +62,7 @@ html, body {
   --map-r: 24px;                                 /* r */
   --map-gap: 34px;                               /* d = リストがマップに重なる量（= タイトル高）*/
   --post-btm: calc(var(--safe-top) + 41px);      /* 投稿ボタンの下端 */
-  --mq-h: 54px;                                  /* マップ内クエストタイトルの 2 段ブロック高 */
+  --mq-h: 80px;                                  /* マップ内クエストブロック（サークル名 / のなかで、/ タイトル）*/
   --map-h: calc(var(--vw) * var(--map-ratio));   /* h */
   --feed-h: calc(var(--vh) - var(--map-h) + var(--map-gap));                  /* lh */
   --feed-pad-top: 0px;                           /* a = タイトルをマップの下に完全に潜らせる */
@@ -519,16 +521,17 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    投稿可能 = カメラ（colorful gradient の WdIconButton）
    投稿済み = 自分の投稿サムネイル。過去のお題を見ている間は出さない。
    ============================================================ */
-/* 投稿ボタンは検索アイコン（左上）の対極 — マップ右上 */
+/* 投稿ボタン — マップの右下。クエストタイトルの上に重なる（タイトル側の幅は変えない） */
 .map-post {
-  position: absolute; left: auto; right: 14px; z-index: 95;
-  bottom: auto; top: var(--safe-top); height: 44px;
+  position: absolute; left: auto; right: 14px; z-index: 96;
+  bottom: auto; top: calc(var(--map-h) - 4px - 38px); height: 38px;
   display: flex; align-items: center; justify-content: flex-end;
   transition: opacity .28s var(--ease-out), transform .3s var(--ease-out);
 }
 /* QuestPopup(マップ) — エリア中心はサークル名のみ。
    クエストタイトルはマップの下（.strip-title）で見せる。 */
-.qp-mount.qp-map { width: 340px; pointer-events: auto; cursor: pointer; }
+/* エリア中心のポップアップ — サークル名はクエストブロック内に移したため非表示 */
+.qp-mount.qp-map { display: none !important; }
 .qp-mount.qp-map .qp-eyebrow { display: none; }
 .qp-mount.qp-map .qp-title { display: none; }
 .qp-mount.qp-map .qp-back { display: none; }   /* カラフルな外廓でなく黒影で読ませる */
@@ -544,9 +547,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
 .qp-mount.qp-map .qp-time { margin-top: 6px; font-size: 21px; font-weight: 300; display: none; }
 .qp-back .qp-meta { visibility: visible; }
-.qp-back .qp-name { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
-  background: var(--gradient-colorful-linear);
-  -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.qp-back .qp-name { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
 .phone.feed-max .qp-mount.qp-map { opacity: 0; transition: opacity .28s var(--ease-out); }
 /* エリアの中心に浮かぶサークル名（旧・クエストタイトルの位置） */
 .area-name {
@@ -584,6 +587,141 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .phone:has(.tl-compose.on) .map-post,
 .phone:has(.nav-push.on) .app-header,
 .phone:has(.tl-compose.on) .app-header { opacity: 0; pointer-events: none; }
+/* ============================================================
+   MAP LIST — マップ左下。投稿ボタン（右下）と対称の同じコンポーネント。
+   タップでクエストボード（サークルごとのクエスト一覧）を開閉する。
+   ============================================================ */
+.map-list {
+  position: absolute; right: auto; left: 14px; z-index: 96;
+  bottom: auto; top: calc(var(--map-h) - 4px - 38px); height: 38px;
+  display: flex; align-items: center;
+  transition: opacity .28s var(--ease-out), transform .3s var(--ease-out);
+}
+.map-list .ml-btn { width: 38px; height: 38px; }
+.map-list .ml-btn::after { background: rgba(255,255,255,.9); }
+.map-list .ml-btn img { width: 18px; height: 18px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.phone.qb-mode .map-list .ml-btn {
+  background: rgba(255,255,255,.92); backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.phone.qb-mode .map-list .ml-btn img { filter: brightness(0); opacity: .82; }
+.phone.feed-max .map-list { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.phone:has(.nav-push.on) .map-list,
+.phone:has(.tl-compose.on) .map-list,
+.phone:has(.tl-sheet.on) .map-list { opacity: 0; pointer-events: none; }
+
+/* ============================================================
+   QUEST BOARD 状態 — グリッドのルールは変えず、サークルごとの帯の中身を
+   「そのサークルのクエスト一覧」に差し替える。上下スクロールでサークルが変わる。
+   ============================================================ */
+.phone.qb-mode .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.phone.qb-mode .map-quest .mq-name { display: none; }
+.phone.qb-mode .strip-title { opacity: 0; pointer-events: none; }
+.phone.qb-mode .mstat { opacity: 0; pointer-events: none; }
+.phone.qb-mode .post-cell .u-name { display: none; }
+/* クエストボードの行カード */
+.post-cell.qb-row {
+  --ac: #9a9a9a;
+  position: absolute; overflow: hidden; border-radius: var(--radius-sm, 12px);
+  background: #0a0a10; border: 2px solid var(--ac);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--ac) 55%, transparent), 0 8px 24px rgba(0,0,0,.5);
+  cursor: pointer; transition: transform .16s var(--ease-out);
+}
+.qb-row.ac-1, .qb-row.ac-2, .qb-row.ac-3 { --ac: #9a9a9a; }
+.qb-row .seam {
+  position: absolute; left: calc(50% - 1.5px); top: -6px; bottom: -6px; width: 3px; z-index: 3;
+  transform: skewX(-7.5deg); pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--ac) 18%, #fff 50%, var(--ac) 82%, transparent);
+  box-shadow: 0 0 10px var(--ac), 0 0 22px color-mix(in srgb, var(--ac) 60%, transparent);
+}
+.qb-row:active { transform: scale(.985); }
+.qb-row .h { position: absolute; top: 0; bottom: 0; width: 54%; overflow: hidden; }
+.qb-row .h.l { left: 0; clip-path: polygon(0 0, 100% 0, calc(100% - 26px) 100%, 0 100%); }
+.qb-row .h.r { right: 0; clip-path: polygon(26px 0, 100% 0, 100% 100%, 0 100%); }
+.qb-row .h > img, .qb-row .h > video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.qb-row .h .sc {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.34) 0%, rgba(0,0,0,.06) 42%, rgba(0,0,0,.78) 100%);
+}
+.qb-row .h .ft {
+  position: absolute; left: 0; right: 0; bottom: 8px; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; padding: 0 22px;
+}
+.qb-row .h.l .ft { padding-right: 34px; }
+.qb-row .h.r .ft { padding-left: 34px; }
+.qb-row .h .chip {
+  position: absolute; top: 0; z-index: 2; pointer-events: none;
+  width: 58%; padding: 3px 0 4px; text-align: center;
+  background: rgba(8,10,26,.86);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+  box-shadow: inset 0 -2px 0 var(--ac);
+  font: 700 13px/1.3 var(--font-jp); letter-spacing: .14em; color: #fff;
+}
+.qb-row .h.l .chip { left: 21%; }
+.qb-row .h.r .chip { right: 21%; }
+.qb-row .h .nm {
+  font: 900 24px/1.25 var(--font-jp); color: #fff; text-align: center; letter-spacing: .02em;
+  text-shadow: 0 0 10px rgba(0,0,0,.95), 0 2px 4px #000, 0 0 22px rgba(0,0,0,.7);
+  max-width: 100%; overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.qb-row .sm {
+  position: absolute; left: 50%; top: 50%; z-index: 3; transform: translate(-50%, -50%);
+  display: flex; align-items: center; pointer-events: none;
+}
+.qb-row .sm { z-index: 4; }
+.qb-row .sm img {
+  width: 30px; height: 30px; display: block;
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px var(--ac)) drop-shadow(0 0 12px var(--ac));
+}
+.qb-row .sm img + img { display: none; }
+.post-cell .q-ov {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; text-align: center;
+}
+/* クエストタイトル — コンテンツの左上に左寄せ */
+.post-cell .q-ov .qt2 {
+  position: absolute; left: 12px; top: 11px; right: 12px; z-index: 3;
+  font: 700 15px/1.3 var(--font-jp); color: #fff; letter-spacing: .01em; text-align: left;
+  text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 0 30px rgba(0,0,0,.6);
+}
+.post-cell .q-ov .l {
+  flex: none; font: 800 28px/1 var(--font-jp); letter-spacing: .14em; color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 0 30px rgba(0,0,0,.55);
+}
+/* 報酬画像 — 正方形。コンテンツの短辺の 80%。中心に報酬の内容 */
+.post-cell .q-ov .qrw {
+  position: relative; flex: none; width: var(--rwz, 96px); height: var(--rwz, 96px);
+  border-radius: var(--radius-sm, 12px); overflow: hidden; background: rgba(255,255,255,.06);
+  pointer-events: auto;
+}
+.post-cell .q-ov .qrw .im { position: absolute; inset: 0; }
+.post-cell .q-ov .qrw .im img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.post-cell .q-ov .qrw::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(78% 66% at 50% 50%, rgba(0,0,0,.5) 0%, rgba(0,0,0,.22) 100%);
+}
+.post-cell .q-ov .qrw .v {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+  padding: 8px; pointer-events: none;
+  font: 700 12px/1.34 var(--font-jp); color: #fff; text-align: center;
+  text-shadow: 0 1px 8px rgba(0,0,0,.9);
+}
+.post-cell.sm .q-ov { gap: 6px; }
+.post-cell.sm .q-ov .qt2 { font-size: 12.5px; left: 9px; top: 8px; right: 9px; }
+.post-cell.sm .q-ov .l { font-size: 18px; }
+.post-cell.sm .q-ov .qrw .v { font-size: 10px; }
+.rw-palette { position: absolute; left: -9999px; top: 0; width: 140px; height: 140px; }
+.rw-palette image-slot { position: absolute; inset: 0; }
+/* 小さいタイルは「報酬」の見出しを省く */
+.post-cell.rwsm .q-ov .l { display: none; }
+.post-cell.rwsm .q-ov .qt2 { font-size: 12px; }
+
 /* 下のクエストを弱める画面下部スクリム */
 .feed-scrim { display: none; }
 .feed-scrim-unused {
@@ -640,6 +778,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .post-cell video, .post-cell img.media {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
 }
+.post-cell.fitwhole video, .post-cell.fitwhole img.media { object-fit: contain; background: #000; }
 .post-cell .cell-scrim {
   position: absolute; inset: 0; pointer-events: none;
   background:
@@ -659,7 +798,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
   box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 1px 5px rgba(0,0,0,.6);
 }
-.post-cell .u-text {
+.post-cell .u-text { display: none; }
+.post-cell .u-text-off {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
   padding: 44px 14px 22px; pointer-events: none; text-align: center;
   font: 700 12px/1.5 var(--font-jp); color: #fff; letter-spacing: .015em;
@@ -742,17 +882,23 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .mq-pop { width: calc(100% - 32px); }   /* 両脇 16px を確保 */
 .mq-pop .qp { animation: none; }
+.mq-pop .mq-name {
+  display: block; font-family: var(--font-jp); font-weight: 400; font-size: 20px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 .mq-pop .mq-cap {
-  display: block; font-family: var(--font-jp); font-weight: 500; font-size: 13px;
+  display: block; margin-top: 3px; font-family: var(--font-jp); font-weight: 500; font-size: 13px;
   line-height: 1; letter-spacing: .18em;
 }
 .mq-pop .qp-title { margin-top: 5px; font-size: 26px; font-weight: 900;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qp-back .mq-cap { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
-  background: var(--gradient-colorful-linear);
-  -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.qp-back .mq-cap, .qp-back .mq-name { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
 .qp-mount > .qp .mq-cap { color: #fff; -webkit-text-stroke: 0;
   text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
+.qp-mount > .qp .mq-name { color: #fff; -webkit-text-stroke: 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
 .phone.feed-max .map-quest { opacity: 0; }
 .phone:has(.nav-push.on) .map-quest,
 .phone:has(.tl-compose.on) .map-quest,
@@ -1154,14 +1300,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 /* 同じ表示を 2 枚重ね、後ろの 1 枚をぼかして奥行きを出す */
 .qp-back { position: absolute; inset: 0; transform: scale(1.06); transform-origin: 50% 50%;
   filter: blur(4px); opacity: .95; }
-/* 背面 — テーマグラデーションの太い輪郭（ぼけて色の光の縁になる） */
+/* 背面 — 黒の太い輪郭（ぼけて文字を地図から切る影の縁になる） */
 .qp-back .qp-title, .qp-back .qp-time, .qp-back .qp-until, .qp-back .qp-label {
-  -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
-  background: var(--gradient-colorful-linear);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: none;
+  -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none;
 }
-.qp-back { filter: blur(5px) saturate(1.35); opacity: 1; }
+.qp-back { filter: blur(5px); opacity: 1; }
 /* 前面 — 白抜き文字。地図から切るのは薄い黒の影のみ */
 .qp-mount > .qp .qp-title, .qp-mount > .qp .qp-time, .qp-mount > .qp .qp-until {
   color: #fff; -webkit-text-stroke: 0; 
@@ -1629,9 +1774,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .qp-sub { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 800;
   font-size: 13.5px; line-height: 1.5; letter-spacing: .01em; color: #fff; text-wrap: pretty; }
-.qp-back .qp-sub { -webkit-text-stroke: 3.4px transparent; paint-order: stroke fill;
-  background: var(--gradient-colorful-linear); -webkit-background-clip: text; background-clip: text;
-  color: transparent; text-shadow: none; }
+.qp-back .qp-sub { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
 .ns-pin { width: 30px; height: 30px; }
 .ns-pin .pin-core img { width: 14px; height: 14px; filter: brightness(0) invert(1); }
 
@@ -1998,11 +2143,18 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           <button class="mp-mine" id="mpMine" type="button" aria-label="自分の投稿"><img alt=""></button>
         </div>
 
+        <!-- マップ左下 — クエスト一覧（投稿ボタンと対称の位置・同じコンポーネント） -->
+        <div class="map-list" id="mapList">
+          <button class="ml-btn wd-icon-btn color" id="mlBtn" type="button" aria-label="クエスト一覧を開く">
+            <img src="../../assets/icons/icon_menu.png" alt="">
+          </button>
+        </div>
+
         <!-- マップ内下方 — クエストタイトル（ラベル + タイトルの 2 段） -->
         <div class="map-quest" id="mapQuest">
           <div class="qp-mount mq-pop">
-            <div class="qp-back"><div class="qp"><span class="mq-cap">クエスト</span><div class="qp-title mq-t"></div></div></div>
-            <div class="qp"><span class="mq-cap">クエスト</span><div class="qp-title mq-t"></div></div>
+            <div class="qp-back"><div class="qp"><span class="mq-name"></span><div class="qp-title mq-t"></div></div></div>
+            <div class="qp"><span class="mq-name"></span><div class="qp-title mq-t"></div></div>
           </div>
         </div>
 
@@ -2016,9 +2168,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
             </div>
           </div>
           <div class="ct-stack">
-            <button class="wd-icon-btn" id="fbList" type="button" aria-label="サークルのリスト">
-              <img src="../../assets/icons/icon_menu.png" alt="">
-            </button>
             <button class="wd-icon-btn has-badge" id="chatBtn" aria-label="チャット">
               <img src="../../assets/icons/icon_comment.png" alt="">
               <span class="wd-badge"><span>3</span></span>
@@ -2038,6 +2187,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         <div class="feed-sheet" id="feedSheet">
           <div class="feed-col" id="feedCol"></div>
         </div>
+
 
         <div class="feed-scrim"></div>
 
@@ -2408,6 +2558,25 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   // ---- circles: one circle = one quest -------------------------------------
   const CIRCLES = [
     {
+      name: 'SCRAMBLE SHIBUYA', desc: 'スクランブル交差点まわり · ＋12人が参加中',
+      cover: '../../assets/sample/reel/reel022.jpg',
+      center: [139.70048, 35.65950], radius: 480,
+      quest: {
+        title: 'ウィンクして', date: '8/1(土) 12:00–23:00',
+        venue: 'スクランブル交差点', spot: [139.70041, 35.65935],
+        desc: 'スクランブル交差点でウィンクしている写真をアップロードするとクリア。クリアするとこのクエストの投稿が見られる。',
+      },
+      cleared: false, inside: true,
+      posts: [
+        { ava: '../../assets/sample/user/user007.jpg', text: '交差点のど真ん中でウィンク', img: '../../assets/sample/reel/reel022.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user008.jpg', text: '二人でタイミング合わせた', img: '../../assets/sample/reel/reel021.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user005.jpg', text: '109の前で一枚', img: '../../assets/sample/reel/reel027.jpg', ar: 'L' },
+        { ava: '../../assets/sample/user/user003.jpg', text: '三人で片目つぶり', img: '../../assets/sample/reel/reel023.jpg', ar: 'L' },
+        { ava: '../../assets/sample/user/user011.jpg', text: '日差しが強くて自然にウィンク', img: '../../assets/sample/reel/reel025.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user013.jpg', text: 'ハチ公側から', img: '../../assets/sample/reel/reel026.jpg', ar: 'L' },
+      ],
+    },
+    {
       name: 'グラフィティマンの日常', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
       cover: '../../assets/sample/uv/story-05.png',
       admin: true,
@@ -2494,6 +2663,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   const md = (d) => (d.getMonth() + 1) + ' / ' + d.getDate();
   const jpDate = (d) => (d.getMonth() + 1) + '/' + d.getDate() + '(' + WD[d.getDay()] + ')';
   const PAST_TITLES = [
+    ['ハチ公と一枚', '交差点を斜めに渡る', '109の前で待ち合わせ', '知らない人と乾杯', 'センター街で踊る'],
     ['朝の渋谷川さんぽ', 'スクランブル交差点を渡る', '渋谷横丁でひとり乾杯', '口説いてハーレムを作る', 'フランス色ダンスを学ぶ'],
     ['裏原のコーヒースタンド', '明治神宮の朝参り', '原宿の古着屋めぐり', '竹下通りのクレープ', 'キャットストリートで一枚'],
     ['ランチの定食屋めぐり', '朝までカラオケ', '道玖坂を登りきる', '深夜の立ち食いそば', '円山町の路地裏めし'],
@@ -2503,6 +2673,23 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     'また来ます', '近所なのに知らなかった', '夕方の光がきれい', '友だちと一緒に',
     'あっという間だった', '思ったより人が多かった', 'リピート確定', '静かで落ち着く',
     '偶然通りかかって', '今日の一枚', '並んだ甸斐あった', '帰り道で撮った',
+  ];
+  /* 前日のお題「ハイタッチ」— 実写 5 枚（横3・縦2）。
+     左に横向きを縦積み、その右に縦向きを 2 枚縦積みする固定レイアウト（'J' 列）。 */
+  const HIFIVE = [
+    { img: '../../assets/quest/hifive_l1.jpg', ar: 'L', text: '全力でいった' },
+    { img: '../../assets/quest/hifive_l2.jpg', ar: 'L', text: '音が鳴った' },
+    { img: '../../assets/quest/hifive_l3.jpg', ar: 'L', text: '初対面でハイタッチ' },
+    { img: '../../assets/quest/hifive_p1.jpg', ar: 'P', text: '手が痛い' },
+    { img: '../../assets/quest/hifive_p2.jpg', ar: 'P', text: 'ぎりぎり間に合った' },
+  ];
+  /* 前々日のお題「乾杯」— 実写 5 枚（横2・縦3）。ハイタッチと同じ 'J' 列。 */
+  const KANPAI = [
+    { img: '../../assets/quest/kanpai_l1.jpg', ar: 'L', text: 'とりあえず一杯' },
+    { img: '../../assets/quest/kanpai_l2.jpg', ar: 'L', text: 'この面々は久しぶり' },
+    { img: '../../assets/quest/kanpai_p1.jpg', ar: 'P', text: 'やきとり屋で合流' },
+    { img: '../../assets/quest/kanpai_p2.jpg', ar: 'P', text: '夕飯のあとに一杯' },
+    { img: '../../assets/quest/kanpai_p3.jpg', ar: 'P', text: '渋谷で乾杯、最高' },
   ];
   const REEL = (i) => '../../assets/sample/reel/reel' + String((((i % 15) + 15) % 15) + 1).padStart(3, '0') + '.jpg';
 
@@ -2518,10 +2705,17 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           name: NAMES[s % NAMES.length],
         });
       }
+      /* 前日 = ハイタッチ（横3・縦2 の 'J' 列）/ その前日 = 乾杯（横2・縦3 —
+         縦 3 枚の縦積みはしないので、既存の列パターンに任せる） */
+      const shot = k === 1 ? { t: 'ハイタッチ', ph: HIFIVE, fix: 'J', cols: null }
+        : k === 2 ? { t: '乾杯', ph: KANPAI, fix: null, cols: ['E', 'G'] } : null;
       days.push({
-        date: dt, past: true, posts, hot: 38 + ((ci * 53 + k * 91) % 172),
+        date: dt, past: true, hot: 38 + ((ci * 53 + k * 91) % 172),
+        posts: shot ? shot.ph.map((p, i) => ({ ...p, name: NAMES[(ci * 5 + i + k) % NAMES.length] })) : posts,
+        fixedType: shot ? shot.fix : null,
+        cols: shot ? shot.cols : null,
         quest: {
-          past: true, title: PAST_TITLES[ci][PAST_N - k], venue: c.quest.venue,
+          past: true, title: shot ? shot.t : PAST_TITLES[ci][PAST_N - k], venue: c.quest.venue,
           spot: c.quest.spot, date: jpDate(dt) + ' 19:00–23:00', desc: '',
         },
       });
@@ -2635,15 +2829,23 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   fsQpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
   document.getElementById('fsQpBody').appendChild(fsQpMount);
   const mqT = document.querySelectorAll('#mapQuest .mq-t');
+  const mqN = document.querySelectorAll('#mapQuest .mq-name');
   const setMq = (v) => mqT.forEach((e) => { e.textContent = v; });
+  const setMqName = (v) => mqN.forEach((e) => { e.textContent = v; });
+  let questBoardOn = false;
   function tickHero() {
+    if (questBoardOn) { setMq('クエストボード'); setMqName(''); return; }
     if (typeof nsMode !== 'undefined' && nsMode) {
       if (nsCreated) qpRender(qpMount, { cleared: false }, nsCreated.quest);
-      if (nsCreated) setMq(nsCreated.quest.title);
+      if (nsCreated) { setMq(nsCreated.quest.title); setMqName(nsCreated.name); }
     } else {
-      qpRender(qpMount, CIRCLES[active]);
-      const cq = (CIRCLES[active] && CIRCLES[active].quest) || {};
-      setMq(cq.title || '');
+      const ac = CIRCLES[active] || {};
+      /* マップ内の表示も、リストで見ている日のお題に追従させる */
+      const acDay = ac.curDay || ac.today;
+      const acQuest = (acDay && acDay.quest) || ac.quest;
+      qpRender(qpMount, CIRCLES[active], acQuest);
+      setMq((acQuest && acQuest.title) || '');
+      setMqName(ac.name || '');
     }
     if (typeof fsCircle !== 'undefined' && fsCircle) {
       qpRender(fsQpMount, fsCircle, (typeof fsDay !== 'undefined' && fsDay) ? fsDay.quest : null);
@@ -2670,8 +2872,66 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     txt.className = 'u-text'; txt.textContent = p.text; cell.appendChild(txt);
     const nm = document.createElement('span');
     nm.className = 'u-name'; nm.textContent = p.name || 'user'; cell.appendChild(nm);
+    if (p.qtitle) {
+      const ov = document.createElement('span');
+      ov.className = 'q-ov';
+      const rw = p.qreward || {};
+      const src = rwThumb(rw.k) || rw.src || '';
+      ov.innerHTML = '<span class="qt2"></span>'
+        + '<span class="l">報酬</span>'
+        + '<span class="qrw"><span class="im"><img alt=""></span><span class="v"></span></span>';
+      ov.querySelectorAll('.qrw img').forEach((im) => { im.src = src; });
+      ov.querySelector('.qt2').textContent = p.qtitle;
+      ov.querySelector('.qrw .v').textContent = rw.v || '';
+      /* 写真の差し替えはボードのタップ（クエストへ移動）と分ける — 実体のスロットを開く */
+      ov.querySelector('.qrw').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (rwSlots[rw.k]) rwSlots[rw.k].click();
+      });
+      cell.appendChild(ov);
+    }
     cell.dataset.postRef = ''; cell._post = p;
     return cell;
+  }
+
+  /* クエストボードの行カード — 左「お題」/ 右「報酬」の 2 枚を斜めの継ぎ目で分割 */
+  function makeQuestCard(p, no) {
+    const rw = p.qreward || {};
+    const card = document.createElement('div');
+    card.className = 'post-cell qb-row';
+    card.innerHTML =
+      '<span class="h l">' +
+        '<span class="sc"></span><span class="chip">お題</span>' +
+        '<span class="ft"><span class="nm"></span></span>' +
+      '</span>' +
+      '<span class="h r"><img alt="">' +
+        '<span class="sc"></span><span class="chip rw">報酬</span>' +
+        '<span class="ft"><span class="nm"></span></span>' +
+      '</span>' +
+      '<span class="seam"></span>' +
+      '<span class="sm"><img src="../../assets/icons/icon_next.png" alt=""></span>';
+    card.classList.add('ac-' + (((no - 1) % 3) + 1));
+    const lh = card.querySelector('.h.l');
+    let med;
+    if (p.vid) {
+      med = document.createElement('video');
+      med.src = p.vid; med.muted = true; med.loop = true; med.playsInline = true;
+      med.autoplay = true;
+    } else {
+      med = document.createElement('img');
+      med.alt = ''; med.src = p.img || (p._qday && p._qday.cover) || '';
+    }
+    lh.insertBefore(med, lh.firstChild);
+    card.querySelector('.h.r img').src = rwThumb(rw.k) || rw.src || '';
+    card.querySelector('.h.l .nm').textContent = p.qtitle || '';
+    card.querySelector('.h.r .nm').textContent = rw.s || rw.v || '';
+    card.querySelector('.h.r').title = rw.v || '';
+    card.querySelector('.h.r').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (rwSlots[rw.k]) rwSlots[rw.k].click();
+    });
+    card._post = p;
+    return card;
   }
 
   // ---- one section per circle: quest board + 9:16 post rail -----------------
@@ -2769,7 +3029,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
        H: 横1 の下に縦3枚横並び / I: 縦3枚横並び の下に横1 */
     const TYPES = ['B', 'F', 'C', 'D', 'H', 'G', 'C3', 'B', 'E', 'I', 'C', 'F'];
     const TYPES_SPARSE = ['A', 'AL'];   // 投稿が極端に少ないとき
-    function layoutColumn(type, H) {
+    function layoutColumn(type, H, opt) {
       const t = [];
       const fit = (h, ar) => { let w = Math.round(h * ar); if (w > MAXW) { w = MAXW; h = Math.round(w / ar); } return { w, h }; };
       if (type === 'A' || type === 'AL') {
@@ -2794,6 +3054,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb, k: 'P' });
           t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh, k: 'L' });
         }
+      } else if (type === 'J') {
+        /* 左: 横向きを縦積み / 右: 縦向きを縦積み。両列とも列高 H にぴったり。
+           枚数は nL / nP（layoutColumn の第3引数）で決まる。 */
+        const nL = Math.max(1, (opt && opt.nL) || 3);
+        const nP = Math.max(1, (opt && opt.nP) || 2);
+        const hl = Math.round((H - GAP * (nL - 1)) / nL), wl = Math.round(hl * L);
+        const hp = Math.round((H - GAP * (nP - 1)) / nP), wp = Math.round(hp * P);
+        for (let i = 0; i < nL; i++) t.push({ dx: 0, dy: (hl + GAP) * i, w: wl, h: hl, k: 'L' });
+        for (let i = 0; i < nP; i++) t.push({ dx: wl + GAP, dy: (hp + GAP) * i, w: wp, h: hp, k: 'P' });
       } else if (type === 'B' || type === 'C') {
         const ar = type === 'B' ? P : L;
         const ah = Math.round((H - GAP) / 2);
@@ -2839,12 +3108,57 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       const H = rail.clientHeight - PT;
       if (H <= 40) return posts.length;
       const remain = posts.length - idx;
+      /* 固定レイアウトのお題（ハイタッチ）— 比率スナップも余白埋めもせず、
+         列幅の上限だけで一様に縮めて 1 列にまとめて置く。 */
+      if (day && day.fixedType) {
+        const nL = day.posts.filter((p) => p.ar === 'L').length;
+        const nP = day.posts.length - nL;
+        const tiles = layoutColumn(day.fixedType, H, { nL, nP });
+        const cap = Math.round(rail.clientWidth * 1.45);
+        const raw = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
+        if (raw > cap) {
+          const k = cap / raw;
+          tiles.forEach((t) => {
+            t.dx = Math.round(t.dx * k); t.dy = Math.round(t.dy * k);
+            t.w = Math.round(t.w * k); t.h = Math.round(t.h * k);
+          });
+        }
+        /* 縮めたときは列を縦中央に置く */
+        const usedH = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
+        const cy = Math.max(0, Math.round((H - usedH) / 2));
+        /* 横向き→縦向きの順に並べ替えて、枚を果に入れる */
+        const order = day.posts.filter((p) => p.ar === 'L').concat(day.posts.filter((p) => p.ar !== 'L'));
+        posts = order;
+        tiles.forEach((t) => { t.dy += cy; });
+        tiles.forEach((t, i) => {
+          const p = posts[i]; if (!p) return;
+          const cell = makeCell(p);
+          if (t.w < 132) cell.classList.add('sm');
+          if (!canViewDay(c, day)) cell.classList.add('locked');
+          cell._day = day;
+          cell.style.left = (c.cursorX + t.dx) + 'px';
+          cell.style.top = (PT + t.dy) + 'px';
+          cell.style.width = t.w + 'px';
+          cell.style.height = t.h + 'px';
+          inner.appendChild(cell);
+        });
+        c.cursorX += Math.max.apply(null, tiles.map((t) => t.dx + t.w)) + GAP;
+        return posts.length;
+      }
       const wide = document.querySelector('.phone').classList.contains('feed-max');
       let type = null;
-      for (let g = 0; g < TYPES.length; g++) {
-        const t = TYPES[(c.colIdx + g) % TYPES.length];
-        if (wide && (t === 'H' || t === 'I')) continue;   // 拡大時は 横1+縦3 の列を使わない
-        if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
+      /* 列パターンを日単位で固定できる（向きが決まっている実写の日）。
+         固定すれば縦の写真が横の果に入る（fitwhole）ことがない。 */
+      if (day && day.cols) {
+        const ci2 = day._ci || 0;
+        if (day.cols[ci2]) { type = day.cols[ci2]; day._ci = ci2 + 1; }
+      }
+      if (!type) {
+        for (let g = 0; g < TYPES.length; g++) {
+          const t = TYPES[(c.colIdx + g) % TYPES.length];
+          if (wide && (t === 'H' || t === 'I')) continue;   // 拡大時は 横1+縦3 の列を使わない
+          if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
+        }
       }
       if (!type) { type = TYPES_SPARSE[c.colIdx % TYPES_SPARSE.length]; c.colIdx++; }
       const tiles = layoutColumn(type, H).slice(0, remain);
@@ -2890,9 +3204,19 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       const center = Math.max(0, Math.round((H - used) / 2));   // 余白がある列は縦中央に
       const yOff = PT + center + (center > 4 ? 0 : Math.round(rnd() * GAP * 1.6));
+      /* 向きを保つ — 撮った向き（ar）が指定された投稿は同じ向きの枠へ入れ替える */
+      for (let i = 0; i < tiles.length; i++) {
+        const want = tiles[i].k, at = idx + i, p = posts[at];
+        if (!p || !p.ar || p.ar === want) continue;
+        for (let j = at + 1; j < posts.length; j++) {
+          const q = posts[j];
+          if (q && (q.ar || want) === want) { posts[at] = q; posts[j] = p; break; }
+        }
+      }
       tiles.forEach((t) => {
         const p = posts[idx++];
         const cell = makeCell(p);
+        if (p && p.ar && p.ar !== t.k) cell.classList.add('fitwhole');
         if (t.w < 132) cell.classList.add('sm');
         if (!canViewDay(c, day)) cell.classList.add('locked');
         cell._day = day;
@@ -2900,6 +3224,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         cell.style.top = (yOff + t.dy) + 'px';
         cell.style.width = t.w + 'px';
         cell.style.height = t.h + 'px';
+        const rwz = Math.round(Math.min(t.w, t.h) * 0.8);
+        cell.style.setProperty('--rwz', rwz + 'px');
+        if (t.w < 132 || t.h < 200) cell.classList.add('rwsm');
         inner.appendChild(cell);
       });
       c.cursorX += colW + GAP;
@@ -2915,6 +3242,29 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       inner.innerHTML = '';
       seed = 1337 + CIRCLES.indexOf(c) * 977;
       c.cursorX = PAD; c.colIdx = 0;
+      /* クエストボード — 同じ配置ルールのまま、中身を「このサークルのクエスト一覧」に */
+      if (questBoardOn) {
+        const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34) + 4;
+        const H = rail.clientHeight - PT;
+        const ROWS = 3, RG = 8;
+        const ch = Math.floor((H - RG * (ROWS - 1) - PAD) / ROWS);
+        const cw = Math.min(Math.round(ch * 16 / 9), rail.clientWidth - PAD * 2);
+        const heads = c.questHeads();
+        heads.forEach((p, i) => {
+          const card = makeQuestCard(p, heads.length - i);
+          card.style.left = (PAD + Math.floor(i / ROWS) * (cw + RG)) + 'px';
+          card.style.top = (PT + (i % ROWS) * (ch + RG)) + 'px';
+          card.style.width = cw + 'px';
+          card.style.height = ch + 'px';
+          inner.appendChild(card);
+        });
+        c.cursorX = PAD + Math.ceil(heads.length / ROWS) * (cw + RG) - RG;
+        if (c.wrap) c.wrap.classList.remove('day-locked');
+        inner.style.width = Math.max(c.cursorX + PAD, rail.clientWidth) + 'px';
+        rail.scrollLeft = 0;
+        c.setFocus();
+        return;
+      }
       c.days.forEach((day, di) => {
         if (di) {
           const sep = document.createElement('div');
@@ -2925,6 +3275,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           c.cursorX += SEP_W;
         }
         day.x0 = c.cursorX;
+        day._ci = 0;
         let i = 0, guard = 0;
         while (i < day.posts.length && guard++ < 60) i = addColumnFrom(day.posts, i, day);
         day.x1 = c.cursorX;
@@ -2955,6 +3306,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         if (!el.classList.contains('locked') && x + el.offsetWidth > L && x < R) v.play().catch(() => {}); else v.pause();
       });
     };
+    /* 各クエストの一番頭の投稿 = 一覧のサムネイル（新しいクエストが左） */
+    c.questHeads = () => c.days.slice().reverse().map((d) => Object.assign({}, d.posts[0] || {}, {
+      qtitle: d.quest.title, qreward: d.quest.reward, _qday: d,
+    }));
     c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
     c.dots = bd.querySelector('.qb-dots');
     c.qlbl = bd.querySelector('.qlbl');
@@ -2992,7 +3347,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     }, { passive: true });
     rail.addEventListener('click', (ev) => {
       const cell = ev.target.closest('.post-cell');
-      if (cell) openFs(cell._post, c, cell._day);
+      if (!cell) return;
+      if (questBoardOn) {
+        const d = cell._post && cell._post._qday;
+        setQuestBoard(false);
+        active = CIRCLES.indexOf(c); renderBoard();
+        if (d && c.goDay) c.goDay(d, true);
+        return;
+      }
+      openFs(cell._post, c, cell._day);
     });
     requestAnimationFrame(c.buildBoard);
     setTimeout(c.buildBoard, 240);
@@ -3058,6 +3421,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* 進行中のお題はクリア or エリア内のときだけ。
      過去のお題は、そのサークルで投稿したことがある人（member）ならエリア外でも見られる。 */
   function canViewDay(c, day) {
+    if (day && day.questList) return true;
     if (day && day.past) return !!(c.member || canView(c));
     return canView(c);
   }
@@ -3097,6 +3461,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return best;
   }
   function syncDay(c, force) {
+    if (questBoardOn) return;
     const day = currentDay(c);
     if (!force && c.curDay === day) return;
     c.curDay = day;
@@ -3311,9 +3676,94 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     openFs(c.posts[0], c, c.today);
   });
 
+  /* ---- QUEST BOARD（クエスト一覧） ------------------------------------
+     マップ左下のリストボタンで開く。リストと同じ帯に、画面幅ぴったりの
+     16:8 サムネイル（= そのクエストの一番頭の投稿）を縦に並べる。
+     日付の区切りはなし。中心にクエストタイトルと報酬。 */
+  /* 報酬 — クエストごとの景品。写真は <image-slot> にユーザーがドロップする。 */
+  /* src は手持ちのサンプル写真の仮置き。ユーザーがドロップすれば差し替わる。 */
+  const REWARDS = [
+    { k: 'coffee',   s: 'カフェ',   v: 'スターバックス コーヒー1杯', ph: 'コーヒーの写真', src: '../../assets/sample/reel/reel014.jpg' },
+    { k: 'yakiniku', s: '焼肉',     v: '焼肉 食べ放題',              ph: '焼肉の写真',     src: '../../assets/sample/reel/reel007.jpg' },
+    { k: 'donut',    s: 'ドーナツ', v: 'ドーナツ 1ダース',            ph: 'ドーナツの写真', src: '../../assets/sample/reel/reel001.jpg' },
+    { k: 'drink',    s: 'ドリンク', v: 'ドリンク 1杯無料',            ph: 'ドリンクの写真', src: '../../assets/quest/kanpai_l1.jpg' },
+  ];
+  /* 報酬写真は kind ごとに 1 つの <image-slot> だけを持ち、タイルはその src を描く */
+  const rwPalette = document.createElement('div');
+  rwPalette.className = 'rw-palette';
+  rwPalette.id = 'rwPalette';
+  rwPalette.setAttribute('aria-hidden', 'true');
+  (document.querySelector('.phone .screen') || document.body).appendChild(rwPalette);
+  const rwSlots = {};
+  REWARDS.forEach((r) => {
+    const s = document.createElement('image-slot');
+    s.id = 'rwv2-' + r.k;
+    s.setAttribute('shape', 'rounded');
+    s.setAttribute('src', r.src || '');
+    s.setAttribute('placeholder', r.ph || '');
+    rwPalette.appendChild(s);
+    rwSlots[r.k] = s;
+  });
+  function rwSrc(k) {
+    const s = rwSlots[k]; if (!s) return '';
+    const im = s.shadowRoot && s.shadowRoot.querySelector('img');
+    return (im && (im.currentSrc || im.src)) || s.getAttribute('src') || '';
+  }
+  /* タイルは 240px の縮小サムネイルを使う（ドロップされた data URI をそのまま
+     24 枚 × 2 レイヤーに配ると、書き出し（PNG/PDF）が重すぎて破綻する） */
+  const rwThumbs = {};
+  function rwThumb(k) {
+    const src = rwSrc(k);
+    if (!src) return '';
+    const hit = rwThumbs[k];
+    if (hit && hit.src === src) return hit.url;
+    if (!/^data:/.test(src)) { rwThumbs[k] = { src: src, url: src }; return src; }
+    rwThumbs[k] = { src: src, url: (hit && hit.url) || '' };
+    const im = new Image();
+    im.onload = () => {
+      const N = 240, cv = document.createElement('canvas');
+      const s = Math.max(N / im.width, N / im.height);
+      cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      rwThumbs[k] = { src: src, url: cv.toDataURL('image/jpeg', 0.82) };
+      CIRCLES.forEach((c) => { if (questBoardOn && c.buildBoard) c.buildBoard(); });
+    };
+    im.src = src;
+    return rwThumbs[k].url;
+  }
+  const REWARD_BY_TITLE = { 'ウィンクして': 'coffee', '乾杯': 'yakiniku', 'ハイタッチ': 'donut' };
+  const rewardOf = (k) => REWARDS.find((r) => r.k === k) || REWARDS[0];
+  CIRCLES.forEach((c, ci) => c.days.forEach((d, k) => {
+    const key = REWARD_BY_TITLE[d.quest.title] || REWARDS[(ci * 2 + k) % REWARDS.length].k;
+    d.quest.reward = rewardOf(key);
+  }));
+
+  const mlBtn = document.getElementById('mlBtn');
+  function setQuestBoard(on) {
+    questBoardOn = !!on;
+    phone.classList.toggle('qb-mode', questBoardOn);
+    CIRCLES.forEach((c) => {
+      if (c.buildBoard) c.buildBoard();
+      if (!questBoardOn) syncDay(c, true);
+    });
+    const st = CIRCLES[active].strip;
+    if (st) col.scrollTop = Math.max(0, st.offsetTop - (parseFloat(getComputedStyle(col).paddingTop) || 0));
+    tickHero();
+  }
+  mlBtn.addEventListener('click', () => setQuestBoard(!questBoardOn));
+  /* スロットに写真が入ったらタイルに反映（変更イベントがないので軽くポーリング） */
+  let rwSeen = '';
+  setInterval(() => {
+    if (!questBoardOn) return;
+    const sig = REWARDS.map((r) => rwSrc(r.k).slice(0, 64)).join('|');
+    if (sig === rwSeen) return;
+    rwSeen = sig;
+    CIRCLES.forEach((c) => { if (c.buildBoard) c.buildBoard(); });
+  }, 1200);
+
   // ---- quest countdown ------------------------------------------------------
   const NOW0 = Date.now();
-  CIRCLES.forEach((c, i) => { c.endsAt = NOW0 + [2.25, 30, 76][i] * 3600e3; });
+  CIRCLES.forEach((c, i) => { c.endsAt = NOW0 + [5.5, 2.25, 30, 76][i] * 3600e3; });
   function tickCountdown() {
     CIRCLES.forEach((c) => {
       if (!c.board) return;
@@ -3472,8 +3922,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
      「光のカーテン」。壁色は --gradient-colorful の 11 stop を一周サンプリングし、
      暗い stop だけ輝度下限までリフトして途切れて見せない。 */
   const WALL_N = 56;
-  const WALL_PAL = ['#fff0a6','#bfcc96','#80a787','#40837f','#005f67','#60566f',
-                    '#804e78','#bf4680','#ff3e88','#e86f6d','#d0a052'].map(lift);
+  /* 壁は白一色（カラフルグラデーションは廃止） */
+  const WALL_PAL = ['#ffffff'];
   function lift(hex) {
     const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
     const L = (.2126 * r + .7152 * g + .0722 * b) / 255;
@@ -3483,7 +3933,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return '#' + m(r) + m(g) + m(b);
   }
   function segColor(i) { return WALL_PAL[Math.min(WALL_PAL.length - 1, Math.round(i / WALL_N * (WALL_PAL.length - 1)))]; }
-  function wallH(R) { return Math.max(80, R * 0.195); }
+  function wallH(R) { return Math.max(96, R * 0.234); }
   /* カーテン面のフェード（DS: 下 66% → 34% で 36% → 70% で 14% → 上 0%）を
      10 バンドの押し出しでなめらかに近似し、最上部に天端リムを乗せる。 */
   const WALL_BANDS = (function () {
@@ -3643,7 +4093,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (EM.setCenter) EM.setCenter(C);
       map.stop();
       const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
-        padding: { top: 0, bottom: 60 } };
+        padding: { top: 0, bottom: 20 } };
       if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
     } catch (err) { console.warn('circle focus:', err); }
   }
@@ -3855,7 +4305,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   document.getElementById('qbBack').addEventListener('click', qbClose);
 
   document.querySelector('.wd-circle-bar').addEventListener('click', tlOpen);
-  document.getElementById('fbList').addEventListener('click', qbOpen);
   document.getElementById('tlClose').addEventListener('click', tlClose);
   tlScrim.addEventListener('click', tlClose);
 
@@ -3967,6 +4416,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
   // ---- 投票データ（既存サークル） -------------------------------------------
   const NAME_IDEAS = [
+    [['SCRAMBLE SHIBUYA', 'Starry', 61], ['交差点の民', 'Pixel', 44], ['ハチ公前集合', 'Kawaii', 27]],
     [['グラフィティマンの日常', 'Pixel', 42], ['渋谷ペイント倶楽部', 'SunnyVi', 58], ['壁と夜と渋谷', 'Mocha', 31]],
     [['原宿コミュニティ', 'Kawaii', 24], ['朝7時のキャットストリート', 'ZenGarden', 49], ['宮下パーク常連会', 'Starry', 18]],
     [['道玄坂グループ', 'foodie', 37], ['替え玉は文化', 'o_cean', 66], ['坂の上のラーメン', 'Dreamy', 29]],
@@ -4075,7 +4525,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       tickHero();
       map.stop();
       map.easeTo({ center: nsCreated.center, zoom: questZoom(nsCreated.center, nsCreated.radius),
-        pitch: 60, bearing: 0, duration: 900, padding: { top: 0, bottom: 60 } });
+        pitch: 60, bearing: 0, duration: 900, padding: { top: 0, bottom: 20 } });
       return;
     }
     areaVisible(true);
@@ -4091,7 +4541,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     }
     map.stop();
     map.easeTo({ center: NS_CENTER, zoom: questZoom(NS_CENTER, NS_RADIUS), pitch: 60, bearing: 0,
-      duration: 900, padding: { top: 0, bottom: 60 } });
+      duration: 900, padding: { top: 0, bottom: 20 } });
   }
 
   // ---- 設立フロー ----------------------------------------------------------
@@ -4380,12 +4830,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (q.has('embed')) document.body.classList.add('embed');
     if (!q.has('circle')) return;
     const ci = Math.max(0, Math.min(CIRCLES.length - 1, parseInt(q.get('circle'), 10) || 0));
-    const back = Math.max(1, parseInt(q.get('past'), 10) || 1);
+    const back = q.has('past') ? Math.max(0, parseInt(q.get('past'), 10) || 0) : 1;   /* past=0 = 今日のお題 */
     const c = CIRCLES[ci];
     active = ci;
     renderBoard();
     if (q.has('embed')) document.body.classList.add('no-anim');   /* 遷移演出を切って即・確定状態で描く */
-    setFeedMax(true);
+    const keepMap = q.has('map');            /* map=1: 拡大せずマップを出したまま、その日の列へ */
+    if (!keepMap) setFeedMax(true);
     let tries = 0;
     const go = () => {
       if ((!c.days || c.days[0].x0 == null) && tries++ < 20) { setTimeout(go, 120); return; }
@@ -4393,8 +4844,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (c.goDay) c.goDay(day, true);
       const st = c.strip;
       if (st) col.scrollTop = Math.max(0, st.offsetTop - (parseFloat(getComputedStyle(col).paddingTop) || 0));
+      /* 初期スクロール（既定 = 前日）や setFocus の後勝ちを防ぐ — 数フレーム後に再度確定 */
+      [90, 400, 1000].forEach((t) => setTimeout(() => { if (c.goDay) c.goDay(day, true); }, t));
     };
-    setTimeout(go, 950);   /* setFeedMax の最終 rebuild(900ms) 後に位置を確定 */
+    setTimeout(go, keepMap ? 260 : 950);   /* setFeedMax の最終 rebuild(900ms) 後に位置を確定 */
   })();
 })();
 </script>
@@ -4427,139 +4880,4 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     .map((i) => '../../assets/sample/reel/reel' + String(i).padStart(3, '0') + '.jpg');
   const PF_TYPES = ['B', 'F', 'C', 'G', 'D', 'C3', 'F', 'B'];
   function pfLayout(type, H, GAP) {
-    const P = 9 / 16, L = 16 / 9, t = [];
-    if (type === 'C3') {
-      const h = Math.round((H - GAP * 2) / 3);
-      for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (h + GAP) * i, w: Math.round(h * L), h });
-    } else if (type === 'B' || type === 'C') {
-      const h = Math.round((H - GAP) / 2);
-      const w = Math.round(h * (type === 'B' ? P : L));
-      t.push({ dx: 0, dy: 0, w, h }); t.push({ dx: 0, dy: h + GAP, w, h });
-    } else if (type === 'F' || type === 'G') {
-      const w = Math.round((H - GAP) / (1 / P + 1 / L));
-      const hp = Math.round(w / P), hl = Math.round(w / L);
-      if (type === 'F') { t.push({ dx: 0, dy: 0, w, h: hp }); t.push({ dx: 0, dy: hp + GAP, w, h: hl }); }
-      else { t.push({ dx: 0, dy: 0, w, h: hl }); t.push({ dx: 0, dy: hl + GAP, w, h: hp }); }
-    } else {                                     // D: 横1 の下に縦2
-      const hb = Math.round((H - GAP * 1.56) / 1.63), wb = Math.round(hb * P);
-      const cw = wb * 2 + GAP, ht = Math.round(cw * P);
-      t.push({ dx: 0, dy: 0, w: cw, h: ht });
-      t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb });
-      t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb });
-    }
-    return t;
-  }
-  function pfBuild() {
-    const H = PF_BOARD.clientHeight - 8;
-    if (H <= 40) { setTimeout(pfBuild, 150); return; }
-    const GAP = 7, PAD = 20;
-    PF_INNER.innerHTML = '';
-    let x = PAD, i = 0, ti = 0, guard = 0;
-    while (i < PF_POSTS.length && guard++ < 40) {
-      const tiles = pfLayout(PF_TYPES[ti++ % PF_TYPES.length], H, GAP).slice(0, PF_POSTS.length - i);
-      const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
-      const y = 4 + Math.max(0, Math.round((H - used) / 2));
-      tiles.forEach((t) => {
-        const el = document.createElement('div');
-        el.className = 'tile';
-        el.style.cssText = 'left:' + (x + t.dx) + 'px;top:' + (y + t.dy) + 'px;width:'
-          + t.w + 'px;height:' + t.h + 'px;';
-        el.innerHTML = '<img src="' + PF_POSTS[i++] + '" alt="">';
-        PF_INNER.appendChild(el);
-      });
-      x += Math.max.apply(null, tiles.map((t) => t.dx + t.w)) + GAP;
-    }
-    PF_INNER.style.width = (x + PAD) + 'px';
-  }
-  document.getElementById('meBtn').addEventListener('click', () => { push(pf); pfBuild(); });
-
-  // 編集モード — ヘッダーのペン → その場で名前・ハンドル・自己紹介を書き換える
-  const EDS = ['pfName', 'pfHandle', 'pfBio'].map((id) => document.getElementById(id));
-  document.getElementById('pfPen').addEventListener('click', () => {
-    pf.classList.add('editing');
-    EDS.forEach((e) => e.setAttribute('contenteditable', 'plaintext-only'));
-    EDS[0].focus();
-  });
-  document.getElementById('pfDone').addEventListener('click', () => {
-    pf.classList.remove('editing');
-    EDS.forEach((e) => e.removeAttribute('contenteditable'));
-  });
-
-  // ---- チャットリスト ------------------------------------------------
-  const THREADS = [
-    { name: 'SunnyVi',   av: '../../assets/sample/user/user001.jpg', pv: 'いいね！素敵な写真ですね。',     t: '2分',   unread: true,  on: true },
-    { name: 'Kawaii',    av: '../../assets/sample/user/user008.jpg', pv: 'ここはどこですか？',             t: '14分',  unread: true,  on: true },
-    { name: 'o_cean',    av: '../../assets/sample/user/user013.jpg', pv: '原宿コミュニティに参加しました', t: '38分',  unread: true,  on: false },
-    { name: 'foodie',    av: '../../assets/sample/user/user004.jpg', pv: 'あのお店、また行きたい！',       t: '1時間', unread: false, on: true },
-    { name: 'ZenGarden', av: '../../assets/sample/user/user015.jpg', pv: 'ありがとう、また連絡するね',     t: '昨日',   unread: false, on: false },
-    { name: 'Dreamy',    av: '../../assets/sample/user/user010.jpg', pv: '写真送ってくれてありがとう',     t: '昨日',   unread: false, on: false },
-    { name: 'Mocha',     av: '../../assets/sample/user/user012.jpg', pv: '渋谷で会えてよかった',           t: '2日',   unread: false, on: false },
-  ];
-  const clList = document.getElementById('clList');
-  clList.innerHTML = THREADS.map((m, i) =>
-    '<button class="cl-row' + (m.unread ? ' unread' : '') + '" data-i="' + i + '" type="button">'
-    + '<span class="av"><img src="' + m.av + '" alt="">' + (m.on ? '<span class="on"></span>' : '') + '</span>'
-    + '<span class="col"><span class="nm"><b>' + m.name + '</b><span class="t">' + m.t + '</span></span>'
-    + '<span class="pv">' + m.pv + '</span></span>'
-    + '<span class="dot' + (m.unread ? '' : ' hide') + '"></span></button>'
-  ).join('');
-  document.getElementById('chatBtn').addEventListener('click', () => push(cl));
-  document.getElementById('searchBtn').addEventListener('click', () => {
-    location.href = 'handoff/UniverseQuestRecommend/UniverseQuestRecommend.html';
-  });
-
-  // ---- チャットルーム ------------------------------------------------
-  const crScroll = document.getElementById('crScroll');
-  const crInput = document.getElementById('crInput');
-  let peer = THREADS[0];
-  const SEED = [
-    ['in', 'いいね！素敵な写真ですね。', '14:01'],
-    ['in', 'ここはどこですか？', '14:01'],
-    ['out', '渋谷スカイの屋上から撮ったよ！', '14:03'],
-    ['in', 'わー、行ってみたい！今度一緒に行きませんか？', '14:06'],
-    ['out', 'いいね、土曜の夕方はどう？夜景がきれいだよ', '14:07'],
-  ];
-  function bubble(side, text, time, grouped) {
-    const el = document.createElement('div');
-    el.className = 'wd-chat-bubble ' + side + (grouped ? ' grouped' : '');
-    el.innerHTML = (side === 'in' ? '<img class="av" src="' + peer.av + '" alt="">' : '')
-      + '<div class="col"><div class="brow"><div class="bub"></div>'
-      + '<span class="tm">' + time + '</span></div></div>';
-    el.querySelector('.bub').textContent = text;
-    return el;
-  }
-  function crRender() {
-    document.getElementById('crAv').src = peer.av;
-    document.getElementById('crName').textContent = peer.name;
-    document.getElementById('crState').textContent = peer.on ? 'オンライン' : '最終ログイン ' + peer.t + '前';
-    crScroll.innerHTML = '<div class="cr-day">今日</div>';
-    SEED.forEach((m, i) => {
-      const prev = SEED[i - 1];
-      crScroll.appendChild(bubble(m[0], m[1], m[2], prev && prev[0] === m[0]));
-    });
-    requestAnimationFrame(() => { crScroll.scrollTop = crScroll.scrollHeight; });
-  }
-  clList.addEventListener('click', (e) => {
-    const row = e.target.closest('.cl-row'); if (!row) return;
-    row.classList.remove('unread');
-    const dot = row.querySelector('.dot'); if (dot) dot.classList.add('hide');
-    peer = THREADS[+row.dataset.i];
-    crRender();
-    push(cr);
-  });
-  function send() {
-    const v = crInput.value.trim(); if (!v) return;
-    const d = new Date();
-    const t = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
-    const last = crScroll.lastElementChild;
-    crScroll.appendChild(bubble('out', v, t, last && last.classList.contains('out')));
-    crInput.value = '';
-    crScroll.scrollTop = crScroll.scrollHeight;
-  }
-  document.getElementById('crSend').addEventListener('click', send);
-  crInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
-})();
-</script>
-
-</body>
-</html>
+   
