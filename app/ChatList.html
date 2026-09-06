@@ -12,6 +12,8 @@
 <!-- MapLibre GL JS — the real rendering engine (positron + globe projection) -->
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" />
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<!-- <image-slot> — 報酬の写真はユーザーがドロップして差し替える -->
+<script src="image-slot.js"></script>
 
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -58,9 +60,11 @@ html, body {
   --vw: 402px; --vh: 874px;
   --safe-top: 60px;                              /* SafeArea 上端インセット */
   --safe-bottom: 34px;                           /* SafeArea 下端（ホームインジケータ） */
-  --map-ratio: calc(3 / 4);
+  --map-ratio: calc(1 / 2);                      /* = 従来 3/4 の 2/3 */
   --map-r: 24px;                                 /* r */
   --map-gap: 34px;                               /* d = リストがマップに重なる量（= タイトル高）*/
+  --post-btm: calc(var(--safe-top) + 41px);      /* 投稿ボタンの下端 */
+  --mq-h: 80px;                                  /* マップ内クエストブロック（サークル名 / のなかで、/ タイトル）*/
   --map-h: calc(var(--vw) * var(--map-ratio));   /* h */
   --feed-h: calc(var(--vh) - var(--map-h) + var(--map-gap));                  /* lh */
   --feed-pad-top: 0px;                           /* a = タイトルをマップの下に完全に潜らせる */
@@ -193,10 +197,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    ============================================================ */
 .wd-circle-tool {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 72; height: var(--footer-h);
-  box-sizing: border-box;
+  box-sizing: border-box; pointer-events: none;
   display: flex; flex-direction: row; align-items: flex-end; gap: 10px;
   padding: 16px 14px calc(var(--safe-bottom) + 8px);
 }
+.wd-circle-tool > * { pointer-events: auto; }
 .wd-circle-tool .wd-icon-btn { flex: none; width: 44px; height: 44px; }
 .wd-circle-tool .wd-icon-btn img { width: 42%; height: 42%; object-fit: contain;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
@@ -518,22 +523,55 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    投稿可能 = カメラ（colorful gradient の WdIconButton）
    投稿済み = 自分の投稿サムネイル。過去のお題を見ている間は出さない。
    ============================================================ */
+/* 投稿ボタン — マップの右下。クエストタイトルの上に重なる（タイトル側の幅は変えない） */
 .map-post {
-  position: absolute; left: 0; right: 0; z-index: 94;   /* 最前面 */
-  bottom: auto; top: calc(var(--map-h) - 40px); height: 0;  /* マップView 内の下センター */
-  display: flex; align-items: center; justify-content: center;
+  position: absolute; left: auto; right: 14px; z-index: 96;
+  bottom: auto; top: calc(var(--map-h) - 4px - 38px); height: 38px;
+  display: flex; align-items: center; justify-content: flex-end;
   transition: opacity .28s var(--ease-out), transform .3s var(--ease-out);
 }
-.map-post .mp-cam { width: 58px; height: 58px;
+/* QuestPopup(マップ) — エリア中心はサークル名のみ。
+   クエストタイトルはマップの下（.strip-title）で見せる。 */
+/* エリア中心のポップアップ — サークル名はクエストブロック内に移したため非表示 */
+.qp-mount.qp-map { display: none !important; }
+.qp-mount.qp-map .qp-eyebrow { display: none; }
+.qp-mount.qp-map .qp-title { display: none; }
+.qp-mount.qp-map .qp-back { display: none; }   /* カラフルな外廓でなく黒影で読ませる */
+.qp-mount.qp-map .qp-name { font-weight: 400; font-size: 20px; color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
+.qp-mount.qp-map .qp-time { display: none; }   /* カウントダウンは出さない */
+.qp-meta { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 0; }
+.qp-meta > span { display: flex; align-items: center; gap: 5px; }
+.qp-meta img { width: 13px; height: 13px; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
+.qp-name { font: 400 15px var(--font-jp); color: #fff; white-space: nowrap;
+  max-width: 240px; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
+.qp-mount.qp-map .qp-time { margin-top: 6px; font-size: 21px; font-weight: 300; display: none; }
+.qp-back .qp-meta { visibility: visible; }
+.qp-back .qp-name { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
+.phone.feed-max .qp-mount.qp-map { opacity: 0; transition: opacity .28s var(--ease-out); }
+/* エリアの中心に浮かぶサークル名（旧・クエストタイトルの位置） */
+.area-name {
+  pointer-events: auto; cursor: pointer; text-align: center; max-width: 240px;
+  font: 700 18px/1.34 var(--font-jp); color: #0a0a0d; letter-spacing: .01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(255,255,255,.9), 0 0 10px rgba(255,255,255,.8), 0 0 22px rgba(255,255,255,.6);
+}
+.map-post .mp-cam { width: 38px; height: 38px;
   animation: mappulse 2.4s var(--ease-out) infinite; }
-.map-post .mp-cam img { width: 25px; height: 25px;
+/* 枚線はグラデーションでなく白 */
+.map-post .mp-cam::after { background: rgba(255,255,255,.9); }
+.map-post .mp-cam img { width: 19px; height: 19px;
   filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
 @keyframes mappulse {
   0%   { box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow), 0 0 0 0 rgba(255,62,136,.34); }
   100% { box-shadow: inset 0 1px 0 var(--lg-specular-top), var(--lg-shadow), 0 0 0 14px rgba(255,62,136,0); }
 }
 .map-post .mp-mine {
-  display: none; width: 54px; height: 54px; border-radius: 50%; overflow: hidden;
+  display: none; width: 38px; height: 38px; border-radius: 50%; overflow: hidden;
   padding: 0; border: 0; background: #101014; cursor: pointer;
   -webkit-appearance: none; appearance: none; -webkit-tap-highlight-color: transparent;
   box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 4px 14px rgba(0,0,0,.4);
@@ -546,6 +584,146 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .map-post.done .mp-mine { display: block; }
 /* リスト拡大中はマップごと引っ込む */
 .phone.feed-max .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+/* プッシュ画面（チャットリスト・チャットルーム・プロフィール等）表示中は隠す */
+.phone:has(.nav-push.on) .map-post,
+.phone:has(.tl-compose.on) .map-post,
+.phone:has(.nav-push.on) .app-header,
+.phone:has(.tl-compose.on) .app-header { opacity: 0; pointer-events: none; }
+/* ============================================================
+   MAP LIST — マップ左下。投稿ボタン（右下）と対称の同じコンポーネント。
+   タップでクエストボード（サークルごとのクエスト一覧）を開閉する。
+   ============================================================ */
+.map-list {
+  position: absolute; right: auto; left: 14px; z-index: 96;
+  bottom: auto; top: calc(var(--map-h) - 4px - 38px); height: 38px;
+  display: flex; align-items: center;
+  transition: opacity .28s var(--ease-out), transform .3s var(--ease-out);
+}
+.map-list .ml-btn { width: 38px; height: 38px; }
+.map-list .ml-btn::after { background: rgba(255,255,255,.9); }
+.map-list .ml-btn img { width: 18px; height: 18px;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.45)); }
+.phone.qb-mode .map-list .ml-btn {
+  background: rgba(255,255,255,.92); backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.phone.qb-mode .map-list .ml-btn img { filter: brightness(0); opacity: .82; }
+.phone.feed-max .map-list { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.phone:has(.nav-push.on) .map-list,
+.phone:has(.tl-compose.on) .map-list,
+.phone:has(.tl-sheet.on) .map-list { opacity: 0; pointer-events: none; }
+
+/* ============================================================
+   QUEST BOARD 状態 — グリッドのルールは変えず、サークルごとの帯の中身を
+   「そのサークルのクエスト一覧」に差し替える。上下スクロールでサークルが変わる。
+   ============================================================ */
+.phone.qb-mode .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+.phone.qb-mode .map-quest .mq-name { display: none; }
+.phone.qb-mode .strip-title { opacity: 0; pointer-events: none; }
+.phone.qb-mode .mstat { opacity: 0; pointer-events: none; }
+.phone.qb-mode .post-cell .u-name { display: none; }
+/* クエストボードの行カード */
+.post-cell.qb-row {
+  --ac: #9a9a9a;
+  position: absolute; overflow: hidden; border-radius: var(--radius-sm, 12px);
+  background: #0a0a10; border: 2px solid var(--ac);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--ac) 55%, transparent), 0 8px 24px rgba(0,0,0,.5);
+  cursor: pointer; transition: transform .16s var(--ease-out);
+}
+.qb-row.ac-1, .qb-row.ac-2, .qb-row.ac-3 { --ac: #9a9a9a; }
+.qb-row .seam {
+  position: absolute; left: calc(50% - 1.5px); top: -6px; bottom: -6px; width: 3px; z-index: 3;
+  transform: skewX(-7.5deg); pointer-events: none;
+  background: linear-gradient(180deg, transparent, var(--ac) 18%, #fff 50%, var(--ac) 82%, transparent);
+  box-shadow: 0 0 10px var(--ac), 0 0 22px color-mix(in srgb, var(--ac) 60%, transparent);
+}
+.qb-row:active { transform: scale(.985); }
+.qb-row .h { position: absolute; top: 0; bottom: 0; width: 54%; overflow: hidden; }
+.qb-row .h.l { left: 0; clip-path: polygon(0 0, 100% 0, calc(100% - 26px) 100%, 0 100%); }
+.qb-row .h.r { right: 0; clip-path: polygon(26px 0, 100% 0, 100% 100%, 0 100%); }
+.qb-row .h > img, .qb-row .h > video {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.qb-row .h .sc {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.34) 0%, rgba(0,0,0,.06) 42%, rgba(0,0,0,.78) 100%);
+}
+.qb-row .h .ft {
+  position: absolute; left: 0; right: 0; bottom: 8px; z-index: 2; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; padding: 0 22px;
+}
+.qb-row .h.l .ft { padding-right: 34px; }
+.qb-row .h.r .ft { padding-left: 34px; }
+.qb-row .h .chip {
+  position: absolute; top: 0; z-index: 2; pointer-events: none;
+  width: 58%; padding: 3px 0 4px; text-align: center;
+  background: rgba(8,10,26,.86);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 12px) 100%, 12px 100%);
+  box-shadow: inset 0 -2px 0 var(--ac);
+  font: 700 13px/1.3 var(--font-jp); letter-spacing: .14em; color: #fff;
+}
+.qb-row .h.l .chip { left: 21%; }
+.qb-row .h.r .chip { right: 21%; }
+.qb-row .h .nm {
+  font: 900 24px/1.25 var(--font-jp); color: #fff; text-align: center; letter-spacing: .02em;
+  text-shadow: 0 0 10px rgba(0,0,0,.95), 0 2px 4px #000, 0 0 22px rgba(0,0,0,.7);
+  max-width: 100%; overflow: hidden; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.qb-row .sm {
+  position: absolute; left: 50%; top: 50%; z-index: 3; transform: translate(-50%, -50%);
+  display: flex; align-items: center; pointer-events: none;
+}
+.qb-row .sm { z-index: 4; }
+.qb-row .sm img {
+  width: 30px; height: 30px; display: block;
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px var(--ac)) drop-shadow(0 0 12px var(--ac));
+}
+.qb-row .sm img + img { display: none; }
+.post-cell .q-ov {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; text-align: center;
+}
+/* クエストタイトル — コンテンツの左上に左寄せ */
+.post-cell .q-ov .qt2 {
+  position: absolute; left: 12px; top: 11px; right: 12px; z-index: 3;
+  font: 700 15px/1.3 var(--font-jp); color: #fff; letter-spacing: .01em; text-align: left;
+  text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 0 30px rgba(0,0,0,.6);
+}
+.post-cell .q-ov .l {
+  flex: none; font: 800 28px/1 var(--font-jp); letter-spacing: .14em; color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.9), 0 0 30px rgba(0,0,0,.55);
+}
+/* 報酬画像 — 正方形。コンテンツの短辺の 80%。中心に報酬の内容 */
+.post-cell .q-ov .qrw {
+  position: relative; flex: none; width: var(--rwz, 96px); height: var(--rwz, 96px);
+  border-radius: var(--radius-sm, 12px); overflow: hidden; background: rgba(255,255,255,.06);
+  pointer-events: auto;
+}
+.post-cell .q-ov .qrw .im { position: absolute; inset: 0; }
+.post-cell .q-ov .qrw .im img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.post-cell .q-ov .qrw::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(78% 66% at 50% 50%, rgba(0,0,0,.5) 0%, rgba(0,0,0,.22) 100%);
+}
+.post-cell .q-ov .qrw .v {
+  position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
+  padding: 8px; pointer-events: none;
+  font: 700 12px/1.34 var(--font-jp); color: #fff; text-align: center;
+  text-shadow: 0 1px 8px rgba(0,0,0,.9);
+}
+.post-cell.sm .q-ov { gap: 6px; }
+.post-cell.sm .q-ov .qt2 { font-size: 12.5px; left: 9px; top: 8px; right: 9px; }
+.post-cell.sm .q-ov .l { font-size: 18px; }
+.post-cell.sm .q-ov .qrw .v { font-size: 10px; }
+.rw-palette { position: absolute; left: -9999px; top: 0; width: 140px; height: 140px; }
+.rw-palette image-slot { position: absolute; inset: 0; }
+/* 小さいタイルは「報酬」の見出しを省く */
+.post-cell.rwsm .q-ov .l { display: none; }
+.post-cell.rwsm .q-ov .qt2 { font-size: 12px; }
+
 /* 下のクエストを弱める画面下部スクリム */
 .feed-scrim { display: none; }
 .feed-scrim-unused {
@@ -602,6 +780,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .post-cell video, .post-cell img.media {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
 }
+.post-cell.fitwhole video, .post-cell.fitwhole img.media { object-fit: contain; background: #000; }
 .post-cell .cell-scrim {
   position: absolute; inset: 0; pointer-events: none;
   background:
@@ -621,7 +800,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   width: 30px; height: 30px; border-radius: 50%; object-fit: cover;
   box-shadow: 0 0 0 1.5px rgba(255,255,255,.6), 0 1px 5px rgba(0,0,0,.6);
 }
-.post-cell .u-text {
+.post-cell .u-text { display: none; }
+.post-cell .u-text-off {
   position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center;
   padding: 44px 14px 22px; pointer-events: none; text-align: center;
   font: 700 12px/1.5 var(--font-jp); color: #fff; letter-spacing: .015em;
@@ -653,6 +833,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .lock-note .lmeta {
   display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.lock-note .llabel, .story-fs .fs-lock .llabel {
+  font: 500 11px/1 var(--font-jp); color: var(--text-2); letter-spacing: .08em;
+  margin-bottom: -10px;
 }
 .lock-note .ldist {
   display: flex; align-items: baseline; gap: 5px;
@@ -689,6 +873,40 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .lock-note .ldir img { width: 20px; height: 20px; object-fit: contain;
   filter: brightness(0) invert(1) opacity(.8); }
 
+/* マップ内のクエストタイトル — 「クエスト」ラベル + タイトルの 2 段。
+   ブロック中心を「投稿ボタン下端 〜 マップ下端」の中間に置く。 */
+.map-quest {
+  position: absolute; left: 0; right: 0; z-index: 93; pointer-events: none;
+  top: calc(var(--map-h) - var(--map-gap) - 4px - var(--mq-h));
+  height: var(--mq-h);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity .28s var(--ease-out);
+}
+.mq-pop { width: calc(100% - 32px); }   /* 両脇 16px を確保 */
+.mq-pop .qp { animation: none; }
+.mq-pop .mq-name {
+  display: block; font-family: var(--font-jp); font-weight: 400; font-size: 20px; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.mq-pop .mq-cap {
+  display: block; margin-top: 3px; font-family: var(--font-jp); font-weight: 500; font-size: 13px;
+  line-height: 1; letter-spacing: .18em;
+}
+.mq-pop .qp-title { margin-top: 5px; font-size: 26px; font-weight: 900;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qp-back .mq-cap, .qp-back .mq-name { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
+.qp-mount > .qp .mq-cap { color: #fff; -webkit-text-stroke: 0;
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4); }
+.qp-mount > .qp .mq-name { color: #fff; -webkit-text-stroke: 0;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
+.phone.feed-max .map-quest { opacity: 0; }
+.phone:has(.nav-push.on) .map-quest,
+.phone:has(.tl-compose.on) .map-quest,
+.phone:has(.tl-sheet.on) .map-quest { opacity: 0; }
+
+/* マップ内のクエストタイトルの下にリストが来る */
 .strip-title .qedit {
   position: absolute; right: 12px; top: 6px; z-index: 2;
   flex: none; pointer-events: auto; cursor: pointer; display: none;
@@ -987,8 +1205,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .story-fs .fs-qp .fs-qp-body { flex: 1 1 auto; min-width: 0; display: flex; justify-content: center; }
 /* フルスクリーンでは Quest ラベルを出さない — タイトルとカウントダウンだけ */
 .story-fs .fs-qp .qp-eyebrow { display: none; }
-.story-fs .fs-qp .qp.urgent .qp-time { color: #08080b; }
-.qp-mount > .qp.urgent .qp-time { color: #08080b; }
+.story-fs .fs-qp .qp.urgent .qp-time { color: #fff; }
+.qp-mount > .qp.urgent .qp-time { color: #fff; }
 .story-fs .fs-qp .qp-title { margin-top: 0; }
 .story-fs .fs-back {
   flex: none; width: 40px; height: 40px; display: grid; place-items: center; padding: 0;
@@ -1084,17 +1302,21 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 /* 同じ表示を 2 枚重ね、後ろの 1 枚をぼかして奥行きを出す */
 .qp-back { position: absolute; inset: 0; transform: scale(1.06); transform-origin: 50% 50%;
   filter: blur(4px); opacity: .95; }
-/* 背面 — 太い白の輪郭線（ぼけたまま光の縁になる） */
+/* 背面 — 黒の太い輪郭（ぼけて文字を地図から切る影の縁になる） */
 .qp-back .qp-title, .qp-back .qp-time, .qp-back .qp-until, .qp-back .qp-label {
-  -webkit-text-stroke: 3px rgba(255,255,255,.95); paint-order: stroke fill;
-  text-shadow: 0 2px 18px rgba(0,0,0,.45), 0 0 48px rgba(0,0,0,.35);
+  -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none;
 }
-/* 前面 — 細い黒の輪郭線で地図から切り離す */
+.qp-back { filter: blur(5px); opacity: 1; }
+/* 前面 — 白抜き文字。地図から切るのは薄い黒の影のみ */
 .qp-mount > .qp .qp-title, .qp-mount > .qp .qp-time, .qp-mount > .qp .qp-until {
-  color: #08080b; -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill;
+  color: #fff; -webkit-text-stroke: 0; 
+  text-shadow: 0 1px 3px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.4);
 }
-.qp-mount > .qp .qp-label { -webkit-text-stroke: 1.4px rgba(255,255,255,.95); paint-order: stroke fill; }
-.qp-mount > .qp.cleared .qp-time { color: #08080b; }
+.qp-mount > .qp .qp-label { -webkit-text-stroke: 0; text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  background: none; -webkit-background-clip: border-box; background-clip: border-box; color: #fff; }
+.qp-mount > .qp.cleared .qp-time { color: #fff; }
 /* マップ上のマーカーではお題を 1 行に固定 — anchor:'center' のため
    折り返すとボックスが上下に伸び、ステータスバーと過去お題リストの
    両方にぶつかる（お題は qe-sheet でユーザーが編集できる）。 */
@@ -1109,7 +1331,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 @keyframes qp-float { to { transform: translateY(-8px); } }
 .qp-eyebrow { display: flex; align-items: center; justify-content: center; min-height: 16px; }
 .qp-label {
-  font-family: var(--font-latin); font-weight: 700; font-size: 17px; line-height: 1;
+  font-family: var(--font-latin); font-weight: 900; font-size: 17px; line-height: 1;
   letter-spacing: .02em;
   background: linear-gradient(90deg, #fff0a6 0%, #bfcc96 10%, #80a787 20%, #40837f 30%,
     #5d9ba1 40%, #8d8499 50%, #a97ba2 60%, #bf4680 70%, #ff3e88 80%, #e86f6d 90%, #d0a052 100%);
@@ -1117,13 +1339,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 }
 .qp.cleared .qp-label { background: none; -webkit-background-clip: border-box; background-clip: border-box;
   color: #6fae74; }
-.qp-title { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 700;
+.qp-title { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 900;
   font-size: 18px; line-height: 1.34; letter-spacing: .01em; color: #fff; text-wrap: balance; }
-.qp-time { text-shadow: var(--qp-shadow); margin-top: 9px; font-family: var(--font-latin); font-weight: 700;
+.qp-time { text-shadow: var(--qp-shadow); margin-top: 9px; font-family: var(--font-latin); font-weight: 900;
   font-size: 26px; line-height: 1; letter-spacing: .02em; color: #fff; font-variant-numeric: tabular-nums; }
-.qp.urgent .qp-time { color: var(--state-quest-active); }
+.qp.urgent .qp-time { color: #fff; }
 .qp.cleared .qp-time { font-size: 19px; color: #fff; }
-.qp-until { text-shadow: var(--qp-shadow); margin-top: 6px; font-family: var(--font-jp); font-weight: 500;
+.qp-until { text-shadow: var(--qp-shadow); margin-top: 6px; font-family: var(--font-jp); font-weight: 800;
   font-size: 13px; letter-spacing: .02em; color: #fff; }
 .maplibregl-marker { will-change: transform; }
 
@@ -1164,7 +1386,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .wd-circle-bar { cursor: pointer; }
 
 .tl-scrim {
-  position: absolute; inset: 0; z-index: 74; background: rgba(0,0,0,.55);
+  position: absolute; inset: 0; z-index: 74; background: transparent;
   opacity: 0; pointer-events: none; transition: opacity .3s var(--ease-out);
 }
 .tl-scrim.on { opacity: 1; pointer-events: auto; }
@@ -1181,11 +1403,42 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tl-sheet.on { transform: translateY(0); }
 .tl-sheet.full { top: 0; border-radius: 0; }
 .tl-sheet.dragging { transition: none; }
+/* クエスト拡大時 — 上から降りてくる黒いモーダルシート（セーフエリア含む） */
+.tlq-top { position: absolute; left: 0; right: 0; top: 0; z-index: 90; background: #08080b;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg); transform: translateY(-100%);
+  transition: transform .4s var(--ease-out); pointer-events: none; overflow: hidden; }
+.tlq-top.on { transform: translateY(0); pointer-events: auto; }
+/* シート内に移したマップ — Universe Quest と同じ MapLibre ビュー */
+.tlq-top > #map { position: absolute; inset: 0; height: auto; transform: none !important; opacity: 1 !important;
+  visibility: visible !important; transition: none; filter: saturate(1.08); }
+.tlq-top .tt-grab { z-index: 2; }
+/* 上シート内ではエリア中央のクエスト表示（Universe Quest と同じ）を出す */
+.tlq-top .qp-mount.qp-map { display: block !important; opacity: 1 !important; width: calc(100% - 32px); }
+.tlq-top .qp-mount.qp-map .qp-title { display: block; margin-top: 5px; font-size: 26px; font-weight: 900; line-height: 1.34;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tlq-top .qp-mount.qp-map .qp-back { display: block; }
+.tlq-top .qp-mount.qp-map .qp-eyebrow, .tlq-top .qp-mount.qp-map .qp-meta img, .tlq-top .qp-mount.qp-map .qp-time { display: none; }
+.tlq-top .qp-mount.qp-map .qp-meta { margin: 0; gap: 0; }
+.tlq-top .qp-mount.qp-map .qp-meta > span { display: block; min-width: 0; }
+.tlq-top .qp-mount.qp-map .qp-name { display: block; font-family: var(--font-jp); font-weight: 400; font-size: 20px; line-height: 1.2;
+  max-width: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tlq-top .qp-mount.qp-map .qp-back .qp-name { color: #000; -webkit-text-stroke: 3.4px #000; text-shadow: none; }
+.tlq-top .qp-mount.qp-map > .qp .qp-name { color: #fff; -webkit-text-stroke: 0; text-shadow: 0 1px 4px rgba(0,0,0,.8), 0 0 10px rgba(0,0,0,.5); }
+.tlq-top .tt-grab { position: absolute; left: 50%; bottom: 8px; width: 38px; height: 4px; margin-left: -19px;
+  border-radius: var(--radius-pill); background: rgba(255,255,255,.28); }
+/* 単一 View モード — シートではなく画面そのもの */
+.tl-standalone .tl-sheet { transition: none; box-shadow: none; top: 0; border-radius: 0; transform: none; }
+.tl-standalone .tl-scrim { display: none; }
+.tl-standalone .app-header, .tl-standalone .map-post, .tl-standalone .map-list,
+.tl-standalone #map, .tl-standalone #strato-shadow, .tl-standalone #globe-frame { visibility: hidden; }
+.tl-standalone .tl-sheet:not(.on) { visibility: hidden; }
+.tl-standalone .tl-grab { cursor: default; }
 
 .tl-grab { flex: none; height: 22px; display: flex; align-items: center; justify-content: center;
   touch-action: none; cursor: grab; }
 .tl-grab span { width: 38px; height: 4px; border-radius: var(--radius-pill); background: rgba(8,8,11,.18); }
-.tl-sheet.full .tl-grab { height: 66px; align-items: flex-end; padding-bottom: 8px; }
+.tl-sheet.full .tl-grab { height: 54px; }
+.tl-sheet.full .tl-grab span { display: none; }
 
 .tl-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 2px 16px 12px;
   border-bottom: 1px solid rgba(8,8,11,.08); touch-action: none; }
@@ -1198,12 +1451,32 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tl-close { appearance: none; border: 0; width: 32px; height: 32px; border-radius: 50%; flex: none;
   background: rgba(8,8,11,.06); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .tl-close img { width: 12px; height: 12px; filter: invert(1); opacity: .55; }
+.tl-sheet .tl-good, .tl-sheet .tl-close { display: none; }
+.tl-next { appearance: none; border: 0; width: 36px; height: 36px; border-radius: 50%; flex: none; margin-right: -8px;
+  background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: transform .14s var(--ease-out), opacity .12s var(--ease-out); }
+.tl-next img { width: 14px; height: 14px; object-fit: contain; filter: invert(1); opacity: .6; }
+.tl-next:active { transform: scale(.88); opacity: .5; }
+/* サークルごとのタイムラインを横に並べたページャー（1 ページ = 1 サークル） */
+.tl-pane { flex: 1; min-height: 0; display: flex; flex-direction: row; overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain; background: #fff; touch-action: pan-x pan-y; }
+.tl-pane::-webkit-scrollbar { display: none; }
+.tl-pane.gliding { scroll-snap-type: none; }
+.tl-sheet > .tl-head { display: none; }   /* 共有ヘッダーは非表示 — 各ページ内にヘッダーを持つ */
+.tl-page { flex: none; width: 100%; height: 100%; display: flex; flex-direction: column;
+  scroll-snap-align: start; scroll-snap-stop: always; }
+.tl-page .tl-head { touch-action: pan-x; }
+.tl-page .tl-list { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; touch-action: pan-y; }
+.tl-page .tlq-board { touch-action: pan-x pan-y; overscroll-behavior-x: contain; }
+.tl-sheet.tall:not(.full) .tl-page .tl-head { border-bottom: 0; padding: 0 14px 4px; }
+.tl-sheet.tall:not(.full) .tl-page .tl-cover, .tl-sheet.tall:not(.full) .tl-page .tl-hcol { display: none; }
 
 .tl-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; background: #fff;
-  padding-bottom: 104px; -webkit-overflow-scrolling: touch; }
+  padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
 
 /* WdTimelinePost — ライトのリスト行セル */
-.tlp { display: grid; grid-template-columns: 44px 1fr; gap: 12px; padding: 20px 24px;
+.tlp { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px 24px;
   border-bottom: 1px solid rgba(8,8,11,.08); font-family: var(--font-jp); color: #08080b; background: #fff; }
 .tlp-av { width: 44px; height: 44px; border-radius: var(--radius-pill); object-fit: cover; display: block; }
 .tlp-col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
@@ -1216,11 +1489,30 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tlp-chip span { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: #0d5f67;
   white-space: nowrap; }
 .tlp-body { margin: 0; font-size: 15px; line-height: 1.75; text-wrap: pretty; }
-.tlp-m1 { border-radius: var(--radius-md); overflow: hidden; border: 1px solid rgba(8,8,11,.08); }
-.tlp-m1 img, .tlp-m1 video { width: 100%; height: 240px; object-fit: cover; display: block; }
-.tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border-radius: var(--radius-md);
-  overflow: hidden; border: 1px solid rgba(8,8,11,.08); }
-.tlp-m2 img { width: 100%; height: 164px; object-fit: cover; display: block; }
+.tlp-m1 { margin: 0 -24px; overflow: hidden; }
+.tlp-m1 img, .tlp-m1 video { width: 100%; aspect-ratio: 9 / 16; height: auto; object-fit: cover; display: block; }
+.tlp-m1.wide img, .tlp-m1.wide video { aspect-ratio: 16 / 9; }
+/* クエスト投稿のボード — 横スクロールのみ */
+.tlq-board { position: relative; height: 720px; margin: 0 -24px; overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch; transition: height .36s var(--ease-out); }
+.tlq-board::-webkit-scrollbar { display: none; }
+.tlq-inner { position: relative; height: 100%; }
+.tlq-tile { position: absolute; overflow: hidden; border-radius: 12px; background: #eee; cursor: pointer;
+  transition: left .36s var(--ease-out), top .36s var(--ease-out), width .36s var(--ease-out), height .36s var(--ease-out), border-radius .36s var(--ease-out); }
+/* タップで拡大表示 — 隙間と角丸を消し、横向きを表示幅いっぱいに */
+.tlq-board.zoom .tlq-tile { border-radius: 0; }
+.tlq-tile > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.tlq-tile.ls > img { object-position: 50% 34%; }
+.tlq-by { position: absolute; left: 10px; top: 8px; font: 600 12px/1 var(--font-latin); color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+.tlq-like { position: absolute; right: 8px; top: 6px; display: flex; align-items: center; gap: 4px;
+  min-height: 28px; padding: 0 6px; border: 0; background: none; cursor: pointer;
+  font: 600 12px/1 var(--font-latin); color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+.tlq-like img { width: 16px; height: 16px; filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
+.tlq-like.liked span { color: var(--state-like); }
+.tlq-like:active { transform: scale(.94); }
+.tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 -24px; overflow: hidden; }
+.tlp-m2 img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .tlp-acts { display: flex; align-items: center; gap: 28px; padding-top: 2px; }
 .tlp-act { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0;
   cursor: pointer; min-height: 44px; }
@@ -1233,9 +1525,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 @keyframes tlpIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
 
 /* FAB — WdIconButton special(colorful) variant · pen */
-.tl-fab { position: absolute; right: 18px; bottom: 30px; z-index: 6;
-  width: 58px; height: 58px; cursor: pointer; }
-.tl-fab img { width: 38%; height: 38%; }
+.tl-fab { position: absolute; right: 16px; top: 132px; bottom: auto; z-index: 6;
+  width: 48px; height: 48px; cursor: pointer; }
+.tl-fab img { width: 40%; height: 40%; }
+/* 右下 — ユーザー / メッセージ / メニュー（App の ct-stack と同じ縦積み） */
+.tl-br { position: absolute; right: 16px; bottom: 30px; z-index: 6; display: flex; flex-direction: column;
+  align-items: center; gap: 10px; }
+.tl-br .wd-icon-btn { width: 44px; height: 44px; background: rgba(8,8,11,.78); backdrop-filter: blur(6px); }
+.tl-br .wd-icon-btn img { width: 42%; height: 42%; object-fit: contain;
+  filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.5)); }
 
 /* 投稿画面 */
 .tl-compose { position: absolute; inset: 0; z-index: 86; background: #fff;
@@ -1286,12 +1584,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
    中身は padding-top = セーフエリア分だけ下げて、可能な限り上に詰める。
    ============================================================ */
 .app-header {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 62;
+  position: absolute; top: 0; left: 0; right: 0; z-index: 90;
   box-sizing: border-box;
   padding: var(--safe-top) 16px 20px;
   display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(180deg,
-    rgba(0,0,0,.62) 0%, rgba(0,0,0,.46) 34%, rgba(0,0,0,.20) 68%, rgba(0,0,0,0) 100%);
+  background: none;
   pointer-events: none;
 }
 .app-header > * { pointer-events: auto; }
@@ -1377,8 +1674,6 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   transition: transform .38s var(--ease-out);
 }
 .nav-push.on { transform: translateX(0); pointer-events: auto; }
-/* nav-push (profile / chat / board) が最前面のときは home のカメラ FAB を隠す (z 94 > 88) */
-.screen:has(.nav-push.on) .map-post { opacity: 0; pointer-events: none; }
 .nav-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 58px 16px 12px; }
 .nav-head h2 { font: 700 19px var(--font-jp); color: #fff; letter-spacing: .01em;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1536,10 +1831,357 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ============================================================
+   NEW SPOT — 現在地がどのサークルにも属さないときの最終セクション
+   マップはエリアを描かず、ピンと設立ポップアップだけを立てる。
+   ============================================================ */
+.ns-mount { display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
+.ns-pop { width: 262px; }
+.ns-pop > .qp .qp-title { white-space: normal; overflow: visible; text-overflow: clip; }
+/* 現在地ドット — 地図で一般的な青丸＋白リング＋拡散ハロ */
+.me-dot { position: relative; width: 18px; height: 18px; pointer-events: none; }
+.me-dot .core { position: absolute; inset: 0; border-radius: 50%; background: #1a73e8;
+  border: 2.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.45); }
+.me-dot .halo { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px;
+  border-radius: 50%; background: rgba(26,115,232,.28); animation: meHalo 2.4s var(--ease-out) infinite; }
+@keyframes meHalo {
+  0% { transform: scale(1); opacity: .55; }
+  70% { transform: scale(3.4); opacity: 0; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+.qp-sub { text-shadow: var(--qp-shadow); margin-top: 8px; font-family: var(--font-jp); font-weight: 800;
+  font-size: 13.5px; line-height: 1.5; letter-spacing: .01em; color: #fff; text-wrap: pretty; }
+.qp-back .qp-sub { -webkit-text-stroke: 3.4px #000; paint-order: stroke fill;
+  background: none; -webkit-background-clip: border-box; background-clip: border-box;
+  color: #000; text-shadow: none; }
+.ns-pin { width: 30px; height: 30px; }
+.ns-pin .pin-core img { width: 14px; height: 14px; filter: brightness(0) invert(1); }
+
+/* オンボーディング 1 枚 — 投稿でサークルを設立する流れ */
+.circle-strip.newspot { background: #fff; }
+.ns-onb { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center;
+  padding: 46px 20px calc(var(--footer-h) - 20px); gap: 26px; overflow: hidden; }
+/* 背景写真 — アスペクト比より面を埋めることを優先（cover）し、透過＋ブラーで文字を守る */
+.ns-onb .ns-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  object-position: 50% 38%; opacity: .9; filter: blur(10px) saturate(120%);
+  transform: scale(1.12); pointer-events: none; z-index: 0; }
+.ns-onb .ns-bg-veil { position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.72) 46%, rgba(255,255,255,.82)); }
+.ns-onb > .ns-lead, .ns-onb > .ns-steps, .ns-onb > .ns-cta { position: relative; z-index: 1; }
+.ns-lead { font: 800 15.5px/1.6 var(--font-jp); color: #0a0a0d; letter-spacing: .01em; }
+.ns-steps { display: flex; flex-direction: column; gap: 22px; }
+.ns-step { display: flex; align-items: flex-start; gap: 13px; }
+.ns-step .n { flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+  font: 900 15px var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; }
+.ns-step .sc { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ns-step b { font: 700 14px/1.35 var(--font-jp); color: #0a0a0d; }
+.ns-step span { font: 500 12.5px/1.6 var(--font-jp); color: rgba(10,10,13,.56); text-wrap: pretty; }
+.ns-vote { margin-top: 2px; padding: 12px 13px; border-radius: var(--radius-sm, 12px);
+  background: rgba(10,10,13,.05); font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.66); }
+.ns-vote b { font-weight: 800; color: #0a0a0d; }
+.ns-cta { margin-top: auto; flex: none; appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+  height: 52px; border-radius: var(--radius-pill); display: flex; align-items: center; justify-content: center;
+  gap: 9px; font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear);
+  box-shadow: 0 8px 24px rgba(255,62,136,.28); transition: transform .12s var(--ease-out); }
+.ns-cta:active { transform: scale(.975); }
+.ns-cta img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) invert(1); }
+
+/* 設立後の最終セクション */
+.ns-founded { position: absolute; inset: 0; display: flex; flex-direction: column;
+  padding: 44px 0 0; gap: 0; }
+.ns-founded .fphoto { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+.ns-founded .fphoto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ns-founded .fphoto .badge { position: absolute; left: 12px; top: 12px; padding: 5px 11px;
+  border-radius: var(--radius-pill); background: var(--gradient-colorful-linear);
+  font: 800 10.5px var(--font-latin); letter-spacing: .08em; color: #fff; }
+.ns-founded .frow { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 0; }
+.ns-founded .fname { font: 700 15px var(--font-jp); color: #0a0a0d; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ns-founded .fvote { margin-left: auto; flex: none; appearance: none; border: 0; cursor: pointer;
+  height: 36px; padding: 0 15px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 7px;
+  background: rgba(10,10,13,.06); font: 700 12px var(--font-jp); color: #0a0a0d; }
+.ns-founded .fvote img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) opacity(.6); }
+.ns-founded .fvote:active { transform: scale(.97); }
+.ns-founded .fmeta { flex: none; padding: 6px 16px 0; font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.55); }
+
+/* ============================================================
+   CREATE CIRCLE — 撮影 → エリア(最大1km) → クエスト → 名前
+   ============================================================ */
+#csView { background: #000; z-index: 90; }
+#csView[data-mode="cam"] .cs-form, #csView[data-mode="cam"] .cs-done { display: none; }
+#csView[data-mode="form"] .cs-cam, #csView[data-mode="form"] .cs-done { display: none; }
+#csView[data-mode="done"] .cs-cam, #csView[data-mode="done"] .cs-form { display: none; }
+.cs-cam { position: absolute; inset: 0; }
+.cs-cam .cs-vf { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cs-cam::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,.5) 0%, transparent 26%, transparent 58%, rgba(0,0,0,.72) 100%); }
+.cs-cam-top { position: absolute; top: 56px; left: 14px; right: 14px; z-index: 3;
+  display: flex; align-items: center; gap: 10px; }
+.cs-x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: var(--glass-fill);
+  backdrop-filter: blur(var(--lg-blur)); -webkit-backdrop-filter: blur(var(--lg-blur)); }
+.cs-x img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-here { display: flex; align-items: center; gap: 7px; padding: 8px 13px; border-radius: var(--radius-pill);
+  background: var(--lg-tint); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  font: 700 11.5px var(--font-jp); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,.5);
+  box-shadow: inset 0 1px 0 var(--lg-specular-top); }
+.cs-here img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-cam-bot { position: absolute; bottom: 46px; left: 0; right: 0; z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.cs-hint { font: 700 13px/1.5 var(--font-jp); color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,.7); text-align: center; }
+.cs-shutter { width: 74px; height: 74px; border-radius: 50%; border: 0; cursor: pointer; padding: 0;
+  background: var(--gradient-colorful-linear); box-shadow: 0 0 0 5px rgba(255,255,255,.9), 0 10px 28px rgba(0,0,0,.5);
+  transition: transform .12s var(--ease-out); }
+.cs-shutter:active { transform: scale(.94); }
+
+.cs-form { position: absolute; inset: 0; display: flex; flex-direction: column; background: #fff; }
+.cs-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 64px 14px 10px; }
+.cs-back { flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(10,10,13,.06); }
+.cs-title { flex: 1 1 auto; text-align: center; font: 700 16px var(--font-jp); color: #0a0a0d; }
+.cs-step { flex: none; min-width: 38px; text-align: right; font: 700 11px var(--font-latin); color: rgba(10,10,13,.42);
+  font-variant-numeric: tabular-nums; }
+.cs-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 4px 18px 18px; }
+.cs-scroll::-webkit-scrollbar { display: none; }
+.cs-pane { display: none; }
+.cs-pane.on { display: block; }
+.cs-pane h3 { font: 800 19px/1.4 var(--font-jp); color: #0a0a0d; }
+.cs-pane .lede { margin-top: 7px; font: 500 12.5px/1.65 var(--font-jp); color: rgba(10,10,13,.58); text-wrap: pretty; }
+.cs-map { position: relative; margin-top: 16px; height: 214px; border-radius: var(--radius-md, 16px);
+  overflow: hidden; background: #0e0e12; display: grid; place-items: center; }
+.cs-map .base { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .5;
+  filter: grayscale(.7) brightness(.7); }
+.cs-ring { position: relative; border-radius: 50%; transition: width .18s var(--ease-out), height .18s var(--ease-out);
+  background: radial-gradient(closest-side, rgba(255,62,136,.10), rgba(255,62,136,.03));
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.85), 0 0 40px rgba(255,62,136,.35); }
+.cs-map .cs-pin { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gradient-colorful-linear); box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 4px 14px rgba(0,0,0,.55); }
+.cs-map .cs-pin img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-map .cap { position: absolute; left: 12px; bottom: 11px; font: 700 10.5px var(--font-latin);
+  letter-spacing: .06em; color: rgba(255,255,255,.72); }
+.cs-radius { margin-top: 16px; display: flex; align-items: baseline; gap: 5px; }
+.cs-radius .v { font: 900 40px/1 var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.cs-radius .u { font: 700 14px/1 var(--font-latin); color: rgba(10,10,13,.45); }
+.cs-slider { -webkit-appearance: none; appearance: none; width: 100%; margin-top: 10px; height: 4px;
+  border-radius: 99px; background: rgba(10,10,13,.12); outline: none; }
+.cs-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+  background: var(--gradient-colorful-linear); box-shadow: 0 2px 8px rgba(0,0,0,.28); cursor: pointer; }
+.cs-scale { margin-top: 8px; display: flex; justify-content: space-between;
+  font: 600 10.5px var(--font-latin); color: rgba(10,10,13,.42); }
+.cs-field { margin-top: 18px; display: flex; flex-direction: column; gap: 7px; }
+.cs-field label { font: 700 11px var(--font-latin); letter-spacing: .1em; text-transform: uppercase; color: rgba(10,10,13,.42); }
+.cs-field input, .cs-field textarea { appearance: none; border: 0; outline: none; resize: none; width: 100%;
+  padding: 13px 14px; border-radius: var(--radius-xs, 8px); background: rgba(10,10,13,.05);
+  font: 600 14.5px/1.55 var(--font-jp); color: #0a0a0d; }
+.cs-field input::placeholder, .cs-field textarea::placeholder { color: rgba(10,10,13,.3); font-weight: 500; }
+.cs-note { margin-top: 16px; padding: 13px 14px; border-radius: var(--radius-sm, 12px);
+  background: rgba(10,10,13,.05); font: 500 11.5px/1.65 var(--font-jp); color: rgba(10,10,13,.62); }
+.cs-note b { font-weight: 800; color: #0a0a0d; }
+.cs-foot { flex: none; padding: 8px 18px calc(var(--safe-bottom) + 10px); }
+.cs-next { width: 100%; height: 52px; border: 0; border-radius: var(--radius-pill); cursor: pointer;
+  font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear);
+  box-shadow: 0 8px 24px rgba(255,62,136,.26); transition: transform .12s var(--ease-out); }
+.cs-next:active { transform: scale(.985); }
+.cs-next:disabled { background: rgba(10,10,13,.12); color: rgba(10,10,13,.4); box-shadow: none; cursor: default; }
+
+.cs-done { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 20px calc(var(--safe-bottom) + 18px); background: #000; }
+.cs-done .dphoto { position: absolute; inset: 0; }
+.cs-done .dphoto img { width: 100%; height: 100%; object-fit: cover; }
+.cs-done .dphoto::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.2) 40%, rgba(0,0,0,.86) 100%); }
+.cs-done .dbody { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 9px; }
+.cs-done .dlbl { font: 900 12px var(--font-latin); letter-spacing: .1em;
+  background: var(--gradient-colorful-linear); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.cs-done .dname { font: 900 27px/1.3 var(--font-jp); color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+.cs-done .dquest { font: 700 14px/1.5 var(--font-jp); color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+.cs-done .dmeta { font: 600 11.5px var(--font-latin); color: rgba(255,255,255,.7); }
+.cs-done .dtk { margin-top: 4px; display: flex; align-items: center; gap: 8px; align-self: flex-start;
+  padding: 8px 13px; border-radius: var(--radius-pill); background: var(--lg-tint);
+  backdrop-filter: blur(var(--lg-blur)); -webkit-backdrop-filter: blur(var(--lg-blur));
+  font: 700 11.5px var(--font-jp); color: #fff; }
+.cs-done .dtk img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) invert(1); }
+.cs-done .dgo { margin-top: 16px; width: 100%; height: 52px; border: 0; border-radius: var(--radius-pill);
+  cursor: pointer; font: 700 15px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear); }
+
+/* ============================================================
+   NAME VOTE — サークル名は投票で決まる
+   ============================================================ */
+#nvView { background: #fff; z-index: 91; }
+#nvView .nv-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 64px 14px 8px; }
+#nvView .nv-back { flex: none; width: 38px; height: 38px; border: 0; border-radius: 50%; cursor: pointer;
+  display: grid; place-items: center; background: rgba(10,10,13,.06); }
+#nvView .nv-htitle { flex: 1 1 auto; text-align: center; font: 700 16px var(--font-jp); color: #0a0a0d; }
+#nvView .nv-sp { flex: none; width: 38px; }
+.nv-now { padding: 6px 20px 0; }
+.nv-now .k { font: 700 10.5px var(--font-latin); letter-spacing: .1em; text-transform: uppercase; color: rgba(10,10,13,.42); }
+.nv-now .v { margin-top: 5px; font: 900 24px/1.35 var(--font-jp); color: #0a0a0d; }
+.nv-now .s { margin-top: 5px; font: 500 11.5px/1.6 var(--font-jp); color: rgba(10,10,13,.55); text-wrap: pretty; }
+.nv-tk { margin: 14px 20px 0; padding: 12px 14px; border-radius: var(--radius-sm, 12px);
+  display: flex; align-items: center; gap: 10px; background: rgba(10,10,13,.05); }
+.nv-tk.warn { background: rgba(255,62,136,.10); }
+.nv-tk img { width: 16px; height: 16px; object-fit: contain; filter: brightness(0) opacity(.55); }
+.nv-tk .t { font: 600 11.5px/1.55 var(--font-jp); color: rgba(10,10,13,.62); }
+.nv-tk .t b { font-weight: 800; color: #0a0a0d; }
+.nv-tk .n { margin-left: auto; font: 900 20px/1 var(--font-latin); color: #0a0a0d; font-variant-numeric: tabular-nums; }
+.nv-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; padding: 14px 20px 8px; }
+.nv-list::-webkit-scrollbar { display: none; }
+.nv-row { display: flex; align-items: center; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid rgba(8,8,11,.08); will-change: transform; }
+.nv-row.no-tk { transform: translateX(4px); transition: transform .18s var(--ease-out); }
+.nv-row .rk { flex: none; width: 26px; text-align: right; font: 700 14px/1 var(--font-latin);
+  color: rgba(8,8,11,.4); font-variant-numeric: tabular-nums; }
+.nv-row.top .rk { background: linear-gradient(135deg,#fff0a6,#005f67 38%,#ff3e88 70%,#d0a052);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nv-row .col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.nv-row .nm { font: 700 15px/1.35 var(--font-jp); color: #0a0a0d; }
+.nv-row .by { font: 500 10.5px var(--font-latin); color: rgba(10,10,13,.42); }
+.nv-row .chip { align-self: flex-start; padding: 3px 9px; border-radius: var(--radius-pill);
+  background: var(--gradient-colorful-linear); font: 800 9.5px var(--font-latin); letter-spacing: .07em; color: #fff; }
+.nv-like { flex: none; display: flex; align-items: center; justify-content: center; gap: 7px;
+  min-width: 76px; height: 44px; padding: 0 14px;
+  border: 0; border-radius: var(--radius-pill); cursor: pointer; background: rgba(8,8,11,.06);
+  box-shadow: inset 0 0 0 1px rgba(8,8,11,.08);
+  font: 600 14px var(--font-latin); color: rgba(8,8,11,.56); font-variant-numeric: tabular-nums;
+  transition: background .16s ease, box-shadow .16s ease, transform .12s var(--ease-out); }
+.nv-like:active { transform: scale(.97); }
+.nv-like img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.nv-like.liked { background: #08080b; color: #fff; box-shadow: none; }
+.nv-like.liked img { filter: none; opacity: 1; }
+.nv-post { flex: none; display: flex; gap: 9px; padding: 10px 20px calc(var(--safe-bottom) + 12px);
+  border-top: 1px solid rgba(10,10,13,.07); }
+.nv-post input { flex: 1 1 auto; min-width: 0; appearance: none; border: 0; outline: none;
+  padding: 13px 14px; border-radius: var(--radius-pill); background: rgba(10,10,13,.05);
+  font: 600 14px var(--font-jp); color: #0a0a0d; }
+.nv-post input::placeholder { color: rgba(10,10,13,.3); font-weight: 500; }
+.nv-post button { flex: none; height: 46px; padding: 0 18px; border: 0; border-radius: var(--radius-pill);
+  cursor: pointer; font: 700 13.5px var(--font-jp); color: #fff; background: var(--gradient-colorful-linear); }
+.nv-post button:disabled { background: rgba(10,10,13,.12); color: rgba(10,10,13,.4); cursor: default; }
+
+  .hd-circle { cursor: pointer; pointer-events: auto; }
+
+/* ============================================================
+   WdMemberStatus — サークル項目の左下。参加者アイコン＋タイムラインの投稿数。
+   タップでサークルタイムラインのモーダルシートを開く。
+   ============================================================ */
+.mstat { position: absolute; left: 12px; bottom: 4px; z-index: 74; pointer-events: auto;
+  appearance: none; border: 0; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 13px 0 8px; border-radius: var(--radius-pill);
+  background: var(--lg-tint, rgba(0,0,0,.51));
+  backdrop-filter: blur(var(--lg-blur, 14px)) saturate(var(--lg-saturate, 160%));
+  -webkit-backdrop-filter: blur(var(--lg-blur, 14px)) saturate(var(--lg-saturate, 160%));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top, rgba(255,255,255,.28)), 0 4px 14px rgba(0,0,0,.35);
+  transition: transform .12s var(--ease-out); }
+.mstat:active { transform: scale(.96); }
+.mstat .avs { display: flex; align-items: center; }
+.mstat .avs img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block;
+  box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
+.mstat .avs img + img { margin-left: -9px; }
+.mstat .cnt { display: flex; align-items: baseline; gap: 3px; color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.mstat .cnt .v { font: 900 15px/1 var(--font-latin); font-variant-numeric: tabular-nums; }
+.mstat .cnt .u { font: 700 10px/1 var(--font-jp); opacity: .8; }
+/* 右下 — メニューアイコンをメッセージボタンの上に縦積み */
+.wd-circle-tool > .ct-stack { flex: none; margin-left: auto; display: flex; flex-direction: column;
+  align-items: center; gap: 10px; }
+
+/* good 残高 — ヘッダー左上の自分のアイコンの直下 */
+.me-wrap { flex: none; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.me-good { display: flex; align-items: center; justify-content: center; gap: 2px; width: 44px; }
+.me-good img { width: 9px; height: 9px; object-fit: contain; filter: brightness(0) invert(1);
+  opacity: .9; }
+.me-good span { font: 800 9px/1 var(--font-latin); color: #fff; letter-spacing: .01em;
+  text-shadow: 0 1px 3px rgba(0,0,0,.6); font-variant-numeric: tabular-nums; }
+
+/* サークル名が上に残る高さのシート */
+.tl-sheet.tall { top: calc(var(--map-h) + 8px); }
+/* この高さのときはヘッダー（名前・閉じる）なし — good ボタンだけ右上に残す */
+.tl-sheet.tall:not(.full) .tl-head { border-bottom: 0; padding: 0 14px 4px; }
+.tl-sheet.tall:not(.full) .tl-cover,
+.tl-sheet.tall:not(.full) .tl-hcol,
+.tl-sheet.tall:not(.full) .tl-close { display: none; }
+.tl-sheet.tall:not(.full) .tl-good { margin-left: auto; }
+.phone:has(.tl-sheet.on) .map-post { opacity: 0; transform: translateY(10px); pointer-events: none; }
+
+/* タイムライン右上の good ボタン */
+.tl-good { appearance: none; border: 0; cursor: pointer; flex: none; display: flex; align-items: center;
+  gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--radius-pill);
+  background: rgba(8,8,11,.06); transition: transform .12s var(--ease-out); }
+.tl-good:active { transform: scale(.95); }
+.tl-good img { width: 14px; height: 14px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.tl-good span { font: 800 12px/1 var(--font-latin); color: #08080b; font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   サークル名投票 ダイアログ
+   ============================================================ */
+.gv-veil { position: absolute; inset: 0; z-index: 94; display: flex; align-items: center;
+  justify-content: center; padding: 24px; background: rgba(0,0,0,.72); opacity: 0;
+  pointer-events: none; transition: opacity .2s var(--ease-out); }
+.gv-veil.on { opacity: 1; pointer-events: auto; }
+.gv-dlg { width: 100%; max-height: 78%; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--radius-md, 16px); background: #fff;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5); transform: scale(.96);
+  transition: transform .2s var(--ease-out); }
+.gv-veil.on .gv-dlg { transform: scale(1); }
+.gv-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(8,8,11,.08); }
+.gv-title { flex: 1 1 auto; font: 700 15px var(--font-jp); color: #08080b; }
+.gv-bal { flex: none; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px;
+  border-radius: var(--radius-pill); background: rgba(8,8,11,.06); }
+.gv-bal img { width: 12px; height: 12px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.gv-bal span { font: 800 11.5px/1 var(--font-latin); color: #08080b; font-variant-numeric: tabular-nums; }
+.gv-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.gv-list::-webkit-scrollbar { display: none; }
+.gv-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-bottom: 1px solid rgba(8,8,11,.08); will-change: transform; }
+.gv-row.shake { transform: translateX(4px); transition: transform .18s var(--ease-out); }
+.gv-row .rk { flex: none; width: 26px; text-align: right; font: 700 14px/1 var(--font-latin);
+  color: rgba(8,8,11,.4); font-variant-numeric: tabular-nums; }
+.gv-row.top .rk { background: linear-gradient(135deg,#fff0a6,#005f67 38%,#ff3e88 70%,#d0a052);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.gv-row .col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.gv-row .nm { font: 700 15px/1.35 var(--font-jp); color: #08080b; }
+.gv-row .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gv-row .by { font: 400 12px var(--font-latin); color: rgba(8,8,11,.56); }
+.gv-row.top .nm { color: #08080b; }
+.gv-row .chip { align-self: flex-start; margin-top: 2px; padding: 3px 9px;
+  border-radius: var(--radius-pill); background: var(--gradient-colorful-linear);
+  font: 800 9.5px var(--font-latin); letter-spacing: .07em; color: #fff; }
+.gv-btn { flex: none; appearance: none; border: 0; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 7px; min-width: 76px; height: 44px; padding: 0 14px;
+  border-radius: var(--radius-pill); background: rgba(8,8,11,.06);
+  box-shadow: inset 0 0 0 1px rgba(8,8,11,.08);
+  transition: background .16s ease, box-shadow .16s ease, transform .12s var(--ease-out); }
+.gv-btn:active { transform: scale(.97); }
+.gv-btn img { width: 18px; height: 18px; object-fit: contain; filter: brightness(0) opacity(.5); }
+.gv-btn span { font: 600 14px/1 var(--font-latin); color: rgba(8,8,11,.56); font-variant-numeric: tabular-nums; }
+.gv-btn.voted { background: #08080b; box-shadow: none; }
+.gv-btn.voted img { filter: none; opacity: 1; }
+.gv-btn.voted span { color: #fff; }
+.gv-foot { flex: none; display: flex; gap: 9px; padding: 12px 16px 14px;
+  border-top: 1px solid rgba(8,8,11,.08); }
+.gv-foot input { flex: 1 1 auto; min-width: 0; appearance: none; border: 0; outline: none;
+  padding: 11px 13px; border-radius: var(--radius-pill); background: rgba(8,8,11,.05);
+  font: 600 13.5px var(--font-jp); color: #08080b; }
+.gv-foot input::placeholder { color: rgba(8,8,11,.3); font-weight: 500; }
+.gv-foot button { flex: none; height: 40px; padding: 0 16px; border: 0; cursor: pointer;
+  border-radius: var(--radius-pill); font: 700 13px var(--font-jp); color: #fff;
+  background: var(--gradient-colorful-linear); }
+.gv-foot button:disabled { background: rgba(8,8,11,.12); color: rgba(8,8,11,.4); cursor: default; }
+.gv-close { appearance: none; border: 0; width: 30px; height: 30px; border-radius: 50%; flex: none;
+  cursor: pointer; background: rgba(8,8,11,.06); display: grid; place-items: center; }
+.gv-close img { width: 11px; height: 11px; filter: brightness(0) opacity(.5); }
 </style>
 </head>
 <body>
 <script>window.__APP_SCREEN__=1;window.__APP_PARAMS__={"view":"chatlist"};</script>
+<script>
+  /* standalone timeline (view=timeline): apply before first paint so map/sheet chrome never flashes */
+  if (((window.__APP_PARAMS__ || {}).view === 'timeline') || /[?&#]view=timeline\b/.test(location.search + location.hash)) document.body.classList.add('tl-standalone');
+</script>
 <style>
   body.screen-only .studio { padding: 0; gap: 0; min-height: 100dvh; align-items: center; justify-content: center; }
   body.screen-only .specimen-cap,
@@ -1570,34 +2212,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
         <!-- APP HEADER — スクリムがそのままヘッダーの背景。左=ユーザー / 右=チャット -->
         <header class="app-header">
-          <button class="me-btn" id="meBtn" aria-label="プロフィール">
-            <img src="../../assets/sample/user/user007.jpg" alt="">
-          </button>
-          <span class="hd-circle" id="hdCircle">グラフィティマンの日常</span>
           <button class="chat-btn wd-icon-btn" id="searchBtn" aria-label="検索">
             <img src="../../assets/icons/icon_search.png" alt="">
           </button>
+          <span class="hd-circle" id="hdCircle" hidden>グラフィティマンの日常</span>
         </header>
 
-        <!-- WdCircleBar in the header — follows the vertically-active circle -->
-        <div class="wd-circle-tool">
-          <button class="wd-icon-btn" id="fbList" type="button" aria-label="サークルのリスト">
-            <img src="../../assets/icons/icon_menu.png" alt="">
-          </button>
-          <div class="wd-circle-bar">
-            <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
-            <div class="col">
-              <span class="nm" id="cbName">グラフィティマンの日常</span>
-              <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
-            </div>
-          </div>
-          <button class="wd-icon-btn has-badge" id="chatBtn" aria-label="チャット" style="margin-left: auto;">
-            <img src="../../assets/icons/icon_comment.png" alt="">
-            <span class="wd-badge"><span>3</span></span>
-          </button>
-        </div>
-
-        <!-- マップ右下 — 投稿ボタン / 投稿済みサムネイル -->
+        <!-- マップ下部センター — 投稿ボタン / 投稿済みサムネイル -->
         <div class="map-post" id="mapPost">
           <button class="mp-cam wd-icon-btn color" id="mpCam" type="button" aria-label="クエストを投稿">
             <img src="../../assets/icons/icon_camera.png" alt="">
@@ -1605,10 +2226,51 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           <button class="mp-mine" id="mpMine" type="button" aria-label="自分の投稿"><img alt=""></button>
         </div>
 
+        <!-- マップ左下 — クエスト一覧（投稿ボタンと対称の位置・同じコンポーネント） -->
+        <div class="map-list" id="mapList">
+          <button class="ml-btn wd-icon-btn color" id="mlBtn" type="button" aria-label="クエスト一覧を開く">
+            <img src="../../assets/icons/icon_menu.png" alt="">
+          </button>
+        </div>
+
+        <!-- マップ内下方 — クエストタイトル（ラベル + タイトルの 2 段） -->
+        <div class="map-quest" id="mapQuest">
+          <div class="qp-mount mq-pop">
+            <div class="qp-back"><div class="qp"><span class="mq-name"></span><div class="qp-title mq-t"></div></div></div>
+            <div class="qp"><span class="mq-name"></span><div class="qp-title mq-t"></div></div>
+          </div>
+        </div>
+
+        <!-- WdCircleBar in the header — follows the vertically-active circle -->
+        <div class="wd-circle-tool">
+          <div class="wd-circle-bar">
+            <span class="cover"><img id="cbCover" src="../../assets/sample/uv/story-05.png" alt=""></span>
+            <div class="col">
+              <span class="nm" id="cbName">グラフィティマンの日常</span>
+              <span class="ds" id="cbDesc">渋谷駅周辺のコミュニティ · ＋3人が参加中</span>
+            </div>
+          </div>
+          <div class="ct-stack">
+            <button class="wd-icon-btn has-badge" id="chatBtn" aria-label="チャット">
+              <img src="../../assets/icons/icon_comment.png" alt="">
+              <span class="wd-badge"><span>3</span></span>
+            </button>
+            <div class="me-wrap">
+              <button class="me-btn" id="meBtn" aria-label="プロフィール">
+                <img src="../../assets/sample/user/user007.jpg" alt="">
+              </button>
+              <span class="me-good"><img src="../../assets/icons/icon_good.png" alt="good"><span id="meGood">x521</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- クエスト（WdQuestPopup）はエリア中心のマーカーとして JS が立てる -->
+
         <!-- POST FEED — quest pager × 16:8 landscape videos -->
         <div class="feed-sheet" id="feedSheet">
           <div class="feed-col" id="feedCol"></div>
         </div>
+
 
         <div class="feed-scrim"></div>
 
@@ -1688,13 +2350,46 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
               <span class="tl-nm" id="tlName">グラフィティマンの日常</span>
               <span class="tl-ds" id="tlDesc">タイムライン</span>
             </div>
+            <button class="tl-good" id="tlGood" type="button" aria-label="サークル名投票">
+              <img src="../../assets/icons/icon_good.png" alt=""><span id="tlGoodN">good</span>
+            </button>
             <button class="tl-close" id="tlClose" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+            <button class="tl-next" id="tlNext" type="button" aria-label="次のサークル"><img src="../../assets/icons/icon_next.png" alt=""></button>
           </header>
-          <div class="tl-list" id="tlList"></div>
+          <div class="tl-pane" id="tlPane"></div>
+          <div class="tlq-top" id="tlqTop" aria-hidden="true"><span class="tt-grab"></span></div>
           <button class="tl-fab wd-icon-btn color" id="tlFab" aria-label="投稿する">
             <img src="../../assets/icons/icon_edit.png" alt="">
           </button>
+          <div class="tl-br">
+            <button class="me-btn" id="tlMe" aria-label="プロフィール">
+              <img src="../../assets/sample/user/user007.jpg" alt="">
+            </button>
+            <button class="wd-icon-btn has-badge" id="tlChat" aria-label="チャット">
+              <img src="../../assets/icons/icon_comment.png" alt="">
+              <span class="wd-badge"><span>3</span></span>
+            </button>
+            <button class="wd-icon-btn" id="tlMenu" aria-label="メニュー">
+              <img src="../../assets/icons/icon_menu.png" alt="">
+            </button>
+          </div>
         </section>
+
+        <!-- サークル名投票 ダイアログ -->
+        <div class="gv-veil" id="gvVeil" aria-hidden="true">
+          <div class="gv-dlg" role="dialog" aria-label="サークル名投票">
+            <header class="gv-head">
+              <span class="gv-title">サークル名投票</span>
+              <span class="gv-bal"><img src="../../assets/icons/icon_good.png" alt="good"><span id="gvBal">521</span></span>
+              <button class="gv-close" id="gvClose" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+            </header>
+            <div class="gv-list" id="gvList"></div>
+            <div class="gv-foot">
+              <input id="gvInput" type="text" placeholder="サークル名を投稿する">
+              <button id="gvSend" type="button" disabled>投稿</button>
+            </div>
+          </div>
+        </div>
 
         <!-- タイムラインへの投稿画面 -->
         <section class="tl-compose" id="tlCompose" aria-hidden="true">
@@ -1816,6 +2511,103 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           </div>
         </section>
 
+        <!-- サークル設立 — 撮影 → エリア(最大1km) → クエスト → 名前 -->
+        <section class="nav-push" id="csView" data-mode="cam" aria-hidden="true">
+          <div class="cs-cam">
+            <img class="cs-vf" src="../../assets/sample/reel/reel006.jpg" alt="">
+            <div class="cs-cam-top">
+              <button class="cs-x" id="csClose" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+              <span class="cs-here"><img src="../../assets/icons/icon_near.png" alt="">どのサークルにも属さない場所です</span>
+            </div>
+            <div class="cs-cam-bot">
+              <span class="cs-hint">写真を撮ると、この場所が<br>サークルの中心になります</span>
+              <button class="cs-shutter" id="csShot" type="button" aria-label="撮影"></button>
+            </div>
+          </div>
+
+          <div class="cs-form">
+            <header class="cs-head">
+              <button class="cs-back" id="csBack" type="button" aria-label="戻る">
+                <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#0a0a0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="cs-title">サークルを設立</div>
+              <span class="cs-step" id="csStepLbl">1 / 3</span>
+            </header>
+            <div class="cs-scroll">
+              <section class="cs-pane on" data-pane="area">
+                <h3>エリアを決める</h3>
+                <p class="lede">撮影した場所が中心です。半径は最大 1km。エリアの中にいる人だけが投稿できます。</p>
+                <div class="cs-map">
+                  <img class="base" src="../../assets/sample/reel/reel006.jpg" alt="">
+                  <span class="cs-ring" id="csRing"></span>
+                  <span class="cs-pin"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>
+                  <span class="cap">YOUR LOCATION · CENTER</span>
+                </div>
+                <div class="cs-radius"><span class="v" id="csRv">400</span><span class="u" id="csRu">m</span></div>
+                <input class="cs-slider" id="csRad" type="range" min="100" max="1000" step="20" value="400">
+                <div class="cs-scale"><span>100m</span><span>1km (MAX)</span></div>
+              </section>
+
+              <section class="cs-pane" data-pane="quest">
+                <h3>クエストを決める</h3>
+                <p class="lede">サークルにはクエストが1つ。エリアの中で撮って投稿するとクリアになります。</p>
+                <div class="cs-field"><label>quest</label>
+                  <input id="csQt" type="text" placeholder="例）路地裏の壁画を見つける"></div>
+                <div class="cs-field"><label>description</label>
+                  <textarea id="csQd" rows="3" placeholder="クリアの条件を書く"></textarea></div>
+                <div class="cs-note">クリアすると<b>投票権が1つ</b>もらえます。投票権はサークル名の投票に使います。</div>
+              </section>
+
+              <section class="cs-pane" data-pane="name">
+                <h3>最初の名前をつける</h3>
+                <p class="lede">設立者のあなたが好きな名前をつけられます。</p>
+                <div class="cs-field"><label>circle name</label>
+                  <input id="csName" type="text" placeholder="例）宇田川の壁"></div>
+                <div class="cs-note">これ以降の名前は<b>投票で決まります</b>。誰でも名前を投稿でき、サークルにいる人がいいねを押して投票。<b>いいねが一番多い名前</b>がサークル名になります。</div>
+              </section>
+            </div>
+            <div class="cs-foot"><button class="cs-next" id="csNext" type="button">次へ</button></div>
+          </div>
+
+          <div class="cs-done">
+            <div class="dphoto"><img id="csDonePhoto" src="../../assets/sample/reel/reel006.jpg" alt=""></div>
+            <div class="dbody">
+              <span class="dlbl">CIRCLE FOUNDED</span>
+              <div class="dname" id="csDoneName">宇田川の壁</div>
+              <div class="dquest" id="csDoneQuest">路地裏の壁画を見つける</div>
+              <div class="dmeta" id="csDoneMeta">半径 400m · メンバー 1人</div>
+              <span class="dtk"><img src="../../assets/icons/icon_check.png" alt="">投稿でクリア — 投票権 ×1 を獲得</span>
+              <button class="dgo" id="csDoneGo" type="button">サークルを見る</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- サークル名の投票 -->
+        <section class="nav-push" id="nvView" aria-hidden="true">
+          <header class="nv-head">
+            <button class="nv-back" id="nvBack" type="button" aria-label="戻る">
+              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#0a0a0d" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="nv-htitle">サークル名の投票</div>
+            <span class="nv-sp"></span>
+          </header>
+          <div class="nv-now">
+            <div class="k">current name</div>
+            <div class="v" id="nvNow">グラフィティマンの日常</div>
+            <div class="s" id="nvSub">いいねが一番多い名前がサークル名になります。</div>
+          </div>
+          <div class="nv-tk" id="nvTkRow">
+            <img src="../../assets/icons/icon_check.png" alt="">
+            <span class="t">投票権 — <b>クエストをクリアすると1つ</b>もらえます</span>
+            <span class="n" id="nvTk">1</span>
+          </div>
+          <div class="nv-list" id="nvList"></div>
+          <div class="nv-post">
+            <input id="nvInput" type="text" placeholder="サークル名を投稿する">
+            <button id="nvSend" type="button" disabled>投稿</button>
+          </div>
+        </section>
+
         <!-- SafeArea chrome -->
         <div class="statusbar">
           <div class="time">9:41</div>
@@ -1862,6 +2654,25 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 (function () {
   // ---- circles: one circle = one quest -------------------------------------
   const CIRCLES = [
+    {
+      name: 'SCRAMBLE SHIBUYA', desc: 'スクランブル交差点まわり · ＋12人が参加中',
+      cover: '../../assets/sample/reel/reel022.jpg',
+      center: [139.70048, 35.65950], radius: 480,
+      quest: {
+        title: 'ウィンクして', date: '8/1(土) 12:00–23:00',
+        venue: 'スクランブル交差点', spot: [139.70041, 35.65935],
+        desc: 'スクランブル交差点でウィンクしている写真をアップロードするとクリア。クリアするとこのクエストの投稿が見られる。',
+      },
+      cleared: false, inside: true,
+      posts: [
+        { ava: '../../assets/sample/user/user007.jpg', text: '交差点のど真ん中でウィンク', img: '../../assets/sample/reel/reel022.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user008.jpg', text: '二人でタイミング合わせた', img: '../../assets/sample/reel/reel021.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user005.jpg', text: '109の前で一枚', img: '../../assets/sample/reel/reel027.jpg', ar: 'L' },
+        { ava: '../../assets/sample/user/user003.jpg', text: '三人で片目つぶり', img: '../../assets/sample/reel/reel023.jpg', ar: 'L' },
+        { ava: '../../assets/sample/user/user011.jpg', text: '日差しが強くて自然にウィンク', img: '../../assets/sample/reel/reel025.jpg', ar: 'P' },
+        { ava: '../../assets/sample/user/user013.jpg', text: 'ハチ公側から', img: '../../assets/sample/reel/reel026.jpg', ar: 'L' },
+      ],
+    },
     {
       name: 'グラフィティマンの日常', desc: '渋谷駅周辺のコミュニティ · ＋3人が参加中',
       cover: '../../assets/sample/uv/story-05.png',
@@ -1949,6 +2760,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   const md = (d) => (d.getMonth() + 1) + ' / ' + d.getDate();
   const jpDate = (d) => (d.getMonth() + 1) + '/' + d.getDate() + '(' + WD[d.getDay()] + ')';
   const PAST_TITLES = [
+    ['ハチ公と一枚', '交差点を斜めに渡る', '109の前で待ち合わせ', '知らない人と乾杯', 'センター街で踊る'],
     ['朝の渋谷川さんぽ', 'スクランブル交差点を渡る', '渋谷横丁でひとり乾杯', '口説いてハーレムを作る', 'フランス色ダンスを学ぶ'],
     ['裏原のコーヒースタンド', '明治神宮の朝参り', '原宿の古着屋めぐり', '竹下通りのクレープ', 'キャットストリートで一枚'],
     ['ランチの定食屋めぐり', '朝までカラオケ', '道玖坂を登りきる', '深夜の立ち食いそば', '円山町の路地裏めし'],
@@ -1958,6 +2770,23 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     'また来ます', '近所なのに知らなかった', '夕方の光がきれい', '友だちと一緒に',
     'あっという間だった', '思ったより人が多かった', 'リピート確定', '静かで落ち着く',
     '偶然通りかかって', '今日の一枚', '並んだ甸斐あった', '帰り道で撮った',
+  ];
+  /* 前日のお題「ハイタッチ」— 実写 5 枚（横3・縦2）。
+     左に横向きを縦積み、その右に縦向きを 2 枚縦積みする固定レイアウト（'J' 列）。 */
+  const HIFIVE = [
+    { img: '../../assets/quest/hifive_l1.jpg', ar: 'L', text: '全力でいった' },
+    { img: '../../assets/quest/hifive_l2.jpg', ar: 'L', text: '音が鳴った' },
+    { img: '../../assets/quest/hifive_l3.jpg', ar: 'L', text: '初対面でハイタッチ' },
+    { img: '../../assets/quest/hifive_p1.jpg', ar: 'P', text: '手が痛い' },
+    { img: '../../assets/quest/hifive_p2.jpg', ar: 'P', text: 'ぎりぎり間に合った' },
+  ];
+  /* 前々日のお題「乾杯」— 実写 5 枚（横2・縦3）。ハイタッチと同じ 'J' 列。 */
+  const KANPAI = [
+    { img: '../../assets/quest/kanpai_l1.jpg', ar: 'L', text: 'とりあえず一杯' },
+    { img: '../../assets/quest/kanpai_l2.jpg', ar: 'L', text: 'この面々は久しぶり' },
+    { img: '../../assets/quest/kanpai_p1.jpg', ar: 'P', text: 'やきとり屋で合流' },
+    { img: '../../assets/quest/kanpai_p2.jpg', ar: 'P', text: '夕飯のあとに一杯' },
+    { img: '../../assets/quest/kanpai_p3.jpg', ar: 'P', text: '渋谷で乾杯、最高' },
   ];
   const REEL = (i) => '../../assets/sample/reel/reel' + String((((i % 15) + 15) % 15) + 1).padStart(3, '0') + '.jpg';
 
@@ -1973,10 +2802,17 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           name: NAMES[s % NAMES.length],
         });
       }
+      /* 前日 = ハイタッチ（横3・縦2 の 'J' 列）/ その前日 = 乾杯（横2・縦3 —
+         縦 3 枚の縦積みはしないので、既存の列パターンに任せる） */
+      const shot = k === 1 ? { t: 'ハイタッチ', ph: HIFIVE, fix: 'J', cols: null }
+        : k === 2 ? { t: '乾杯', ph: KANPAI, fix: null, cols: ['E', 'G'] } : null;
       days.push({
-        date: dt, past: true, posts, hot: 38 + ((ci * 53 + k * 91) % 172),
+        date: dt, past: true, hot: 38 + ((ci * 53 + k * 91) % 172),
+        posts: shot ? shot.ph.map((p, i) => ({ ...p, name: NAMES[(ci * 5 + i + k) % NAMES.length] })) : posts,
+        fixedType: shot ? shot.fix : null,
+        cols: shot ? shot.cols : null,
         quest: {
-          past: true, title: PAST_TITLES[ci][PAST_N - k], venue: c.quest.venue,
+          past: true, title: shot ? shot.t : PAST_TITLES[ci][PAST_N - k], venue: c.quest.venue,
           spot: c.quest.spot, date: jpDate(dt) + ' 19:00–23:00', desc: '',
         },
       });
@@ -1994,12 +2830,24 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   const cbName = document.getElementById('cbName');
   const cbDesc = document.getElementById('cbDesc');
   const cbCover = document.getElementById('cbCover');
-  const hdCircle = document.getElementById('hdCircle');
+  const hdCircleEl = document.getElementById('hdCircle');
+  // サークル名はエリアの中心（マップ上のマーカー）に表示する
+  const areaNameEl = document.createElement('div');
+  areaNameEl.className = 'area-name';
+  areaNameEl.textContent = hdCircleEl.textContent;
+  const hdCircle = {
+    get textContent() { return areaNameEl.textContent; },
+    set textContent(v) { hdCircleEl.textContent = v; areaNameEl.textContent = v; },
+    addEventListener(...a) { hdCircleEl.addEventListener(...a); qpMount.addEventListener(...a); },
+  };
   // ---- WdQuestPopup — マップのエリア上空に直接浮かべる ----------------
   const qpMount = document.createElement('div');
-  qpMount.className = 'qp-mount';
+  qpMount.className = 'qp-mount qp-map';
   const qpBlock = '<div class="qp sm">'
     + '<div class="qp-eyebrow"><span class="qp-label">Quest</span></div>'
+    + '<div class="qp-meta">'
+    +   '<span><img src="../../assets/icons/icon_pin_location.png" alt=""><span class="qp-name"></span></span>'
+    + '</div>'
     + '<div class="qp-title"></div>'
     + '<div class="qp-time"></div>'
     + '</div>';
@@ -2014,9 +2862,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* offset Y: -28 = エリアの中心の少し上（DS の定位置）。過去お題リストは
      このボックスが残した帯に収める — ポップアップ側は動かさない。 */
   const QP_OFFSET_Y = -28;
+  /* pitch 60 では中心の lngLat がスクリーン上端寄りに投影されるため、
+     サークル名はエリア楕円の視覚中心まで下げる（ステータスバーに被らせない）。 */
+  const AREA_NAME_OFFSET_Y = 12;
+  // クエストはエリアの中心にマーカーとして立てる（画面平行）
   function placePopup(map, C) {
     if (!qpMarker) {
-      qpMarker = new maplibregl.Marker({ element: qpMount, anchor: 'center', offset: [0, QP_OFFSET_Y] })
+      qpMarker = new maplibregl.Marker({ element: qpMount, anchor: 'center',
+        pitchAlignment: 'viewport', rotationAlignment: 'viewport',
+        offset: [0, AREA_NAME_OFFSET_Y] })
         .setLngLat(C).addTo(map);
     } else {
       qpMarker.setLngLat(C);
@@ -2044,6 +2898,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const cards = mount.querySelectorAll('.qp');
     const put = (sel, txt) => mount.querySelectorAll(sel).forEach(e => { e.textContent = txt; });
     put('.qp-title', q.title);
+    put('.qp-name', c.name || (typeof hdCircleEl !== 'undefined' ? hdCircleEl.textContent : ''));
     cards.forEach(k => k.classList.remove('urgent', 'cleared'));
     if (!past && c.cleared) {
       cards.forEach(k => k.classList.add('cleared'));
@@ -2070,8 +2925,30 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   fsQpMount.className = 'qp-mount';
   fsQpMount.innerHTML = '<div class="qp-back">' + qpBlock + '</div>' + qpBlock;
   document.getElementById('fsQpBody').appendChild(fsQpMount);
+  const mqT = document.querySelectorAll('#mapQuest .mq-t');
+  const mqN = document.querySelectorAll('#mapQuest .mq-name');
+  const setMq = (v) => mqT.forEach((e) => { e.textContent = v; });
+  const setMqName = (v) => mqN.forEach((e) => { e.textContent = v; });
+  let questBoardOn = false;
   function tickHero() {
-    qpRender(qpMount, CIRCLES[active]);
+    if (questBoardOn) { setMq('クエストボード'); setMqName(''); return; }
+    if (window.tlqOverride) {   /* タイムラインでタップしたクエストをマップ上に表示 */
+      const o = window.tlqOverride;
+      qpRender(qpMount, o.circle, o.quest); setMq(o.quest.title || ''); setMqName(o.circle.name || '');
+      return;
+    }
+    if (typeof nsMode !== 'undefined' && nsMode) {
+      if (nsCreated) qpRender(qpMount, { cleared: false }, nsCreated.quest);
+      if (nsCreated) { setMq(nsCreated.quest.title); setMqName(nsCreated.name); }
+    } else {
+      const ac = CIRCLES[active] || {};
+      /* マップ内の表示も、リストで見ている日のお題に追従させる */
+      const acDay = ac.curDay || ac.today;
+      const acQuest = (acDay && acDay.quest) || ac.quest;
+      qpRender(qpMount, CIRCLES[active], acQuest);
+      setMq((acQuest && acQuest.title) || '');
+      setMqName(ac.name || '');
+    }
     if (typeof fsCircle !== 'undefined' && fsCircle) {
       qpRender(fsQpMount, fsCircle, (typeof fsDay !== 'undefined' && fsDay) ? fsDay.quest : null);
     }
@@ -2097,8 +2974,66 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     txt.className = 'u-text'; txt.textContent = p.text; cell.appendChild(txt);
     const nm = document.createElement('span');
     nm.className = 'u-name'; nm.textContent = p.name || 'user'; cell.appendChild(nm);
+    if (p.qtitle) {
+      const ov = document.createElement('span');
+      ov.className = 'q-ov';
+      const rw = p.qreward || {};
+      const src = rwThumb(rw.k) || rw.src || '';
+      ov.innerHTML = '<span class="qt2"></span>'
+        + '<span class="l">報酬</span>'
+        + '<span class="qrw"><span class="im"><img alt=""></span><span class="v"></span></span>';
+      ov.querySelectorAll('.qrw img').forEach((im) => { im.src = src; });
+      ov.querySelector('.qt2').textContent = p.qtitle;
+      ov.querySelector('.qrw .v').textContent = rw.v || '';
+      /* 写真の差し替えはボードのタップ（クエストへ移動）と分ける — 実体のスロットを開く */
+      ov.querySelector('.qrw').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (rwSlots[rw.k]) rwSlots[rw.k].click();
+      });
+      cell.appendChild(ov);
+    }
     cell.dataset.postRef = ''; cell._post = p;
     return cell;
+  }
+
+  /* クエストボードの行カード — 左「お題」/ 右「報酬」の 2 枚を斜めの継ぎ目で分割 */
+  function makeQuestCard(p, no) {
+    const rw = p.qreward || {};
+    const card = document.createElement('div');
+    card.className = 'post-cell qb-row';
+    card.innerHTML =
+      '<span class="h l">' +
+        '<span class="sc"></span><span class="chip">お題</span>' +
+        '<span class="ft"><span class="nm"></span></span>' +
+      '</span>' +
+      '<span class="h r"><img alt="">' +
+        '<span class="sc"></span><span class="chip rw">報酬</span>' +
+        '<span class="ft"><span class="nm"></span></span>' +
+      '</span>' +
+      '<span class="seam"></span>' +
+      '<span class="sm"><img src="../../assets/icons/icon_next.png" alt=""></span>';
+    card.classList.add('ac-' + (((no - 1) % 3) + 1));
+    const lh = card.querySelector('.h.l');
+    let med;
+    if (p.vid) {
+      med = document.createElement('video');
+      med.src = p.vid; med.muted = true; med.loop = true; med.playsInline = true;
+      med.autoplay = true;
+    } else {
+      med = document.createElement('img');
+      med.alt = ''; med.src = p.img || (p._qday && p._qday.cover) || '';
+    }
+    lh.insertBefore(med, lh.firstChild);
+    card.querySelector('.h.r img').src = rwThumb(rw.k) || rw.src || '';
+    card.querySelector('.h.l .nm').textContent = p.qtitle || '';
+    card.querySelector('.h.r .nm').textContent = rw.s || rw.v || '';
+    card.querySelector('.h.r').title = rw.v || '';
+    card.querySelector('.h.r').addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (rwSlots[rw.k]) rwSlots[rw.k].click();
+    });
+    card._post = p;
+    return card;
   }
 
   // ---- one section per circle: quest board + 9:16 post rail -----------------
@@ -2165,6 +3100,21 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     rail.appendChild(inner);
     c.rail = rail; c.board = bd; c.inner = inner;
 
+    /* WdMemberStatus — 左下。参加者アイコン＋タイムラインの投稿数 */
+    const ms = document.createElement('button');
+    ms.type = 'button';
+    ms.className = 'mstat';
+    ms.setAttribute('aria-label', 'サークルタイムラインを開く');
+    ms.innerHTML = '<span class="avs">'
+      + c.posts.slice(0, 4).map((p) => '<img src="' + p.ava + '" alt="">').join('')
+      + '</span><span class="cnt"><span class="v"></span><span class="u">件の投稿</span></span>';
+    ms.addEventListener('click', () => {
+      active = CIRCLES.indexOf(c); renderBoard();
+      tlOpen(true);
+    });
+    c.mstat = ms;
+    strip.appendChild(ms);
+
     /* ---- FREE BOARD packing -------------------------------------------------
        ボードを「列」単位で埋める。列同士は X が重ならないので、列内のタイルを
        縦に積むだけで全体の非重複が保証される。タイル数・アスペクト比・
@@ -2181,18 +3131,18 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
        H: 横1 の下に縦3枚横並び / I: 縦3枚横並び の下に横1 */
     const TYPES = ['B', 'F', 'C', 'D', 'H', 'G', 'C3', 'B', 'E', 'I', 'C', 'F'];
     const TYPES_SPARSE = ['A', 'AL'];   // 投稿が極端に少ないとき
-    function layoutColumn(type, H) {
+    function layoutColumn(type, H, opt) {
       const t = [];
       const fit = (h, ar) => { let w = Math.round(h * ar); if (w > MAXW) { w = MAXW; h = Math.round(w / ar); } return { w, h }; };
       if (type === 'A' || type === 'AL') {
         // 一枚絵は縦・横で同じ幅。縦がボード高さに収まる幅を共通幅にする
         const w = Math.min(Math.round(H * P), MAXW);
-        t.push({ dx: 0, dy: 0, w, h: Math.round(w / (type === 'A' ? P : L)) });
+        t.push({ dx: 0, dy: 0, w, h: Math.round(w / (type === 'A' ? P : L)), k: type === 'A' ? 'P' : 'L' });
       } else if (type === 'C3') {
         // 横3枚 — 上下の余白をなくす（アスペクト比維持のまま最大高）
         const ah = Math.round((H - GAP * 2) / 3);
         const a = { h: ah, w: Math.round(ah * L) };
-        for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (a.h + GAP) * i, w: a.w, h: a.h });
+        for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (a.h + GAP) * i, w: a.w, h: a.h, k: 'L' });
       } else if (type === 'H' || type === 'I') {
         // 横1 + 縦3 — 列高にちょうど収まる幅（MAXW で頭打ちにしない）
         const wb = Math.round((H - GAP * 2.125) / 3.4653);
@@ -2200,29 +3150,39 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         const colW = wb * 3 + GAP * 2;
         const lh = Math.round(colW / L);
         if (type === 'H') {
-          t.push({ dx: 0, dy: 0, w: colW, h: lh });
-          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: lh + GAP, w: wb, h: hb });
+          t.push({ dx: 0, dy: 0, w: colW, h: lh, k: 'L' });
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: lh + GAP, w: wb, h: hb, k: 'P' });
         } else {
-          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb });
-          t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh });
+          for (let i = 0; i < 3; i++) t.push({ dx: (wb + GAP) * i, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: lh, k: 'L' });
         }
+      } else if (type === 'J') {
+        /* 左: 横向きを縦積み / 右: 縦向きを縦積み。両列とも列高 H にぴったり。
+           枚数は nL / nP（layoutColumn の第3引数）で決まる。 */
+        const nL = Math.max(1, (opt && opt.nL) || 3);
+        const nP = Math.max(1, (opt && opt.nP) || 2);
+        const hl = Math.round((H - GAP * (nL - 1)) / nL), wl = Math.round(hl * L);
+        const hp = Math.round((H - GAP * (nP - 1)) / nP), wp = Math.round(hp * P);
+        for (let i = 0; i < nL; i++) t.push({ dx: 0, dy: (hl + GAP) * i, w: wl, h: hl, k: 'L' });
+        for (let i = 0; i < nP; i++) t.push({ dx: wl + GAP, dy: (hp + GAP) * i, w: wp, h: hp, k: 'P' });
       } else if (type === 'B' || type === 'C') {
         const ar = type === 'B' ? P : L;
         const ah = Math.round((H - GAP) / 2);
         const a = type === 'C' ? { h: ah, w: Math.round(ah * L) } : fit(ah, ar);
-        t.push({ dx: 0, dy: 0, w: a.w, h: a.h });
-        t.push({ dx: 0, dy: a.h + GAP, w: a.w, h: a.h });
+        const ak = type === 'B' ? 'P' : 'L';
+        t.push({ dx: 0, dy: 0, w: a.w, h: a.h, k: ak });
+        t.push({ dx: 0, dy: a.h + GAP, w: a.w, h: a.h, k: ak });
       } else if (type === 'F' || type === 'G') {
         // 縦1 + 横1 は同じ幅。共通幅 w に対し h = w/P + w/L + GAP = H
         const w = Math.min(Math.round((H - GAP) / (1 / P + 1 / L)), MAXW);
         const p1 = { w, h: Math.round(w / P) };
         const l1 = { w, h: Math.round(w / L) };
         if (type === 'F') {
-          t.push({ dx: 0, dy: 0, w, h: p1.h });
-          t.push({ dx: 0, dy: p1.h + GAP, w, h: l1.h });
+          t.push({ dx: 0, dy: 0, w, h: p1.h, k: 'P' });
+          t.push({ dx: 0, dy: p1.h + GAP, w, h: l1.h, k: 'L' });
         } else {
-          t.push({ dx: 0, dy: 0, w, h: l1.h });
-          t.push({ dx: 0, dy: l1.h + GAP, w, h: p1.h });
+          t.push({ dx: 0, dy: 0, w, h: l1.h, k: 'L' });
+          t.push({ dx: 0, dy: l1.h + GAP, w, h: p1.h, k: 'P' });
         }
       } else {
         const hb = Math.round((H - GAP * 1.5625) / 1.6328);
@@ -2230,13 +3190,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         const colW = wb * 2 + GAP;
         const ht = Math.round(colW * P);
         if (type === 'D') {
-          t.push({ dx: 0, dy: 0, w: colW, h: ht });
-          t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb });
-          t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb });
+          t.push({ dx: 0, dy: 0, w: colW, h: ht, k: 'L' });
+          t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb, k: 'P' });
+          t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb, k: 'P' });
         } else {
-          t.push({ dx: 0, dy: 0, w: wb, h: hb });
-          t.push({ dx: wb + GAP, dy: 0, w: wb, h: hb });
-          t.push({ dx: 0, dy: hb + GAP, w: colW, h: ht });
+          t.push({ dx: 0, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: wb + GAP, dy: 0, w: wb, h: hb, k: 'P' });
+          t.push({ dx: 0, dy: hb + GAP, w: colW, h: ht, k: 'L' });
         }
       }
       return t;
@@ -2246,46 +3206,119 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
     // ひとつのお題の投稿を 1 列分だけ置く。次に使う投稿の index を返す
     function addColumnFrom(posts, idx, day) {
-      const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34);
+      const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34) + 4;
       const H = rail.clientHeight - PT;
       if (H <= 40) return posts.length;
       const remain = posts.length - idx;
+      /* 固定レイアウトのお題（ハイタッチ）— 比率スナップも余白埋めもせず、
+         列幅の上限だけで一様に縮めて 1 列にまとめて置く。 */
+      if (day && day.fixedType) {
+        const nL = day.posts.filter((p) => p.ar === 'L').length;
+        const nP = day.posts.length - nL;
+        const tiles = layoutColumn(day.fixedType, H, { nL, nP });
+        const cap = Math.round(rail.clientWidth * 1.45);
+        const raw = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
+        if (raw > cap) {
+          const k = cap / raw;
+          tiles.forEach((t) => {
+            t.dx = Math.round(t.dx * k); t.dy = Math.round(t.dy * k);
+            t.w = Math.round(t.w * k); t.h = Math.round(t.h * k);
+          });
+        }
+        /* 縮めたときは列を縦中央に置く */
+        const usedH = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
+        const cy = Math.max(0, Math.round((H - usedH) / 2));
+        /* 横向き→縦向きの順に並べ替えて、枚を果に入れる */
+        const order = day.posts.filter((p) => p.ar === 'L').concat(day.posts.filter((p) => p.ar !== 'L'));
+        posts = order;
+        tiles.forEach((t) => { t.dy += cy; });
+        tiles.forEach((t, i) => {
+          const p = posts[i]; if (!p) return;
+          const cell = makeCell(p);
+          if (t.w < 132) cell.classList.add('sm');
+          if (!canViewDay(c, day)) cell.classList.add('locked');
+          cell._day = day;
+          cell.style.left = (c.cursorX + t.dx) + 'px';
+          cell.style.top = (PT + t.dy) + 'px';
+          cell.style.width = t.w + 'px';
+          cell.style.height = t.h + 'px';
+          inner.appendChild(cell);
+        });
+        c.cursorX += Math.max.apply(null, tiles.map((t) => t.dx + t.w)) + GAP;
+        return posts.length;
+      }
       const wide = document.querySelector('.phone').classList.contains('feed-max');
       let type = null;
-      for (let g = 0; g < TYPES.length; g++) {
-        const t = TYPES[(c.colIdx + g) % TYPES.length];
-        if (wide && (t === 'H' || t === 'I')) continue;   // 拡大時は 横1+縦3 の列を使わない
-        if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
+      /* 列パターンを日単位で固定できる（向きが決まっている実写の日）。
+         固定すれば縦の写真が横の果に入る（fitwhole）ことがない。 */
+      if (day && day.cols) {
+        const ci2 = day._ci || 0;
+        if (day.cols[ci2]) { type = day.cols[ci2]; day._ci = ci2 + 1; }
+      }
+      if (!type) {
+        for (let g = 0; g < TYPES.length; g++) {
+          const t = TYPES[(c.colIdx + g) % TYPES.length];
+          if (wide && (t === 'H' || t === 'I')) continue;   // 拡大時は 横1+縦3 の列を使わない
+          if (TILE_N[t] <= remain) { type = t; c.colIdx += g + 1; break; }
+        }
       }
       if (!type) { type = TYPES_SPARSE[c.colIdx % TYPES_SPARSE.length]; c.colIdx++; }
       const tiles = layoutColumn(type, H).slice(0, remain);
-      // 列幅は画面幅の 90% まで。超える列は比率を保って縮小し、上下は中央寄せ
-      const cap = Math.round(rail.clientWidth * 0.9);
+      // 列幅は画面幅の 145% まで許可 — 横スクロールボードなので、幅より
+      // 「列高 = H を埋める」ことを優先する（上下に余白を残さない）
+      const cap = Math.round(rail.clientWidth * 1.45);
       const rawW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       if (rawW > cap) {
         const k = cap / rawW;
         tiles.forEach((t) => {
           t.dx = Math.round(t.dx * k); t.dy = Math.round(t.dy * k);
-          t.w = Math.round(t.w * k); t.h = Math.round(t.h * k);
+          t.w = Math.round(t.w * k);
         });
       }
+      /* 比率スナップ — 幅を基準に h を 9:16 / 16:9 に厳密に合わせ、行を再積みする。
+         横並びの整列（dx / w）は触らないので列内の継ぎ目はずれない。 */
+      const snap = () => {
+        tiles.forEach((t) => { t.h = Math.max(1, Math.round(t.w * (t.k === 'P' ? 1 / P : 1 / L))); });
+        const rows = [...new Set(tiles.map((t) => t.dy))].sort((a, b) => a - b);
+        let y = 0;
+        rows.forEach((ry) => {
+          const row = tiles.filter((t) => t.dy === ry);
+          row.forEach((t) => { t._ny = y; });
+          y += Math.max.apply(null, row.map((t) => t.h)) + GAP;
+        });
+        tiles.forEach((t) => { t.dy = t._ny; delete t._ny; });
+      };
+      snap();
       const colW0 = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used0 = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       // 縦の余りを埋める — 比率を保ったまま列高が H になるまで拡大（幅は cap まで）
       if (used0 > 0 && used0 < H) {
         const k2 = Math.min(H / used0, cap / colW0);
-        if (k2 > 1.001) tiles.forEach((t) => {
-          t.dx = Math.round(t.dx * k2); t.dy = Math.round(t.dy * k2);
-          t.w = Math.round(t.w * k2); t.h = Math.round(t.h * k2);
-        });
+        if (k2 > 1.001) {
+          tiles.forEach((t) => {
+            t.dx = Math.round(t.dx * k2); t.dy = Math.round(t.dy * k2);
+            t.w = Math.round(t.w * k2);
+          });
+          snap();
+        }
       }
       const colW = Math.max.apply(null, tiles.map((t) => t.dx + t.w));
       const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
       const center = Math.max(0, Math.round((H - used) / 2));   // 余白がある列は縦中央に
       const yOff = PT + center + (center > 4 ? 0 : Math.round(rnd() * GAP * 1.6));
+      /* 向きを保つ — 撮った向き（ar）が指定された投稿は同じ向きの枠へ入れ替える */
+      for (let i = 0; i < tiles.length; i++) {
+        const want = tiles[i].k, at = idx + i, p = posts[at];
+        if (!p || !p.ar || p.ar === want) continue;
+        for (let j = at + 1; j < posts.length; j++) {
+          const q = posts[j];
+          if (q && (q.ar || want) === want) { posts[at] = q; posts[j] = p; break; }
+        }
+      }
       tiles.forEach((t) => {
         const p = posts[idx++];
         const cell = makeCell(p);
+        if (p && p.ar && p.ar !== t.k) cell.classList.add('fitwhole');
         if (t.w < 132) cell.classList.add('sm');
         if (!canViewDay(c, day)) cell.classList.add('locked');
         cell._day = day;
@@ -2293,6 +3326,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         cell.style.top = (yOff + t.dy) + 'px';
         cell.style.width = t.w + 'px';
         cell.style.height = t.h + 'px';
+        const rwz = Math.round(Math.min(t.w, t.h) * 0.8);
+        cell.style.setProperty('--rwz', rwz + 'px');
+        if (t.w < 132 || t.h < 200) cell.classList.add('rwsm');
         inner.appendChild(cell);
       });
       c.cursorX += colW + GAP;
@@ -2308,6 +3344,29 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       inner.innerHTML = '';
       seed = 1337 + CIRCLES.indexOf(c) * 977;
       c.cursorX = PAD; c.colIdx = 0;
+      /* クエストボード — 同じ配置ルールのまま、中身を「このサークルのクエスト一覧」に */
+      if (questBoardOn) {
+        const PT = Math.max(PAD_TOP, Math.round(bd.getBoundingClientRect().height) || 34) + 4;
+        const H = rail.clientHeight - PT;
+        const ROWS = 3, RG = 8;
+        const ch = Math.floor((H - RG * (ROWS - 1) - PAD) / ROWS);
+        const cw = Math.min(Math.round(ch * 16 / 9), rail.clientWidth - PAD * 2);
+        const heads = c.questHeads();
+        heads.forEach((p, i) => {
+          const card = makeQuestCard(p, heads.length - i);
+          card.style.left = (PAD + Math.floor(i / ROWS) * (cw + RG)) + 'px';
+          card.style.top = (PT + (i % ROWS) * (ch + RG)) + 'px';
+          card.style.width = cw + 'px';
+          card.style.height = ch + 'px';
+          inner.appendChild(card);
+        });
+        c.cursorX = PAD + Math.ceil(heads.length / ROWS) * (cw + RG) - RG;
+        if (c.wrap) c.wrap.classList.remove('day-locked');
+        inner.style.width = Math.max(c.cursorX + PAD, rail.clientWidth) + 'px';
+        rail.scrollLeft = 0;
+        c.setFocus();
+        return;
+      }
       c.days.forEach((day, di) => {
         if (di) {
           const sep = document.createElement('div');
@@ -2318,6 +3377,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           c.cursorX += SEP_W;
         }
         day.x0 = c.cursorX;
+        day._ci = 0;
         let i = 0, guard = 0;
         while (i < day.posts.length && guard++ < 60) i = addColumnFrom(day.posts, i, day);
         day.x1 = c.cursorX;
@@ -2348,6 +3408,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
         if (!el.classList.contains('locked') && x + el.offsetWidth > L && x < R) v.play().catch(() => {}); else v.pause();
       });
     };
+    /* 各クエストの一番頭の投稿 = 一覧のサムネイル（新しいクエストが左） */
+    c.questHeads = () => c.days.slice().reverse().map((d) => Object.assign({}, d.posts[0] || {}, {
+      qtitle: d.quest.title, qreward: d.quest.reward, _qday: d,
+    }));
     c.cursorX = PAD; c.feedIdx = 0; c.colIdx = 0;
     c.dots = bd.querySelector('.qb-dots');
     c.qlbl = bd.querySelector('.qlbl');
@@ -2358,8 +3422,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const d = distTo(c);
     lock.innerHTML = '<span class="lscrim"></span>'
       + '<span class="lmeta">'
+      +   '<span class="lt">エリアに入って<br>クエストに挑戦してください</span>'
+      +   '<span class="llabel">エリアまで</span>'
       +   '<span class="ldist"><span class="v">' + d.val + '</span><span class="u">' + d.unit + '</span></span>'
-      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">地図アプリを開く</button>'
       + '</span>';
     lock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     wrap.appendChild(lock);
@@ -2383,7 +3449,15 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     }, { passive: true });
     rail.addEventListener('click', (ev) => {
       const cell = ev.target.closest('.post-cell');
-      if (cell) openFs(cell._post, c, cell._day);
+      if (!cell) return;
+      if (questBoardOn) {
+        const d = cell._post && cell._post._qday;
+        setQuestBoard(false);
+        active = CIRCLES.indexOf(c); renderBoard();
+        if (d && c.goDay) c.goDay(d, true);
+        return;
+      }
+      openFs(cell._post, c, cell._day);
     });
     requestAnimationFrame(c.buildBoard);
     setTimeout(c.buildBoard, 240);
@@ -2449,6 +3523,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* 進行中のお題はクリア or エリア内のときだけ。
      過去のお題は、そのサークルで投稿したことがある人（member）ならエリア外でも見られる。 */
   function canViewDay(c, day) {
+    if (day && day.questList) return true;
     if (day && day.past) return !!(c.member || canView(c));
     return canView(c);
   }
@@ -2488,6 +3563,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return best;
   }
   function syncDay(c, force) {
+    if (questBoardOn) return;
     const day = currentDay(c);
     if (!force && c.curDay === day) return;
     c.curDay = day;
@@ -2554,8 +3630,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const dd = distTo(c);
     fsLock.innerHTML = '<span class="lscrim"></span>'
       + '<span class="lmeta">'
+      +   '<span class="lt">エリアに入って<br>クエストに挑戦してください</span>'
+      +   '<span class="llabel">エリアまで</span>'
       +   '<span class="ldist"><span class="v">' + dd.val + '</span><span class="u">' + dd.unit + '</span></span>'
-      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">Open Map App</button>'
+      +   '<button class="lroute" type="button"><img src="../../assets/icons/icon_directions.png" alt="">地図アプリを開く</button>'
       + '</span>';
     fsLock.querySelector('.lroute').addEventListener('click', (ev) => { ev.stopPropagation(); openRoute(c); });
     qpRender(fsQpMount, c, day.quest);
@@ -2691,6 +3769,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (c.cleared) mpMineImg.src = c.myThumb || c.posts[0].img || c.cover;
   }
   document.getElementById('mpCam').addEventListener('click', () => {
+    if (nsMode) { if (!nsCreated) csOpen(); return; }
     if (CIRCLES[active].cleared) return;
     runUpload();
   });
@@ -2699,9 +3778,94 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     openFs(c.posts[0], c, c.today);
   });
 
+  /* ---- QUEST BOARD（クエスト一覧） ------------------------------------
+     マップ左下のリストボタンで開く。リストと同じ帯に、画面幅ぴったりの
+     16:8 サムネイル（= そのクエストの一番頭の投稿）を縦に並べる。
+     日付の区切りはなし。中心にクエストタイトルと報酬。 */
+  /* 報酬 — クエストごとの景品。写真は <image-slot> にユーザーがドロップする。 */
+  /* src は手持ちのサンプル写真の仮置き。ユーザーがドロップすれば差し替わる。 */
+  const REWARDS = [
+    { k: 'coffee',   s: 'カフェ',   v: 'スターバックス コーヒー1杯', ph: 'コーヒーの写真', src: '../../assets/sample/reel/reel014.jpg' },
+    { k: 'yakiniku', s: '焼肉',     v: '焼肉 食べ放題',              ph: '焼肉の写真',     src: '../../assets/sample/reel/reel007.jpg' },
+    { k: 'donut',    s: 'ドーナツ', v: 'ドーナツ 1ダース',            ph: 'ドーナツの写真', src: '../../assets/sample/reel/reel001.jpg' },
+    { k: 'drink',    s: 'ドリンク', v: 'ドリンク 1杯無料',            ph: 'ドリンクの写真', src: '../../assets/quest/kanpai_l1.jpg' },
+  ];
+  /* 報酬写真は kind ごとに 1 つの <image-slot> だけを持ち、タイルはその src を描く */
+  const rwPalette = document.createElement('div');
+  rwPalette.className = 'rw-palette';
+  rwPalette.id = 'rwPalette';
+  rwPalette.setAttribute('aria-hidden', 'true');
+  (document.querySelector('.phone .screen') || document.body).appendChild(rwPalette);
+  const rwSlots = {};
+  REWARDS.forEach((r) => {
+    const s = document.createElement('image-slot');
+    s.id = 'rwv2-' + r.k;
+    s.setAttribute('shape', 'rounded');
+    s.setAttribute('src', r.src || '');
+    s.setAttribute('placeholder', r.ph || '');
+    rwPalette.appendChild(s);
+    rwSlots[r.k] = s;
+  });
+  function rwSrc(k) {
+    const s = rwSlots[k]; if (!s) return '';
+    const im = s.shadowRoot && s.shadowRoot.querySelector('img');
+    return (im && (im.currentSrc || im.src)) || s.getAttribute('src') || '';
+  }
+  /* タイルは 240px の縮小サムネイルを使う（ドロップされた data URI をそのまま
+     24 枚 × 2 レイヤーに配ると、書き出し（PNG/PDF）が重すぎて破綻する） */
+  const rwThumbs = {};
+  function rwThumb(k) {
+    const src = rwSrc(k);
+    if (!src) return '';
+    const hit = rwThumbs[k];
+    if (hit && hit.src === src) return hit.url;
+    if (!/^data:/.test(src)) { rwThumbs[k] = { src: src, url: src }; return src; }
+    rwThumbs[k] = { src: src, url: (hit && hit.url) || '' };
+    const im = new Image();
+    im.onload = () => {
+      const N = 240, cv = document.createElement('canvas');
+      const s = Math.max(N / im.width, N / im.height);
+      cv.width = Math.round(im.width * s); cv.height = Math.round(im.height * s);
+      cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+      rwThumbs[k] = { src: src, url: cv.toDataURL('image/jpeg', 0.82) };
+      CIRCLES.forEach((c) => { if (questBoardOn && c.buildBoard) c.buildBoard(); });
+    };
+    im.src = src;
+    return rwThumbs[k].url;
+  }
+  const REWARD_BY_TITLE = { 'ウィンクして': 'coffee', '乾杯': 'yakiniku', 'ハイタッチ': 'donut' };
+  const rewardOf = (k) => REWARDS.find((r) => r.k === k) || REWARDS[0];
+  CIRCLES.forEach((c, ci) => c.days.forEach((d, k) => {
+    const key = REWARD_BY_TITLE[d.quest.title] || REWARDS[(ci * 2 + k) % REWARDS.length].k;
+    d.quest.reward = rewardOf(key);
+  }));
+
+  const mlBtn = document.getElementById('mlBtn');
+  function setQuestBoard(on) {
+    questBoardOn = !!on;
+    phone.classList.toggle('qb-mode', questBoardOn);
+    CIRCLES.forEach((c) => {
+      if (c.buildBoard) c.buildBoard();
+      if (!questBoardOn) syncDay(c, true);
+    });
+    const st = CIRCLES[active].strip;
+    if (st) col.scrollTop = Math.max(0, st.offsetTop - (parseFloat(getComputedStyle(col).paddingTop) || 0));
+    tickHero();
+  }
+  mlBtn.addEventListener('click', () => setQuestBoard(!questBoardOn));
+  /* スロットに写真が入ったらタイルに反映（変更イベントがないので軽くポーリング） */
+  let rwSeen = '';
+  setInterval(() => {
+    if (!questBoardOn) return;
+    const sig = REWARDS.map((r) => rwSrc(r.k).slice(0, 64)).join('|');
+    if (sig === rwSeen) return;
+    rwSeen = sig;
+    CIRCLES.forEach((c) => { if (c.buildBoard) c.buildBoard(); });
+  }, 1200);
+
   // ---- quest countdown ------------------------------------------------------
   const NOW0 = Date.now();
-  CIRCLES.forEach((c, i) => { c.endsAt = NOW0 + [2.25, 30, 76][i] * 3600e3; });
+  CIRCLES.forEach((c, i) => { c.endsAt = NOW0 + [5.5, 2.25, 30, 76][i] * 3600e3; });
   function tickCountdown() {
     CIRCLES.forEach((c) => {
       if (!c.board) return;
@@ -2766,6 +3930,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     scrollT = setTimeout(() => {
       const stripH = (col.querySelector('.circle-strip')?.getBoundingClientRect().height) || col.clientHeight * 0.8;
       const i = Math.round(col.scrollTop / stripH);
+      if (i >= CIRCLES.length) { setNewSpot(true); return; }
+      setNewSpot(false);
       if (i !== active && CIRCLES[i]) {
         active = i;
         renderBoard();
@@ -2773,6 +3939,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       }
     }, 80);
   });
+
 
   // ---- quest clear flow (FAB) ----------------------------------------------
   const upVeil = document.getElementById('upVeil');
@@ -2836,6 +4003,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (window.EarthMap && EarthMap.map) applyWallState(EarthMap.map, CIRCLES[active]);
     clearToast.classList.add('on');
     setTimeout(() => clearToast.classList.remove('on'), 2600);
+    awardTicket();
     c.setFocus();
   }
 
@@ -2857,8 +4025,8 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
      「光のカーテン」。壁色は --gradient-colorful の 11 stop を一周サンプリングし、
      暗い stop だけ輝度下限までリフトして途切れて見せない。 */
   const WALL_N = 56;
-  const WALL_PAL = ['#fff0a6','#bfcc96','#80a787','#40837f','#005f67','#60566f',
-                    '#804e78','#bf4680','#ff3e88','#e86f6d','#d0a052'].map(lift);
+  /* 壁は白一色（カラフルグラデーションは廃止） */
+  const WALL_PAL = ['#ffffff'];
   function lift(hex) {
     const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
     const L = (.2126 * r + .7152 * g + .0722 * b) / 255;
@@ -2868,7 +4036,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return '#' + m(r) + m(g) + m(b);
   }
   function segColor(i) { return WALL_PAL[Math.min(WALL_PAL.length - 1, Math.round(i / WALL_N * (WALL_PAL.length - 1)))]; }
-  function wallH(R) { return Math.max(160, R * 0.39); }
+  function wallH(R) { return Math.max(96, R * 0.234); }
   /* カーテン面のフェード（DS: 下 66% → 34% で 36% → 70% で 14% → 上 0%）を
      10 バンドの押し出しでなめらかに近似し、最上部に天端リムを乗せる。 */
   const WALL_BANDS = (function () {
@@ -2963,18 +4131,20 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* 壁の状態 — 未クリア / 残り30分未満（scan 2.2s）/ クリア済み
      （cleared: --state-quest-cleared 単色・scan 停止・高さ 60%、壁は消さない） */
   const WALL_CLEARED = '#7cc47f';
+  const WALL_UNCLAIMED = '#9aa1ab';
   function applyWallState(map, c) {
     if (!c || !map.getLayer('area-wall-b0')) return;
     const cleared = !!c.cleared;
-    const color = cleared ? WALL_CLEARED : ['get', 'c'];
-    const H = wallH(c.radius) * (cleared ? 0.6 : 1);
+    const unclaimed = !!c.unclaimed;
+    const color = unclaimed ? WALL_UNCLAIMED : cleared ? WALL_CLEARED : ['get', 'c'];
+    const H = wallH(c.radius) * (unclaimed ? 0.72 : cleared ? 0.6 : 1);
     WALL_BANDS.forEach(b => {
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-color', color);
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-base', H * b[1]);
       map.setPaintProperty('area-wall-' + b[0], 'fill-extrusion-height', H * b[2]);
     });
     ['area-glow-wide', 'area-glow-mid'].forEach(id => {
-      if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', cleared ? WALL_CLEARED : ['get', 'c']);
+      if (map.getLayer(id)) map.setPaintProperty(id, 'line-color', color);
     });
     [['lo', 0, 0.42], ['hi', 0.42, 0.80]].forEach(r => {
       if (!map.getLayer('area-rib-' + r[0])) return;
@@ -2984,13 +4154,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   }
 
 
-  function areaMove(map, C, R) {
+  function areaMove(map, C, R, st) {
     if (!map.getSource('area-disk')) return;
     map.getSource('area-disk').setData(disk(C, R));
     map.getSource('area-line').setData(wallLines(C, R));
     map.getSource('area-wall').setData(wallSegs(C, R));
     map.getSource('area-rib').setData(wallRibs(C, R));
-    applyWallState(map, CIRCLES[active]);
+    applyWallState(map, st || CIRCLES[active]);
   }
 
   // restart board + marker pulses together so they beat in sync
@@ -3013,11 +4183,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   function placeSpot() { /* マップ上のクエストピンは非表示 */ }
 
   // ---- focus the map on the active circle -----------------------------------
-  function focusCircle(instant) {
+  function focusCircle(instant, circle) {
     const EM = window.EarthMap;
     if (!EM || !EM.map) return;
     const map = EM.map;
-    const c = CIRCLES[active], C = c.center;
+    const c = circle || CIRCLES[active], C = c.center;
     try {
       areaMove(map, C, c.radius);
       placeSpot(map);
@@ -3026,7 +4196,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (EM.setCenter) EM.setCenter(C);
       map.stop();
       const view = { center: C, zoom: questZoom(C, c.radius), pitch: 60, bearing: 0,
-        padding: { top: 70, bottom: 0 } };
+        padding: { top: 0, bottom: 20 } };
       if (instant) map.jumpTo(view); else map.easeTo(Object.assign({ duration: 900 }, view));
     } catch (err) { console.warn('circle focus:', err); }
   }
@@ -3062,14 +4232,24 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       handle: '@' + String(p.name || 'user').toLowerCase(),
       time: TL_TIMES[i % TL_TIMES.length],
       body: p.text, media: p.img ? [p.img] : [], vid: p.vid || null,
+      wide: Math.random() < 0.5,
       comments: 3 + ((i * 7) % 38), likes: 18 + ((i * 47) % 280), liked: i === 0,
     }));
+    /* クエスト属性の投稿を差し込む（3件おき） */
+    (c.days || []).slice().reverse().forEach((d, k) => {
+      if (!d.posts || !d.posts.length) return;
+      c.timeline.splice(Math.min(c.timeline.length, 1 + k * 3), 0, {
+        name: d.quest.title, time: TL_TIMES[(k + 2) % TL_TIMES.length],
+        quest: { title: d.quest.title, posts: d.posts }, media: [], vid: null,
+        comments: 5 + ((k * 11) % 30), likes: 40 + ((k * 53) % 200), liked: false,
+      });
+    });
   });
 
   const phone = document.querySelector('.phone');
   const tlSheet = document.getElementById('tlSheet');
   const tlScrim = document.getElementById('tlScrim');
-  const tlList = document.getElementById('tlList');
+  let tlList = null;   /* 表示中サークルのリスト（tlPane 内の 1 ページ） */
   const tlCompose = document.getElementById('tlCompose');
   const tlcText = document.getElementById('tlcText');
   const tlcSend = document.getElementById('tlcSend');
@@ -3078,22 +4258,22 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   let tlCircle = null;
 
   function tlNode(e, c) {
+    if (e.quest) return tlQuestNode(e, c);
     const el = document.createElement('article');
     el.className = 'tlp';
     const d = distTo(c);
     let media = '';
     if (e.vid) {
-      media = '<div class="tlp-m1"><video src="' + e.vid + '" muted loop playsinline autoplay></video></div>';
+      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><video src="' + e.vid + '" muted loop playsinline autoplay></video></div>';
     } else if (e.media.length === 1) {
-      media = '<div class="tlp-m1"><img src="' + e.media[0] + '" alt=""></div>';
+      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><img src="' + e.media[0] + '" alt=""></div>';
     } else if (e.media.length >= 2) {
       media = '<div class="tlp-m2">' + e.media.slice(0, 2)
         .map(m => '<img src="' + m + '" alt="">').join('') + '</div>';
     }
-    el.innerHTML = '<img class="tlp-av" src="' + e.ava + '" alt="">'
-      + '<div class="tlp-col">'
+    el.innerHTML = '<div class="tlp-col">'
       +   '<div class="tlp-head"><span class="tlp-name">' + e.name + '</span>'
-      +     '<span class="tlp-meta">' + e.handle + ' · ' + e.time + '</span></div>'
+      +     '<span class="tlp-meta">' + e.time + '</span></div>'
       +   (e.body ? '<p class="tlp-body">' + e.body + '</p>' : '')
       +   media
       +   '<div class="tlp-acts">'
@@ -3114,36 +4294,295 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     return el;
   }
 
-  function tlRender(fresh) {
-    const c = tlCircle; if (!c) return;
+  function tlHeader(c) {
     document.getElementById('tlName').textContent = c.name;
     document.getElementById('tlDesc').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
+    if (c.mstat) c.mstat.querySelector('.cnt .v').textContent = c.timeline.length;
     document.getElementById('tlCover').src = c.cover;
-    tlList.innerHTML = '';
+    if (c.tlPage) {
+      const hd = c.tlPage.querySelector('.tl-head');
+      hd.querySelector('.tl-nm').textContent = c.name;
+      hd.querySelector('.tl-ds').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
+      hd.querySelector('.tl-cover').src = c.cover;
+      hd.querySelector('.tl-next').style.visibility = CIRCLES.indexOf(c) >= CIRCLES.length - 1 ? 'hidden' : '';
+    }
+  }
+  function tlMakePage(c) {
+    const pg = document.createElement('div'); pg.className = 'tl-page';
+    const hd = document.createElement('header'); hd.className = 'tl-head';
+    hd.innerHTML = '<img class="tl-cover" src="' + c.cover + '" alt="">'
+      + '<div class="tl-hcol"><span class="tl-nm"></span><span class="tl-ds"></span></div>'
+      + '<button class="tl-next" type="button" aria-label="次のサークル"><img src="../../assets/icons/icon_next.png" alt=""></button>';
+    hd.querySelector('.tl-next').addEventListener('click', (e) => { e.stopPropagation(); tlGo(1); });
+    const l = document.createElement('div'); l.className = 'tl-list';
+    pg.appendChild(hd); pg.appendChild(l);
+    c.tlPage = pg; c.tlList = l;
+    return pg;
+  }
+  function tlFillList(list, c, fresh) {
+    list.innerHTML = '';
     c.timeline.forEach((e, i) => {
       const n = tlNode(e, c);
       if (fresh && i === 0) n.classList.add('fresh');
-      tlList.appendChild(n);
+      list.appendChild(n);
     });
+  }
+  function tlRender(fresh) {
+    const c = tlCircle; if (!c) return;
+    tlHeader(c);
+    const pane = document.getElementById('tlPane');
+    if (pane.children.length !== CIRCLES.length) {
+      pane.innerHTML = '';
+      CIRCLES.forEach((cc) => pane.appendChild(tlMakePage(cc)));
+    }
+    CIRCLES.forEach((cc) => { tlFillList(cc.tlList, cc, fresh && cc === c); tlHeader(cc); });
+    tlHeader(c);
+    tlList = c.tlList;
+    pane.scrollLeft = CIRCLES.indexOf(c) * pane.clientWidth;
   }
 
   function tlFull(on) {
     tlSheet.classList.toggle('full', on);
     phone.classList.toggle('light-status', on || tlCompose.classList.contains('on'));
   }
-  function tlOpen() {
+  function tlOpen(tall) {
     tlCircle = CIRCLES[active];
+    tlSheet.classList.remove('tall');
     tlRender(false);
     tlSheet.setAttribute('aria-hidden', 'false');
     tlScrim.classList.add('on');
     tlSheet.classList.add('on');
-    tlList.scrollTop = 0;
+    tlFull(true);
+    if (tlList) tlList.scrollTop = 0;
   }
+  /* 横スライドでサークルのタイムラインを切替（dir: +1 = 次 / -1 = 前） */
+  const tlPane = document.getElementById('tlPane');
+  function tlSetPage(i) {
+    if (!CIRCLES[i] || CIRCLES[i] === tlCircle) return;
+    tlCircle = CIRCLES[i]; tlList = tlCircle.tlList; tlHeader(tlCircle);
+  }
+  function tlGo(dir) {
+    if (!tlCircle) return;
+    const cur = Math.round(tlPane.scrollLeft / (tlPane.clientWidth || 1));
+    const i = cur + dir;
+    if (i < 0 || i >= CIRCLES.length) return;
+    const from = tlPane.scrollLeft, to = i * tlPane.clientWidth, t0 = performance.now(), D = 320;
+    tlPane.classList.add('gliding');
+    const step = (now) => {
+      const p = Math.min(1, (now - t0) / D), e = 1 - Math.pow(1 - p, 3);
+      tlPane.scrollLeft = from + (to - from) * e;
+      if (p < 1) requestAnimationFrame(step); else { tlPane.scrollLeft = to; tlPane.classList.remove('gliding'); tlSetPage(i); }
+    };
+    requestAnimationFrame(step);
+  }
+  let tlScrollT = null;
+  tlPane.addEventListener('scroll', () => {
+    clearTimeout(tlScrollT);
+    tlScrollT = setTimeout(() => tlSetPage(Math.round(tlPane.scrollLeft / (tlPane.clientWidth || 1))), 60);
+  });
+
+  function tlSwipe(el, skipSel) {
+    let sx = 0, sy = 0, on = false, moved = false, swiped = false;
+    el.addEventListener('pointerdown', (e) => {
+      if (skipSel && e.target.closest(skipSel)) return;
+      sx = e.clientX; sy = e.clientY; on = true; moved = false;
+    });
+    el.addEventListener('pointermove', (e) => {
+      if (!on) return;
+      const dx = Math.abs(e.clientX - sx), dy = Math.abs(e.clientY - sy);
+      if (dx > 8 && dx > dy) moved = true;
+    });
+    el.addEventListener('pointerup', (e) => {
+      if (!on) return; on = false;
+      const dx = e.clientX - sx;
+      if (!moved || Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(e.clientY - sy)) return;
+      tlGo(dx < 0 ? 1 : -1);
+      swiped = true; setTimeout(() => { swiped = false; }, 0);
+    });
+    el.addEventListener('pointercancel', () => { on = false; });
+    el.addEventListener('click', (e) => { if (swiped) { e.stopPropagation(); e.preventDefault(); } }, true);
+  }
+  tlSwipe(document.getElementById('tlHead'), '.tl-next, .tl-good, .tl-close');
+  /* マウスでの横ドラッグ — 指に追従してページャーを動かす（タッチはネイティブスクロール）。
+     クエストボード内はボード自身の横スクロールに任せる。 */
+  (function () {
+    let sx = 0, sy = 0, sl = 0, on = false, drag = false, id = null;
+    tlPane.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'touch' || e.button !== 0) return;
+      if (e.target.closest('.tlq-board, .tl-next, .tlp-act')) return;
+      sx = e.clientX; sy = e.clientY; sl = tlPane.scrollLeft; on = true; drag = false; id = e.pointerId;
+    });
+    tlPane.addEventListener('pointermove', (e) => {
+      if (!on) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!drag) { if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { drag = true; tlPane.classList.add('gliding'); tlPane.setPointerCapture(id); } else return; }
+      tlPane.scrollLeft = sl - dx;
+    });
+    const end = (e) => {
+      if (!on) return; on = false;
+      if (!drag) return;
+      const dx = e.clientX - sx, w = tlPane.clientWidth || 1;
+      const base = Math.round(sl / w);
+      const i = Math.max(0, Math.min(CIRCLES.length - 1, Math.abs(dx) > 40 ? base + (dx < 0 ? 1 : -1) : base));
+      const from = tlPane.scrollLeft, to = i * w, t0 = performance.now(), D = 260;
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / D), k = 1 - Math.pow(1 - p, 3);
+        tlPane.scrollLeft = from + (to - from) * k;
+        if (p < 1) requestAnimationFrame(step); else { tlPane.scrollLeft = to; tlPane.classList.remove('gliding'); tlSetPage(i); }
+      };
+      requestAnimationFrame(step);
+      tlPane.addEventListener('click', (ev) => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+      setTimeout(() => { drag = false; }, 0);
+    };
+    tlPane.addEventListener('pointerup', end);
+    tlPane.addEventListener('pointercancel', end);
+    /* クエストボード — マウスでは自身を横ドラッグスクロール */
+    let qb = null, qx = 0, ql = 0, qdrag = false;
+    tlPane.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest('.tlq-board'); if (!b || e.pointerType === 'touch') return;
+      qb = b; qx = e.clientX; ql = b.scrollLeft; qdrag = false;
+    });
+    tlPane.addEventListener('pointermove', (e) => {
+      if (!qb) return; const dx = e.clientX - qx;
+      if (!qdrag && Math.abs(dx) > 6) { qdrag = true; qb.setPointerCapture(e.pointerId); }
+      if (qdrag) qb.scrollLeft = ql - dx;
+    });
+    const qend = () => { if (qb && qdrag) tlPane.addEventListener('click', (ev) => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true }); qb = null; };
+    tlPane.addEventListener('pointerup', qend);
+    tlPane.addEventListener('pointercancel', qend);
+  })();
   function tlClose() {
+    if (document.body.classList.contains('tl-standalone')) return;
     tlSheet.classList.remove('on');
     tlScrim.classList.remove('on');
     tlSheet.setAttribute('aria-hidden', 'true');
-    setTimeout(() => tlFull(false), 300);
+    setTimeout(() => { tlFull(false); tlSheet.classList.remove('tall'); }, 300);
+  }
+
+  /* クエスト属性の投稿 — 名前欄=クエストタイトル、キャプション無し、中身は横スクロールのボード */
+  const TLQ_H = 720;
+  /* #map（ライブの MapLibre）を上シートへ移して表示し、閉じると元の位置へ戻す */
+  let tlqMapHome = null;
+  function tlqMapMount(top, circle, quest) {
+    const m = document.getElementById('map'); if (!m) return;
+    /* タップしたクエストのタイトルをエリア中央に（Universe Quest と同じ表示） */
+    window.tlqOverride = { circle, quest: Object.assign({}, circle.quest || {}, quest) };
+    if (typeof tickHero === 'function') tickHero();
+    const rs = () => { try { window.EarthMap && EarthMap.map && EarthMap.map.resize(); } catch (e) {} };
+    const fc = () => { try { if (typeof focusCircle === 'function') focusCircle(true, circle); } catch (e) {} };
+    if (m.parentElement === top) { rs(); fc(); return; }
+    tlqMapHome = { parent: m.parentElement, next: m.nextSibling };
+    top.insertBefore(m, top.firstChild);
+    rs(); fc(); setTimeout(() => { rs(); fc(); }, 60); setTimeout(rs, 420);
+  }
+  function tlqMapRestore() {
+    const m = document.getElementById('map'); if (!m || !tlqMapHome) return;
+    const hm = tlqMapHome; tlqMapHome = null;
+    window.tlqOverride = null;
+    if (typeof tickHero === 'function') tickHero();
+    setTimeout(() => {
+      hm.parent.insertBefore(m, hm.next && hm.next.parentElement === hm.parent ? hm.next : null);
+      try { window.EarthMap && EarthMap.map && EarthMap.map.resize(); } catch (e) {}
+    }, 400);
+  }
+  function tlQuestNode(e, c) {
+    const el = document.createElement('article');
+    el.className = 'tlp quest';
+    el.innerHTML = '<div class="tlp-col">'
+      +   '<div class="tlp-head"><span class="tlp-name"></span><span class="tlp-meta">' + e.time + '</span></div>'
+      +   '<div class="tlq-board"><div class="tlq-inner"></div></div>'
+      + '</div>';
+    el.querySelector('.tlp-name').textContent = e.quest.title;
+    const posts = e.quest.posts || [];
+    const L = qbLayout(posts.length, TLQ_H);
+    const board = el.querySelector('.tlq-board');
+    const inner = el.querySelector('.tlq-inner');
+    inner.style.width = L.width + 'px';
+    const tiles = [];
+    const place = (b, t) => { b.style.left = qr2(t.x) + 'px'; b.style.top = qr2(t.y) + 'px'; b.style.width = qr2(t.w) + 'px'; b.style.height = qr2(t.h) + 'px'; };
+    /* 拡大 ⇄ 通常。拡大時は横向き3段ぶんの高さにボードを変え、タップした投稿を上から200pxに揃える */
+    const setZoom = (on, idx) => {
+      board.classList.toggle('zoom', on);
+      let Z;
+      if (on) {
+        const W = board.clientWidth;
+        const Hz = W * 9 / 16 * 3;
+        Z = qbLayout(posts.length, Hz, { gap: 0, pad: 0, clamp: false });
+        board.style.height = Hz + 'px';
+      } else {
+        Z = L; board.style.height = '';
+      }
+      inner.style.width = Z.width + 'px';
+      tiles.forEach((b, i) => { if (Z.tiles[i]) place(b, Z.tiles[i]); });
+      const top = document.getElementById('tlqTop');
+      if (idx == null) { top.classList.remove('on'); tlqMapRestore(); return; }
+      const t = Z.tiles[idx];
+      board.scrollTo({ left: Math.max(0, t.x), behavior: 'smooth' });
+      const list = el.closest('.tl-list');
+      if (list) {
+        /* ボード下端を画面（シート）の一番下に揃える */
+        const lr = list.getBoundingClientRect();
+        const boardTop = board.getBoundingClientRect().top - lr.top + list.scrollTop;
+        const Hz = parseFloat(board.style.height);
+        list.scrollTo({ top: Math.max(0, boardTop + Hz - lr.height), behavior: 'smooth' });
+        /* 上のモーダルシート: 画面高さ − ボード高さ − 8 */
+        const sheetH = tlSheet.getBoundingClientRect().height;
+        top.style.height = Math.max(0, sheetH - Hz - 8) + 'px';
+        tlqMapMount(top, c, e.quest);
+        requestAnimationFrame(() => top.classList.add('on'));
+      }
+    };
+    /* 拡大中: 縦スクロールを固定し、下方向へのスクロール入力で通常表示へ戻す */
+    let armT = null, bound = false, ty = 0;
+    const listOf = () => el.closest('.tl-list');
+    const onWheel = (ev) => { if (ev.deltaY > 12 && Math.abs(ev.deltaY) > Math.abs(ev.deltaX)) { ev.preventDefault(); unzoom(); } };
+    const onTS = (ev) => { ty = ev.touches[0].clientY; };
+    const onTM = (ev) => { if (ty - ev.touches[0].clientY > 24) unzoom(); };
+    const disarm = () => {
+      clearTimeout(armT);
+      const list = listOf(); if (!list) return;
+      list.style.overflowY = ''; list.style.touchAction = '';
+      if (bound) { list.removeEventListener('wheel', onWheel); list.removeEventListener('touchstart', onTS); list.removeEventListener('touchmove', onTM); bound = false; }
+    };
+    const unzoom = () => { if (!board.classList.contains('zoom')) return; disarm(); setZoom(false, null); };
+    const arm = () => {
+      const list = listOf(); if (!list) return;
+      if (!bound) {
+        list.addEventListener('wheel', onWheel, { passive: false });
+        list.addEventListener('touchstart', onTS, { passive: true });
+        list.addEventListener('touchmove', onTM, { passive: true });
+        bound = true;
+      }
+      clearTimeout(armT);
+      armT = setTimeout(() => {              /* スムーズスクロールが落ち着いてから固定 */
+        if (board.classList.contains('zoom')) { list.style.overflowY = 'hidden'; list.style.touchAction = 'pan-x'; }
+      }, 450);
+    };
+    L.tiles.forEach((t, i) => {
+      const p = posts[i]; if (!p) return;
+      const b = document.createElement('div');
+      b.className = 'tlq-tile' + (t.k === 'L' ? ' ls' : '');
+      place(b, t);
+      tiles.push(b);
+      b.addEventListener('click', () => {
+        if (board.classList.contains('zoom')) unzoom(); else { setZoom(true, i); arm(); }
+      });
+      b.innerHTML = '<img alt=""><span class="tlq-by"></span>'
+        + '<button class="tlq-like' + (p.liked ? ' liked' : '') + '" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span></span></button>';
+      b.querySelector('img').src = p.img || c.cover;
+      b.querySelector('.tlq-by').textContent = p.name || '';
+      if (p.likes == null) p.likes = 6 + ((i * 37) % 120);
+      const lk = b.querySelector('.tlq-like');
+      lk.querySelector('span').textContent = p.likes;
+      lk.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        p.liked = !p.liked; p.likes += p.liked ? 1 : -1;
+        lk.classList.toggle('liked', p.liked);
+        lk.querySelector('span').textContent = p.likes;
+      });
+      inner.appendChild(b);
+    });
+    return el;
   }
 
   /* ---- クエストボード — WdQuestPostBoard の列パターン配置 -------------------
@@ -3160,9 +4599,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     F: { need: 2, solve: (H, G) => { const W = (H - G) * 144 / 337; return { w: W, tiles: [qt(0, 0, W, W * (16 / 9), 'P'), qt(0, W * (16 / 9) + G, W, W * (9 / 16), 'L')] }; } },
     G: { need: 2, solve: (H, G) => { const W = (H - G) * 144 / 337; return { w: W, tiles: [qt(0, 0, W, W * (9 / 16), 'L'), qt(0, W * (9 / 16) + G, W, W * (16 / 9), 'P')] }; } }
   };
-  function qbLayout(count) {
-    const H = QB.H - QB.PAD, G = QB.GAP, tiles = [];
-    let x = QB.PAD, left = count, si = 0;
+  function qbLayout(count, Hpx, opt) {
+    const PAD = opt && opt.pad != null ? opt.pad : QB.PAD, G = opt && opt.gap != null ? opt.gap : QB.GAP;
+    const clamp = !(opt && opt.clamp === false);
+    const H = (Hpx || QB.H) - PAD, tiles = [];
+    let x = PAD, left = count, si = 0;
     while (left > 0) {
       let id = null;
       for (let k = 0; k < QB.SEQ.length; k++) {
@@ -3173,14 +4614,14 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       const pat = QPAT[id];
       let col = pat.solve(H, G), s = 1;
       const widest = col.tiles.reduce((m, t) => Math.max(m, t.w), 0);
-      if (widest > QB.MAXW) s = QB.MAXW / widest;
-      if (col.w * s > QB.VW * QB.MAX_RATIO) s = Math.min(s, QB.VW * QB.MAX_RATIO / col.w);
+      if (clamp && widest > QB.MAXW) s = QB.MAXW / widest;
+      if (clamp && col.w * s > QB.VW * QB.MAX_RATIO) s = Math.min(s, QB.VW * QB.MAX_RATIO / col.w);
       if (s !== 1) col = { w: col.w * s, tiles: col.tiles.map((t) => qt(t.x * s, t.y * s, t.w * s, t.h * s, t.k)) };
       const yOff = (H - H * s) / 2;
       col.tiles.forEach((t) => tiles.push(qt(x + t.x, yOff + t.y, t.w, t.h, t.k)));
       left -= pat.need; x += col.w + G;
     }
-    return { tiles, width: Math.round(x + QB.PAD) };
+    return { tiles, width: Math.round(x - G + PAD * 2) };
   }
 
   const qbView = document.getElementById('qbView');
@@ -3236,30 +4677,50 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   document.getElementById('qbBack').addEventListener('click', qbClose);
 
   document.querySelector('.wd-circle-bar').addEventListener('click', tlOpen);
-  document.getElementById('fbList').addEventListener('click', qbOpen);
   document.getElementById('tlClose').addEventListener('click', tlClose);
   tlScrim.addEventListener('click', tlClose);
 
   // スクロールでフルスクリーンへ昇格 / 上端で引き下げると戻る
-  tlList.addEventListener('scroll', () => {
-    if (tlList.scrollTop > 6) tlFull(true);
-  }, { passive: true });
-  tlList.addEventListener('wheel', (ev) => {
+  tlPane.addEventListener('scroll', () => {
+    if (tlList && tlList.scrollTop > 6) tlFull(true);
+  }, { passive: true, capture: true });
+  tlPane.addEventListener('wheel', (ev) => {
     if (ev.deltaY > 16) tlFull(true);
-    else if (tlList.scrollTop <= 0 && ev.deltaY < -24 && tlSheet.classList.contains('full')) tlFull(false);
   }, { passive: true });
+  /* トラックパッドの横フリック — deltaX をページャーに渡す（クエストボード内はボード自身がスクロール） */
+  (function () {
+    let acc = 0, lock = false, t = null;
+    tlPane.addEventListener('wheel', (ev) => {
+      if (ev.target.closest('.tlq-board')) return;
+      if (Math.abs(ev.deltaX) <= Math.abs(ev.deltaY)) return;
+      ev.preventDefault();
+      if (lock) return;
+      acc += ev.deltaX;
+      clearTimeout(t); t = setTimeout(() => { acc = 0; }, 160);
+      if (Math.abs(acc) < 60) return;
+      const cur = Math.round(tlPane.scrollLeft / (tlPane.clientWidth || 1));
+      const i = Math.max(0, Math.min(CIRCLES.length - 1, cur + (acc > 0 ? 1 : -1)));
+      acc = 0;
+      if (i === cur) return;
+      lock = true; setTimeout(() => { lock = false; }, 420);
+      tlGo(i - cur);
+    }, { passive: false });
+  })();
 
   // グリップ / ヘッダーのドラッグ — 下げてモーダル → 閉じる、上げてフル
   (function () {
-    let sy = 0, dy = 0, on = false;
+    let sy = 0, sx = 0, dy = 0, on = false, horiz = false;
     const grab = (ev) => {
-      on = true; sy = ev.clientY; dy = 0;
+      if (ev.target.closest('.tl-next, .tl-good, .tl-close')) return;
+      on = true; sy = ev.clientY; sx = ev.clientX; dy = 0; horiz = false;
       tlSheet.classList.add('dragging');
       ev.currentTarget.setPointerCapture(ev.pointerId);
     };
     const move = (ev) => {
       if (!on) return;
       dy = ev.clientY - sy;
+      if (!horiz && Math.abs(ev.clientX - sx) > 8 && Math.abs(ev.clientX - sx) > Math.abs(dy)) horiz = true;
+      if (horiz) { dy = 0; tlSheet.style.transform = ''; return; }   /* 横スワイプ → サークル切替に委ねる */
       tlSheet.style.transform = 'translateY(' + Math.max(-24, dy) + 'px)';
     };
     const up = () => {
@@ -3268,7 +4729,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       tlSheet.classList.remove('dragging');
       tlSheet.style.transform = '';
       if (dy < -40) tlFull(true);
-      else if (dy > 96) { if (tlSheet.classList.contains('full')) tlFull(false); else tlClose(); }
+      else if (dy > 96) tlClose();
     };
     ['tlGrab', 'tlHead'].forEach((id) => {
       const el = document.getElementById(id);
@@ -3335,6 +4796,422 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     tlList.scrollTop = 0;
   });
 
+  /* ==========================================================================
+     NEW SPOT — 現在地がどのサークルにも属していないとき
+     ・マップ: エリアを描かず、ピンと「設立できます」のポップアップだけ
+     ・リスト: 投稿がないので、代わりに投稿オンボーディングを 1 枚
+     ・設立フロー: 撮影 → エリア(最大1km) → クエスト → 名前
+     ・サークル名は以降 投票制（クエストクリアで得た投票権を消費していいね）
+     ========================================================================== */
+  var nsMode = false, nsCreated = null, tickets = 1;
+  const NS_CENTER = [139.70620, 35.65190];
+  const NS_RADIUS = 400;
+
+  // ---- 投票データ（既存サークル） -------------------------------------------
+  const NAME_IDEAS = [
+    [['SCRAMBLE SHIBUYA', 'Starry', 61], ['交差点の民', 'Pixel', 44], ['ハチ公前集合', 'Kawaii', 27]],
+    [['グラフィティマンの日常', 'Pixel', 42], ['渋谷ペイント倶楽部', 'SunnyVi', 58], ['壁と夜と渋谷', 'Mocha', 31]],
+    [['原宿コミュニティ', 'Kawaii', 24], ['朝7時のキャットストリート', 'ZenGarden', 49], ['宮下パーク常連会', 'Starry', 18]],
+    [['道玄坂グループ', 'foodie', 37], ['替え玉は文化', 'o_cean', 66], ['坂の上のラーメン', 'Dreamy', 29]],
+  ];
+  CIRCLES.forEach((c, i) => {
+    c.votes = NAME_IDEAS[i].map(([name, by, likes], k) => ({ name, by, likes, liked: false, founder: k === 0 }));
+    c.votes[0].likes = Math.max.apply(null, c.votes.map((v) => v.likes)) + 7;   /* 現行名が1位 */
+  });
+
+  // ---- 最終セクション -------------------------------------------------------
+  const NS_STEPS = [
+    ['撮影する', '今いる場所でカメラを使って撮影。'],
+    ['クエストを考える', 'サークルのお題を自由に考えてください。'],
+    ['サークルに名前をつける', '最初の名前を自由に決めれる。<br>＊ただし、サークルの名前は投票制なので、変わる可能性があります。'],
+  ];
+  const nsStrip = document.createElement('div');
+  nsStrip.className = 'circle-strip newspot';
+  nsStrip.innerHTML = '<div class="strip-title"><div class="qnav">'
+    + '<button class="qn-i on" type="button"><span class="qn-t">サークルを設立する</span></button>'
+    + '</div></div>';
+  const nsBody = document.createElement('div');
+  nsStrip.appendChild(nsBody);
+  col.insertBefore(nsStrip, col.lastElementChild);
+
+  function nsRenderEmpty() {
+    nsBody.className = 'ns-onb';
+    nsBody.innerHTML = '<img class="ns-bg" src="../../assets/images/create_circle_bg.png" alt="">'
+      + '<span class="ns-bg-veil"></span>'
+      + '<div class="ns-lead">サークルの作り方</div>'
+      + '<div class="ns-steps">' + NS_STEPS.map((s, i) =>
+        '<div class="ns-step"><span class="n">' + (i + 1) + '</span>'
+        + '<span class="sc"><b>' + s[0] + '</b><span>' + s[1] + '</span></span></div>').join('') + '</div>';
+    nsStrip.querySelector('.qn-t').textContent = 'サークルを設立する';
+  }
+  function nsRenderFounded() {
+    const n = nsCreated;
+    nsBody.className = 'ns-founded';
+    nsBody.innerHTML = '<div class="fphoto"><img src="' + n.photo + '" alt="">'
+      + '<span class="badge">CLEARED · 1 / 1</span></div>'
+      + '<div class="frow"><span class="fname"></span>'
+      + '<button class="fvote" type="button"><img src="../../assets/icons/icon_like.png" alt="">名前を投票で決める</button></div>'
+      + '<div class="fmeta"></div>';
+    nsBody.querySelector('.fname').textContent = n.name;
+    nsBody.querySelector('.fmeta').textContent = '半径 ' + radLabel(n.radius)
+      + ' · メンバー 1人 · 投票権 ' + tickets + '個';
+    nsBody.querySelector('.fvote').addEventListener('click', () => nvOpen(n));
+    nsStrip.querySelector('.qn-t').textContent = n.quest.title;
+  }
+  const radLabel = (r) => (r >= 1000 ? '1.0km' : r + 'm');
+  nsRenderEmpty();
+
+  // ---- マップ側 ------------------------------------------------------------
+  function areaLayerIds() {
+    const ids = ['area-fill', 'area-glow-wide', 'area-glow-mid', 'area-rib-lo', 'area-rib-hi'];
+    WALL_BANDS.forEach((b) => ids.push('area-wall-' + b[0]));
+    return ids;
+  }
+  function areaVisible(on) {
+    const m = window.EarthMap && EarthMap.map; if (!m) return;
+    areaLayerIds().forEach((id) => {
+      if (m.getLayer(id)) m.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+    });
+  }
+  const NS_POP = '<div class="qp"><div class="qp-title"></div><div class="qp-sub"></div></div>';
+  let nsMarker = null, meMarker = null;
+  function nsMountEl() {
+    const el = document.createElement('div');
+    el.className = 'ns-mount';
+    el.innerHTML = '<div class="qp-mount ns-pop"><div class="qp-back">' + NS_POP + '</div>' + NS_POP + '</div>';
+    el.querySelectorAll('.qp-title').forEach((e) => { e.textContent = 'サークルを作成！'; });
+    el.querySelectorAll('.qp-sub').forEach((e) => { e.textContent = '今いる場所で写真と撮って、サークルを作成できます。'; });
+    return el;
+  }
+  function meDotEl() {
+    const el = document.createElement('div');
+    el.className = 'me-dot';
+    el.innerHTML = '<span class="halo"></span><span class="core"></span>';
+    return el;
+  }
+  function setNewSpot(on, force) {
+    if (nsMode === on && !force) return;
+    nsMode = on;
+    const map = window.EarthMap && EarthMap.map;
+    if (!on) {
+      if (nsMarker) { nsMarker.remove(); nsMarker = null; }
+      if (meMarker) { meMarker.remove(); meMarker = null; }
+      qpMount.style.display = '';
+      areaVisible(true);
+      renderBoard();
+      focusCircle();
+      return;
+    }
+    mapPost.classList.remove('done');
+    if (!map) return;
+    hdCircle.textContent = nsCreated ? nsCreated.name : 'この場所';
+    cbName.textContent = hdCircle.textContent;
+    cbDesc.textContent = nsCreated ? ('半径 ' + radLabel(nsCreated.radius) + ' · メンバー 1人')
+      : 'どのサークルにも属していません';
+    if (nsCreated) {
+      if (nsMarker) { nsMarker.remove(); nsMarker = null; }
+      if (meMarker) { meMarker.remove(); meMarker = null; }
+      qpMount.style.display = '';
+      areaVisible(true);
+      areaMove(map, nsCreated.center, nsCreated.radius);
+      placePopup(map, nsCreated.center);
+      tickHero();
+      map.stop();
+      map.easeTo({ center: nsCreated.center, zoom: questZoom(nsCreated.center, nsCreated.radius),
+        pitch: 60, bearing: 0, duration: 900, padding: { top: 0, bottom: 20 } });
+      return;
+    }
+    areaVisible(true);
+    qpMount.style.display = 'none';
+    areaMove(map, NS_CENTER, NS_RADIUS, { radius: NS_RADIUS, unclaimed: true });
+    if (!meMarker) {
+      meMarker = new maplibregl.Marker({ element: meDotEl(), anchor: 'center' })
+        .setLngLat(NS_CENTER).addTo(map);
+    }
+    if (!nsMarker) {
+      nsMarker = new maplibregl.Marker({ element: nsMountEl(), anchor: 'center', offset: [0, QP_OFFSET_Y] })
+        .setLngLat(NS_CENTER).addTo(map);
+    }
+    map.stop();
+    map.easeTo({ center: NS_CENTER, zoom: questZoom(NS_CENTER, NS_RADIUS), pitch: 60, bearing: 0,
+      duration: 900, padding: { top: 0, bottom: 20 } });
+  }
+
+  // ---- 設立フロー ----------------------------------------------------------
+  const csView = document.getElementById('csView');
+  const csNext = document.getElementById('csNext');
+  const csRad = document.getElementById('csRad');
+  const csQt = document.getElementById('csQt');
+  const csQd = document.getElementById('csQd');
+  const csNameIn = document.getElementById('csName');
+  const CS_PANES = ['area', 'quest', 'name'];
+  const CS_PHOTO = '../../assets/sample/reel/reel006.jpg';
+  let csPane = 0;
+
+  function csOpen() {
+    csPane = 0;
+    csQt.value = ''; csQd.value = ''; csNameIn.value = ''; csRad.value = 400;
+    csRadSync();
+    csView.dataset.mode = 'cam';
+    csView.classList.add('on');
+    csView.setAttribute('aria-hidden', 'false');
+    phone.classList.remove('light-status');
+  }
+  function csClose() {
+    csView.classList.remove('on');
+    csView.setAttribute('aria-hidden', 'true');
+    phone.classList.remove('light-status');
+  }
+  function csRadSync() {
+    const r = +csRad.value;
+    document.getElementById('csRv').textContent = r >= 1000 ? '1.0' : r;
+    document.getElementById('csRu').textContent = r >= 1000 ? 'km' : 'm';
+    const d = 54 + (r / 1000) * 156;
+    const ring = document.getElementById('csRing');
+    ring.style.width = d + 'px'; ring.style.height = d + 'px';
+  }
+  function csPaneSync() {
+    csView.dataset.mode = 'form';
+    phone.classList.add('light-status');
+    CS_PANES.forEach((k, i) => {
+      csView.querySelector('.cs-pane[data-pane="' + k + '"]').classList.toggle('on', i === csPane);
+    });
+    document.getElementById('csStepLbl').textContent = (csPane + 1) + ' / 3';
+    csNext.textContent = csPane === 2 ? 'サークルを設立する' : '次へ';
+    csValid();
+  }
+  function csValid() {
+    let ok = true;
+    if (csPane === 1) ok = !!csQt.value.trim();
+    if (csPane === 2) ok = !!csNameIn.value.trim();
+    csNext.disabled = !ok;
+  }
+  csRad.addEventListener('input', csRadSync);
+  csQt.addEventListener('input', csValid);
+  csNameIn.addEventListener('input', csValid);
+  document.getElementById('csClose').addEventListener('click', csClose);
+  document.getElementById('csShot').addEventListener('click', () => { csPane = 0; csPaneSync(); });
+  document.getElementById('csBack').addEventListener('click', () => {
+    if (csPane === 0) { csView.dataset.mode = 'cam'; phone.classList.remove('light-status'); return; }
+    csPane--; csPaneSync();
+  });
+  csNext.addEventListener('click', () => {
+    if (csNext.disabled) return;
+    if (csPane < 2) { csPane++; csPaneSync(); return; }
+    csFound();
+  });
+  function csFound() {
+    const r = +csRad.value;
+    const name = csNameIn.value.trim();
+    nsCreated = {
+      name, radius: r, center: NS_CENTER, photo: CS_PHOTO, isNew: true,
+      desc: '半径 ' + radLabel(r) + ' · メンバー 1人',
+      quest: { title: csQt.value.trim(), venue: 'この場所', spot: NS_CENTER,
+        date: jpDate(TODAY) + ' 19:00–23:00', desc: csQd.value.trim() },
+      votes: [{ name, by: 'Pixel', likes: 1, liked: false, founder: true }],
+    };
+    tickets++;
+    document.getElementById('csDonePhoto').src = CS_PHOTO;
+    document.getElementById('csDoneName').textContent = name;
+    document.getElementById('csDoneQuest').textContent = nsCreated.quest.title;
+    document.getElementById('csDoneMeta').textContent = '半径 ' + radLabel(r) + ' · メンバー 1人';
+    csView.dataset.mode = 'done';
+    phone.classList.remove('light-status');
+  }
+  document.getElementById('csDoneGo').addEventListener('click', () => {
+    csClose();
+    nsRenderFounded();
+    setNewSpot(true, true);
+    col.scrollTop = Math.max(0, nsStrip.offsetTop);
+  });
+
+  // ---- サークル名の投票 ----------------------------------------------------
+  const nvView = document.getElementById('nvView');
+  const nvList = document.getElementById('nvList');
+  const nvInput = document.getElementById('nvInput');
+  const nvSend = document.getElementById('nvSend');
+  let nvCircle = null;
+
+  function nvOpen(c) {
+    nvCircle = c || CIRCLES[active];
+    nvInput.value = ''; nvSend.disabled = true;
+    document.getElementById('nvTkRow').classList.remove('warn');
+    nvRender();
+    nvView.classList.add('on');
+    nvView.setAttribute('aria-hidden', 'false');
+    phone.classList.add('light-status');
+  }
+  function nvClose() {
+    nvView.classList.remove('on');
+    nvView.setAttribute('aria-hidden', 'true');
+    phone.classList.remove('light-status');
+  }
+  function awardTicket() {
+    tickets++;
+    if (nvView.classList.contains('on')) nvRender();
+    if (nsCreated && nsBody.classList.contains('ns-founded')) nsRenderFounded();
+  }
+  function nvRender() {
+    const c = nvCircle; if (!c) return;
+    // FLIP — 並び替えを滑らかに見せるため、描き直す前の行位置を控える
+    const prevPos = new Map();
+    nvList.querySelectorAll('.nv-row').forEach(r => prevPos.set(r.dataset.vote, r.getBoundingClientRect().top));
+    c.votes.sort((a, b) => (b.likes - a.likes) || String(a.name).localeCompare(String(b.name), 'ja'));
+    const top = c.votes[0];
+    if (c.name !== top.name) {
+      c.name = top.name;
+      if (c.isNew) { nsRenderFounded(); if (nsMode) setNewSpot(true, true); }
+      else if (!nsMode) renderBoard();
+    }
+    document.getElementById('nvNow').textContent = top.name;
+    document.getElementById('nvSub').textContent = c.votes.length
+      + '件の候補 · いいねが一番多い名前がサークル名になります。';
+    document.getElementById('nvTk').textContent = tickets;
+    nvList.innerHTML = '';
+    c.votes.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'nv-row' + (i === 0 ? ' top' : '');
+      row.dataset.vote = v.name;
+      row.innerHTML = '<span class="rk">' + (i + 1) + '</span>'
+        + '<span class="col"><span class="nm"></span>'
+        + '<span class="by"></span></span>'
+        + '<button class="nv-like' + (v.liked ? ' liked' : '') + '" type="button" aria-pressed="' + !!v.liked + '">'
+        + '<img src="../../assets/icons/icon_good.png" alt=""><span>' + v.likes + '</span></button>';
+      row.querySelector('.nm').textContent = v.name;
+      row.querySelector('.by').textContent = '@' + v.by.toLowerCase() + (v.founder ? ' · founder' : '');
+      row.querySelector('.nv-like').addEventListener('click', () => {
+        if (!v.liked && tickets <= 0) {
+          row.classList.add('no-tk');
+          document.getElementById('nvTkRow').classList.add('warn');
+          setTimeout(() => row.classList.remove('no-tk'), 400);
+          return;
+        }
+        v.liked = !v.liked;
+        v.likes += v.liked ? 1 : -1;
+        tickets += v.liked ? -1 : 1;
+        document.getElementById('nvTkRow').classList.remove('warn');
+        nvRender();
+      });
+      nvList.appendChild(row);
+    });
+    if (prevPos.size) {
+      nvList.querySelectorAll('.nv-row').forEach(r => {
+        const prev = prevPos.get(r.dataset.vote); if (prev == null) return;
+        const dy = prev - r.getBoundingClientRect().top; if (!dy) return;
+        r.style.transition = 'none';
+        r.style.transform = 'translateY(' + dy + 'px)';
+        requestAnimationFrame(() => {
+          r.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+          r.style.transform = 'translateY(0)';
+        });
+      });
+    }
+  }
+  nvInput.addEventListener('input', () => { nvSend.disabled = !nvInput.value.trim(); });
+  nvSend.addEventListener('click', () => {
+    const v = nvInput.value.trim(); if (!v || !nvCircle) return;
+    nvCircle.votes.push({ name: v, by: 'Pixel', likes: 0, liked: false });
+    nvInput.value = ''; nvSend.disabled = true;
+    nvRender();
+  });
+  document.getElementById('nvBack').addEventListener('click', nvClose);
+  hdCircle.addEventListener('click', () => {
+    if (nsMode) { if (nsCreated) gvOpen(nsCreated); return; }
+    gvOpen(CIRCLES[active]);
+  });
+
+  /* ---- good 残高 と サークル名投票ダイアログ -------------------------------- */
+  let goods = 521;
+  const gvVeil = document.getElementById('gvVeil');
+  const gvList = document.getElementById('gvList');
+  const gvInput = document.getElementById('gvInput');
+  const gvSend = document.getElementById('gvSend');
+  let gvCircle = null;
+
+  function goodSync() {
+    document.getElementById('meGood').textContent = 'x' + goods;
+    document.getElementById('gvBal').textContent = goods;
+  }
+  function msSync() {
+    CIRCLES.forEach((c) => {
+      if (c.mstat) c.mstat.querySelector('.cnt .v').textContent = c.timeline.length;
+    });
+  }
+  function gvOpen(c) {
+    gvCircle = c || tlCircle || CIRCLES[active];
+    gvInput.value = ''; gvSend.disabled = true;
+    gvRender();
+    gvVeil.classList.add('on');
+    gvVeil.setAttribute('aria-hidden', 'false');
+  }
+  function gvClose() {
+    gvVeil.classList.remove('on');
+    gvVeil.setAttribute('aria-hidden', 'true');
+  }
+  function gvRender() {
+    const c = gvCircle; if (!c) return;
+    const prevPos = new Map();
+    gvList.querySelectorAll('.gv-row').forEach(r => prevPos.set(r.dataset.vote, r.getBoundingClientRect().top));
+    c.votes.sort((a, b) => (b.likes - a.likes) || String(a.name).localeCompare(String(b.name), 'ja'));
+    const top = c.votes[0];
+    if (top && c.name !== top.name) {
+      c.name = top.name;
+      document.getElementById('tlName').textContent = c.name;
+      hdCircle.textContent = c.name;
+      cbName.textContent = c.name;
+      if (!nsMode) renderBoard();
+    }
+    goodSync();
+    gvList.innerHTML = '';
+    c.votes.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'gv-row' + (i === 0 ? ' top' : '');
+      row.dataset.vote = v.name;
+      row.innerHTML = '<span class="rk">' + (i + 1) + '</span>'
+        + '<span class="col"><span class="nm"></span><span class="by"></span></span>'
+        + '<button class="gv-btn' + (v.liked ? ' voted' : '') + '" type="button" aria-pressed="' + !!v.liked + '">'
+        + '<img src="../../assets/icons/icon_good.png" alt="good"><span>' + v.likes + '</span></button>';
+      row.querySelector('.nm').textContent = v.name;
+      row.querySelector('.by').textContent = '@' + String(v.by).toLowerCase() + (v.founder ? ' · founder' : '');
+      row.querySelector('.gv-btn').addEventListener('click', () => {
+        if (!v.liked && goods <= 0) {
+          row.classList.add('shake');
+          setTimeout(() => row.classList.remove('shake'), 400);
+          return;
+        }
+        v.liked = !v.liked;
+        v.likes += v.liked ? 1 : -1;
+        goods += v.liked ? -1 : 1;
+        gvRender();
+      });
+      gvList.appendChild(row);
+    });
+    if (prevPos.size) {
+      gvList.querySelectorAll('.gv-row').forEach(r => {
+        const prev = prevPos.get(r.dataset.vote); if (prev == null) return;
+        const dy = prev - r.getBoundingClientRect().top; if (!dy) return;
+        r.style.transition = 'none';
+        r.style.transform = 'translateY(' + dy + 'px)';
+        requestAnimationFrame(() => {
+          r.style.transition = 'transform .32s cubic-bezier(.2,.8,.2,1)';
+          r.style.transform = 'translateY(0)';
+        });
+      });
+    }
+  }
+  gvInput.addEventListener('input', () => { gvSend.disabled = !gvInput.value.trim(); });
+  gvSend.addEventListener('click', () => {
+    const v = gvInput.value.trim(); if (!v || !gvCircle) return;
+    gvCircle.votes.push({ name: v, by: 'Pixel', likes: 0, liked: false });
+    gvInput.value = ''; gvSend.disabled = true;
+    gvRender();
+  });
+  document.getElementById('gvClose').addEventListener('click', gvClose);
+  gvVeil.addEventListener('click', (ev) => { if (ev.target === gvVeil) gvClose(); });
+  document.getElementById('tlGood').addEventListener('click', () => gvOpen(tlCircle));
+  goodSync();
+  msSync();
+
   renderBoard();
   build();
 
@@ -3347,12 +5224,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     if (q.has('embed')) document.body.classList.add('embed');
     if (!q.has('circle')) return;
     const ci = Math.max(0, Math.min(CIRCLES.length - 1, parseInt(q.get('circle'), 10) || 0));
-    const back = Math.max(1, parseInt(q.get('past'), 10) || 1);
+    const back = q.has('past') ? Math.max(0, parseInt(q.get('past'), 10) || 0) : 1;   /* past=0 = 今日のお題 */
     const c = CIRCLES[ci];
     active = ci;
     renderBoard();
     if (q.has('embed')) document.body.classList.add('no-anim');   /* 遷移演出を切って即・確定状態で描く */
-    setFeedMax(true);
+    const keepMap = q.has('map');            /* map=1: 拡大せずマップを出したまま、その日の列へ */
+    if (!keepMap) setFeedMax(true);
     let tries = 0;
     const go = () => {
       if ((!c.days || c.days[0].x0 == null) && tries++ < 20) { setTimeout(go, 120); return; }
@@ -3360,8 +5238,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (c.goDay) c.goDay(day, true);
       const st = c.strip;
       if (st) col.scrollTop = Math.max(0, st.offsetTop - (parseFloat(getComputedStyle(col).paddingTop) || 0));
+      /* 初期スクロール（既定 = 前日）や setFocus の後勝ちを防ぐ — 数フレーム後に再度確定 */
+      [90, 400, 1000].forEach((t) => setTimeout(() => { if (c.goDay) c.goDay(day, true); }, t));
     };
-    setTimeout(go, 950);   /* setFeedMax の最終 rebuild(900ms) 後に位置を確定 */
+    setTimeout(go, keepMap ? 260 : 950);   /* setFeedMax の最終 rebuild(900ms) 後に位置を確定 */
   })();
 })();
 </script>
@@ -3527,7 +5407,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   crInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
 
   /* ---- Deep link（app/ の画面だけページ用） ------------------------------
-     ?view=profile|chatlist|chatroom : 該当ビューを開いた状態で起動する */
+     ?view=profile|chatlist|chatroom|timeline : 該当ビューを開いた状態で起動する */
   (function () {
     const v = (window.__APP_PARAMS__ && window.__APP_PARAMS__.view) ||
         new URLSearchParams(location.search).get('view');
@@ -3535,6 +5415,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     setTimeout(() => {
       if (v === 'profile') document.getElementById('meBtn').click();
       else if (v === 'chatlist') document.getElementById('chatBtn').click();
+      else if (v === 'timeline') document.querySelector('.wd-circle-bar').click();
       else if (v === 'chatroom') {
         document.getElementById('chatBtn').click();
         const row = clList.querySelector('.cl-row');
