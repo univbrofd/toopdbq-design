@@ -1518,9 +1518,82 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tlq-like:active { transform: scale(.94); }
 .tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 -16px; overflow: hidden; }
 .tlp-m2 img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
-.tlp-acts { display: flex; align-items: center; gap: 28px; padding-top: 2px; }
+/* リンクチップ（アクション行の右端） */
+.tlp-og { display: flex; align-items: center; gap: 8px; min-width: 120px; flex: 1; margin-left: auto;
+  max-width: 180px; height: 36px; margin-top: 4px; margin-bottom: 4px; padding: 0 8px 0 0; border-radius: var(--radius-xs); overflow: hidden;
+  border: 1px solid rgba(8,8,11,.10); text-decoration: none; color: inherit; background: #fff; }
+.tlp-og:active { transform: scale(.97); }
+.tlp-og img { width: 36px; height: 36px; flex: none; object-fit: cover; display: block; background: #eee; }
+.tlp-og-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tlp-og-site { font-family: var(--font-latin); font-size: 9px; line-height: 1.2; color: rgba(8,8,11,.48);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tlp-og-ttl { font-weight: 700; font-size: 11px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tlp-lnk { display: inline-flex; align-items: center; gap: 6px; min-width: 96px; flex: 1; margin-left: auto;
+  max-width: 180px; height: 28px; margin-top: 8px; margin-bottom: 8px; padding: 0 10px; border-radius: var(--radius-pill); background: rgba(8,8,11,.05);
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
+  font-family: var(--font-latin); font-weight: 700; font-size: 11px; color: #08080b; }
+.tlp-lnk img { width: 12px; height: 12px; filter: invert(1); opacity: .5; flex: none; }
+.tlp-lnk span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; min-width: 0; }
+.tlp-lnk:active { opacity: .6; }
+/* 自分の投稿でリンク未設定 → 右下に「リンクを追加」 */
+.tlp-addlnk { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; height: 28px; padding: 0 10px;
+  border: 1px dashed rgba(8,8,11,.28); border-radius: var(--radius-pill); background: none; cursor: pointer;
+  font-family: var(--font-jp); font-size: 11px; font-weight: 700; color: rgba(8,8,11,.62); flex: none; }
+.tlp-addlnk img { width: 12px; height: 12px; filter: invert(1); opacity: .5; }
+.tlp-addlnk:active { opacity: .6; }
+/* リンクダイアログ */
+.tl-ld { position: absolute; inset: 0; z-index: 95; display: flex; flex-direction: column; justify-content: center;
+  padding: 24px; background: rgba(0,0,0,.72); opacity: 0; pointer-events: none; transition: opacity .22s var(--ease-standard); }
+.tl-ld.on { opacity: 1; pointer-events: auto; }
+.tl-ld-x { position: absolute; right: 14px; top: calc(var(--safe-top, 46px) + 8px); width: 40px; height: 40px;
+  border: 0; background: none; cursor: pointer; display: grid; place-items: center; z-index: 2; }
+.tl-ld-x img { width: 14px; height: 14px; opacity: .55; }
+.tl-ld-card { position: relative; border-radius: var(--radius-md); overflow: hidden; background: #fff; color: #08080b;
+  font-family: var(--font-jp); box-shadow: 0 8px 24px rgba(0,0,0,.5); transform: translateY(12px) scale(.98);
+  transition: transform .22s var(--ease-out); display: flex; flex-direction: column; }
+.tl-ld.on .tl-ld-card { transform: none; }
+.tl-ld-img { width: 100%; aspect-ratio: 1.91; object-fit: cover; display: block; background: #eee; }
+.tl-ld-img.none { display: none; }
+.tl-ld-t { display: flex; flex-direction: column; gap: 6px; padding: 16px 18px 4px; }
+.tl-ld-site { font-family: var(--font-latin); font-size: 12px; color: rgba(8,8,11,.48); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-ld-ttl { font-weight: 700; font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
+.tl-ld-dsc { font-size: 13px; line-height: 1.6; color: rgba(8,8,11,.56); }
+.tl-ld-url { font-family: var(--font-latin); font-weight: 700; font-size: 12px; color: #08080b; word-break: break-all;
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px;
+  overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.tl-ld-q { padding: 14px 18px 6px; font-size: 14px; text-align: center; color: rgba(8,8,11,.72); }
+.tl-ld-open { appearance: none; border: 0; background: none; cursor: pointer; min-height: 52px; margin: 0 8px 6px;
+  font-family: var(--font-jp); font-weight: 700; font-size: 16px; color: #08080b; border-radius: var(--radius-xs); }
+.tl-ld-open:active { opacity: .6; }
+/* リンク設定（ダイアログの編集モード） */
+.tl-ld-in { display: none; align-items: center; gap: 8px; height: 44px; margin: 16px 16px 0; padding: 0 12px;
+  border-radius: var(--radius-xs); background: rgba(8,8,11,.04); border: 1px solid rgba(8,8,11,.10); }
+.tl-ld-in img { width: 14px; height: 14px; filter: invert(1); opacity: .5; flex: none; }
+.tl-ld-in input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font-family: var(--font-latin); font-size: 14px; color: #08080b; }
+.tl-ld-in input::placeholder { color: rgba(8,8,11,.32); }
+.tl-ld-note { display: none; padding: 10px 18px 0; font-family: var(--font-jp); font-size: 11px; color: rgba(8,8,11,.44); }
+.tl-ld.edit .tl-ld-in, .tl-ld.edit .tl-ld-note { display: flex; }
+/* リンク履歴 — 過去に設定した URL を一覧から選べる */
+.tl-ld-hh { display: none; }
+.tl-ld-note:empty { display: none !important; }
+.tl-ld-hist { display: none; flex-direction: column; margin: 8px 0 0; padding-top: 4px; border-top: 1px solid rgba(8,8,11,.08); max-height: 216px; overflow-y: auto; }
+.tl-ld.edit .tl-ld-hist.has { display: flex; }
+.tl-ld-hh { padding: 10px 18px 4px; font-family: var(--font-jp); font-size: 11px; font-weight: 700; color: rgba(8,8,11,.44); }
+.tl-ld.edit .tl-ld-t:empty, .tl-ld.edit .tl-ld-t:not(:has(.tl-ld-url:not(:empty))) { display: none; }
+.tl-ld-hi { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 6px 18px; border: 0; background: none; text-align: left; cursor: pointer; font-family: var(--font-jp); }
+.tl-ld-hi:active { background: rgba(8,8,11,.04); }
+.tl-ld-hi.sel { background: rgba(8,8,11,.06); }
+.tl-ld-hi img { width: 36px; height: 36px; flex: none; object-fit: cover; border-radius: var(--radius-xs); background: #eee; }
+.tl-ld-hi .ph { width: 36px; height: 36px; flex: none; border-radius: var(--radius-xs); background: rgba(8,8,11,.06); display: grid; place-items: center; }
+.tl-ld-hi .ph img { width: 14px; height: 14px; filter: invert(1); opacity: .5; border-radius: 0; background: none; }
+.tl-ld-hi .c { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tl-ld-hi .t { font-weight: 700; font-size: 13px; color: #08080b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-ld-hi .u { font-family: var(--font-latin); font-size: 11px; color: rgba(8,8,11,.48); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-ld.edit .tl-ld-q { display: none; }
+.tl-ld.edit .tl-ld-open:disabled { opacity: .3; }
+.tlp-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 0 20px; padding-top: 2px; min-width: 0; }
 .tlp-act { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0;
-  cursor: pointer; min-height: 44px; }
+  cursor: pointer; min-height: 44px; flex: none; }
 .tlp-act img { width: 18px; height: 18px; filter: invert(1); opacity: .5; display: block; }
 .tlp-act span { font-family: var(--font-latin); font-size: 13px; color: rgba(8,8,11,.56); }
 .tlp-act.liked img { opacity: 1;
@@ -2409,6 +2482,25 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
               <input id="gvInput" type="text" placeholder="サークル名を投稿する">
               <button id="gvSend" type="button" disabled>投稿</button>
             </div>
+          </div>
+        </div>
+
+        <!-- リンクダイアログ（表示 / 設定） -->
+        <div class="tl-ld" id="tlLd" aria-hidden="true">
+          <button class="tl-ld-x" id="tlLdX" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="tl-ld-card" id="tlLdCard">
+            <label class="tl-ld-in"><img src="../../assets/icons/icon_share.png" alt=""><input id="tlLdIn" type="url" inputmode="url" placeholder="https://"></label>
+            <span class="tl-ld-note" id="tlLdNote"></span>
+            <img class="tl-ld-img none" id="tlLdImg" alt="">
+            <div class="tl-ld-t">
+              <span class="tl-ld-site" id="tlLdSite"></span>
+              <span class="tl-ld-ttl" id="tlLdTtl"></span>
+              <span class="tl-ld-dsc" id="tlLdDsc"></span>
+              <span class="tl-ld-url" id="tlLdUrl"></span>
+            </div>
+            <p class="tl-ld-q">このリンクを開きますか？</p>
+            <div class="tl-ld-hist" id="tlLdHist"></div>
+            <button class="tl-ld-open" id="tlLdOpen" type="button">開く</button>
           </div>
         </div>
 
@@ -4262,6 +4354,28 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   // WdCircleTimeline — サークルフッター → モーダルシート → フルスクリーン
   // ==========================================================================
   const TL_TIMES = ['8分', '24分', '1時間', '3時間', '5時間', '昨日'];
+  var TL_OGP = {
+    'tabelog.com': { site: 'tabelog.com', title: '渋谷 穴場カフェ — 路地裏のロースタリー', desc: '渋谷駅から徒歩6分。自家焙煎の浅煎りとカルダモンロールが人気の小さなカフェ。', img: '../../assets/sample/reel/reel004.jpg' },
+    'note.com': { site: 'note.com', title: '原宿の壁画をぜんぶ歩いて撮ってきた', desc: 'キャットストリートから裏原まで、2026年夏に見つけたストリートアート27点の記録。', img: '../../assets/sample/reel/reel009.jpg' },
+    'youtube.com': { site: 'youtube.com', title: '新宿 夜のタイムラプス 4K', desc: '西口高層ビル群から歌舞伎町まで、一晩かけて撮影。', img: '../../assets/sample/reel/reel012.jpg' },
+  };
+  function tlLinkOf(url) {
+    let u; try { u = new URL(url); } catch (_) { return null; }
+    const host = u.hostname.replace(/^www\./, '');
+    const og = Object.keys(TL_OGP).find(h => host === h || host.endsWith('.' + h));
+    return { url: url, host: host, path: (u.pathname + u.search).replace(/\/$/, ''), ogp: og ? TL_OGP[og] : null };
+  }
+  function tlLinkHTML(l) {
+    if (!l) return '';
+    if (l.ogp) {
+      return '<a class="tlp-og" href="' + l.url + '" data-link><img src="' + l.ogp.img + '" alt="">'
+        + '<div class="tlp-og-t"><span class="tlp-og-site">' + l.ogp.site + '</span>'
+        + '<span class="tlp-og-ttl">' + l.ogp.title + '</span></div></a>';
+    }
+    return '<a class="tlp-lnk" href="' + l.url + '" data-link>'
+      + '<img src="../../assets/icons/icon_share.png" alt=""><span>' + l.host + l.path + '</span></a>';
+  }
+  const TL_ME = 'Pixel';
   CIRCLES.forEach((c) => {
     c.timeline = c.posts.map((p, i) => ({
       ava: p.ava, name: p.name || 'user',
@@ -4269,7 +4383,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       time: TL_TIMES[i % TL_TIMES.length],
       body: p.text, media: p.img ? [p.img] : [], vid: p.vid || null,
       wide: Math.random() < 0.5,
-      comments: 3 + ((i * 7) % 38), likes: 18 + ((i * 47) % 280), liked: i === 0,
+      comments: 3 + ((i * 7) % 38), likes: 18 + ((i * 47) % 280), liked: i === 0, shares: (i * 5) % 23,
+      link: i === 1 ? tlLinkOf('https://tabelog.com/tokyo/A1303/A130301/13245678/')
+          : i === 3 ? tlLinkOf('https://maps.app.goo.gl/x8Kq2vZ9nLpR3wTf7?g_st=ic')
+          : null,
     }));
     /* クエスト属性の投稿を差し込む（3件おき） */
     (c.days || []).slice().reverse().forEach((d, k) => {
@@ -4323,10 +4440,16 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       +     '<button class="tlp-act like' + (e.liked ? ' liked' : '') + '" type="button">'
       +       '<img src="../../assets/icons/icon_like.png" alt=""><span>' + e.likes + '</span></button>'
       +     '<button class="tlp-act" type="button"><img src="../../assets/icons/icon_share.png" alt="">'
-      +       '<span>共有</span></button>'
+      +       '<span>' + (e.shares == null ? 0 : e.shares) + '</span></button>'
+      +     (e.link ? tlLinkHTML(e.link)
+          : e.name === TL_ME ? '<button class="tlp-addlnk" type="button"><img src="../../assets/icons/icon_add.png" alt=""><span>リンクを追加</span></button>' : '')
       +   '</div>'
       + '</div>';
     const like = el.querySelector('.tlp-act.like');
+    const lnk = el.querySelector('[data-link]');
+    if (lnk) lnk.addEventListener('click', (ev) => { ev.preventDefault(); tlLdOpen(e.link); });
+    const add = el.querySelector('.tlp-addlnk');
+    if (add) add.addEventListener('click', () => tlLdEdit(e, el));
     like.addEventListener('click', () => {
       e.liked = !e.liked; e.likes += e.liked ? 1 : -1;
       like.classList.toggle('liked', e.liked);
@@ -4334,6 +4457,90 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     });
     return el;
   }
+
+  /* リンクダイアログ — 表示（開く）/ 編集（自分の投稿にリンクを設定） */
+  const tlLd = document.getElementById('tlLd');
+  const tlLdIn = document.getElementById('tlLdIn');
+  const tlLdBtn = document.getElementById('tlLdOpen');
+  let tlLdUrl = '', tlLdTarget = null, tlLdT = 0;
+  /* リンク履歴（新しい順・重複なし） */
+  const TL_LINK_HIST_KEY = 'toopdbq.linkHistory';
+  let tlLinkHist = [];
+  try { tlLinkHist = JSON.parse(localStorage.getItem(TL_LINK_HIST_KEY) || '[]'); } catch (_) { tlLinkHist = []; }
+  if (!tlLinkHist.length) tlLinkHist = ['https://tabelog.com/tokyo/A1303/A130301/13245678/', 'https://note.com/harajuku_walk/n/n8f3a2c1d9e7b'];
+  function tlHistPush(url) {
+    tlLinkHist = [url].concat(tlLinkHist.filter(u => u !== url)).slice(0, 10);
+    try { localStorage.setItem(TL_LINK_HIST_KEY, JSON.stringify(tlLinkHist)); } catch (_) {}
+  }
+  function tlHistRender() {
+    const box = document.getElementById('tlLdHist');
+    box.innerHTML = '';
+    box.classList.toggle('has', tlLinkHist.length > 0);
+    if (!tlLinkHist.length) return;
+    const h = document.createElement('div'); h.className = 'tl-ld-hh'; h.textContent = ''; box.appendChild(h);
+    tlLinkHist.forEach((url) => {
+      const l = tlLinkOf(url); if (!l) return;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'tl-ld-hi';
+      b.innerHTML = (l.ogp ? '<img src="' + l.ogp.img + '" alt="">' : '<span class="ph"><img src="../../assets/icons/icon_share.png" alt=""></span>')
+        + '<span class="c"><span class="t">' + (l.ogp ? l.ogp.title : l.host) + '</span><span class="u">' + l.host + l.path + '</span></span>';
+      b.addEventListener('click', () => {
+        tlLdIn.value = url; tlLdPreview();
+        box.querySelectorAll('.tl-ld-hi').forEach(x => x.classList.toggle('sel', x === b));
+      });
+      box.appendChild(b);
+    });
+  }
+  function tlLdPreview() {
+    const v = tlLdIn.value.trim();
+    const l = v ? tlLinkOf(/^https?:\/\//i.test(v) ? v : 'https://' + v) : null;
+    tlLdFill(l); tlLdBtn.disabled = !l;
+    document.getElementById('tlLdNote').textContent = !v ? ''
+      : !l ? 'URLの形式が正しくありません' : l.ogp ? '' : 'プレビュー情報がないため、リンクのみ表示されます';
+  }
+  function tlLdFill(l) {
+    const img = document.getElementById('tlLdImg');
+    img.className = 'tl-ld-img' + (l && l.ogp ? '' : ' none');
+    if (l && l.ogp) img.src = l.ogp.img; else img.removeAttribute('src');
+    document.getElementById('tlLdSite').textContent = l ? (l.ogp ? l.ogp.site : l.host) : '';
+    document.getElementById('tlLdTtl').textContent = l ? (l.ogp ? l.ogp.title : l.host) : '';
+    document.getElementById('tlLdDsc').textContent = l && l.ogp ? l.ogp.desc : '';
+    document.getElementById('tlLdUrl').textContent = l ? l.url : '';
+  }
+  function tlLdOpen(l) {
+    tlLdUrl = l.url; tlLdTarget = null;
+    tlLd.classList.remove('edit'); tlLdBtn.textContent = '開く'; tlLdBtn.disabled = false;
+    tlLdFill(l);
+    tlLd.classList.add('on'); tlLd.setAttribute('aria-hidden', 'false');
+  }
+  function tlLdEdit(e, el) {
+    tlLdTarget = { e, el }; tlLdIn.value = '';
+    tlLd.classList.add('edit'); tlLdBtn.textContent = '設定'; tlLdBtn.disabled = true;
+    tlLdFill(null); document.getElementById('tlLdNote').textContent = '';
+    tlHistRender();
+    tlLd.classList.add('on'); tlLd.setAttribute('aria-hidden', 'false');
+    setTimeout(() => tlLdIn.focus(), 240);
+  }
+  function tlLdClose() { tlLd.classList.remove('on'); tlLd.setAttribute('aria-hidden', 'true'); tlLdIn.blur(); }
+  tlLdIn.addEventListener('input', () => {
+    clearTimeout(tlLdT);
+    document.querySelectorAll('#tlLdHist .sel').forEach(x => x.classList.remove('sel'));
+    tlLdT = setTimeout(tlLdPreview, 200);
+  });
+  document.getElementById('tlLdX').addEventListener('click', tlLdClose);
+  tlLd.addEventListener('click', (ev) => { if (!document.getElementById('tlLdCard').contains(ev.target)) tlLdClose(); });
+  tlLdBtn.addEventListener('click', () => {
+    if (tlLdTarget) {
+      const v = tlLdIn.value.trim();
+      const l = tlLinkOf(/^https?:\/\//i.test(v) ? v : 'https://' + v);
+      if (!l) return;
+      tlHistPush(l.url);
+      tlLdTarget.e.link = l;
+      const fresh = tlNode(tlLdTarget.e, tlLdTarget.c || tlCircle || CIRCLES[0]);
+      tlLdTarget.el.replaceWith(fresh);
+      tlLdClose(); return;
+    }
+    window.open(tlLdUrl, '_blank', 'noopener'); tlLdClose();
+  });
 
   function tlHeader(c) {
     document.getElementById('tlName').textContent = c.name;
