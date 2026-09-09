@@ -1476,20 +1476,27 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
 
 /* WdTimelinePost — ライトのリスト行セル */
-.tlp { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px 24px;
+.tlp { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px 16px;
   border-bottom: 1px solid rgba(8,8,11,.08); font-family: var(--font-jp); color: #08080b; background: #fff; }
-.tlp-av { width: 44px; height: 44px; border-radius: var(--radius-pill); object-fit: cover; display: block; }
-.tlp-col { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
-.tlp-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.tlp-name { font-weight: 700; font-size: 15px; line-height: 1.3; }
+.tlp-av { flex: none; width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block;
+  background: rgba(8,8,11,.08); }
+.tlp-col { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.tlp-head { display: flex; align-items: center; gap: 8px; }
+.tlp-name { font-weight: 700; font-size: 15px; line-height: 1.3;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tlp-meta { font-family: var(--font-latin); font-size: 13px; color: rgba(8,8,11,.56); }
 .tlp-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 24px;
   padding: 0 10px; border-radius: var(--radius-pill); background: rgba(0,95,103,.10); }
 .tlp-chip img { width: 12px; height: 12px; filter: invert(1); opacity: .55; display: block; }
 .tlp-chip span { font-family: var(--font-latin); font-weight: 600; font-size: 11px; color: #0d5f67;
   white-space: nowrap; }
-.tlp-body { margin: 0; font-size: 15px; line-height: 1.75; text-wrap: pretty; }
-.tlp-m1 { margin: 0 -24px; overflow: hidden; }
+.tlp-body { margin: 0; font-size: 13px; line-height: 1.75; text-wrap: pretty; }
+.tlp-m1 { position: relative; margin: 0 -16px; overflow: hidden; }
+/* 縦メディアはキャプションだけをメディアに重ねる（横向き / 2 枚 / テキストのみは外） */
+.tlp-m1:has(.tlp-cap) { margin-top: -6px; }
+.tlp-cap { position: absolute; left: 0; right: 0; top: 0; padding: 6px 16px 16px;
+  background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.6) 62%, rgba(255,255,255,0) 100%);
+  font: 400 13px/1.6 var(--font-jp); color: #08080b; }
 .tlp-m1 img, .tlp-m1 video { width: 100%; aspect-ratio: 9 / 16; height: auto; object-fit: cover; display: block; }
 .tlp-m1.wide img, .tlp-m1.wide video { aspect-ratio: 16 / 9; }
 /* クエスト投稿のボード — 横スクロールのみ */
@@ -1511,7 +1518,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tlq-like img { width: 16px; height: 16px; filter: drop-shadow(0 1px 3px rgba(0,0,0,.6)); }
 .tlq-like.liked span { color: var(--state-like); }
 .tlq-like:active { transform: scale(.94); }
-.tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 -24px; overflow: hidden; }
+.tlp-m2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 0 -16px; overflow: hidden; }
 .tlp-m2 img { width: 100%; height: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .tlp-acts { display: flex; align-items: center; gap: 28px; padding-top: 2px; }
 .tlp-act { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0;
@@ -1521,6 +1528,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .tlp-act.liked img { opacity: 1;
   filter: invert(29%) sepia(93%) saturate(4000%) hue-rotate(320deg) brightness(102%); }
 .tlp-act.liked span { font-weight: 600; color: var(--state-like); }
+.tlp.quest { padding: 20px 24px; }
 .tlp.fresh { animation: tlpIn .48s var(--ease-out) both; }
 @keyframes tlpIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
 
@@ -1688,62 +1696,78 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .nav-head .ct { margin-left: auto; font: 600 11px var(--font-latin); color: var(--text-2);
   white-space: nowrap; background: rgba(255,255,255,.1); padding: 4px 10px; border-radius: var(--radius-pill); }
 
-/* ---- プロフィール ------------------------------------------- */
-.pf-scroll { flex: 1; min-height: 0; display: flex; flex-direction: column;
-  overflow-y: auto; scrollbar-width: none; padding-bottom: 34px; }
-.pf-scroll::-webkit-scrollbar { display: none; }
-.nav-head .pf-pen {
-  margin-left: auto; width: 38px; height: 38px; flex: none; display: grid; place-items: center;
-  padding: 0; border: 0; border-radius: 50%; cursor: pointer; background: var(--glass-fill);
-  -webkit-appearance: none; appearance: none;
-  -webkit-backdrop-filter: blur(8px) saturate(140%); backdrop-filter: blur(8px) saturate(140%);
-  transition: transform .12s var(--ease-out);
-}
-.nav-head .pf-pen:active { transform: scale(.92); }
-.nav-head .pf-pen img { width: 16px; height: 16px; object-fit: contain;
-  filter: brightness(0) invert(1) opacity(.85); }
-.nav-head .pf-done { margin-left: auto; display: none; appearance: none; -webkit-appearance: none;
-  border: 0; cursor: pointer; height: 34px; padding: 0 18px; border-radius: var(--radius-pill);
-  color: #fff; font: 700 13px var(--font-jp); background: var(--gradient-colorful-linear);
-  box-shadow: 0 2px 10px rgba(255,62,136,.3); }
-#pfView.editing .pf-pen { display: none; }
-#pfView.editing .pf-done { display: block; }
+/* ---- プロフィール（サークルタイムラインと同型のライト面） ---------------
+   ProfileView = ProfileUserBar(104) + ProfileTimeline（投稿行 + お題ボード）。
+   バーはフィードと一緒に流れず、スクロール量 1:1 で上へ退避し逆スクロールで戻る。 */
+#pfView { background: #fff; --pf-bar-h: calc(var(--safe-top) + 104px); }
+.pf-list { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  padding: var(--pf-bar-h) 0 calc(var(--safe-bottom) + 24px); }
+.pf-list::-webkit-scrollbar { display: none; }
+.pf-empty { padding: 40px 0; text-align: center; font: 400 13px var(--font-jp); color: rgba(8,8,11,.56); }
 
-.pf-id { padding: 8px 20px 0; display: flex; align-items: center; gap: 16px; }
-.pf-id .avwrap { position: relative; flex: none; }
-.pf-id .av { width: 104px; height: 104px; border-radius: 50%; object-fit: cover; display: block;
-  box-shadow: 0 0 0 1.5px rgba(255,255,255,.35), 0 2px 8px rgba(0,0,0,.7); }
-.pf-id .avcam { position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px;
-  border-radius: 50%; display: none; place-items: center; border: 2px solid #0b0b10;
-  background: var(--gradient-colorful-linear); cursor: pointer; padding: 0; }
-#pfView.editing .pf-id .avcam { display: grid; }
-.pf-id .avcam img { width: 13px; height: 13px; filter: brightness(0) invert(1); }
-.pf-id .col { min-width: 0; flex: 1; }
-.pf-id .nm { font: 700 24px var(--font-jp); color: #fff; }
-.pf-id .hd { font: 500 13px var(--font-latin); color: var(--fg-3); margin-top: 4px; }
-.pf-bio { padding: 18px 20px 0; font: 400 14px/1.75 var(--font-jp); color: var(--text-2); text-wrap: pretty; }
-.pf-stats { display: flex; gap: 30px; padding: 20px 20px 0; }
-.pf-stats div { display: flex; flex-direction: column; gap: 2px; }
-.pf-stats b { font: 700 20px var(--font-latin); color: #fff; font-variant-numeric: tabular-nums; }
-.pf-stats span { font: 500 11.5px var(--font-jp); color: var(--fg-3); }
-/* 編集モード — 名前・ハンドル・自己紹介がその場で書き換わる */
-#pfView .ed { border-radius: 8px; transition: background .16s var(--ease-out); }
-#pfView.editing .ed { background: rgba(255,255,255,.09); outline: none;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); padding: 4px 8px; margin: -4px -8px; }
-#pfView.editing .pf-bio { padding: 4px 12px; margin: -4px 8px; }
-#pfView.editing .ed:focus { box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.45); }
-.pf-sec { padding: 26px 0 0; flex: 1 1 auto; min-height: 300px; display: flex; flex-direction: column; }
-.pf-sec h3 { padding: 0 20px; font: 700 10px var(--font-latin); letter-spacing: .14em;
-  color: var(--fg-3); text-transform: uppercase; }
-/* Posts — クエストリストと同じ自由配置ボード（横スクロール・縦横混在） */
-.pf-board { position: relative; flex: 1 1 auto; min-height: 0; margin-top: 12px; overflow-x: auto; overflow-y: hidden;
-  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-.pf-board::-webkit-scrollbar { display: none; }
-.pf-board .inner { position: relative; height: 100%; }
-.pf-board .tile { position: absolute; overflow: hidden; border-radius: 14px; background: #101014;
-  cursor: pointer; transition: transform .16s var(--ease-out); }
-.pf-board .tile:active { transform: scale(.975); }
-.pf-board .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* ProfileUserBar — 戻る / アバター72 / 名前・件数・フォロー数 / menu */
+.pf-bar { position: absolute; left: 0; right: 0; top: 0; z-index: 3; height: var(--pf-bar-h);
+  display: flex; align-items: center; padding: var(--safe-top) 8px 0 4px; background: #fff;
+  border-bottom: 1px solid rgba(8,8,11,.08); will-change: transform; }
+.pf-nav { flex: none; width: 44px; height: 44px; display: grid; place-items: center; padding: 0;
+  border: 0; background: none; cursor: pointer; -webkit-appearance: none; appearance: none; }
+.pf-nav img { width: 18px; height: 18px; object-fit: contain; filter: invert(1); opacity: .6; }
+.pf-nav:active { transform: scale(.92); }
+.pf-av { flex: none; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; display: block;
+  background: rgba(8,8,11,.08); }
+.pf-idcol { flex: 1; min-width: 0; margin-left: 12px; display: flex; flex-direction: column; }
+.pf-nmrow { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.pf-nm { font: 700 15px/1.3 var(--font-jp); color: #08080b;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-hd { font: 400 13px var(--font-latin); color: rgba(8,8,11,.56);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-sub { margin-top: 2px; font: 400 11px var(--font-jp); color: rgba(8,8,11,.56);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pf-stats { margin-top: 6px; display: flex; align-items: baseline; gap: 16px; }
+.pf-stats div { display: flex; align-items: baseline; }
+.pf-stats b { font: 700 13px var(--font-latin); color: #08080b; font-variant-numeric: tabular-nums; }
+.pf-stats span { margin-left: 4px; font: 400 11px var(--font-jp); color: rgba(8,8,11,.56); }
+.pf-acts { flex: none; margin-left: 4px; display: flex; flex-direction: column; align-items: flex-end; }
+/* 他人のプロフィールだけ menu の下に出る relation ピル（フォロー / フォロー中 / メッセージ） */
+.pf-pill { height: 30px; padding: 0 14px; border-radius: var(--radius-pill); cursor: pointer;
+  border: 1px solid rgba(8,8,11,.18); background: none; color: #08080b; font: 700 12px var(--font-jp);
+  -webkit-appearance: none; appearance: none; }
+.pf-pill.filled { border: 0; background: #08080b; color: #fff; }
+
+/* お題ボードの行 — 見出し（お題 + 日付）+ 当時のクエストボード（拡大はしない） */
+.pfq { padding: 20px 0; background: #fff; border-bottom: 1px solid rgba(8,8,11,.08); }
+.pfq-head { display: flex; align-items: baseline; gap: 8px; padding: 0 24px; }
+.pfq-title { font: 700 15px/1.3 var(--font-jp); color: #08080b;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pfq-day { flex: none; font: 400 13px var(--font-latin); color: rgba(8,8,11,.56); }
+.pfq .tlq-board { margin: 12px 0 0; }
+
+/* 編集モード — 全面を ProfileEditPanel に差し替える */
+.pf-edit { position: absolute; inset: 0; z-index: 4; display: none; flex-direction: column;
+  background: #fff; padding-top: var(--safe-top); }
+#pfView.editing .pf-edit { display: flex; }
+#pfView.editing .pf-bar, #pfView.editing .pf-list { display: none; }
+.pfe-head { display: flex; align-items: center; padding: 0 16px 8px 4px; }
+.pfe-title { flex: 1; font: 700 15px var(--font-jp); color: #08080b; }
+.pfe-done { height: 34px; padding: 0 18px; border: 0; border-radius: var(--radius-pill); cursor: pointer;
+  color: #fff; font: 700 13px var(--font-jp); background: var(--gradient-colorful-linear);
+  box-shadow: 0 2px 10px rgba(255,62,136,.3); -webkit-appearance: none; appearance: none; }
+.pfe-id { display: flex; align-items: center; gap: 16px; padding: 8px 20px 0; }
+.pfe-avwrap { position: relative; flex: none; }
+.pfe-av { width: 104px; height: 104px; border-radius: 50%; object-fit: cover; display: block;
+  box-shadow: inset 0 0 0 1.5px rgba(8,8,11,.12); }
+.pfe-cam { position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; padding: 0;
+  border: 2px solid #fff; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
+  background: var(--gradient-colorful-linear); -webkit-appearance: none; appearance: none; }
+.pfe-cam img { width: 13px; height: 13px; filter: brightness(0) invert(1); }
+.pfe-col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.pf-box { padding: 4px 8px; border: 1px solid rgba(8,8,11,.12); border-radius: 8px;
+  background: rgba(8,8,11,.04); color: #08080b; outline: none; }
+.pf-box:focus { border-color: rgba(8,8,11,.28); }
+.pf-box.nm { font: 700 20px var(--font-jp); }
+.pf-box.sub { font: 500 13px var(--font-latin); }
+.pf-box.bio { margin: 18px 20px 0; font: 400 14px/1.75 var(--font-jp); min-height: 62px; }
 
 /* ---- チャットリスト ----------------------------------------- */
 .cl-list { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 2px 0 30px; }
@@ -2442,42 +2466,57 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
           <div class="qb-scroll" id="qbScroll"></div>
         </section>
 
-        <!-- プロフィール画面 -->
+        <!-- プロフィール画面 — サークルタイムラインと同型（ProfileView） -->
         <section class="nav-push" id="pfView" aria-hidden="true">
-          <header class="nav-head">
-            <button class="nav-back" data-close="pfView" aria-label="戻る">
-              <svg width="16" height="16" viewBox="0 0 16 16"><path d="M10 2L4 8l6 6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="pf-list" id="pfList"></div>
+          <header class="pf-bar" id="pfBar">
+            <button class="pf-nav" id="pfBack" type="button" aria-label="戻る">
+              <img src="../../assets/icons/icon_back.png" alt="">
             </button>
-            <h2>プロフィール</h2>
-            <button class="pf-pen" id="pfPen" aria-label="プロフィールを編集">
-              <img src="../../assets/icons/icon_edit.png" alt="">
-            </button>
-            <button class="pf-done" id="pfDone">完了</button>
-          </header>
-          <div class="pf-scroll">
-            <div class="pf-id">
-              <span class="avwrap">
-                <img class="av" src="../../assets/sample/user/user007.jpg" alt="">
-                <button class="avcam" aria-label="アイコンを変更"><img src="../../assets/icons/icon_camera.png" alt=""></button>
-              </span>
-              <div class="col">
-                <div class="nm ed" id="pfName">Pixel</div>
-                <div class="hd ed" id="pfHandle">@pixel</div>
+            <img class="pf-av" id="pfAv" src="../../assets/sample/user/user007.jpg" alt="">
+            <div class="pf-idcol">
+              <div class="pf-nmrow">
+                <span class="pf-nm" id="pfName">Pixel</span>
+                <span class="pf-hd" id="pfHandle">@pixel</span>
+              </div>
+              <div class="pf-sub" id="pfSub"></div>
+              <div class="pf-stats">
+                <div><b>342</b><span>フォロー</span></div>
+                <div><b>1,204</b><span>フォロワー</span></div>
               </div>
             </div>
-            <p class="pf-bio ed" id="pfBio">渋谷と原宿を歩いて写真を撮っています。夜のクエストによく出ます。</p>
-            <div class="pf-stats">
-              <div><b>128</b><span>投稿</span></div>
-              <div><b>342</b><span>フォロー</span></div>
-              <div><b>1,204</b><span>フォロワー</span></div>
+            <div class="pf-acts">
+              <button class="pf-nav" id="pfMenu" type="button" aria-label="メニュー">
+                <img src="../../assets/icons/icon_menu.png" alt="">
+              </button>
             </div>
-            <div class="pf-sec">
-              <h3>Posts</h3>
-              <div class="pf-board" id="pfBoard"><div class="inner"></div></div>
-            </div>
-          </div>
-        </section>
+          </header>
 
+          <!-- 編集（ProfileEditPanel） — タイムラインの代わりに全面へ出す -->
+          <section class="pf-edit" id="pfEdit">
+            <header class="pfe-head">
+              <button class="pf-nav" id="pfEditBack" type="button" aria-label="戻る">
+                <img src="../../assets/icons/icon_back.png" alt="">
+              </button>
+              <span class="pfe-title">プロフィール</span>
+              <button class="pfe-done" id="pfDone" type="button">完了</button>
+            </header>
+            <div class="pfe-id">
+              <span class="pfe-avwrap">
+                <img class="pfe-av" src="../../assets/sample/user/user007.jpg" alt="">
+                <button class="pfe-cam" type="button" aria-label="アイコンを変更">
+                  <img src="../../assets/icons/icon_camera.png" alt="">
+                </button>
+              </span>
+              <div class="pfe-col">
+                <div class="pf-box nm" id="pfEdName">Pixel</div>
+                <div class="pf-box sub" id="pfEdHandle">@pixel</div>
+                <div class="pf-box sub" id="pfEdIg">instagram</div>
+              </div>
+            </div>
+            <div class="pf-box bio" id="pfEdBio">渋谷と原宿を歩いて写真を撮っています。夜のクエストによく出ます。</div>
+          </section>
+        </section>
         <!-- チャットリスト -->
         <section class="nav-push" id="clView" aria-hidden="true">
           <header class="nav-head">
@@ -4262,19 +4301,24 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const el = document.createElement('article');
     el.className = 'tlp';
     const d = distTo(c);
+    /* 縦 1 枚（動画含む）はキャプションをメディアに重ねる（WdTimelinePost の overlaid） */
+    const overlaid = !e.wide && (!!e.vid || e.media.length === 1);
+    const cap = overlaid && e.body ? '<div class="tlp-cap">' + e.body + '</div>' : '';
     let media = '';
     if (e.vid) {
-      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><video src="' + e.vid + '" muted loop playsinline autoplay></video></div>';
+      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><video src="' + e.vid + '" muted loop playsinline autoplay></video>' + cap + '</div>';
     } else if (e.media.length === 1) {
-      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><img src="' + e.media[0] + '" alt=""></div>';
+      media = '<div class="tlp-m1' + (e.wide ? ' wide' : '') + '"><img src="' + e.media[0] + '" alt="">' + cap + '</div>';
     } else if (e.media.length >= 2) {
       media = '<div class="tlp-m2">' + e.media.slice(0, 2)
         .map(m => '<img src="' + m + '" alt="">').join('') + '</div>';
     }
     el.innerHTML = '<div class="tlp-col">'
-      +   '<div class="tlp-head"><span class="tlp-name">' + e.name + '</span>'
+      +   '<div class="tlp-head">'
+      +     (e.ava ? '<img class="tlp-av" src="' + e.ava + '" alt="">' : '<span class="tlp-av"></span>')
+      +     '<span class="tlp-name">' + e.name + '</span>'
       +     '<span class="tlp-meta">' + e.time + '</span></div>'
-      +   (e.body ? '<p class="tlp-body">' + e.body + '</p>' : '')
+      +   (e.body && !overlaid ? '<p class="tlp-body">' + e.body + '</p>' : '')
       +   media
       +   '<div class="tlp-acts">'
       +     '<button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt="">'
@@ -5243,6 +5287,9 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     };
     setTimeout(go, keepMap ? 260 : 950);   /* setFeedMax の最終 rebuild(900ms) 後に位置を確定 */
   })();
+
+  /* プロフィール（下の nav-push 側 IIFE）が同じ行セル・お題ボードを組むための受け渡し */
+  window.TLFeed = { CIRCLES, tlNode, qbLayout, qr2, jpDate, TLQ_H, tlSheet };
 })();
 </script>
 
@@ -5265,73 +5312,105 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     b.addEventListener('click', () => pop(document.getElementById(b.dataset.close)));
   });
 
-  // ---- プロフィール ----------------------------------------------------
-  /* Posts — クエストリストと同じ自由配置ボード。列単位で縦(9:16)・横(16:9)を
-     混在させ、列内は縦積み。横スクロールで時間をさかのぼる。 */
-  const PF_BOARD = document.getElementById('pfBoard');
-  const PF_INNER = PF_BOARD.querySelector('.inner');
-  const PF_POSTS = [3, 5, 7, 9, 11, 12, 14, 1, 2, 4, 6, 8, 10, 13, 15]
-    .map((i) => '../../assets/sample/reel/reel' + String(i).padStart(3, '0') + '.jpg');
-  const PF_TYPES = ['B', 'F', 'C', 'G', 'D', 'C3', 'F', 'B'];
-  function pfLayout(type, H, GAP) {
-    const P = 9 / 16, L = 16 / 9, t = [];
-    if (type === 'C3') {
-      const h = Math.round((H - GAP * 2) / 3);
-      for (let i = 0; i < 3; i++) t.push({ dx: 0, dy: (h + GAP) * i, w: Math.round(h * L), h });
-    } else if (type === 'B' || type === 'C') {
-      const h = Math.round((H - GAP) / 2);
-      const w = Math.round(h * (type === 'B' ? P : L));
-      t.push({ dx: 0, dy: 0, w, h }); t.push({ dx: 0, dy: h + GAP, w, h });
-    } else if (type === 'F' || type === 'G') {
-      const w = Math.round((H - GAP) / (1 / P + 1 / L));
-      const hp = Math.round(w / P), hl = Math.round(w / L);
-      if (type === 'F') { t.push({ dx: 0, dy: 0, w, h: hp }); t.push({ dx: 0, dy: hp + GAP, w, h: hl }); }
-      else { t.push({ dx: 0, dy: 0, w, h: hl }); t.push({ dx: 0, dy: hl + GAP, w, h: hp }); }
-    } else {                                     // D: 横1 の下に縦2
-      const hb = Math.round((H - GAP * 1.56) / 1.63), wb = Math.round(hb * P);
-      const cw = wb * 2 + GAP, ht = Math.round(cw * P);
-      t.push({ dx: 0, dy: 0, w: cw, h: ht });
-      t.push({ dx: 0, dy: ht + GAP, w: wb, h: hb });
-      t.push({ dx: wb + GAP, dy: ht + GAP, w: wb, h: hb });
-    }
-    return t;
+  // ---- プロフィール（ProfileView = ユーザーバー + タイムライン） -----------
+  /* 自分の投稿とお題への提出を時系列で 1 本に並べる。単発投稿はサークルタイムラインと
+     同じ行セル、お題は当時のクエストボード（プロフィールでは拡大しない）。 */
+  const PF_ME = 'Pixel';
+  const TF = window.TLFeed;                  // 行セル / お題ボードは上の IIFE と同じものを使う
+  const PF_LIST = document.getElementById('pfList');
+  const PF_BAR = document.getElementById('pfBar');
+
+  const PF_FEED = [];
+  TF.CIRCLES.forEach((c) => {
+    c.timeline.forEach((e, i) => {
+      if (!e.quest && e.name === PF_ME) PF_FEED.push({ t: Date.now() - (i + 1) * 5400e3, post: e, circle: c });
+    });
+    (c.days || []).forEach((d) => {
+      if ((d.posts || []).some((p) => p.name === PF_ME)) {
+        PF_FEED.push({ t: d.date.getTime() + 20 * 3600e3, day: d, circle: c });
+      }
+    });
+  });
+  PF_FEED.sort((a, b) => b.t - a.t);
+
+  /* お題ボードの行 — 見出し（お題 + 日付）+ 当時のボード。タップは投稿ビューアなので
+     タイムライン home のような拡大／地図せり出しは持たない。 */
+  function pfQuestNode(d, c) {
+    const el = document.createElement('article');
+    el.className = 'pfq';
+    el.innerHTML = '<div class="pfq-head"><span class="pfq-title"></span>'
+      + '<span class="pfq-day">' + TF.jpDate(d.date) + '</span></div>'
+      + '<div class="tlq-board"><div class="tlq-inner"></div></div>';
+    el.querySelector('.pfq-title').textContent = d.quest.title;
+    const posts = d.posts || [];
+    const L = TF.qbLayout(posts.length, TF.TLQ_H);
+    const inner = el.querySelector('.tlq-inner');
+    inner.style.width = L.width + 'px';
+    L.tiles.forEach((t, i) => {
+      const p = posts[i]; if (!p) return;
+      const b = document.createElement('div');
+      b.className = 'tlq-tile' + (t.k === 'L' ? ' ls' : '');
+      b.style.cssText = 'left:' + TF.qr2(t.x) + 'px;top:' + TF.qr2(t.y) + 'px;width:'
+        + TF.qr2(t.w) + 'px;height:' + TF.qr2(t.h) + 'px;';
+      b.innerHTML = '<img alt=""><span class="tlq-by"></span>';
+      b.querySelector('img').src = p.img || c.cover;
+      b.querySelector('.tlq-by').textContent = p.name || '';
+      inner.appendChild(b);
+    });
+    return el;
   }
+
   function pfBuild() {
-    const H = PF_BOARD.clientHeight - 8;
-    if (H <= 40) { setTimeout(pfBuild, 150); return; }
-    const GAP = 7, PAD = 20;
-    PF_INNER.innerHTML = '';
-    let x = PAD, i = 0, ti = 0, guard = 0;
-    while (i < PF_POSTS.length && guard++ < 40) {
-      const tiles = pfLayout(PF_TYPES[ti++ % PF_TYPES.length], H, GAP).slice(0, PF_POSTS.length - i);
-      const used = Math.max.apply(null, tiles.map((t) => t.dy + t.h));
-      const y = 4 + Math.max(0, Math.round((H - used) / 2));
-      tiles.forEach((t) => {
-        const el = document.createElement('div');
-        el.className = 'tile';
-        el.style.cssText = 'left:' + (x + t.dx) + 'px;top:' + (y + t.dy) + 'px;width:'
-          + t.w + 'px;height:' + t.h + 'px;';
-        el.innerHTML = '<img src="' + PF_POSTS[i++] + '" alt="">';
-        PF_INNER.appendChild(el);
-      });
-      x += Math.max.apply(null, tiles.map((t) => t.dx + t.w)) + GAP;
+    PF_LIST.innerHTML = '';
+    document.getElementById('pfSub').textContent =
+      PF_FEED.length + ' 件の投稿 · 渋谷と原宿を歩いて写真を撮っています。';
+    if (!PF_FEED.length) {
+      PF_LIST.innerHTML = '<div class="pf-empty">まだ投稿がありません</div>';
+      return;
     }
-    PF_INNER.style.width = (x + PAD) + 'px';
+    PF_FEED.forEach((e) => {
+      PF_LIST.appendChild(e.day ? pfQuestNode(e.day, e.circle) : TF.tlNode(e.post, e.circle));
+    });
+    PF_LIST.scrollTop = 0; pfShift = 0; pfLast = 0; PF_BAR.style.transform = '';
   }
-  document.getElementById('meBtn').addEventListener('click', () => { push(pf); pfBuild(); });
 
-  // 編集モード — ヘッダーのペン → その場で名前・ハンドル・自己紹介を書き換える
-  const EDS = ['pfName', 'pfHandle', 'pfBio'].map((id) => document.getElementById(id));
-  document.getElementById('pfPen').addEventListener('click', () => {
-    pf.classList.add('editing');
-    EDS.forEach((e) => e.setAttribute('contenteditable', 'plaintext-only'));
-    EDS[0].focus();
+  /* ユーザーバーはスクロール量 1:1 で上へ逃がし、逆スクロールで戻す */
+  let pfShift = 0, pfLast = 0;
+  PF_LIST.addEventListener('scroll', () => {
+    const h = PF_BAR.offsetHeight, y = PF_LIST.scrollTop, dy = y - pfLast;
+    pfLast = y;
+    pfShift = y <= 0 ? 0 : Math.min(h, Math.max(0, pfShift + dy));
+    PF_BAR.style.transform = 'translateY(' + (-pfShift) + 'px)';
   });
-  document.getElementById('pfDone').addEventListener('click', () => {
+
+  const pfOpen = () => {
+    push(pf);
+    phone.classList.add('light-status');   // 白面 — ステータスを黒文字へ
+    pfBuild();
+  };
+  const pfClose = () => {
     pf.classList.remove('editing');
-    EDS.forEach((e) => e.removeAttribute('contenteditable'));
-  });
+    pop(pf);
+    phone.classList.toggle('light-status', TF.tlSheet.classList.contains('full'));
+  };
+  document.getElementById('meBtn').addEventListener('click', pfOpen);
+  document.getElementById('pfBack').addEventListener('click', pfClose);
 
+  // menu（自分 = アカウント操作）→ プロフィール編集。specimen は編集パネルへ直行する
+  const PF_EDS = ['pfEdName', 'pfEdHandle', 'pfEdIg', 'pfEdBio'].map((id) => document.getElementById(id));
+  document.getElementById('pfMenu').addEventListener('click', () => {
+    pf.classList.add('editing');
+    PF_EDS.forEach((e) => e.setAttribute('contenteditable', 'plaintext-only'));
+    PF_EDS[0].focus();
+  });
+  const pfEditDone = () => {
+    pf.classList.remove('editing');
+    PF_EDS.forEach((e) => e.removeAttribute('contenteditable'));
+    document.getElementById('pfName').textContent = PF_EDS[0].textContent;
+    document.getElementById('pfHandle').textContent = PF_EDS[1].textContent;
+  };
+  document.getElementById('pfDone').addEventListener('click', pfEditDone);
+  document.getElementById('pfEditBack').addEventListener('click', pfEditDone);
   // ---- チャットリスト ------------------------------------------------
   const THREADS = [
     { name: 'SunnyVi',   av: '../../assets/sample/user/user001.jpg', pv: 'いいね！素敵な写真ですね。',     t: '2分',   unread: true,  on: true },
