@@ -261,13 +261,6 @@
       "name": "WebAbout C — 紙面カード",
       "subtitle": "番号バッジ + カードの積層。継ぎ目=カードの角が折の上に覗く。全 8 章 + ヒーロー + クロージング",
       "viewport": "402x900"
-    },
-    {
-      "path": "handoff/TimelineFounding/brief.html",
-      "group": "TimelineFounding",
-      "name": "Timeline Founding — brief",
-      "subtitle": "タイムライン home の空ページ（この場所）を『サークルの作り方』+ 設立 CTA にする。実測・契約・3 案の探索軸",
-      "viewport": "1440x900"
     }
   ],
   "templates": [],
