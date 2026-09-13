@@ -1964,6 +1964,11 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 .ns-onb .ns-bg-veil { position: absolute; inset: 0; pointer-events: none; z-index: 0;
   background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.72) 46%, rgba(255,255,255,.82)); }
 .ns-onb > .ns-lead, .ns-onb > .ns-steps, .ns-onb > .ns-cta { position: relative; z-index: 1; }
+/* タイムラインの「この場所」ページ — 投稿の代わりに設立オンボーディング（.ns-onb）を敷き、CTA を持つ */
+.tl-page.founding .tl-cover { display: none; }
+.tl-page .tl-list.tl-founding { position: relative; overflow: hidden; }
+.tl-founding .ns-onb { padding: 40px 20px 34px; }
+.tl-founding .ns-cta { margin-top: 6px; }
 .ns-lead { font: 800 15.5px/1.6 var(--font-jp); color: #0a0a0d; letter-spacing: .01em; }
 .ns-steps { display: flex; flex-direction: column; gap: 22px; }
 .ns-step { display: flex; align-items: flex-start; gap: 13px; }
@@ -4376,6 +4381,10 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       + '<img src="../../assets/icons/icon_share.png" alt=""><span>' + l.host + l.path + '</span></a>';
   }
   const TL_ME = 'Pixel';
+  /* タイムラインの横ページ列。現在地がどのサークルにも入っていないとき、実装は 2 番目に
+     「この場所」（未所属 = サークル設立プレースホルダ）を差し込む。デモも同じ位置に置く */
+  const NS_PAGE = { name: 'この場所', desc: 'どのサークルにも属していません', cover: '', posts: [], timeline: [], founding: true };
+  const TL_PAGES = [CIRCLES[0], NS_PAGE].concat(CIRCLES.slice(1));
   CIRCLES.forEach((c) => {
     c.timeline = c.posts.map((p, i) => ({
       ava: p.ava, name: p.name || 'user',
@@ -4546,13 +4555,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     document.getElementById('tlName').textContent = c.name;
     document.getElementById('tlDesc').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
     if (c.mstat) c.mstat.querySelector('.cnt .v').textContent = c.timeline.length;
-    document.getElementById('tlCover').src = c.cover;
+    if (c.cover) document.getElementById('tlCover').src = c.cover;
     if (c.tlPage) {
       const hd = c.tlPage.querySelector('.tl-head');
       hd.querySelector('.tl-nm').textContent = c.name;
       hd.querySelector('.tl-ds').textContent = c.timeline.length + '件の投稿 · ' + c.desc;
-      hd.querySelector('.tl-cover').src = c.cover;
-      hd.querySelector('.tl-next').style.visibility = CIRCLES.indexOf(c) >= CIRCLES.length - 1 ? 'hidden' : '';
+      if (c.cover) hd.querySelector('.tl-cover').src = c.cover;
+      hd.querySelector('.tl-next').style.visibility = TL_PAGES.indexOf(c) >= TL_PAGES.length - 1 ? 'hidden' : '';
     }
   }
   function tlMakePage(c) {
@@ -4563,11 +4572,20 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       + '<button class="tl-next" type="button" aria-label="次のサークル"><img src="../../assets/icons/icon_next.png" alt=""></button>';
     hd.querySelector('.tl-next').addEventListener('click', (e) => { e.stopPropagation(); tlGo(1); });
     const l = document.createElement('div'); l.className = 'tl-list';
+    if (c.founding) {
+      pg.classList.add('founding'); l.classList.add('tl-founding');
+      const onb = document.createElement('div'); onb.className = 'ns-onb';
+      onb.innerHTML = nsOnbHTML()
+        + '<button class="ns-cta" type="button"><img src="../../assets/icons/icon_camera.png" alt="">サークルをつくる</button>';
+      onb.querySelector('.ns-cta').addEventListener('click', () => csOpen());
+      l.appendChild(onb);
+    }
     pg.appendChild(hd); pg.appendChild(l);
     c.tlPage = pg; c.tlList = l;
     return pg;
   }
   function tlFillList(list, c, fresh) {
+    if (c.founding) return;
     list.innerHTML = '';
     c.timeline.forEach((e, i) => {
       const n = tlNode(e, c);
@@ -4579,14 +4597,14 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     const c = tlCircle; if (!c) return;
     tlHeader(c);
     const pane = document.getElementById('tlPane');
-    if (pane.children.length !== CIRCLES.length) {
+    if (pane.children.length !== TL_PAGES.length) {
       pane.innerHTML = '';
-      CIRCLES.forEach((cc) => pane.appendChild(tlMakePage(cc)));
+      TL_PAGES.forEach((cc) => pane.appendChild(tlMakePage(cc)));
     }
-    CIRCLES.forEach((cc) => { tlFillList(cc.tlList, cc, fresh && cc === c); tlHeader(cc); });
+    TL_PAGES.forEach((cc) => { tlFillList(cc.tlList, cc, fresh && cc === c); tlHeader(cc); });
     tlHeader(c);
     tlList = c.tlList;
-    pane.scrollLeft = CIRCLES.indexOf(c) * pane.clientWidth;
+    pane.scrollLeft = TL_PAGES.indexOf(c) * pane.clientWidth;
   }
 
   function tlFull(on) {
@@ -4606,14 +4624,14 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   /* 横スライドでサークルのタイムラインを切替（dir: +1 = 次 / -1 = 前） */
   const tlPane = document.getElementById('tlPane');
   function tlSetPage(i) {
-    if (!CIRCLES[i] || CIRCLES[i] === tlCircle) return;
-    tlCircle = CIRCLES[i]; tlList = tlCircle.tlList; tlHeader(tlCircle);
+    if (!TL_PAGES[i] || TL_PAGES[i] === tlCircle) return;
+    tlCircle = TL_PAGES[i]; tlList = tlCircle.tlList; tlHeader(tlCircle);
   }
   function tlGo(dir) {
     if (!tlCircle) return;
     const cur = Math.round(tlPane.scrollLeft / (tlPane.clientWidth || 1));
     const i = cur + dir;
-    if (i < 0 || i >= CIRCLES.length) return;
+    if (i < 0 || i >= TL_PAGES.length) return;
     const from = tlPane.scrollLeft, to = i * tlPane.clientWidth, t0 = performance.now(), D = 320;
     tlPane.classList.add('gliding');
     const step = (now) => {
@@ -4671,7 +4689,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
       if (!drag) return;
       const dx = e.clientX - sx, w = tlPane.clientWidth || 1;
       const base = Math.round(sl / w);
-      const i = Math.max(0, Math.min(CIRCLES.length - 1, Math.abs(dx) > 40 ? base + (dx < 0 ? 1 : -1) : base));
+      const i = Math.max(0, Math.min(TL_PAGES.length - 1, Math.abs(dx) > 40 ? base + (dx < 0 ? 1 : -1) : base));
       const from = tlPane.scrollLeft, to = i * w, t0 = performance.now(), D = 260;
       const step = (now) => {
         const p = Math.min(1, (now - t0) / D), k = 1 - Math.pow(1 - p, 3);
@@ -5018,6 +5036,7 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
 
   document.getElementById('tlFab').addEventListener('click', () => {
     if (!tlCircle) tlCircle = CIRCLES[active];
+    if (tlCircle.founding) { csOpen(); return; }
     document.getElementById('tlcWhere').textContent = tlCircle.name;
     tlcText.value = ''; tlcPicked = []; tlcSync();
     tlCompose.classList.add('on');
@@ -5082,14 +5101,19 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
   nsStrip.appendChild(nsBody);
   col.insertBefore(nsStrip, col.lastElementChild);
 
-  function nsRenderEmpty() {
-    nsBody.className = 'ns-onb';
-    nsBody.innerHTML = '<img class="ns-bg" src="../../assets/images/create_circle_bg.png" alt="">'
+  /* 「サークルの作り方」オンボーディング本体。クエスト home の未所属セクションと
+     タイムラインの「この場所」ページで同じものを使う */
+  function nsOnbHTML() {
+    return '<img class="ns-bg" src="../../assets/images/create_circle_bg.png" alt="">'
       + '<span class="ns-bg-veil"></span>'
       + '<div class="ns-lead">サークルの作り方</div>'
       + '<div class="ns-steps">' + NS_STEPS.map((s, i) =>
         '<div class="ns-step"><span class="n">' + (i + 1) + '</span>'
         + '<span class="sc"><b>' + s[0] + '</b><span>' + s[1] + '</span></span></div>').join('') + '</div>';
+  }
+  function nsRenderEmpty() {
+    nsBody.className = 'ns-onb';
+    nsBody.innerHTML = nsOnbHTML();
     nsStrip.querySelector('.qn-t').textContent = 'サークルを設立する';
   }
   function nsRenderFounded() {
@@ -5698,7 +5722,13 @@ body.no-anim .wd-circle-tool, body.no-anim .app-header, body.no-anim .map-post {
     setTimeout(() => {
       if (v === 'profile') document.getElementById('meBtn').click();
       else if (v === 'chatlist') document.getElementById('chatBtn').click();
-      else if (v === 'timeline') document.querySelector('.wd-circle-bar').click();
+      else if (v === 'timeline') {
+        document.querySelector('.wd-circle-bar').click();
+        const pg = parseInt((window.__APP_PARAMS__ && window.__APP_PARAMS__.tlpage)
+          || new URLSearchParams(location.search).get('tlpage') || '', 10);
+        // scroll イベントでページ切替（tlSetPage）が走るので DOM を動かすだけでよい
+        if (pg > 0) setTimeout(() => { const pn = document.getElementById('tlPane'); pn.scrollLeft = pg * pn.clientWidth; }, 500);
+      }
       else if (v === 'chatroom') {
         document.getElementById('chatBtn').click();
         const row = clList.querySelector('.cl-row');
