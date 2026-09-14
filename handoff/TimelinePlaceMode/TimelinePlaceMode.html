@@ -1,0 +1,517 @@
+<!-- @dsCard group="TimelinePlaceMode" tier="screen" viewport="2520x2480" name="TimelinePlaceMode — サークルタイムラインの場所モード（4シーン）" subtitle="投稿のGoogleマップリンク → 上半分=サークルのエリア地図+場所ピン+場所カード / 下半分=場所のタイムライン。as-built（shots/）との Before / After 付き。402×874" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TimelinePlaceMode — 場所モード</title>
+<!-- foundation: DS tokens / specimen card / device frame — コピーせず参照 -->
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<!-- MapLibre GL JS — UniverseQuest と同じ描画エンジン（openfreemap liberty） -->
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="TimelinePlaceMode.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;600;700;900&display=swap">
+</head>
+<body class="tpm">
+<div class="tpm-doc">
+
+  <div>
+    <div class="tpm-h1">TimelinePlaceMode — サークルタイムラインの「場所モード」</div>
+    <p class="tpm-lead" style="margin-top:8px">
+      投稿に貼られた Google マップのリンクをタップすると、上半分が<b>サークルのエリア地図（場所ピン＋場所カード）</b>、
+      下半分が<b>その場所の投稿タイムライン</b>に切り替わる。挙動・データ・寸法は HANDOFF の as-built のまま。
+      変えたのは <b>①ピンの語彙とタップ領域 ②カードを吹き出しにして状態を持たせる ③遷移の読ませ方 ④ヘッダーの情報設計と横断表示
+      ⑤地図パネルの継ぎ目と戻るの位置 ⑥役割トークンと assets/icons への統一</b> の 6 点。
+      地図は UniverseQuest と同じ <b>MapLibre（openfreemap liberty ＋ positron 風ラベル）</b>に <b>WdEriaWall</b> を fill-extrusion で建てた実物（pitch 60・パン / ズーム不可）。
+    </p>
+  </div>
+
+  <!-- ====================================================================
+       4 シーン
+       ==================================================================== -->
+  <div class="tpm-scenes">
+
+    <!-- ---------------- S0 サークルタイムライン（入る前） ---------------- -->
+    <div class="tpm-scene">
+      <div class="tpm-tag"><span class="n">S0</span><span class="t">サークルタイムライン（入る前・tl-standalone）</span></div>
+      <div class="phone">
+        <div class="tpm-screen">
+          <div class="tpm-cfeed">
+            <div class="tpm-cfeed-top">
+              <header class="tl-head">
+                <img class="tl-cover" src="../../assets/sample/reel/reel009.jpg" alt="">
+                <div class="tl-hcol">
+                  <span class="tl-nm">渋谷コミュニティ</span>
+                  <span class="tl-ds">24件の投稿 · 渋谷駅周辺のコミュニティ</span>
+                </div>
+              </header>
+            </div>
+            <div class="tpm-list">
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user003.jpg" alt="">
+                    <span class="tlp-name">SunnyVi</span>
+                    <span class="tlp-meta">24分</span>
+                  </div>
+                  <p class="tlp-body">深夜の渋谷、まだ人が多い。フロアが空く時間まで外で待機してた。</p>
+                  <div class="tlp-m1"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>12</span></button>
+                    <button class="tlp-act liked" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>148</span></button>
+                    <a class="tlp-og" href="#s1">
+                      <img src="../../assets/sample/reel/reel012.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">maps.google.com</span>
+                        <span class="tlp-og-ttl">WOMB · 渋谷区, 東京都</span>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </article>
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user011.jpg" alt="">
+                    <span class="tlp-name">o_cean</span>
+                    <span class="tlp-meta">1時間</span>
+                  </div>
+                  <p class="tlp-body">路地裏のロースタリー、浅煎りが良かった。</p>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>3</span></button>
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>41</span></button>
+                    <a class="tlp-og" href="#s1">
+                      <img src="../../assets/sample/reel/reel004.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">maps.google.com</span>
+                        <span class="tlp-og-ttl">ABOUT LIFE COFFEE</span>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="tpm-mark" style="left:160px; top:352px">
+            <span class="d">1</span><span class="l">ここだけが入口（ヘッダーに入口は無い）</span>
+          </div>
+        </div>
+        <div class="statusbar ink">
+          <span class="time">9:41</span>
+          <span class="sys"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="2.5" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg></span>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind" style="background:rgba(8,8,11,.28)"></div>
+      </div>
+      <p class="tpm-note"><b>as-built のまま。</b>リンクカード <code>.tlp-og</code> はアクション行の右端。ここをタップして場所モードへ。</p>
+    </div>
+
+    <!-- ---------------- S1 場所モード（WOMB・営業中） ------------------- -->
+    <div class="tpm-scene" id="s1">
+      <div class="tpm-tag"><span class="n">S1</span><span class="t">場所モード（WOMB 選択・営業中）</span></div>
+      <div class="phone">
+        <div class="tpm-screen">
+          <div class="tpm-map has-sel">
+            <!-- サークルのエリア地図 — UniverseQuest と同じ MapLibre(liberty) + WdEriaWall(fill-extrusion)。
+                 pitch 60 / interactive:false（as-built どおりパン・ズーム不可） -->
+            <div class="tpm-gl" data-map data-lng="139.7005" data-lat="35.6595" data-radius="420" data-pitch="60" data-bearing="-18" data-frac="0.74"></div>
+            <div class="tpm-mapfade"></div>
+            <button class="tpm-mback" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+
+            <!-- 場所ピン -->
+            <button class="tpm-pin sel" type="button" style="left:150px; top:286px" aria-label="WOMB 6件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel012.jpg" alt=""></span><span class="cnt">6</span>
+                <span class="leg"></span>
+              </span>
+            </button>
+            <button class="tpm-pin" type="button" style="left:262px; top:124px" aria-label="TK NIGHTCLUB 4件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel055.jpg" alt=""></span><span class="cnt">4</span>
+                <span class="leg"></span>
+              </span>
+            </button>
+            <button class="tpm-pin" type="button" style="left:330px; top:262px" aria-label="ABOUT LIFE COFFEE 1件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel004.jpg" alt=""></span>
+                <span class="leg"></span>
+              </span>
+            </button>
+
+            <!-- 場所カード（選択中のピンの上・脚でピンに帰属） -->
+            <div class="tpm-card" style="left:18px; bottom:162px; --tail:132px" role="button" tabindex="0">
+              <div class="tpm-card-top">
+                <img class="tpm-card-ph" src="../../assets/sample/reel/reel012.jpg" alt="">
+                <div class="tpm-card-col">
+                  <span class="tpm-card-nm">WOMB</span>
+                  <span class="tpm-card-ad">渋谷区, 東京都</span>
+                  <span class="tpm-card-st">
+                    <span class="dot"></span><span class="s">営業中</span><span class="h">5:00 まで</span>
+                  </span>
+                </div>
+              </div>
+              <div class="tpm-card-foot">
+                <span class="tpm-card-cta">Google Mapsで開く<img src="../../assets/icons/icon_next.png" alt=""></span>
+                <span class="tpm-card-rt"><span class="st">★</span><b>4.5</b>(1,500)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 下半分: 場所のタイムライン -->
+          <section class="tpm-tl">
+            <div class="tpm-grab"><span></span></div>
+            <header class="tpm-tlhead">
+              <button class="tpm-back" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+              <div class="tpm-hcol">
+                <span class="tpm-hnm">WOMB</span>
+                <span class="tpm-hsub"><b>6</b>件の投稿 · 渋谷コミュニティ</span>
+              </div>
+            </header>
+            <div class="tpm-list">
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user003.jpg" alt="">
+                    <span class="tlp-name">SunnyVi</span>
+                    <span class="tlp-meta">24分</span>
+                  </div>
+                  <p class="tlp-body">深夜の渋谷、まだ人が多い。フロアが空く時間まで外で待機してた。</p>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>12</span></button>
+                    <button class="tlp-act liked" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>148</span></button>
+                    <span class="tlp-og here">
+                      <img src="../../assets/sample/reel/reel012.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">この場所</span>
+                        <span class="tlp-og-ttl">WOMB</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user014.jpg" alt="">
+                    <span class="tlp-name">Kawaii</span>
+                    <span class="tlp-meta">3時間</span>
+                    <span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>新宿グループ</span></span>
+                  </div>
+                  <p class="tlp-body">先週のフロア。音がいいので毎回ここに来てしまう。</p>
+                  <div class="tlp-m1"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>5</span></button>
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>87</span></button>
+                    <span class="tlp-og here">
+                      <img src="../../assets/sample/reel/reel012.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">この場所</span>
+                        <span class="tlp-og-ttl">WOMB</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </div>
+            <div class="tpm-spin"></div>
+          </section>
+          <button class="tpm-fab" type="button" aria-label="この場所に投稿する"><img src="../../assets/icons/icon_edit.png" alt=""></button>
+          <span class="tpm-flag">提案 / 未実装</span>
+          <div class="tpm-mark" style="left:196px; top:300px"><span class="d">2</span><span class="l">脚でピンに帰属</span></div>
+          <div class="tpm-mark" style="left:238px; top:424px"><span class="d">5</span><span class="l">白面を 12 かぶせる</span></div>
+        </div>
+        <div class="statusbar">
+          <span class="time">9:41</span>
+          <span class="sys"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="2.5" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg></span>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+      <p class="tpm-note">ピン＝<b>角丸スクエア 36</b>（投稿ピンの円と区別）、透明タップ領域 44。カードは<b>吹き出し</b>で
+        <b>営業中 / 5:00 まで</b>＋評価。ヘッダーは<b>場所名 ＋ N件の投稿 · サークル名</b>（住所はカードだけに置いて重複を消した）。</p>
+    </div>
+
+    <!-- ---------------- S2 別ピン（TK NIGHTCLUB・営業時間外） ----------- -->
+    <div class="tpm-scene">
+      <div class="tpm-tag"><span class="n">S2</span><span class="t">別ピンへ切替（営業時間外・カードは下側へ反転）</span></div>
+      <div class="phone">
+        <div class="tpm-screen">
+          <div class="tpm-map has-sel">
+            <!-- サークルのエリア地図 — UniverseQuest と同じ MapLibre(liberty) + WdEriaWall(fill-extrusion)。
+                 pitch 60 / interactive:false（as-built どおりパン・ズーム不可） -->
+            <div class="tpm-gl" data-map data-lng="139.7005" data-lat="35.6595" data-radius="420" data-pitch="60" data-bearing="-18" data-frac="0.74"></div>
+            <div class="tpm-mapfade"></div>
+            <button class="tpm-mback" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+
+            <button class="tpm-pin" type="button" style="left:150px; top:286px" aria-label="WOMB 6件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel012.jpg" alt=""></span><span class="cnt">6</span>
+                <span class="leg"></span>
+              </span>
+            </button>
+            <button class="tpm-pin sel" type="button" style="left:262px; top:124px" aria-label="TK NIGHTCLUB 4件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel055.jpg" alt=""></span><span class="cnt">4</span>
+                <span class="leg"></span>
+              </span>
+            </button>
+            <button class="tpm-pin" type="button" style="left:330px; top:262px" aria-label="ABOUT LIFE COFFEE 1件の投稿">
+              <span>
+                <span class="tile"><img src="../../assets/sample/reel/reel004.jpg" alt=""></span>
+                <span class="leg"></span>
+              </span>
+            </button>
+
+            <!-- ピンが上寄り → カードは下側へ反転して脚が上を向く -->
+            <div class="tpm-card below" style="left:126px; top:178px; --tail:136px" role="button" tabindex="0">
+              <div class="tpm-card-top">
+                <img class="tpm-card-ph" src="../../assets/sample/reel/reel055.jpg" alt="">
+                <div class="tpm-card-col">
+                  <span class="tpm-card-nm">TK NIGHTCLUB SHIBUYA</span>
+                  <span class="tpm-card-ad">渋谷区道玄坂1丁目, 東京都</span>
+                  <span class="tpm-card-st">
+                    <span class="dot off"></span><span class="s off">営業時間外</span><span class="h">20:00 から</span>
+                  </span>
+                </div>
+              </div>
+              <div class="tpm-card-foot">
+                <span class="tpm-card-cta">Google Mapsで開く<img src="../../assets/icons/icon_next.png" alt=""></span>
+                <span class="tpm-card-rt"><span class="st">★</span><b>4.2</b>(980)</span>
+              </div>
+            </div>
+          </div>
+
+          <section class="tpm-tl">
+            <div class="tpm-grab"><span></span></div>
+            <header class="tpm-tlhead">
+              <button class="tpm-back" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+              <div class="tpm-hcol">
+                <span class="tpm-hnm">TK NIGHTCLUB SHIBUYA</span>
+                <span class="tpm-hsub"><b>4</b>件の投稿 · 渋谷コミュニティ</span>
+              </div>
+            </header>
+            <div class="tpm-list">
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user008.jpg" alt="">
+                    <span class="tlp-name">Pixel</span>
+                    <span class="tlp-meta">昨日</span>
+                  </div>
+                  <p class="tlp-body">道玄坂の坂上、開店前の並び。20時から。</p>
+                  <div class="tlp-m1"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>7</span></button>
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>63</span></button>
+                    <span class="tlp-og here">
+                      <img src="../../assets/sample/reel/reel055.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">この場所</span>
+                        <span class="tlp-og-ttl">TK NIGHTCLUB</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+              <article class="tlp">
+                <div class="tlp-col">
+                  <div class="tlp-head">
+                    <img class="tlp-av" src="../../assets/sample/user/user005.jpg" alt="">
+                    <span class="tlp-name">ZenGarden</span>
+                    <span class="tlp-meta">昨日</span>
+                  </div>
+                  <p class="tlp-body">ここはどこですか？と聞かれたので貼っておく。</p>
+                  <div class="tlp-acts">
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>2</span></button>
+                    <button class="tlp-act" type="button"><img src="../../assets/icons/icon_like.png" alt=""><span>18</span></button>
+                    <span class="tlp-og here">
+                      <img src="../../assets/sample/reel/reel055.jpg" alt="">
+                      <span class="tlp-og-t">
+                        <span class="tlp-og-site">この場所</span>
+                        <span class="tlp-og-ttl">TK NIGHTCLUB</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+          <div class="tpm-mark" style="left:20px; top:312px"><span class="d">2</span><span class="l">status bar 下に押し込まず下側へ反転</span></div>
+          <div class="tpm-mark" style="left:20px; top:356px"><span class="d">5</span><span class="l">戻る 44・カードの左 clamp は 56</span></div>
+        </div>
+        <div class="statusbar">
+          <span class="time">9:41</span>
+          <span class="sys"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="2.5" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg></span>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+      <p class="tpm-note">別ピンのタップ＝<b>カードが横へ 180ms で移動</b>してから中身が差し替わる（消えて出ない）。長い店名は 1 行省略のまま、
+        住所は 1 行省略。<b>営業時間外</b>は success を使わずドットを ink-dim に落とす。</p>
+    </div>
+
+    <!-- ---------------- S3 状態バリエーション --------------------------- -->
+    <div class="tpm-scene">
+      <div class="tpm-tag"><span class="n">S3</span><span class="t">状態（座標なし・空・営業時間未取得）</span></div>
+      <div class="phone">
+        <div class="tpm-screen">
+          <div class="tpm-map">
+            <!-- サークルのエリア地図 — UniverseQuest と同じ MapLibre(liberty) + WdEriaWall(fill-extrusion)。
+                 pitch 60 / interactive:false（as-built どおりパン・ズーム不可） -->
+            <div class="tpm-gl" data-map data-lng="139.7005" data-lat="35.6595" data-radius="420" data-pitch="60" data-bearing="-18" data-frac="0.74"></div>
+            <div class="tpm-mapfade"></div>
+            <button class="tpm-mback" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+            <div class="tpm-mapchip">
+              <img src="../../assets/icons/icon_map.png" alt="">
+              この場所は座標を持たないため、地図には出ません
+            </div>
+          </div>
+          <section class="tpm-tl">
+            <div class="tpm-grab"><span></span></div>
+            <header class="tpm-tlhead">
+              <button class="tpm-back" type="button" aria-label="サークルへ戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+              <div class="tpm-hcol">
+                <span class="tpm-hnm">渋谷 カフェ 検索</span>
+                <span class="tpm-hsub"><b>0</b>件の投稿 · 渋谷コミュニティ</span>
+              </div>
+              <span class="tpm-nogeo"><img src="../../assets/icons/icon_map.png" alt="">位置なし</span>
+            </header>
+            <div class="tpm-list">
+              <div class="tpm-empty">
+                <span class="t">投稿がありません</span>
+                <span class="s">このリンクを貼った投稿はまだこの 1 件だけです。<br>投稿すると、同じ場所の投稿がここに集まります。</span>
+              </div>
+            </div>
+          </section>
+          <div class="tpm-mark" style="left:184px; top:432px"><span class="d">4</span><span class="l">空は理由まで書く</span></div>
+        </div>
+        <div class="statusbar">
+          <span class="time">9:41</span>
+          <span class="sys"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="2.5" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg></span>
+        </div>
+        <div class="dynamic-island"></div>
+        <div class="home-ind"></div>
+      </div>
+      <div class="tpm-detach">
+        <div class="box">
+          <div class="tpm-card">
+            <div class="tpm-card-top">
+              <img class="tpm-card-ph" src="../../assets/sample/reel/reel004.jpg" alt="">
+              <div class="tpm-card-col">
+                <span class="tpm-card-nm">ABOUT LIFE COFFEE</span>
+                <span class="tpm-card-ad">渋谷区, 東京都</span>
+                <span class="tpm-card-st pending">営業時間は未取得</span>
+              </div>
+            </div>
+            <div class="tpm-card-foot">
+              <span class="tpm-card-cta">Google Mapsで開く<img src="../../assets/icons/icon_next.png" alt=""></span>
+            </div>
+          </div>
+          <p class="cap"><b>detailsPending</b> — 営業時間・評価の行を落とし、<b>高さ 88</b>（解決済みは 104）。
+            行ごと消さず「未取得」と書いて、無いのか読めていないのかを区別する。</p>
+        </div>
+        <div class="box">
+          <div class="tpm-card">
+            <div class="tpm-card-top">
+              <span class="tpm-card-ph none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>
+              <div class="tpm-card-col">
+                <span class="tpm-card-nm">渋谷駅周辺の名もない路地</span>
+                <span class="tpm-card-ad">渋谷区, 東京都</span>
+                <span class="tpm-card-st pending">営業時間は未取得</span>
+              </div>
+            </div>
+            <div class="tpm-card-foot">
+              <span class="tpm-card-cta">Google Mapsで開く<img src="../../assets/icons/icon_next.png" alt=""></span>
+            </div>
+          </div>
+          <p class="cap"><b>写真なし</b> — ink 地 ＋ <code>icon_pin_location</code> 20 白。ピンも同じ扱い。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ====================================================================
+       Before（as-built = shots/）/ After
+       ==================================================================== -->
+  <div>
+    <div class="tpm-h1">Before（as-built · shots/）/ After</div>
+    <p class="tpm-lead" style="margin-top:8px">左が実機 mock、右が上の specimen と同じ提案。変更点は下の表に「なぜ」を 1 行で。</p>
+  </div>
+  <div class="tpm-ba">
+    <div class="tpm-ba-col">
+      <span class="tpm-ba-lbl">Before · P00 入る前</span>
+      <img class="tpm-shot" src="shots/P00-timeline.jpg" alt="as-built: サークルタイムライン">
+    </div>
+    <div class="tpm-ba-col">
+      <span class="tpm-ba-lbl">Before · P01 場所モード（WOMB）</span>
+      <img class="tpm-shot" src="shots/P01-place-mode.jpg" alt="as-built: 場所モード">
+    </div>
+    <div class="tpm-ba-col">
+      <span class="tpm-ba-lbl">Before · P02 別ピン（TK NIGHTCLUB）</span>
+      <img class="tpm-shot" src="shots/P02-place-switch.jpg" alt="as-built: 別ピンに切替">
+    </div>
+    <div class="tpm-ba-col">
+      <span class="tpm-ba-lbl after">After</span>
+      <p class="tpm-note" style="width:320px">
+        上の <b>S0 / S1 / S2</b> が同じ 3 状態の After。<br><br>
+        寸法は as-built を踏襲（地図パネル 437 / カード幅 264 / ピン円 36 / ヘッダー 56）。
+        動かしたのは <b>タップ領域・脚・状態表記・継ぎ目・戻るの位置</b>だけで、
+        レイアウトの骨格と情報量は変えていない。
+      </p>
+    </div>
+  </div>
+
+  <div>
+    <div class="tpm-h1">直すべき逸脱 → After</div>
+  </div>
+  <div class="tpm-fix">
+    <div class="hd"></div><div class="hd">Before（as-built）</div><div class="hd">After</div><div class="hd">なぜ</div>
+
+    <div class="no">1</div>
+    <div class="be">ピン＝写真の円 34 ＋ 脚。投稿ピン（円）と同じ形。タップ 34。</div>
+    <div class="af">写真は残して<b>角丸スクエア 36 / r11</b> に。脚 9 と白枠 2.5 は据え置き。透明な<b>タップ領域 44×44</b>を上に敷く。選択は <code>scale(1.14)</code>＋ink リング 3、非選択 .72。状態（営業・未取得・座標なし）は<b>ピンに描かない</b>。</div>
+    <div class="wy">円＝投稿・角丸＝場所で、同じ地図に並んでも語彙が衝突しない。36 のピンに状態を足すと読めないので、状態はカードとヘッダーが持つ。</div>
+
+    <div class="no">2</div>
+    <div class="be">カードに脚なし。ピンとの帰属が弱い。営業時間は素の <code>20:00–5:00</code>。評価・件数は持っているのに出していない。上寄りのピンでは status bar 直下に押し込まれる。</div>
+    <div class="af"><b>脚 10</b>（tail は ピン中心に追従・左右 12 clamp）。時間は<b>営業中 / 営業時間外 / 未取得</b>の 3 状態＋残り時刻。<b>★4.5 (1,500)</b> と <code>Google Mapsで開く</code> を hairline 下の 1 行に。上に収まらなければ<b>下側へ反転</b>（脚が上向き）。</div>
+    <div class="wy">吹き出しなら「どのピンの話か」を言葉で補わずに済む。生の営業時間は今開いているか判断させる作業が残る。反転は clamp より情報が減らない。</div>
+
+    <div class="no">3</div>
+    <div class="be">ピンは取得後に<b>アニメ無しで出現</b>。別ピン切替も<b>即時差し替え</b>。</div>
+    <div class="af">ピンは<b>脚を原点に 8px 立ち上がり＋fade（160ms・40ms stagger）</b>。切替はカードが<b>横へ 180ms 移動</b>し、中身と一覧は 120ms で cross-fade。ヘッダー 2 行目に<b>サークル名</b>を残してパンくずにする。</div>
+    <div class="wy">出現が突然だと地図が壊れたように見える。移動で繋げば「同じカードが別の場所を指した」と分かり、サークルから来たことも消えない。</div>
+
+    <div class="no">4</div>
+    <div class="be">ヘッダーは 場所名 ＋ <code>N 件の投稿 · サークル名</code>。横断してくる他サークルの投稿が無印。空は <code>投稿がありません</code> の 1 行。</div>
+    <div class="af">ヘッダーはそのまま（住所はカードだけに置いて重複を消す）。他サークルの投稿は既存 <code>.tlp-chip</code>（teal）でサークル名を出す。いま開いている場所のリンクは <b>この場所</b> と書いて無効化。空は理由の 1 行を足す。<b>提案</b>: 右下に colorful の WdIconButton で「この場所に投稿する」。</div>
+    <div class="wy">場所グループはサークル横断なので、どこの誰かが分からないと読めない。無効なリンクが押せそうに見えるのが一番の事故。</div>
+
+    <div class="no">5</div>
+    <div class="be">上半分固定・下端は 1px の区切り。戻る 38 が左上でカードと重なる。座標が無い場所は地図が無言。</div>
+    <div class="af">白面を <b>r12 で 12 かぶせ</b>、grab bar を置いて上ドラッグで抜ける面だと示す。戻るは <b>44</b>、カードの左 clamp を 56 にして衝突を消す。座標なしは<b>地図に glass chip で理由</b>＋ヘッダー右に <b>位置なし</b>。</div>
+    <div class="wy">1px の線では上半分が畳めることが分からない。理由が書かれていない空の地図は不具合と区別できない。</div>
+
+    <div class="no">6</div>
+    <div class="be">Material アイコン・場当たりのグレーが混ざる余地。</div>
+    <div class="af">色は <b>ink / ink-sub / hairline / teal / state-success / state-like</b> の役割トークンのみ。アイコンは <code>assets/icons/</code>（back / next / map / pin_location / comment / like / group / edit）。</div>
+    <div class="wy">ライト面の役割が 5 色に収まっていれば、実装で増えたグレーはすべて逸脱として見つかる。</div>
+  </div>
+
+</div>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#0b0d13"/><rect x="72" y="72" width="96" height="52" rx="10" fill="#fff"/><rect x="80" y="80" width="36" height="36" rx="8" fill="#0d5f67"/><rect x="122" y="84" width="38" height="7" rx="3.5" fill="#08080b"/><rect x="122" y="96" width="28" height="6" rx="3" fill="rgba(8,8,11,.4)"/><path d="M112 124 l8 12 l8 -12 z" fill="#fff"/><rect x="96" y="150" width="48" height="48" rx="14" fill="#fff"/><rect x="100" y="154" width="40" height="40" rx="11" fill="#d0a052"/><text x="120" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="22" font-weight="700" fill="#fff">PLACE</text><text x="120" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="rgba(255,255,255,.6)">4 scenes</text></svg></template>
+<script src="place-map.js"></script>
+<script src="../WdQuestPopup/eria-wall.js"></script>
+<script>
+  document.querySelectorAll('[data-ew]').forEach(function (el, i) {
+    var d = el.dataset;
+    window.EriaWall.build(el, { seed: +d.seed || (7 + i), n: +d.n || 48, r: +d.r || 150,
+      h: +d.h || 92, blds: +d.blds || 22, ground: 3 });
+  });
+</script>
+</body>
+</html>

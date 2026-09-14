@@ -1,0 +1,313 @@
+/* TimelinePlaceMode — View 固有の差分のみ。foundation は ../colors_and_type.css /
+   ../../DesignSystem/preview/card.css を参照（コピーしない）。
+   as-built の実値は HANDOFF.md 準拠。After（提案）の変更点はコメントで印を付けた。 */
+
+/* ---- ライト面の役割トークン（既存 .tl-* / .tlp-* と同値） ---------------- */
+.tpm {
+  --ink: #08080b;
+  --ink-sub: rgba(8,8,11,.56);
+  --ink-dim: rgba(8,8,11,.38);
+  --hairline: rgba(8,8,11,.08);
+  --divider: rgba(8,8,11,.18);
+  --teal: #0d5f67;
+  --map-h: 437px;          /* 画面高 874 / 2 */
+  --safe-top: 62px;
+  --safe-bot: 34px;
+}
+
+/* ==== specimen の外枠（カード面） ======================================== */
+.tpm-doc { display: flex; flex-direction: column; gap: 30px; }
+.tpm-h1 { font-family: var(--font-jp); font-weight: 700; font-size: 19px; color: #fff; }
+.tpm-lead { font-family: var(--font-jp); font-size: 12.5px; line-height: 1.8; color: var(--fg-2); max-width: 108ch; }
+.tpm-lead b { color: #fff; font-weight: 700; }
+.tpm-scenes { display: flex; gap: 26px; align-items: flex-start; flex-wrap: nowrap; }
+.tpm-scene { display: flex; flex-direction: column; gap: 12px; flex: none; }
+.tpm-tag { display: flex; align-items: baseline; gap: 8px; }
+.tpm-tag .n { font-family: var(--font-latin); font-weight: 700; font-size: 11px; letter-spacing: .12em;
+  color: var(--fg-4); }
+.tpm-tag .t { font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff; }
+.tpm-note { font-family: var(--font-jp); font-size: 11.5px; line-height: 1.7; color: var(--fg-3); width: 402px; }
+.tpm-note b { color: var(--fg-1); font-weight: 700; }
+.tpm-ba { display: flex; gap: 18px; align-items: flex-start; }
+.tpm-ba-col { display: flex; flex-direction: column; gap: 8px; }
+.tpm-ba-lbl { font-family: var(--font-latin); font-weight: 700; font-size: 10px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--fg-4); }
+.tpm-ba-lbl.after { color: var(--grad-yellow); }
+.tpm-shot { width: 402px; height: 874px; border-radius: 55px; object-fit: cover; object-position: top center;
+  background: #000; box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039; }
+
+/* 改善点テーブル */
+.tpm-fix { display: grid; grid-template-columns: 26px 1.1fr 1.5fr 1.1fr; gap: 0;
+  font-family: var(--font-jp); font-size: 12px; max-width: 1180px; }
+.tpm-fix > div { padding: 11px 12px; border-top: 1px solid rgba(255,255,255,.10); line-height: 1.65; }
+.tpm-fix .hd { font-family: var(--font-latin); font-weight: 700; font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--fg-4); border-top: 0; }
+.tpm-fix .no { font-family: var(--font-latin); font-weight: 700; color: var(--grad-yellow); }
+.tpm-fix .be { color: var(--fg-3); }
+.tpm-fix .af { color: #fff; }
+.tpm-fix .wy { color: var(--fg-2); }
+
+/* ==== 画面（.phone の中身） ============================================= */
+.tpm-screen { position: absolute; inset: 0; background: #fff; overflow: hidden;
+  font-family: var(--font-jp); color: var(--ink); }
+
+/* ---- 上半分: サークルのエリア地図 -------------------------------------- */
+.tpm-map { position: absolute; left: 0; right: 0; top: 0; height: var(--map-h); overflow: hidden;
+  background: #0b0d13; }
+/* WdEriaWall をそのまま全面に敷く（.ew / .ew-scene は DesignSystem/preview/components.css、
+   ジオメトリは handoff/WdQuestPopup/eria-wall.js）。pitch 60 = --tilt:60deg */
+/* 地図面 — MapLibre のキャンバスをそのまま敷く（タイル待ち / オフライン時は地の色） */
+.tpm-gl { position: absolute; inset: 0; background: #e9e5d9; }
+.tpm-gl canvas { display: block; }
+.tpm-gl .maplibregl-control-container { display: none; }
+.tpm-mapfade { position: absolute; left: 0; right: 0; top: 0; height: 132px;
+  background: linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.34) 52%, rgba(0,0,0,0) 100%); }
+
+/* 戻る（地図左上）— AFTER: 38 → 44、カードの clamp と衝突しない位置に固定 */
+.tpm-mback { position: absolute; left: 8px; top: calc(var(--safe-top) + 4px); width: 44px; height: 44px;
+  border: 0; border-radius: 50%; background: #fff; box-shadow: 0 3px 10px rgba(8,8,11,.18);
+  display: grid; place-items: center; cursor: pointer; z-index: 6; }
+.tpm-mback img { width: 15px; height: 15px; filter: invert(1); opacity: .75; }
+.tpm-mback:active { transform: scale(.94); }
+
+/* ---- 場所ピン ---------------------------------------------------------- */
+/* AFTER: 投稿ピン（円）と区別するため角丸スクエア。タップ領域は透明 44×44 */
+.tpm-pin { position: absolute; width: 44px; height: 44px; transform: translate(-50%, 0);
+  border: 0; background: none; padding: 0; cursor: pointer; z-index: 5; }
+.tpm-pin > span { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%);
+  display: block; width: 36px; transition: transform 180ms cubic-bezier(.2,0,0,1); transform-origin: 50% 100%; }
+.tpm-pin .tile { position: relative; display: block; width: 36px; height: 36px; border-radius: 11px;
+  overflow: hidden; border: 2.5px solid #fff; background: var(--ink);
+  box-shadow: 0 2px 8px rgba(8,8,11,.35), 0 0 0 1px rgba(8,8,11,.08);
+  transition: box-shadow 180ms cubic-bezier(.2,0,0,1); }
+.tpm-pin .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tpm-pin .tile .ic { position: absolute; inset: 0; display: grid; place-items: center; }
+.tpm-pin .tile .ic img { width: 16px; height: 16px; object-fit: contain; }
+.tpm-pin .leg { display: block; width: 0; height: 0; margin: 0 auto;
+  border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 9px solid #fff;
+  filter: drop-shadow(0 1px 1px rgba(8,8,11,.25)); }
+.tpm-pin .cnt { position: absolute; right: -6px; top: -6px; height: 18px; min-width: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--ink); box-shadow: 0 0 0 2px #fff;
+  font-family: var(--font-latin); font-weight: 700; font-size: 11px; line-height: 18px; color: #fff;
+  text-align: center; }
+.tpm-pin.sel > span { transform: translateX(-50%) scale(1.14); }
+.tpm-pin.sel .tile { box-shadow: 0 0 0 3px var(--ink), 0 2px 8px rgba(8,8,11,.35); }
+.tpm-map.has-sel .tpm-pin:not(.sel) > span { opacity: .72; }
+
+/* ---- 場所カード -------------------------------------------------------- */
+/* AFTER: 吹き出しの脚（10）を付けてピンとの帰属を明示。上に収まらない時は下側へ反転 */
+.tpm-card { position: absolute; width: 264px; padding: 12px; border-radius: 14px; background: #fff;
+  box-shadow: 0 6px 18px rgba(8,8,11,.18); z-index: 7; text-align: left; border: 0; cursor: pointer;
+  display: flex; flex-direction: column; gap: 8px; font-family: var(--font-jp); }
+.tpm-card:active { transform: scale(.985); }
+.tpm-card::after { content: ''; position: absolute; left: var(--tail, 50%); bottom: -9px; margin-left: -9px;
+  width: 0; height: 0; border-left: 9px solid transparent; border-right: 9px solid transparent;
+  border-top: 10px solid #fff; filter: drop-shadow(0 3px 3px rgba(8,8,11,.10)); }
+.tpm-card.below::after { bottom: auto; top: -9px; border-top: 0; border-bottom: 10px solid #fff;
+  filter: drop-shadow(0 -2px 2px rgba(8,8,11,.08)); }
+.tpm-card-top { display: flex; gap: 10px; align-items: center; }
+.tpm-card-ph { width: 52px; height: 52px; flex: none; border-radius: 10px; object-fit: cover; background: var(--ink); }
+.tpm-card-ph.none { display: grid; place-items: center; }
+.tpm-card-ph.none img { width: 20px; height: 20px; }
+.tpm-card-col { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.tpm-card-nm { font-weight: 700; font-size: 14px; line-height: 1.3; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpm-card-ad { font-size: 11px; line-height: 1.4; color: var(--ink-sub);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* AFTER: 営業時間は「営業中 / 営業時間外 / 未取得」の状態として出す */
+.tpm-card-st { display: flex; align-items: center; gap: 5px; font-size: 11px; line-height: 1.4; }
+.tpm-card-st .dot { width: 6px; height: 6px; border-radius: 50%; flex: none; background: var(--state-success); }
+.tpm-card-st .dot.off { background: var(--ink-dim); }
+.tpm-card-st .s { font-weight: 600; color: var(--ink); }
+.tpm-card-st .s.off { color: var(--ink-sub); }
+.tpm-card-st .h { font-family: var(--font-latin); color: var(--ink-sub); }
+.tpm-card-st.pending { color: var(--ink-dim); }
+/* AFTER: 評価と CTA を 1 行に。CTA は teal + icon_next で押せる面だと分かる強さに */
+.tpm-card-foot { display: flex; align-items: center; gap: 8px; padding-top: 2px;
+  border-top: 1px solid var(--hairline); margin-top: 2px; }
+.tpm-card-cta { display: flex; align-items: center; gap: 4px; min-height: 28px;
+  font-size: 11px; font-weight: 600; color: var(--teal); }
+.tpm-card-cta img { width: 9px; height: 9px; filter: invert(19%) sepia(28%) saturate(1800%) hue-rotate(144deg); }
+.tpm-card-rt { margin-left: auto; display: flex; align-items: center; gap: 4px;
+  font-family: var(--font-latin); font-size: 11px; color: var(--ink-sub); }
+.tpm-card-rt b { color: var(--ink); font-weight: 700; }
+.tpm-card-rt .st { color: var(--grad-golden); }
+
+/* ---- 下半分: 場所のタイムライン ---------------------------------------- */
+/* AFTER: 白面を 12 の角丸で地図に 12 かぶせ、上ドラッグで抜ける面だと分かるように */
+.tpm-tl { position: absolute; left: 0; right: 0; bottom: 0; top: calc(var(--map-h) - 12px);
+  background: #fff; border-radius: 12px 12px 0 0; display: flex; flex-direction: column;
+  box-shadow: 0 -1px 0 var(--divider); overflow: hidden; }
+.tpm-grab { flex: none; height: 14px; display: grid; place-items: center; }
+.tpm-grab span { width: 38px; height: 4px; border-radius: var(--radius-pill); background: rgba(8,8,11,.18); }
+.tpm-tlhead { flex: none; height: 56px; display: flex; align-items: center; gap: 6px; padding: 0 12px 0 0;
+  border-bottom: 1px solid var(--hairline); }
+.tpm-back { width: 44px; height: 44px; flex: none; border: 0; background: none; cursor: pointer;
+  display: grid; place-items: center; }
+.tpm-back img { width: 16px; height: 16px; filter: invert(1); opacity: .65; }
+.tpm-hcol { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tpm-hnm { font-weight: 700; font-size: 15px; line-height: 1.25; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpm-hsub { font-size: 11px; color: var(--ink-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpm-hsub b { font-family: var(--font-latin); font-weight: 700; color: var(--ink); }
+/* AFTER: 座標なしの場所は地図に出せない → ヘッダー右に理由を出す */
+.tpm-nogeo { flex: none; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px;
+  border-radius: var(--radius-pill); background: rgba(8,8,11,.05); font-size: 10.5px; color: var(--ink-sub); }
+.tpm-nogeo img { width: 11px; height: 11px; filter: invert(1); opacity: .45; }
+.tpm-list { flex: 1; min-height: 0; overflow: hidden; }
+
+/* ---- 投稿行（既存 .tlp と同一。差分だけここに） ------------------------- */
+.tlp { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 20px 16px;
+  border-bottom: 1px solid var(--hairline); font-family: var(--font-jp); color: var(--ink); background: #fff; }
+.tlp-col { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.tlp-head { display: flex; align-items: center; gap: 8px; }
+.tlp-av { flex: none; width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: block;
+  background: rgba(8,8,11,.08); }
+.tlp-name { font-weight: 700; font-size: 15px; line-height: 1.3; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.tlp-meta { font-family: var(--font-latin); font-size: 13px; color: var(--ink-sub); }
+/* AFTER: 場所グループはサークル横断 → 他サークルの投稿だけ既存 .tlp-chip で出す */
+.tlp-chip { margin-left: auto; display: flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px;
+  border-radius: var(--radius-pill); background: rgba(0,95,103,.10); flex: none; }
+.tlp-chip img { width: 11px; height: 11px; filter: invert(19%) sepia(28%) saturate(1800%) hue-rotate(144deg); }
+.tlp-chip span { font-family: var(--font-jp); font-weight: 600; font-size: 11px; color: var(--teal);
+  white-space: nowrap; }
+.tlp-body { margin: 0; font-size: 13px; line-height: 1.75; text-wrap: pretty; }
+.tlp-m1 { position: relative; margin: 0 -16px; overflow: hidden; }
+.tlp-m1 img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.tlp-acts { display: flex; align-items: center; flex-wrap: nowrap; gap: 0 10px; padding-top: 2px; min-width: 0; }
+.tlp-act { display: flex; align-items: center; gap: 8px; background: none; border: 0; padding: 0;
+  cursor: pointer; min-height: 44px; flex: none; }
+.tlp-act img { width: 18px; height: 18px; filter: invert(1); opacity: .5; display: block; }
+.tlp-act span { font-family: var(--font-latin); font-size: 13px; color: var(--ink-sub); }
+.tlp-act.liked img { opacity: 1; filter: invert(29%) sepia(93%) saturate(4000%) hue-rotate(320deg) brightness(102%); }
+.tlp-act.liked span { font-weight: 600; color: var(--state-like); }
+.tlp-og { display: flex; align-items: center; gap: 8px; min-width: 96px; flex: 1 1 110px; margin-left: auto;
+  max-width: 180px; height: 36px; padding: 0 8px 0 0; border-radius: var(--radius-xs); overflow: hidden;
+  border: 1px solid rgba(8,8,11,.10); text-decoration: none; color: inherit; background: #fff; }
+.tlp-og img { width: 36px; height: 36px; flex: none; object-fit: cover; display: block; background: #eee; }
+.tlp-og-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tlp-og-site { font-family: var(--font-latin); font-size: 9px; line-height: 1.2; color: rgba(8,8,11,.48);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tlp-og-ttl { font-weight: 700; font-size: 11px; line-height: 1.3; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+/* AFTER: いま開いている場所のリンクは押せないので、現在地であることを明示して無効化 */
+.tlp-og.here { border-color: rgba(0,95,103,.28); background: rgba(0,95,103,.06); cursor: default; }
+.tlp-og.here .tlp-og-site { color: var(--teal); font-weight: 700; }
+
+/* サークルのフィード（S0）のヘッダー — 既存 .tl-head と同値 */
+.tpm-cfeed { position: absolute; inset: 0; display: flex; flex-direction: column; background: #fff; }
+.tpm-cfeed-top { flex: none; padding: calc(var(--safe-top) + 8px) 0 0; }
+.tl-head { flex: none; display: flex; align-items: center; gap: 10px; padding: 2px 16px 12px;
+  border-bottom: 1px solid var(--hairline); }
+.tl-cover { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; }
+.tl-hcol { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.tl-nm { font-weight: 700; font-size: 15px; color: var(--ink); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.tl-ds { font-size: 11px; color: var(--ink-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpm-cfeed .tpm-list { flex: 1; }
+
+/* 空状態 / ローディング */
+.tpm-empty { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 0 32px 40px; text-align: center; }
+.tpm-empty .t { font-size: 13px; color: var(--ink-sub); }
+.tpm-empty .s { font-size: 11px; line-height: 1.7; color: var(--ink-dim); }
+.tpm-spin { width: 20px; height: 20px; margin: 18px auto; border-radius: 50%;
+  border: 2px solid rgba(8,8,11,.12); border-top-color: rgba(8,8,11,.42); }
+
+/* AFTER（提案・未実装）: この場所に投稿する導線 */
+.tpm-fab { position: absolute; right: 16px; bottom: calc(var(--safe-bot) + 16px); width: 48px; height: 48px;
+  border: 0; border-radius: 50%; background: var(--gradient-colorful); cursor: pointer; z-index: 8;
+  display: grid; place-items: center; box-shadow: 0 6px 18px rgba(8,8,11,.28); }
+.tpm-fab img { width: 18px; height: 18px; }
+.tpm-flag { position: absolute; right: 70px; bottom: calc(var(--safe-bot) + 28px); z-index: 8;
+  font-family: var(--font-latin); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-dim); }
+
+/* ==== motion storyboard ================================================= */
+.tpm-sb { display: flex; flex-direction: column; gap: 26px; }
+.tpm-sbrow { display: flex; flex-direction: column; gap: 10px; }
+.tpm-sbttl { font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: #fff; }
+.tpm-sbsub { font-family: var(--font-jp); font-size: 11.5px; line-height: 1.7; color: var(--fg-3); max-width: 104ch; }
+.tpm-frames { display: flex; align-items: flex-start; gap: 0; }
+.tpm-frame { display: flex; flex-direction: column; gap: 7px; width: 176px; flex: none; }
+.tpm-arrow { flex: none; width: 62px; padding-top: 150px; display: flex; flex-direction: column;
+  align-items: center; gap: 4px; }
+.tpm-arrow .ln { width: 100%; height: 1px; background: rgba(255,255,255,.24); position: relative; }
+.tpm-arrow .ln::after { content: ''; position: absolute; right: 0; top: -3px; width: 0; height: 0;
+  border-top: 3.5px solid transparent; border-bottom: 3.5px solid transparent;
+  border-left: 6px solid rgba(255,255,255,.36); }
+.tpm-arrow .ms { font-family: var(--font-latin); font-size: 9px; color: var(--fg-4); white-space: nowrap; }
+.tpm-frame .cap { font-family: var(--font-jp); font-size: 10.5px; line-height: 1.6; color: var(--fg-3); }
+.tpm-frame .cap b { color: #fff; font-weight: 700; }
+/* 小さい画面サムネ（176×382 = 402×874 の 0.4375） */
+.tpm-mini { position: relative; width: 176px; height: 382px; border-radius: 24px; overflow: hidden;
+  background: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,.14); flex: none; }
+.tpm-mini .sky { position: absolute; left: 0; right: 0; top: 0; overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 120%, #1b2130 0%, #0d1017 60%, #08090d 100%);
+  transition: height 360ms cubic-bezier(.16,1,.3,1); }
+  transform: translate(-50%,-50%); border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,.42);
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.02) 70%); }
+.tpm-mini .pnl { position: absolute; left: 0; right: 0; bottom: 0; background: #fff;
+  display: flex; flex-direction: column; }
+.tpm-mini .hd { flex: none; height: 26px; border-bottom: 1px solid rgba(8,8,11,.10);
+  display: flex; align-items: center; gap: 6px; padding: 0 8px; }
+.tpm-mini .hd .b { width: 8px; height: 8px; border-radius: 2px; background: rgba(8,8,11,.28); }
+.tpm-mini .hd .l { height: 6px; border-radius: 3px; background: rgba(8,8,11,.72); width: 74px; }
+.tpm-mini .hd .l.sub { width: 46px; height: 4px; background: rgba(8,8,11,.24); }
+.tpm-mini .rows { flex: 1; display: flex; flex-direction: column; gap: 0; }
+.tpm-mini .r { border-bottom: 1px solid rgba(8,8,11,.08); padding: 9px 8px; display: flex; gap: 6px; }
+.tpm-mini .r .av { width: 14px; height: 14px; border-radius: 50%; background: rgba(8,8,11,.12); flex: none; }
+.tpm-mini .r .c { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.tpm-mini .r .c i { height: 4px; border-radius: 2px; background: rgba(8,8,11,.14); display: block; }
+.tpm-mini .r .c i.w1 { width: 62%; background: rgba(8,8,11,.34); }
+.tpm-mini .r .c i.w2 { width: 92%; }
+.tpm-mini .r .c i.w3 { width: 74%; }
+.tpm-mini .pin { position: absolute; width: 16px; height: 16px; border-radius: 5px; background: #6b7280;
+  border: 1.5px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); }
+.tpm-mini .pin.sel { box-shadow: 0 0 0 2px #08080b, 0 1px 4px rgba(0,0,0,.4); transform: scale(1.14); }
+.tpm-mini .crd { position: absolute; width: 116px; padding: 6px; border-radius: 7px; background: #fff;
+  box-shadow: 0 3px 9px rgba(8,8,11,.3); display: flex; gap: 5px; align-items: center; }
+.tpm-mini .crd .ph { width: 22px; height: 22px; border-radius: 5px; background: rgba(8,8,11,.18); flex: none; }
+.tpm-mini .crd .c { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.tpm-mini .crd .c i { height: 4px; border-radius: 2px; background: rgba(8,8,11,.16); display: block; }
+.tpm-mini .crd .c i.w1 { width: 70%; background: rgba(8,8,11,.5); }
+.tpm-mini .shade { position: absolute; inset: 0; background: rgba(8,8,11,.5); }
+.tpm-mini .ghost { position: absolute; inset: 0; opacity: .35; }
+
+/* ==== 追加: 状態表現 & specimen 補助 ==================================== */
+/* 座標なしの場所 — 地図には出せないので、地図面に理由を置く（glass chip） */
+.tpm-mapchip { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  display: flex; align-items: center; gap: 7px; max-width: 260px; padding: 9px 13px;
+  border-radius: var(--radius-pill); background: var(--lg-tint-dark);
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot),
+              0 0 0 1px rgba(255,255,255,.18);
+  font-family: var(--font-jp); font-size: 11.5px; line-height: 1.5; color: #fff; text-align: left; }
+.tpm-mapchip img { width: 13px; height: 13px; flex: none; }
+
+/* 白面のシーンでは status bar を ink に */
+.statusbar.ink { color: var(--ink); }
+.statusbar.ink .sys svg { opacity: .9; }
+
+/* specimen の注釈ドット（入口・変更点） */
+.tpm-mark { position: absolute; z-index: 20; display: flex; align-items: center; gap: 6px;
+  pointer-events: none; font-family: var(--font-jp); font-size: 10px; font-weight: 700; color: #fff; }
+.tpm-mark .d { width: 18px; height: 18px; border-radius: 50%; background: var(--grad-pink);
+  box-shadow: 0 0 0 3px rgba(255,62,136,.28); flex: none;
+  font-family: var(--font-latin); font-size: 10px; line-height: 18px; text-align: center; color: #fff; }
+.tpm-mark .l { padding: 2px 7px; border-radius: var(--radius-pill); background: rgba(8,8,11,.82);
+  white-space: nowrap; }
+
+/* 分離して見せる部品（カードの状態バリエーション） */
+.tpm-detach { display: flex; gap: 18px; align-items: flex-start; flex-wrap: wrap; }
+.tpm-detach .box { display: flex; flex-direction: column; gap: 8px; width: 264px; }
+.tpm-detach .box .tpm-card { position: relative; }
+.tpm-detach .box .tpm-card::after { display: none; }
+.tpm-detach .cap { font-family: var(--font-jp); font-size: 10.5px; line-height: 1.6; color: var(--fg-3); }
+.tpm-detach .cap b { color: #fff; font-weight: 700; }
+
+/* motion サムネの壁 — 同じ WdEriaWall を小さい半径で建てる */
+.tpm-mini .sky > .ew { position: absolute; inset: 0; border-radius: 0; box-shadow: none;
+  --tilt: 60deg; --spin: -18deg; --z: -26px; --oy: 12px; }

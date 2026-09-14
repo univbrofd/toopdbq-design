@@ -1,0 +1,282 @@
+<!-- @dsCard group="TimelinePlaceMode" tier="screen" viewport="1180x1780" name="TimelinePlaceMode — motion（入る / 抜ける / 別ピン切替）" subtitle="地図パネルが降りる 360ms + フィードが左へ抜けて場所タイムラインが右から入る 440ms（ease-out）。ピンは stagger で立ち上がる。別ピンはカードが横移動してから差し替え" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>TimelinePlaceMode — motion storyboard</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/components.css">
+<link rel="stylesheet" href="TimelinePlaceMode.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;600;700;900&display=swap">
+</head>
+<body class="tpm">
+<div class="tpm-doc">
+
+  <div>
+    <div class="tpm-h1">TimelinePlaceMode — motion</div>
+    <p class="tpm-lead" style="margin-top:8px">
+      カーブは <code>--ease-out = cubic-bezier(.16,1,.3,1)</code>（as-built と同じ）。
+      地図パネルは<b>高さ 0 → 437 を 360ms</b>、サークルのフィードは<b>x 0 → −100%</b>、場所のタイムラインは<b>x +100% → 0</b> を <b>440ms</b>。
+      地図のカメラはサークルのエリアへ 500ms。<b>変えたのは 2 つだけ</b>: ピンの出方（stagger）と別ピン切替（カードの横移動）。
+    </p>
+  </div>
+
+  <div class="tpm-sb">
+
+    <!-- ================= 入る ================= -->
+    <div class="tpm-sbrow">
+      <div class="tpm-sbttl">入る — 投稿のリンクカードをタップ</div>
+      <p class="tpm-sbsub">地図が<b>降りてくる</b>間にフィードが左へ抜ける。ピンは一覧が届いてから
+        <b>脚を原点に 8px 立ち上がり＋fade 160ms・40ms stagger</b>（as-built はアニメ無しの突然出現）。</p>
+      <div class="tpm-frames">
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:0"><div class="ew" data-ew data-seed="8" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <div class="pnl" style="top:0">
+              <div class="hd"><span class="b" style="border-radius:50%"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>0ms</b> — サークルのフィード。<code>.tlp-og</code> をタップ</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">180ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:108px"><div class="ew" data-ew data-seed="11" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <div class="pnl" style="top:96px; opacity:.5; transform:translateX(-46%)">
+              <div class="hd"><span class="b" style="border-radius:50%"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div>
+              </div>
+            </div>
+            <div class="pnl" style="top:96px; transform:translateX(54%)">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>180ms</b> — 地図が降りつつ、フィードが左 / 場所タイムラインが右から交差</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">440ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="14" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>440ms</b> — 交差おわり。ピンはまだ無い（一覧の取得待ち・カメラは 500ms で寄り続ける）</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">+160ms<br>40ms stagger</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="17" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:34px; top:96px; opacity:.72"></span>
+            <span class="pin" style="left:114px; top:66px; opacity:.72"></span>
+            <span class="pin sel" style="left:66px; top:128px"></span>
+            <div class="crd" style="left:12px; top:44px">
+              <span class="ph"></span><span class="c"><i class="w1"></i><i></i><i style="width:44%"></i></span>
+            </div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>600ms</b> — ピンが<b>立ち上がって</b>現れ、選択ピンのカードが続く（<b>After の変更点</b>）</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= 抜ける ================= -->
+    <div class="tpm-sbrow">
+      <div class="tpm-sbttl">抜ける — 戻る（地図左上 44 / ヘッダー 44）または地図を上へドラッグ（−6px）</div>
+      <p class="tpm-sbsub">入るの逆再生。地図パネルが<b>上へ畳まれ</b>、サークルのフィードが左から戻る。
+        ドラッグ中は指に追従し、−6px を超えたら離した時点で確定・足りなければ spring back。</p>
+      <div class="tpm-frames">
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="20" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:34px; top:96px; opacity:.72"></span>
+            <span class="pin sel" style="left:66px; top:128px"></span>
+            <div class="crd" style="left:12px; top:44px"><span class="ph"></span><span class="c"><i class="w1"></i><i></i><i style="width:44%"></i></span></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>0ms</b> — 場所モード</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">ドラッグ −6px</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:150px"><div class="ew" data-ew data-seed="23" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:34px; top:70px; opacity:.4"></span>
+            <span class="pin sel" style="left:66px; top:100px; opacity:.6"></span>
+            <div class="pnl" style="top:144px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>畳み始め</b> — カードとピンが先に fade（地図が消える前に前景を抜く）</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">360ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:46px"><div class="ew" data-ew data-seed="26" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <div class="pnl" style="top:40px; transform:translateX(24%)">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div></div>
+            </div>
+            <div class="pnl ghost" style="top:40px; transform:translateX(-40%); opacity:.5">
+              <div class="hd"><span class="b" style="border-radius:50%"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>360ms</b> — 地図が畳まれ、フィードが左から戻る</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">440ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:0"><div class="ew" data-ew data-seed="29" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <div class="pnl" style="top:0">
+              <div class="hd"><span class="b" style="border-radius:50%"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>440ms</b> — サークルタイムラインに復帰（スクロール位置は保持）</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ================= 別ピン切替 ================= -->
+    <div class="tpm-sbrow">
+      <div class="tpm-sbttl">別ピン切替 — 地図の別ピン、または一覧の<b>別の場所</b>のリンクカードをタップ</div>
+      <p class="tpm-sbsub">as-built は<b>即時差し替え</b>。After は<b>カードが横へ 180ms 移動</b>してから中身を 120ms で cross-fade し、
+        ヘッダーと一覧も同じ 120ms で入れ替える。地図パネルの高さは動かさない（モードは変わっていないため）。</p>
+      <div class="tpm-frames">
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="32" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:114px; top:52px; opacity:.72"></span>
+            <span class="pin sel" style="left:66px; top:128px"></span>
+            <div class="crd" style="left:12px; top:44px"><span class="ph"></span><span class="c"><i class="w1"></i><i></i><i style="width:44%"></i></span></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>0ms</b> — WOMB 選択中。右上のピンをタップ</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">90ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="35" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:66px; top:128px; opacity:.72"></span>
+            <span class="pin sel" style="left:114px; top:52px"></span>
+            <div class="crd" style="left:34px; top:40px; opacity:.75"><span class="ph"></span><span class="c"><i class="w1"></i><i></i><i style="width:44%"></i></span></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:56px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div><div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w3"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>90ms</b> — 選択リング・scale は即時、<b>カードは移動中</b>。文字は薄くなるだけで消えない</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">180ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="38" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:66px; top:128px; opacity:.72"></span>
+            <span class="pin sel" style="left:114px; top:52px"></span>
+            <div class="crd" style="left:52px; top:84px"><span class="ph"></span><span class="c"><i class="w1" style="width:84%"></i><i></i><i style="width:52%"></i></span></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:70px"></i><i class="l sub"></i></span></div>
+              <div class="rows"><div class="r" style="opacity:.35"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div></div>
+            </div>
+          </div>
+          <p class="cap"><b>180ms</b> — 新しいピンの上に着地し、脚が新しい位置を指す。一覧は先頭から読み直し</p>
+        </div>
+
+        <div class="tpm-arrow"><span class="ln"></span><span class="ms">300ms</span></div>
+
+        <div class="tpm-frame">
+          <div class="tpm-mini">
+            <div class="sky" style="height:192px"><div class="ew" data-ew data-seed="41" data-n="36" data-r="58" data-h="34" data-blds="9"><div class="ew-scene"></div></div></div>
+            <span class="pin" style="left:66px; top:128px; opacity:.72"></span>
+            <span class="pin sel" style="left:114px; top:52px"></span>
+            <div class="crd" style="left:52px; top:84px"><span class="ph"></span><span class="c"><i class="w1" style="width:84%"></i><i></i><i style="width:52%"></i></span></div>
+            <div class="pnl" style="top:186px">
+              <div class="hd"><span class="b"></span><span class="c" style="display:flex;flex-direction:column;gap:3px"><i class="l" style="width:70px"></i><i class="l sub"></i></span></div>
+              <div class="rows">
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i><i class="w3"></i></span></div>
+                <div class="r"><span class="av"></span><span class="c"><i class="w1"></i><i class="w2"></i></span></div>
+              </div>
+            </div>
+          </div>
+          <p class="cap"><b>300ms</b> — 新しい場所の投稿が入りきる（<b>ヘッダー 2 行目のサークル名は変わらない</b>）</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <p class="tpm-lead">
+    <b>受け渡しの注</b>: 値は as-built 準拠（360 / 440 / 500ms、<code>--ease-out</code>）。
+    追加したのは <b>ピンの stagger 160ms / 40ms</b> と <b>カード移動 180ms・cross-fade 120ms</b> の 2 本だけで、
+    どちらも <code>Curves.easeOut</code> / <code>easeInOut</code> の範囲内。バウンス・無限ループは使わない。
+  </p>
+
+</div>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#0b0d13"/><rect x="72" y="72" width="96" height="52" rx="10" fill="#fff"/><rect x="80" y="80" width="36" height="36" rx="8" fill="#0d5f67"/><rect x="122" y="84" width="38" height="7" rx="3.5" fill="#08080b"/><rect x="122" y="96" width="28" height="6" rx="3" fill="rgba(8,8,11,.4)"/><path d="M112 124 l8 12 l8 -12 z" fill="#fff"/><rect x="96" y="150" width="48" height="48" rx="14" fill="#fff"/><rect x="100" y="154" width="40" height="40" rx="11" fill="#d0a052"/><text x="120" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="22" font-weight="700" fill="#fff">PLACE</text><text x="120" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="rgba(255,255,255,.6)">motion</text></svg></template>
+<script src="../WdQuestPopup/eria-wall.js"></script>
+<script>
+  document.querySelectorAll('[data-ew]').forEach((el, i) => {
+    const d = el.dataset;
+    window.EriaWall.build(el, { seed: +d.seed || (7 + i), n: +d.n || 48, r: +d.r || 150,
+      h: +d.h || 92, blds: +d.blds || 22, ground: 3 });
+  });
+</script>
+</body>
+</html>
