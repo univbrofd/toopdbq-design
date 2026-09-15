@@ -47,8 +47,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .ab.tall .th { font-family: var(--font-jp); font-weight: 900; font-size: 48px; line-height: 52px;
   letter-spacing: -.02em; color: #fff; }
 .ab.tall .th .ln { display: block; white-space: nowrap; }
-/* accent = 1 面 1 語。brand の --state-like（#ff3e88）を使う */
-.ab.tall .th em { font-style: normal; color: var(--state-like); }
+/* accent = 1 面 1 語。色は面ごとにグラデーションの 4 色を順に（1 面目 = ピンク → teal → yellow → golden） */
+.ab.tall .th em { font-style: normal; color: var(--accent, var(--grad-pink)); }
+.ab.tall[data-accent="pink"]   { --accent: var(--grad-pink); }
+.ab.tall[data-accent="teal"]   { --accent: var(--grad-teal); }
+.ab.tall[data-accent="yellow"] { --accent: var(--grad-yellow); }
+.ab.tall[data-accent="golden"] { --accent: var(--grad-golden); }
 .ab.tall[data-lang="en"] .tq { font-family: var(--font-latin); font-weight: 700; font-size: 22px; }
 .ab.tall[data-lang="en"] .th { font-family: var(--font-latin); font-size: 42px; line-height: 48px;
   letter-spacing: -.02em; }
@@ -71,7 +75,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     <div class="row">
       <div class="abwrap">
         <span class="ab-id">tall-ja-01 · home</span>
-        <div class="ab tall" id="tall-ja-01" data-lang="ja" data-device="iphone"
+        <div class="ab tall" id="tall-ja-01" data-lang="ja" data-accent="pink" data-device="iphone"
              data-screen-label="tall-ja-01 · home">
           <div class="tband">
             <p class="tq">地図でつながる街の投稿</p>
@@ -82,7 +86,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       </div>
       <div class="abwrap">
         <span class="ab-id">tall-ja-02 · place</span>
-        <div class="ab tall" id="tall-ja-02" data-lang="ja" data-device="iphone"
+        <div class="ab tall" id="tall-ja-02" data-lang="ja" data-accent="teal" data-device="iphone"
              data-screen-label="tall-ja-02 · place">
           <div class="tband">
             <p class="tq">同じ場所の投稿が集まる</p>
@@ -93,7 +97,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       </div>
       <div class="abwrap">
         <span class="ab-id">tall-ja-03 · board</span>
-        <div class="ab tall" id="tall-ja-03" data-lang="ja" data-device="iphone"
+        <div class="ab tall" id="tall-ja-03" data-lang="ja" data-accent="yellow" data-device="iphone"
              data-screen-label="tall-ja-03 · board">
           <div class="tband">
             <p class="tq">投稿すると答えが見える</p>
@@ -104,7 +108,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       </div>
       <div class="abwrap">
         <span class="ab-id">tall-ja-04 · full</span>
-        <div class="ab tall" id="tall-ja-04" data-lang="ja" data-device="iphone"
+        <div class="ab tall" id="tall-ja-04" data-lang="ja" data-accent="golden" data-device="iphone"
              data-screen-label="tall-ja-04 · full">
           <div class="tband">
             <p class="tq">投稿をタップして全画面へ</p>
