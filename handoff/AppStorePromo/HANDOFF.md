@@ -34,3 +34,4 @@ App Store 掲載用のスクリーンショット 4 面。訴求の主役は**�
 ## 文言の作り方
 
 `COPY_PROMPT.md`（調査 → 構成案 → コピー → What's New を 1 回で頼む自己完結プロンプト）→ 回答の JSON を `copy.json` へ。
+`STORE_TEXT_PROMPT.md`（ストア文の構成調査 → ポスター英訳 → 概要 / 最新情報 / プロモーションテキスト ja・en）→ `poster_en` を `copy.json` の en へ、`metadata` を App Store Connect へ。
