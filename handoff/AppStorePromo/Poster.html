@@ -31,7 +31,10 @@ a { color: var(--text-1); } a:hover { color: #fff; }
    ショットを丸ごと（筐体なし・下端まで面内）。画面 = 344×744 で面の約 61%。
    ===================================================================== */
 .ab { position: relative; overflow: hidden; flex: none; isolation: isolate; }
-.ab.tall { width: 440px; height: 956px; background: #000; color: #fff; font-family: var(--font-jp); }
+.ab.tall { width: var(--pw, 440px); height: var(--ph, 956px); background: #000; color: #fff; font-family: var(--font-jp); }
+/* 6.5″ 用（1284×2778 @3x = 428×926）。`?size=65` で #tallstudio に .s65 が付く */
+.s65 .ab.tall { --pw: 428px; --ph: 926px; --band: 172px; --sub: 21px; --h1: 46px; --lh: 50px;
+  --sx: 47px; --sy: 188px; --sw: 334px; --sh: 722px; --sr: 45px; }
 /* 下半分にだけ現れる透過グラデーション（上端 45% までは完全な黒のまま）。
    配色は DS の 135° を逆順にする = 要素ごと 180° 回して（色の複製を避ける）、
    マスクも回転後に下側が残る向き（0deg）で指定する */
@@ -39,12 +42,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   background: var(--gradient-colorful-linear); opacity: .78; transform: rotate(180deg);
   -webkit-mask-image: linear-gradient(0deg, rgba(0,0,0,0) 45%, #000 100%);
   mask-image: linear-gradient(0deg, rgba(0,0,0,0) 45%, #000 100%); }
-.ab.tall .tband { position: absolute; z-index: 8; left: 24px; right: 24px; top: 0; height: 176px;
+.ab.tall .tband { position: absolute; z-index: 8; left: 24px; right: 24px; top: 0; height: var(--band, 176px);
   padding-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 10px; text-align: center; }
-.ab.tall .tq { font-family: var(--font-jp); font-weight: 700; font-size: 22px; line-height: 1.3;
+.ab.tall .tq { font-family: var(--font-jp); font-weight: 700; font-size: var(--sub, 22px); line-height: 1.3;
   letter-spacing: .01em; color: #fff; }
-.ab.tall .th { font-family: var(--font-jp); font-weight: 900; font-size: 48px; line-height: 52px;
+.ab.tall .th { font-family: var(--font-jp); font-weight: 900; font-size: var(--h1, 48px); line-height: var(--lh, 52px);
   letter-spacing: -.02em; color: #fff; }
 .ab.tall .th .ln { display: block; white-space: nowrap; }
 /* accent = 1 面 1 語。色は面ごとにグラデーションの 4 色を順に（1 面目 = ピンク → teal → yellow → golden） */
@@ -57,8 +60,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .ab.tall[data-lang="en"] .th { font-family: var(--font-latin); font-size: 42px; line-height: 48px;
   letter-spacing: -.02em; }
 /* 実機画面 — 全体を面内に収める（切らない・拡大しない） */
-.ab.tall .scr { position: absolute; z-index: 6; left: 48px; top: 192px; width: 344px; height: 744px;
-  border-radius: 46px; overflow: hidden; background: #111;
+.ab.tall .scr { position: absolute; z-index: 6; left: var(--sx, 48px); top: var(--sy, 192px); width: var(--sw, 344px);
+  height: var(--sh, 744px); border-radius: var(--sr, 46px); overflow: hidden; background: #111;
   box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 30px 80px rgba(0,0,0,.7); }
 .ab.tall .scr img { display: block; width: 100%; height: 100%; object-fit: cover; }
 </style>
@@ -122,8 +125,11 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 </div>
 
 <script>
-/* ?ab=tall-ja-02 のように 1 面だけ描画できる（scripts/design/poster_export.mjs が使う）。 */
+/* ?ab=tall-ja-02 のように 1 面だけ描画できる（scripts/design/poster_export.mjs が使う）。
+   ?size=65 で 6.5″（428×926 → 1284×2778 @3x）の寸法に切り替える。 */
 (function () {
+  var qs = /[?&]size=(\d+)/i.exec(location.search);
+  if (qs && qs[1] === '65') document.getElementById('tallstudio').classList.add('s65');
   var qa = /[?&]ab=([a-z0-9-]+)/i.exec(location.search);
   if (!qa) return;
   var keep = qa[1].toLowerCase();
