@@ -26,7 +26,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   color: rgba(255,255,255,.38); font-variant-numeric: tabular-nums; }
 
 /* =======================================================================
-   TALL SET (v6) — 黒地（下半分に DS の colorful グラデーションを濃く透過）・
+   TALL SET (v6) — 黒地（下半分に DS の colorful 線形グラデーション 135° を濃く透過 = 斜めに変化）・
    上 176px がコピー帯（補足 1 行 → 見出し 2 行・白）／その下に実機スクリーン
    ショットを丸ごと（筐体なし・下端まで面内）。画面 = 344×744 で面の約 61%。
    ===================================================================== */
@@ -34,7 +34,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .ab.tall { width: 440px; height: 956px; background: #000; color: #fff; font-family: var(--font-jp); }
 /* 下半分にだけ現れる透過グラデーション（上端 45% までは完全な黒のまま） */
 .ab.tall::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: var(--gradient-colorful); opacity: .78;
+  background: var(--gradient-colorful-linear); opacity: .78;
   -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 45%, #000 100%);
   mask-image: linear-gradient(180deg, rgba(0,0,0,0) 45%, #000 100%); }
 .ab.tall .tband { position: absolute; z-index: 8; left: 24px; right: 24px; top: 0; height: 176px;
@@ -90,25 +90,25 @@ a { color: var(--text-1); } a:hover { color: #fff; }
         </div>
       </div>
       <div class="abwrap">
-        <span class="ab-id">tall-ja-03 · place full</span>
+        <span class="ab-id">tall-ja-03 · board</span>
         <div class="ab tall" id="tall-ja-03" data-lang="ja" data-device="iphone"
-             data-screen-label="tall-ja-03 · place full">
+             data-screen-label="tall-ja-03 · board">
           <div class="tband">
             <p class="tq">投稿すると答えが見える</p>
             <h1 class="th"><span class="ln">同じ<em>お題</em>で、</span><span class="ln">街とつながる</span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/03-place-full-ja.png" alt="全画面表示: 「この場所」の投稿" /></div>
+          <div class="scr"><img src="shots/v6/03-board-ja.png" alt="クエストボード: お題「ウィンクして」とみんなの投稿" /></div>
         </div>
       </div>
       <div class="abwrap">
-        <span class="ab-id">tall-ja-04 · place list</span>
+        <span class="ab-id">tall-ja-04 · full</span>
         <div class="ab tall" id="tall-ja-04" data-lang="ja" data-device="iphone"
-             data-screen-label="tall-ja-04 · place list">
+             data-screen-label="tall-ja-04 · full">
           <div class="tband">
             <p class="tq">投稿をタップして全画面へ</p>
             <h1 class="th"><span class="ln">写真も動画も</span><span class="ln">その場に<em>浸る</em></span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/04-place-list-ja.png" alt="場所モード: その場所の投稿一覧" /></div>
+          <div class="scr"><img src="shots/v6/04-full-ja.png" alt="全画面表示: 投稿の動画といいね・コメント・共有" /></div>
         </div>
       </div>
     </div>

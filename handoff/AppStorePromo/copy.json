@@ -17,15 +17,13 @@
       "order": 3,
       "key": "board",
       "role": "同じお題への投稿を通じて、街の人たちと参加体験を共有する。",
-      "shot": "shots/v6/03-place-full-ja.png",
-      "note": "画像はユーザー指定（場所の全画面）。文言との対応は要確認"
+      "shot": "shots/v6/03-board-ja.png"
     },
     {
       "order": 4,
       "key": "full",
       "role": "写真・動画を大きく見て、その場の雰囲気に浸る。",
-      "shot": "shots/v6/04-place-list-ja.png",
-      "note": "画像はユーザー指定（場所モードの一覧）。文言との対応は要確認"
+      "shot": "shots/v6/04-full-ja.png"
     }
   ],
   "panels": [
