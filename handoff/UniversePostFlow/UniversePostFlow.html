@@ -47,7 +47,7 @@ html, body {
   --vw: 402px; --vh: 874px;
   --safe-top: 62px;      /* SafeArea 上端 */
   --safe-bottom: 34px;   /* ホームインジケータ */
-  --footer-h: 112px;     /* WdCircleTool.height */
+  --footer-h: calc(var(--safe-bottom) + 12px); /* セーフエリア + ボトム余白 */
   position: relative; width: var(--vw); height: var(--vh); flex: none;
   border-radius: 55px; overflow: hidden; background: #000;
   box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
@@ -116,14 +116,15 @@ html, body {
   text-align: center;
 }
 .qh-title { color: #fff; -webkit-text-stroke: 1.4px rgba(0,0,0,.92); paint-order: stroke fill; }
-.qh-time {
-  font-family: 'Inter', var(--font-latin);
-  font-weight: 700; font-size: 26px; line-height: 1; letter-spacing: .01em;
-  font-variant-numeric: tabular-nums; margin-top: 9px;
+/* サークル名（クエスト投稿時のみ・タイトルの上に小さく） */
+.qh-sub {
+  font-family: var(--font-jp, var(--font-latin));
+  font-weight: 600; font-size: 12px; line-height: 1.3; letter-spacing: .02em;
+  color: rgba(255,255,255,.9); margin-bottom: 3px; text-align: center;
+  -webkit-text-stroke: 1.1px rgba(0,0,0,.92); paint-order: stroke fill;
 }
-.qh-time { color: #fff; -webkit-text-stroke: 1.4px rgba(0,0,0,.92); paint-order: stroke fill; }
-/* 締切超過は文言だけ差し替え、投稿は止めない（endedText = 滑り込みセーフ / 19px） */
-.phone[data-ended="true"] .qh-time { font-size: 19px; }
+/* 通常投稿はサークル名だけをタイトル位置に出す（カウントダウンなし） */
+.phone[data-post="normal"] .qh-sub { display: none; }
 
 /* ── L2 撮影フッター（WdCameraFooter.standart + トグル） ─────────────── */
 .cam-footer {
@@ -235,18 +236,62 @@ html, body {
 .side-act.liked .face { border: 1.5px solid #ff3e88; }
 .side-act.liked .face img { filter: invert(41%) sepia(72%) saturate(3200%) hue-rotate(311deg); }
 
-/* 投稿アクションバー: 右はサイドツール rail(76px) を避ける */
+/* キャプション + リンク: 右はサイドツール rail(76px) を避ける */
+.compose {
+  position: absolute; z-index: 22; left: 16px; right: 76px;
+  bottom: calc(var(--footer-h) + 84px);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.cap-field {
+  width: 100%; min-height: 64px; max-height: 108px; resize: none; outline: none;
+  border-radius: 12px; padding: 10px 12px; color: #fff;
+  font: 400 14px/1.55 var(--font-jp, var(--font-latin));
+  background: var(--lg-tint); border: .75px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot);
+}
+.cap-field::placeholder { color: rgba(255,255,255,.56); }
+.link-row { display: flex; align-items: center; }
+.link-add {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+  border-radius: 9999px; cursor: pointer; color: #fff;
+  font: 600 12px/1 var(--font-jp, var(--font-latin)); white-space: nowrap;
+  background: var(--lg-tint); border: .75px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+}
+.link-add img { width: 13px; height: 13px; }
+.link-chip {
+  display: none; align-items: center; gap: 8px; max-width: 100%; height: 32px;
+  padding: 0 6px 0 12px; border-radius: 9999px;
+  background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.18);
+  backdrop-filter: blur(var(--lg-blur)); -webkit-backdrop-filter: blur(var(--lg-blur));
+}
+.link-chip .u {
+  font: 500 12px/1 'Inter', var(--font-latin); color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-chip .x {
+  width: 20px; height: 20px; border-radius: 50%; flex: none; cursor: pointer; border: 0;
+  background: rgba(255,255,255,.2); display: grid; place-items: center;
+}
+.link-chip .x img { width: 9px; height: 9px; }
+.phone[data-link="on"] .link-add { display: none; }
+.phone[data-link="on"] .link-chip { display: inline-flex; }
+
+/* 投稿アクション: 画面中央にオーバレイ（サイドツールと重なってよい） */
 .act-bar {
-  position: absolute; z-index: 20; bottom: var(--footer-h);
-  left: 16px; right: 76px;
+  position: absolute; z-index: 30; bottom: var(--footer-h);
+  left: 0; right: 0;
   display: flex; flex-direction: column; align-items: center;
 }
 /* WdIconTextButton.specialFat = h47 / r16 / colorful */
 .btn-post {
-  width: 100%; height: 47px; border-radius: 16px; cursor: pointer; border: 0;
+  min-width: 196px; padding: 0 28px; height: 47px; border-radius: 16px; cursor: pointer; border: 0;
   background: var(--gradient-colorful-linear);
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  font: 700 15px/1 var(--font-jp, var(--font-latin)); color: #fff;
+  font: 700 15px/1 var(--font-jp, var(--font-latin)); color: #fff; white-space: nowrap;
   text-shadow: 0 1px 3px rgba(0,0,0,.35);
   box-shadow: 0 8px 24px rgba(0,0,0,.45);
 }
@@ -254,6 +299,7 @@ html, body {
 .btn-draft {
   margin: 12px 0; background: none; border: 0; cursor: pointer;
   font: 500 12px/1 var(--font-jp, var(--font-latin)); color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,0,.7);
 }
 
 /* サークルフッター（WdCircleTool 112px 全幅） */
@@ -296,7 +342,10 @@ html, body {
 .upload .fill { height: 100%; width: 0%; background: var(--gradient-colorful-linear); transition: width .25s linear; }
 
 /* ── stage 別の出し分け ──────────────────────────────────────────────── */
-.cam-footer, .tt-btn, .placed, .edit-ok, .side-tool, .act-bar, .circle-foot { transition: opacity .18s var(--ease-out, ease); }
+.cam-footer, .tt-btn, .placed, .edit-ok, .side-tool, .act-bar, .compose, .circle-foot { transition: opacity .18s var(--ease-out, ease); }
+.phone[data-stage="shooting"] .compose,
+.phone[data-stage="editing"] .compose { opacity: 0; pointer-events: none; }
+.phone[data-stage="uploading"] .compose { opacity: .4; pointer-events: none; }
 .phone[data-stage="shooting"] .tt-btn,
 .phone[data-stage="shooting"] .placed,
 .phone[data-stage="shooting"] .edit-ok,
@@ -346,7 +395,12 @@ html, body {
       <button data-go="confirm">確認</button>
     </div>
 
-    <div class="phone" id="phone" data-stage="shooting" data-ended="false">
+    <div class="stage-rail" id="ptype">
+      <button data-post="quest" aria-current="true">クエスト投稿</button>
+      <button data-post="normal">通常投稿</button>
+    </div>
+
+    <div class="phone" id="phone" data-stage="shooting" data-post="quest" data-link="off">
       <div class="screen">
 
         <!-- L0 メディア -->
@@ -367,8 +421,8 @@ html, body {
             <img src="../../assets/icons/icon_back.png" alt="" />
           </button>
           <div class="qh-card">
-            <div class="qh-title">とぅーぷどぅっくバーで乾杯</div>
-            <div class="qh-time" id="cd">05:08:04</div>
+            <div class="qh-sub" id="qhSub">サークル渋谷</div>
+            <div class="qh-title" id="qhTitle">とぅーぷどぅっくバーで乾杯</div>
           </div>
           <div class="qh-slot"></div>
         </div>
@@ -400,7 +454,6 @@ html, body {
 
         <!-- L4 確認 -->
         <div class="side-tool">
-          <div class="side-user"><img src="../../assets/sample/user/user003.jpg" alt="" /></div>
           <div class="side-act" id="like">
             <span class="face"><img src="../../assets/icons/icon_like.png" alt="" /></span>
             <span class="n" id="likeN">863</span>
@@ -409,6 +462,22 @@ html, body {
             <span class="face"><img src="../../assets/icons/icon_comment.png" alt="" /></span>
             <span class="n">52</span>
           </div>
+          <div class="side-user"><img src="../../assets/sample/user/user003.jpg" alt="" /></div>
+        </div>
+
+        <div class="compose">
+          <textarea class="cap-field" id="caption" rows="3" placeholder="キャプションを入力"></textarea>
+          <div class="link-row">
+            <button class="link-add" id="linkAdd">
+              <img src="../../assets/icons/icon_add.png" alt="" />リンクを追加
+            </button>
+            <span class="link-chip">
+              <span class="u" id="linkUrl">example.com</span>
+              <button class="x" id="linkDel" aria-label="リンクを削除">
+                <img src="../../assets/icons/icon_close.png" alt="" />
+              </button>
+            </span>
+          </div>
         </div>
 
         <div class="act-bar">
@@ -416,16 +485,6 @@ html, body {
             <img src="../../assets/icons/icon_check.png" alt="" />投稿する
           </button>
           <button class="btn-draft">下書き保存する</button>
-        </div>
-
-        <div class="circle-foot">
-          <div class="circle-pill">
-            <span class="cover"><img src="../../assets/sample/uv/circle-01.png" alt="" /></span>
-            <span class="t">
-              <span class="nm">サークル渋谷</span>
-              <span class="ds">渋谷駅周辺のコミュニティ</span>
-            </span>
-          </div>
         </div>
 
       </div>
@@ -510,16 +569,44 @@ html, body {
     }, 160);
   });
 
-  // カウントダウン（実装 = その日の締切までの残り。tabular で桁が踊らない）
-  const cd = document.getElementById('cd');
-  let left = 5 * 3600 + 8 * 60 + 4;
-  setInterval(() => {
-    left = left > 0 ? left - 1 : 0;
-    const h = String(Math.floor(left / 3600)).padStart(2, '0');
-    const m = String(Math.floor(left % 3600 / 60)).padStart(2, '0');
-    const s = String(left % 60).padStart(2, '0');
-    cd.textContent = `${h}:${m}:${s}`;
-  }, 1000);
+  // 投稿タイプ: 通常 = サークル名のみ / クエスト = サークル名（小）+ クエストタイトル
+  const CIRCLE = 'サークル渋谷';
+  const QUEST  = 'とぅーぷどぅっくバーで乾杯';
+  const qhSub = document.getElementById('qhSub');
+  const qhTitle = document.getElementById('qhTitle');
+  const ptype = document.getElementById('ptype');
+  function setPostType(t) {
+    phone.dataset.post = t;
+    qhSub.textContent = CIRCLE;
+    qhTitle.textContent = t === 'quest' ? QUEST : CIRCLE;
+    for (const b of ptype.querySelectorAll('button')) {
+      b.setAttribute('aria-current', String(b.dataset.post === t));
+    }
+  }
+  ptype.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-post]');
+    if (b) setPostType(b.dataset.post);
+  });
+  setPostType(params.postType === 'normal' ? 'normal' : 'quest');
+
+  // リンク添付
+  const linkUrl = document.getElementById('linkUrl');
+  document.getElementById('linkAdd').addEventListener('click', () => {
+    const u = prompt('リンクを追加', 'https://');
+    if (!u || u.trim() === 'https://') return;
+    linkUrl.textContent = u.trim().replace(/^https?:\/\//, '');
+    phone.dataset.link = 'on';
+  });
+  document.getElementById('linkDel').addEventListener('click', () => {
+    phone.dataset.link = 'off';
+  });
+
+  // キャプションは高さ自動調整
+  const caption = document.getElementById('caption');
+  caption.addEventListener('input', () => {
+    caption.style.height = 'auto';
+    caption.style.height = Math.min(108, caption.scrollHeight) + 'px';
+  });
 })();
 </script>
 </body>
