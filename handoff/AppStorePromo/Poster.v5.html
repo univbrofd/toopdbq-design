@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poster v5 — App Store ポスター（Quest · tall）</title>
+<!-- v6 で置き換える前の Claude Design root Poster.html（Quest 4 面・筐体つき・下端切れ）の控え。
+     画面は Universe-Quest.html?embed を iframe で載せていた。foundation のパスは Claude Design root 基準。 -->
+
+<!-- foundation: DS tokens (colors / type / fonts) — 複製しない -->
+<link rel="stylesheet" href="_ds/toopdbq-design-system-af3394a2-52b1-4c70-a774-1439b41270db/colors_and_type.css" />
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; min-height: 100%; }
+body { background: #101014; color: var(--text-1); font-family: var(--font-latin);
+  -webkit-font-smoothing: antialiased; }
+a { color: var(--text-1); } a:hover { color: #fff; }
+
+/* ---- studio chrome ------------------------------------------------------ */
+.studio { min-height: 100vh; padding: 42px 40px 80px; display: flex; flex-direction: column; gap: 34px; }
+.set { display: flex; flex-direction: column; gap: 14px; }
+.set > h2 { font-family: var(--font-latin); font-weight: 600; font-size: 11px; letter-spacing: .14em;
+  text-transform: uppercase; color: rgba(255,255,255,.5); }
+.set .row { display: flex; gap: 28px; overflow-x: auto; padding: 4px 4px 22px; }
+.abwrap { display: flex; flex-direction: column; gap: 9px; flex: none; }
+.ab-id { font-family: var(--font-latin); font-size: 10px; letter-spacing: .06em;
+  color: rgba(255,255,255,.38); font-variant-numeric: tabular-nums; }
+
+/* =======================================================================
+   TALL SET (v5) — 黒地・コピー上／筐体つきの実機画面が下端で切れる縦構図。
+   画面は Universe-Quest.html?embed を実物のまま（iframe）で載せる。
+   ===================================================================== */
+.ab { position: relative; overflow: hidden; flex: none; isolation: isolate; }
+.ab.tall { --band-w: calc(440px - 60px);   /* 帯幅 = 面幅 − 左右 30px */
+  width: 440px; height: 956px; background: #000; color: #fff; font-family: var(--font-jp); }
+.ab.tall .tband { position: absolute; z-index: 8; left: 30px; right: 30px; top: 0; height: 252px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  text-align: center; }
+.ab.tall .tq { font-family: var(--font-jp); font-weight: 700; font-size: 21px; line-height: 1.3;
+  letter-spacing: .01em; color: #fff; }
+/* 全角 1 文字 = 1em なので、最長行の文字数 --n から見出し全体の字高を一回で決める（測定不要）*/
+.ab.tall .th { font-family: var(--font-jp); font-weight: 900; line-height: 1.13;
+  font-size: min(46px, calc(var(--band-w) / var(--n, 8)));
+  letter-spacing: -.02em; color: #fff; }
+.ab.tall .th .ln { display: block; white-space: nowrap; font-size: inherit; }
+/* 筐体 — 実機のベゼル。下端は面の外へ抜ける（切れてよい） */
+.ab.tall .dev { position: absolute; z-index: 6; left: 20px; top: 252px; width: 400px; height: 704px;
+  padding: 11px; border-radius: 54px 54px 0 0; overflow: hidden;
+  background: linear-gradient(160deg, #26262b 0%, #0c0c0f 34%, #101014 100%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.16), 0 -1px 0 rgba(255,255,255,.28) inset,
+    0 26px 70px rgba(0,0,0,.85); }
+.ab.tall .dev .vp { position: relative; width: 378px; height: 693px; border-radius: 44px 44px 0 0;
+  overflow: hidden; background: #fff; }
+.ab.tall .dev iframe { position: absolute; left: 0; top: 0; width: 402px; height: 874px; border: 0;
+  transform: scale(0.9403); transform-origin: 0 0; }
+</style>
+</head>
+<body>
+
+<div class="studio" id="tallstudio">
+  <section class="set">
+    <h2>Poster v5 · tall — iPhone 6.9″ · ja — 440×956 · export 1320×2868 @3x</h2>
+    <div class="row">
+      <div class="abwrap">
+        <span class="ab-id">tall-ja-01 · quest-home</span>
+        <div class="ab tall" id="tall-ja-01" data-lang="ja" data-device="iphone"
+             data-screen-label="tall-ja-01 · quest-home">
+          <div class="tband">
+            <p class="tq">参加して熱気を共有しよう</p>
+            <h1 class="th" style="--n:8"><span class="ln">近くのフェスに</span><span class="ln">今日のお題がある</span></h1>
+          </div>
+          <div class="dev"><div class="vp">
+            <iframe data-src="Universe-Quest.html?embed&amp;circle=0&amp;past=0&amp;map=1" loading="eager" title="Toopdbq Quest"></iframe>
+          </div></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-ja-02 · quest-hifive-map</span>
+        <div class="ab tall" id="tall-ja-02" data-lang="ja" data-device="iphone"
+             data-screen-label="tall-ja-02 · quest-hifive-map">
+          <div class="tband">
+            <p class="tq">昨日のお題は、ハイタッチ</p>
+            <h1 class="th" style="--n:9"><span class="ln">終わったお題も</span><span class="ln">あとから見にいける</span></h1>
+          </div>
+          <div class="dev"><div class="vp">
+            <iframe data-src="Universe-Quest.html?embed&amp;circle=0&amp;past=1&amp;map=1" loading="eager" title="Toopdbq Quest"></iframe>
+          </div></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-ja-03 · quest-kanpai</span>
+        <div class="ab tall" id="tall-ja-03" data-lang="ja" data-device="iphone"
+             data-screen-label="tall-ja-03 · quest-kanpai">
+          <div class="tband">
+            <p class="tq">お題は毎日、入れ替わる</p>
+            <h1 class="th" style="--n:9"><span class="ln">その日しか撮れない</span><span class="ln">一枚が並んでいく</span></h1>
+          </div>
+          <div class="dev"><div class="vp">
+            <iframe data-src="Universe-Quest.html?embed&amp;circle=0&amp;past=2&amp;map=1" loading="eager" title="Toopdbq Quest"></iframe>
+          </div></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-ja-04 · quest-kanpai-feedmax</span>
+        <div class="ab tall" id="tall-ja-04" data-lang="ja" data-device="iphone"
+             data-screen-label="tall-ja-04 · quest-kanpai-feedmax">
+          <div class="tband">
+            <p class="tq">見るだけの人にはなれない</p>
+            <h1 class="th" style="--n:8"><span class="ln">君が投稿するまで</span><span class="ln">答えは秘密のまま</span></h1>
+          </div>
+          <div class="dev"><div class="vp">
+            <iframe data-src="Universe-Quest.html?embed&amp;circle=0&amp;past=2" loading="eager" title="Toopdbq Quest"></iframe>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* iframe は 1 枚ずつ順に読む（重い MapLibre を同時に走らせない）。
+   ?ab=tall-ja-02 のように 1 面だけ読むこともできる。 */
+(function () {
+  var qa = /[?&]ab=([a-z0-9-]+)/i.exec(location.search);
+  var frames = [].slice.call(document.querySelectorAll('#tallstudio iframe[data-src]'));
+  if (qa) {
+    var keep = qa[1].toLowerCase();
+    document.querySelectorAll('#tallstudio .abwrap').forEach(function (w) {
+      if (w.querySelector('.ab').id.toLowerCase() !== keep) w.remove();
+    });
+    frames = [].slice.call(document.querySelectorAll('#tallstudio iframe[data-src]'));
+  }
+  var i = 0, step = 0;
+  (function next() {
+    var mine = ++step;
+    if (i >= frames.length) return;
+    var f = frames[i++];
+    var go = function () { if (mine === step) next(); };
+    f.addEventListener('load', function () { setTimeout(go, 300); }, { once: true });
+    f.src = f.dataset.src;
+    setTimeout(go, 2600);   /* load が来なくても次へ進む保険 */
+  })();
+})();
+</script>
+</body>
+</html>
