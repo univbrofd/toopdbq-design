@@ -26,19 +26,24 @@ a { color: var(--text-1); } a:hover { color: #fff; }
   color: rgba(255,255,255,.38); font-variant-numeric: tabular-nums; }
 
 /* =======================================================================
-   TALL SET (v6) — 黒地・上 176px がコピー帯（補足 1 行 → 見出し 2 行）／
-   その下に実機スクリーンショットを丸ごと（筐体なし・下端まで面内）。
-   画面 = 344×744（390×844 の実機比を等比縮小）で面の約 61%。
+   TALL SET (v6) — 白地（下半分に DS の colorful グラデーションを透過でうっすら）・
+   上 176px がコピー帯（補足 1 行 → 見出し 2 行・黒）／その下に実機スクリーン
+   ショットを丸ごと（筐体なし・下端まで面内）。画面 = 344×744 で面の約 61%。
    ===================================================================== */
 .ab { position: relative; overflow: hidden; flex: none; isolation: isolate; }
-.ab.tall { width: 440px; height: 956px; background: #000; color: #fff; font-family: var(--font-jp); }
+.ab.tall { width: 440px; height: 956px; background: #fff; color: var(--ink-1); font-family: var(--font-jp); }
+/* 下半分にだけ現れる透過グラデーション（上端 48% までは完全な白のまま） */
+.ab.tall::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: var(--gradient-colorful); opacity: .32;
+  -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0) 48%, #000 100%);
+  mask-image: linear-gradient(180deg, rgba(0,0,0,0) 48%, #000 100%); }
 .ab.tall .tband { position: absolute; z-index: 8; left: 24px; right: 24px; top: 0; height: 176px;
   padding-top: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 10px; text-align: center; }
 .ab.tall .tq { font-family: var(--font-jp); font-weight: 700; font-size: 22px; line-height: 1.3;
-  letter-spacing: .01em; color: #fff; }
+  letter-spacing: .01em; color: var(--ink-1); }
 .ab.tall .th { font-family: var(--font-jp); font-weight: 900; font-size: 48px; line-height: 52px;
-  letter-spacing: -.02em; color: #fff; }
+  letter-spacing: -.02em; color: var(--ink-1); }
 .ab.tall .th .ln { display: block; white-space: nowrap; }
 /* accent = 1 面 1 語。brand の --state-like（#ff3e88）を使う */
 .ab.tall .th em { font-style: normal; color: var(--state-like); }
@@ -48,12 +53,12 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 /* 実機画面 — 全体を面内に収める（切らない・拡大しない） */
 .ab.tall .scr { position: absolute; z-index: 6; left: 48px; top: 192px; width: 344px; height: 744px;
   border-radius: 46px; overflow: hidden; background: #111;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 30px 80px rgba(0,0,0,.7); }
+  box-shadow: 0 0 0 1px rgba(22,19,31,.10), 0 24px 60px rgba(22,19,31,.22); }
 .ab.tall .scr img { display: block; width: 100%; height: 100%; object-fit: cover; }
 </style>
 
 <template id="__bundler_thumbnail">
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#000"/><rect x="26" y="8" width="48" height="5" rx="2.5" fill="#fff" opacity=".8"/><rect x="18" y="17" width="64" height="8" rx="4" fill="#fff"/><rect x="18" y="29" width="30" height="8" rx="4" fill="#ff3e88"/><rect x="24" y="46" width="52" height="60" rx="9" fill="#f7f3ec"/><rect x="24" y="46" width="52" height="30" rx="9" fill="#cfd8c8"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fff"/><rect x="26" y="8" width="48" height="5" rx="2.5" fill="#000" opacity=".8"/><rect x="18" y="17" width="64" height="8" rx="4" fill="#000"/><rect x="18" y="29" width="30" height="8" rx="4" fill="#ff3e88"/><rect x="24" y="46" width="52" height="60" rx="9" fill="#16131f"/><rect x="24" y="46" width="52" height="30" rx="9" fill="#cfd8c8"/><rect y="60" width="100" height="40" fill="#ff3e88" opacity=".14"/></svg>
 </template>
 </head>
 <body>
@@ -68,9 +73,9 @@ a { color: var(--text-1); } a:hover { color: #fff; }
              data-screen-label="tall-ja-01 · home">
           <div class="tband">
             <p class="tq">地図でつながる街の投稿</p>
-            <h1 class="th"><span class="ln"><em>近く</em>の今が、</span><span class="ln">見えてくる</span></h1>
+            <h1 class="th"><span class="ln"><em>この街</em>、</span><span class="ln">何がある？</span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/home-ja.png" alt="ホーム: サークル渋谷の地図と投稿" /></div>
+          <div class="scr"><img src="shots/v6/01-home-ja.png" alt="ホーム: 渋谷スクランブルの地図と投稿" /></div>
         </div>
       </div>
       <div class="abwrap">
@@ -81,40 +86,29 @@ a { color: var(--text-1); } a:hover { color: #fff; }
             <p class="tq">同じ場所の投稿が集まる</p>
             <h1 class="th"><span class="ln">気になる店の</span><span class="ln"><em>雰囲気</em>まで。</span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/place-ja.png" alt="場所モード: 店の吹き出しカードとその場所の投稿" /></div>
+          <div class="scr"><img src="shots/v6/02-place-ja.png" alt="場所モード: 店の吹き出しカードとその場所の投稿" /></div>
         </div>
       </div>
       <div class="abwrap">
-        <span class="ab-id">tall-ja-03 · board</span>
+        <span class="ab-id">tall-ja-03 · place full</span>
         <div class="ab tall" id="tall-ja-03" data-lang="ja" data-device="iphone"
-             data-screen-label="tall-ja-03 · board">
+             data-screen-label="tall-ja-03 · place full">
           <div class="tband">
             <p class="tq">投稿すると答えが見える</p>
             <h1 class="th"><span class="ln">同じ<em>お題</em>で、</span><span class="ln">街とつながる</span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/board-ja.png" alt="クエストボード: お題とみんなの投稿" /></div>
+          <div class="scr"><img src="shots/v6/03-place-full-ja.png" alt="全画面表示: 「この場所」の投稿" /></div>
         </div>
       </div>
       <div class="abwrap">
-        <span class="ab-id">tall-ja-04 · full</span>
+        <span class="ab-id">tall-ja-04 · place list</span>
         <div class="ab tall" id="tall-ja-04" data-lang="ja" data-device="iphone"
-             data-screen-label="tall-ja-04 · full">
+             data-screen-label="tall-ja-04 · place list">
           <div class="tband">
             <p class="tq">投稿をタップして全画面へ</p>
             <h1 class="th"><span class="ln">写真も動画も</span><span class="ln">その場に<em>浸る</em></span></h1>
           </div>
-          <div class="scr"><img src="shots/v6/full-ja.png" alt="全画面表示: 投稿の写真といいね・コメント・共有" /></div>
-        </div>
-      </div>
-      <div class="abwrap">
-        <span class="ab-id">tall-ja-01b · home (A/B alt hook)</span>
-        <div class="ab tall" id="tall-ja-01b" data-lang="ja" data-device="iphone"
-             data-screen-label="tall-ja-01b · home alt">
-          <div class="tband">
-            <p class="tq">地図でつながる街の投稿</p>
-            <h1 class="th"><span class="ln"><em>この街</em>、</span><span class="ln">何がある？</span></h1>
-          </div>
-          <div class="scr"><img src="shots/v6/home-ja.png" alt="ホーム: サークル渋谷の地図と投稿" /></div>
+          <div class="scr"><img src="shots/v6/04-place-list-ja.png" alt="場所モード: その場所の投稿一覧" /></div>
         </div>
       </div>
     </div>

@@ -1,40 +1,102 @@
 {
-  "version": "v6",
+  "version": "v6.1",
   "composition": [
-    { "order": 1, "key": "home",  "role": "近くで何が起きているか、地図と投稿から見えてくる。" },
-    { "order": 2, "key": "place", "role": "気になる店の雰囲気を、その場所に集まる投稿から知る。" },
-    { "order": 3, "key": "board", "role": "同じお題への投稿を通じて、街の人たちと参加体験を共有する。" },
-    { "order": 4, "key": "full",  "role": "写真・動画を大きく見て、その場の雰囲気に浸る。" }
+    {
+      "order": 1,
+      "key": "home",
+      "role": "近くで何が起きているか、地図と投稿から見えてくる。",
+      "shot": "shots/v6/01-home-ja.png"
+    },
+    {
+      "order": 2,
+      "key": "place",
+      "role": "気になる店の雰囲気を、その場所に集まる投稿から知る。",
+      "shot": "shots/v6/02-place-ja.png"
+    },
+    {
+      "order": 3,
+      "key": "board",
+      "role": "同じお題への投稿を通じて、街の人たちと参加体験を共有する。",
+      "shot": "shots/v6/03-place-full-ja.png",
+      "note": "画像はユーザー指定（場所の全画面）。文言との対応は要確認"
+    },
+    {
+      "order": 4,
+      "key": "full",
+      "role": "写真・動画を大きく見て、その場の雰囲気に浸る。",
+      "shot": "shots/v6/04-place-list-ja.png",
+      "note": "画像はユーザー指定（場所モードの一覧）。文言との対応は要確認"
+    }
   ],
   "panels": [
     {
       "order": 1,
       "key": "home",
-      "ja": { "headline": "近くの今が、\n見えてくる", "accent": "近く", "sub": "地図でつながる街の投稿" },
-      "en": { "headline": "See what’s happening\naround you", "accent": "around you", "sub": "Local posts, all on one map" }
+      "ja": {
+        "headline": "この街、\n何がある？",
+        "accent": "この街",
+        "sub": "地図でつながる街の投稿"
+      },
+      "en": {
+        "headline": "What’s happening\naround here?",
+        "accent": "around here",
+        "sub": "Local posts, all on one map"
+      }
     },
     {
       "order": 2,
       "key": "place",
-      "ja": { "headline": "気になる店の\n雰囲気まで。", "accent": "雰囲気", "sub": "同じ場所の投稿が集まる" },
-      "en": { "headline": "Get a feel\nfor the place", "accent": "place", "sub": "Posts from the same place, together" }
+      "ja": {
+        "headline": "気になる店の\n雰囲気まで。",
+        "accent": "雰囲気",
+        "sub": "同じ場所の投稿が集まる"
+      },
+      "en": {
+        "headline": "Get a feel\nfor the place",
+        "accent": "place",
+        "sub": "Posts from the same place, together"
+      }
     },
     {
       "order": 3,
       "key": "board",
-      "ja": { "headline": "同じお題で、\n街とつながる", "accent": "お題", "sub": "投稿すると答えが見える" },
-      "en": { "headline": "One local quest.\nMany different takes.", "accent": "quest", "sub": "Post yours to reveal everyone else’s" }
+      "ja": {
+        "headline": "同じお題で、\n街とつながる",
+        "accent": "お題",
+        "sub": "投稿すると答えが見える"
+      },
+      "en": {
+        "headline": "One local quest.\nMany different takes.",
+        "accent": "quest",
+        "sub": "Post yours to reveal everyone else’s"
+      }
     },
     {
       "order": 4,
       "key": "full",
-      "ja": { "headline": "写真も動画も\nその場に浸る", "accent": "浸る", "sub": "投稿をタップして全画面へ" },
-      "en": { "headline": "Get closer to\nthe moment", "accent": "closer", "sub": "Tap any photo or video post" }
+      "ja": {
+        "headline": "写真も動画も\nその場に浸る",
+        "accent": "浸る",
+        "sub": "投稿をタップして全画面へ"
+      },
+      "en": {
+        "headline": "Get closer to\nthe moment",
+        "accent": "closer",
+        "sub": "Tap any photo or video post"
+      }
     }
   ],
   "alt_hook": {
-    "ja": { "headline": "この街、\n何がある？", "accent": "この街", "sub": "地図でつながる街の投稿" },
-    "en": { "headline": "What’s happening\naround here?", "accent": "around here", "sub": "Local posts, all on one map" }
+    "ja": {
+      "headline": "近くの今が、\n見えてくる",
+      "accent": "近く",
+      "sub": "地図でつながる街の投稿"
+    },
+    "en": {
+      "headline": "See what’s happening\naround you",
+      "accent": "around you",
+      "sub": "Local posts, all on one map"
+    }
   },
   "whats_new": {
     "ja": "■ 地図から、街の投稿へ\nホームで、サークルのエリアや投稿に紐づいた場所を地図で見られるようになりました。\n地図の下には街の投稿が並び、スクロールするとタイムラインを広く読めます。\n\n■ 気になる場所を、みんなの投稿から\nGoogle マップのリンクをつけた投稿が、同じ場所ごとにまとまるようになりました。\n写真ピンや投稿の場所カードをタップすると、お店の情報とその場所の投稿をまとめて見られます。\n\n■ 写真も動画も、全画面で\n投稿をタップすると、写真や動画が全画面に広がるようになりました。\n縦にスワイプして次の投稿へ。動画は音声と一緒に楽しめます。\n\n■ Google マップで見つけた場所を投稿に\nGoogle マップの「共有」からToopdbqを選べるようになりました。\n場所のリンクを引き継いで撮影・投稿したり、自分の既存の投稿にリンクを追加したりできます。",
