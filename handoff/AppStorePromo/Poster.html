@@ -34,7 +34,7 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .ab.tall { width: var(--pw, 440px); height: var(--ph, 956px); background: #000; color: #fff; font-family: var(--font-jp); }
 /* 6.5″ 用（1284×2778 @3x = 428×926）。`?size=65` で #tallstudio に .s65 が付く */
 .s65 .ab.tall { --pw: 428px; --ph: 926px; --band: 172px; --sub: 21px; --h1: 46px; --lh: 50px;
-  --sx: 47px; --sy: 188px; --sw: 334px; --sh: 722px; --sr: 45px; }
+  --h1en: 40px; --lhen: 46px; --sx: 47px; --sy: 188px; --sw: 334px; --sh: 722px; --sr: 45px; }
 /* 下半分にだけ現れる透過グラデーション（上端 45% までは完全な黒のまま）。
    配色は DS の 135° を逆順にする = 要素ごと 180° 回して（色の複製を避ける）、
    マスクも回転後に下側が残る向き（0deg）で指定する */
@@ -57,8 +57,8 @@ a { color: var(--text-1); } a:hover { color: #fff; }
 .ab.tall[data-accent="yellow"] { --accent: var(--grad-yellow); }
 .ab.tall[data-accent="golden"] { --accent: var(--grad-golden); }
 .ab.tall[data-lang="en"] .tq { font-family: var(--font-latin); font-weight: 700; font-size: 22px; }
-.ab.tall[data-lang="en"] .th { font-family: var(--font-latin); font-size: 42px; line-height: 48px;
-  letter-spacing: -.02em; }
+.ab.tall[data-lang="en"] .th { font-family: var(--font-latin); font-size: var(--h1en, 42px);
+  line-height: var(--lhen, 48px); letter-spacing: -.02em; }
 /* 実機画面 — 全体を面内に収める（切らない・拡大しない） */
 .ab.tall .scr { position: absolute; z-index: 6; left: var(--sx, 48px); top: var(--sy, 192px); width: var(--sw, 344px);
   height: var(--sh, 744px); border-radius: var(--sr, 46px); overflow: hidden; background: #111;
@@ -122,6 +122,55 @@ a { color: var(--text-1); } a:hover { color: #fff; }
       </div>
     </div>
   </section>
+  <section class="set">
+    <h2>Poster v6 · tall — iPhone 6.9″ · en — 440×956 · export 1320×2868 @3x（screens: same ja UI shots）</h2>
+    <div class="row">
+      <div class="abwrap">
+        <span class="ab-id">tall-en-01 · home</span>
+        <div class="ab tall" id="tall-en-01" data-lang="en" data-accent="pink" data-device="iphone"
+             data-screen-label="tall-en-01 · home">
+          <div class="tband">
+            <p class="tq">Local posts on the map</p>
+            <h1 class="th"><span class="ln">What’s <em>around</em></span><span class="ln">here?</span></h1>
+          </div>
+          <div class="scr"><img src="shots/v6/01-home-ja.png" alt="Home: map and posts of Shibuya Scramble" /></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-en-02 · place</span>
+        <div class="ab tall" id="tall-en-02" data-lang="en" data-accent="teal" data-device="iphone"
+             data-screen-label="tall-en-02 · place">
+          <div class="tband">
+            <p class="tq">One place. Everyone’s posts.</p>
+            <h1 class="th"><span class="ln">Get a <em>feel</em></span><span class="ln">for the place</span></h1>
+          </div>
+          <div class="scr"><img src="shots/v6/02-place-ja.png" alt="Place mode: place card and its posts" /></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-en-03 · board</span>
+        <div class="ab tall" id="tall-en-03" data-lang="en" data-accent="yellow" data-device="iphone"
+             data-screen-label="tall-en-03 · board">
+          <div class="tband">
+            <p class="tq">Post to see everyone’s take</p>
+            <h1 class="th"><span class="ln">One <em>quest</em>.</span><span class="ln">More in common</span></h1>
+          </div>
+          <div class="scr"><img src="shots/v6/03-board-ja.png" alt="Quest board: today’s quest and everyone’s posts" /></div>
+        </div>
+      </div>
+      <div class="abwrap">
+        <span class="ab-id">tall-en-04 · full</span>
+        <div class="ab tall" id="tall-en-04" data-lang="en" data-accent="golden" data-device="iphone"
+             data-screen-label="tall-en-04 · full">
+          <div class="tband">
+            <p class="tq">Tap a photo or video post</p>
+            <h1 class="th"><span class="ln">Feel <em>closer</em>.</span><span class="ln">Go full screen</span></h1>
+          </div>
+          <div class="scr"><img src="shots/v6/04-full-ja.png" alt="Full screen: a post with like, comment and share" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
@@ -137,6 +186,15 @@ a { color: var(--text-1); } a:hover { color: #fff; }
     if (w.querySelector('.ab').id.toLowerCase() !== keep) w.remove();
   });
 })();
+/* 見出しの行が帯幅からはみ出したら 1px ずつ縮める（en の長い行の保険。フォント読込後に判定） */
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+  document.querySelectorAll('#tallstudio .th').forEach(function (h) {
+    var band = h.parentElement.clientWidth;
+    var size = parseFloat(getComputedStyle(h).fontSize);
+    var over = function () { return [].some.call(h.querySelectorAll('.ln'), function (l) { return l.scrollWidth > band; }); };
+    while (over() && size > 26) { size -= 1; h.style.fontSize = size + 'px'; h.style.lineHeight = Math.round(size * 1.1) + 'px'; }
+  });
+});
 </script>
 </body>
 </html>

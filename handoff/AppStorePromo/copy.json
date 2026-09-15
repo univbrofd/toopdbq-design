@@ -1,5 +1,5 @@
 {
-  "version": "v6.1",
+  "version": "v6.2",
   "composition": [
     {
       "order": 1,
@@ -36,9 +36,9 @@
         "sub": "地図でつながる街の投稿"
       },
       "en": {
-        "headline": "What’s happening\naround here?",
-        "accent": "around here",
-        "sub": "Local posts, all on one map"
+        "headline": "What’s around\nhere?",
+        "accent": "around",
+        "sub": "Local posts on the map"
       }
     },
     {
@@ -51,8 +51,8 @@
       },
       "en": {
         "headline": "Get a feel\nfor the place",
-        "accent": "place",
-        "sub": "Posts from the same place, together"
+        "accent": "feel",
+        "sub": "One place. Everyone’s posts."
       }
     },
     {
@@ -64,9 +64,9 @@
         "sub": "投稿すると答えが見える"
       },
       "en": {
-        "headline": "One local quest.\nMany different takes.",
+        "headline": "One quest.\nMore in common",
         "accent": "quest",
-        "sub": "Post yours to reveal everyone else’s"
+        "sub": "Post to see everyone’s take"
       }
     },
     {
@@ -78,9 +78,9 @@
         "sub": "投稿をタップして全画面へ"
       },
       "en": {
-        "headline": "Get closer to\nthe moment",
+        "headline": "Feel closer.\nGo full screen",
         "accent": "closer",
-        "sub": "Tap any photo or video post"
+        "sub": "Tap a photo or video post"
       }
     }
   ],
@@ -96,8 +96,16 @@
       "sub": "Local posts, all on one map"
     }
   },
-  "whats_new": {
-    "ja": "■ 地図から、街の投稿へ\nホームで、サークルのエリアや投稿に紐づいた場所を地図で見られるようになりました。\n地図の下には街の投稿が並び、スクロールするとタイムラインを広く読めます。\n\n■ 気になる場所を、みんなの投稿から\nGoogle マップのリンクをつけた投稿が、同じ場所ごとにまとまるようになりました。\n写真ピンや投稿の場所カードをタップすると、お店の情報とその場所の投稿をまとめて見られます。\n\n■ 写真も動画も、全画面で\n投稿をタップすると、写真や動画が全画面に広がるようになりました。\n縦にスワイプして次の投稿へ。動画は音声と一緒に楽しめます。\n\n■ Google マップで見つけた場所を投稿に\nGoogle マップの「共有」からToopdbqを選べるようになりました。\n場所のリンクを引き継いで撮影・投稿したり、自分の既存の投稿にリンクを追加したりできます。",
-    "en": "■ Explore your circle on the map\nHome now brings your circle’s map and posts together, with photo pins for places linked in posts.\nScroll to give the feed more room, or pull down from the top to bring the map back.\n\n■ Get to know a place through its posts\nPosts with Google Maps links now come together by place, even across different circles.\nTap a photo pin or a place card to see business details and posts from that place in one view.\n\n■ Give every moment the full screen\nTap a photo or video to open it full screen, then swipe up or down to move between posts.\nVideos play with sound so you can take in more of the moment.\n\n■ Bring a place over from Google Maps\nChoose Toopdbq from the share menu in Google Maps to bring the place link with you.\nCapture a new post with the link attached, or add it to one of your existing posts."
+  "metadata": {
+    "ja": {
+      "promotional_text": "この街、気になる場所はありますか？ ホームに地図が加わり、写真ピンからその場所の投稿をまとめて見られるようになりました。店の雰囲気も、そこで過ごした人のひとコマも。街を知る入口が、地図に増えました。",
+      "whats_new": "■ ホームの地図から、街を発見\nホームにサークルの地図が加わり、投稿に紐づいた場所が写真ピンで見えるようになりました。\n地図とその下の投稿を見ながら、気になる場所を見つけられます。\n\n■ 同じ場所の投稿を、ひとまとめに\nGoogle マップのリンクをつけた投稿が、同じ場所ごとにまとまるようになりました。\n写真ピンや場所カードをタップすると、お店の情報とその場所の投稿を一覧できます。\n\n■ 写真も動画も、全画面で\n投稿をタップすると全画面に広がり、縦スワイプで次の投稿へ進めるようになりました。\n動画は音声と一緒に楽しめます。\n\n■ Google マップから、投稿へ\nGoogle マップの「共有」からToopdbq（トゥーぷどぅっく）を選び、場所のリンクを引き継いで撮影・投稿できるようになりました。\n自分の既存の投稿にリンクを追加することもできます。",
+      "description": "近くの人や場所を、地図と投稿で知るSNS。\n新しい地図つきホームで、街の投稿が場所ごとにつながります。\nいつもの街でもっと発見したい人へ。今日のお題から、参加するきっかけも。\n\n■ 地図から、街のひとコマへ\nホームの地図には、サークルのエリアと投稿に紐づいた場所の写真ピンが並び、その下で街の投稿を読めます。\nサークルは、駅前・公園・フェス会場・キャンパスなど、地図上の円で区切られたエリアです。\nエリアの外からは閲覧でき、中にいるときだけ、その場で撮った写真や動画を投稿できます。\n\n■ 気になる店の、雰囲気まで\n写真ピンや投稿の場所カードをタップすると、お店の情報と、その場所に集まる投稿がひらきます。\nGoogle マップのリンクがついた投稿は、投稿者やサークルが違っても同じ場所にまとまるので、いろいろな人の目線から雰囲気を知れます。\nGoogle マップの「共有」から、新しく撮って投稿したり、自分の既存の投稿に場所のリンクを追加したりできます。\n\n■ 同じお題が、話のきっかけに\nサークルには「ウィンクして」「路地裏のうまい一杯」など、毎日ひとつのクエストが出ます。\nそのエリア内で撮った写真や動画で答えると、それまでぼかされていた同じお題のみんなの答えがひらきます。\nお題ごとの投稿はクエストボードに並び、過去のお題にもあとから参加できます。\n\n■ 写真も動画も、その場に浸る\n投稿をタップすると写真や動画が全画面に広がり、動画は音声と一緒に楽しめます。\n縦にスワイプして次の投稿へ進んだり、いいねやコメントで気持ちを伝えたりできます。\n\n■ 街の記録を、積み重ねる\n投稿は24時間で消えず、そのサークルや場所の記録として残ります。\n正確な位置情報は他のユーザーに表示されず、自分で投稿に紐づけた場所は共有されます。\n位置情報の許可は、投稿ボタンの「チェックイン」を押したときに初めて尋ねます。\n\n気になる場所をのぞいてみる。今日のお題に、自分のひとコマを添えてみる。Toopdbq（トゥーぷどぅっく）で、いつもの街との接点を増やしてみませんか。"
+    },
+    "en": {
+      "promotional_text": "Your neighborhood has more to show you. Explore the new map on Home, tap a photo pin, and get a feel for a place through the people posting there.",
+      "whats_new": "■ Explore the map on Home\nHome now shows your circle’s map, with photo pins for places linked in posts.\nBrowse the map and the feed below it to find somewhere that catches your eye.\n\n■ See a place through its posts\nPosts with Google Maps links now come together by place, across different people and circles.\nTap a photo pin or place card to see business details and posts from that place in one view.\n\n■ Take it all in, full screen\nTap a photo or video to open it full screen, then swipe vertically to move between posts.\nVideos play with sound so you can take in more of the moment.\n\n■ Bring a place over from Google Maps\nChoose Toopdbq from the share menu in Google Maps to capture a new post with the place link attached.\nYou can also add the link to one of your existing posts.",
+      "description": "Get to know the people and places around you.\nToopdbq is a local social app, now with posts on the map.\nExplore your neighborhood and join in with a daily quest.\n\n■ See what’s around the corner\nHome brings a map and local posts together, with photo pins for the places people have linked.\nEach circle covers an area on the map, from a park or campus to a festival site.\nYou can browse from outside a circle, but you need to be inside it to post photos and videos captured there.\n\n■ Get a feel for a place\nTap a photo pin or place card to see business details alongside posts linked to that place, even when they come from different people or circles.\nA Google Maps link brings those posts together, giving you different glimpses of the same spot.\nFrom Google Maps, share a place to Toopdbq to capture a new post with its link, or add the link to one of your existing posts.\n\n■ Start with something in common\nEvery circle has a daily quest, such as sharing a wink or a good drink found down a side street.\nCapture your answer inside the circle and post it to reveal everyone else’s answers to that same quest, which stay blurred until you contribute.\nThe quest board brings the answers together, and you can still take part in past quests.\n\n■ Feel closer to the moment\nOpen a photo or video full screen and swipe vertically to move from one post to the next, with sound for videos.\nLeave a like or a comment when something catches your eye.\n\n■ Keep a record of local life\nPosts stay beyond 24 hours, building a record of each circle and place.\nYour precise location isn’t shown to other users; places you choose to link are shared with your posts.\nLocation permission is requested when you tap Check in to post.\n\nTake a look at a place you’ve been curious about, or add your own take to today’s quest. There’s more than one way to be part of the neighborhood on Toopdbq."
+    }
   }
 }

@@ -14,6 +14,7 @@ App Store 掲載用のスクリーンショット 4 面。訴求の主役は**�
 | 04 | full | 写真・動画を大きく見て、その場の雰囲気に浸る | `04-full-ja.png` 投稿の全画面（sim） |
 
 スクショはユーザー撮影（`shots/v6/`）。自動撮影版は `shots/v6-auto/`（ignore）。alt hook（01b）は廃止。
+**en 面**（`tall-en-01..04`）は同じ画面（日本語 UI のまま）に GPT 英訳のコピー（`copy.json` の `en`）。見出しがはみ出す場合は script が 1px ずつ縮める。
 
 ## 構図（v5 → v6 の差分）
 
@@ -34,4 +35,4 @@ App Store 掲載用のスクリーンショット 4 面。訴求の主役は**�
 ## 文言の作り方
 
 `COPY_PROMPT.md`（調査 → 構成案 → コピー → What's New を 1 回で頼む自己完結プロンプト）→ 回答の JSON を `copy.json` へ。
-`STORE_TEXT_PROMPT.md`（ストア文の構成調査 → ポスター英訳 → 概要 / 最新情報 / プロモーションテキスト ja・en）→ `poster_en` を `copy.json` の en へ、`metadata` を App Store Connect へ。
+`STORE_TEXT_PROMPT.md`（ストア文の構成調査 → ポスター英訳 → 概要 / 最新情報 / プロモーションテキスト ja・en）→ `poster_en` を `copy.json` の en へ、`metadata` を `copy.json` と貼り付け用の `store_text.md` へ（App Store Connect にはそこからコピー）。
