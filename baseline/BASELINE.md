@@ -103,8 +103,7 @@ chrome（タイトル・説明・ベゼル）を一切表示しない**画面そ
 
 - **`app/App.html` = Flutter 実装そのもの（本命）**。Flutter web ビルド（全データ mock・全 repository/認証/位置/カメラを mock 化・カメラのファインダーは mock 動画）を R2 `design/app/<hash>/` から読むローダで、**アプリの全画面・全遷移が実装どおりに動く**（quest home / StoryViewer / 投稿フロー / Chat / Profile / menu）。生成 = GENERATED・手編集禁止:
   `flutter build web --release --pwa-strategy=none --dart-define=MOCK_DATA=1` → `node scripts/design/upload_web_app_to_r2.mjs`（R2 アップ + ローダ生成）
-- `app/QuestPast.html` / `Splash` / `Onboarding` / `StoryViewer` / `PostFlow` / `Profile` / `ChatList` / `ChatRoom` = specimen ベースの screen-only 変種（`scripts/design/gen_app_pages.mjs` 生成・GENERATED）。**HTML 再現なので実装との差分がありうる**。単画面を静的に見たいときの参考。実装の正は App.html
-- `app/CircleCreate.html` / `AuthOverlay.html` / `Drafts.html` = specimen が無かった画面の手書き screen-only 実装（参考）
+- `app/App-{Screen}.html` = 同じローダの画面別 deep link 版（`window.__APP_SCREEN__` をキーに Flutter 側 `lib/app/DesignMirrorWeb.dart` が実機と同じ入口でその画面を開く）。HTML の写しではなく実装そのものなので実装との差分は無い。Splash / MapFull / PlaceMode / PostFull / PostCamera / PostEdit / PostLink / CircleFounding / CircleEdit / CircleCreate / Profile / ProfileOther / Drafts / ChatList / ChatRoom / Menu / Comment / Auth（= 現行アプリに導線のある画面。Claude Design のページ一覧はこの写し）
 
 ## 運用ルール
 
