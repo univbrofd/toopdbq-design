@@ -261,6 +261,13 @@
       "name": "WebAbout C — 紙面カード",
       "subtitle": "番号バッジ + カードの積層。継ぎ目=カードの角が折の上に覗く。全 8 章 + ヒーロー + クロージング",
       "viewport": "402x900"
+    },
+    {
+      "path": "handoff/PlaceRanking/brief.html",
+      "group": "PlaceRanking",
+      "name": "PlaceRanking — brief",
+      "subtitle": "プロフィールの「ランキング」タブ + 追加 FAB + 真上マップでサークルを選ぶ作成フロー。実測・固定値・探索軸",
+      "viewport": "1440x900"
     }
   ],
   "templates": [],
