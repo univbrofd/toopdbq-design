@@ -1,0 +1,151 @@
+<!-- @dsCard group="MapFullPlaceCards" name="MapFullPlaceCards — brief" subtitle="マップ全画面（真上）の上下 200 の帯に場所の OGP カード 3×2。3×2 セルの最寄りピンを線で結ぶ。実測・固定値・探索軸" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<title>MapFullPlaceCards — brief</title>
+<style>
+  :root {
+    --ink:#111114; --ink2:rgba(0,0,0,.62); --ink3:rgba(0,0,0,.42);
+    --line:rgba(0,0,0,.12); --paper:#fbfbfa; --card:#fff;
+    --teal:#005f67; --pink:#ff3e88; --yellow:#fff0a6; --golden:#d0a052;
+    --gcl:linear-gradient(135deg,#fff0a6 0%,#005f67 38%,#ff3e88 70%,#d0a052 100%);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);
+    font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;
+    -webkit-font-smoothing:antialiased;padding:56px 64px 80px;line-height:1.7}
+  .wrap{max-width:1312px;margin:0 auto}
+  .eyebrow{font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--teal)}
+  h1{font-size:36px;font-weight:700;letter-spacing:.01em;margin:6px 0 10px;line-height:1.35}
+  .lead{font-size:16px;color:var(--ink2);max-width:820px}
+  .rule{height:3px;width:120px;background:var(--gcl);border-radius:2px;margin:22px 0 40px}
+  h2{font-size:19px;font-weight:700;margin:0 0 4px}
+  h2 .n{font-family:Inter,sans-serif;color:var(--pink);margin-right:10px}
+  section{margin:0 0 44px}
+  .sub{font-size:13px;color:var(--ink3);margin-bottom:18px}
+  .shots{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
+  .shot{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+  .shot img{display:block;width:100%;border-radius:12px;border:1px solid var(--line)}
+  .shot h3{font-size:14px;font-weight:700;margin:12px 0 4px}
+  .shot p{font-size:12.5px;color:var(--ink2);line-height:1.6}
+  .shot p b{color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);border-top:0}
+  td.k{width:26%;color:var(--ink2)}
+  td b{color:var(--ink)}
+  code{font-family:Inter,ui-monospace,monospace;font-size:12.5px;background:rgba(0,0,0,.05);
+    padding:1px 6px;border-radius:5px}
+  .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;position:relative}
+  .st .num{font-family:Inter,sans-serif;font-size:12px;font-weight:800;color:#fff;
+    width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--teal)}
+  .st.fixed .num{background:var(--ink)}
+  .st.open .num{background:var(--pink)}
+  .st h3{font-size:14px;font-weight:700;margin:10px 0 6px;line-height:1.45}
+  .st p{font-size:12px;color:var(--ink2);line-height:1.6}
+  .st .tag{position:absolute;top:14px;right:14px;font-family:Inter,sans-serif;font-size:10px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .st.fixed .tag{color:var(--ink)} .st.open .tag{color:var(--pink)}
+  .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .ax{background:#fff;border:1px solid var(--line);border-left:4px solid var(--golden);border-radius:12px;padding:16px 18px}
+  .ax b{display:block;font-size:14px;margin-bottom:4px}
+  .ax p{font-size:12.5px;color:var(--ink2);line-height:1.6}
+  .no{background:#fff;border:1px solid var(--line);border-left:4px solid var(--pink);
+    border-radius:12px;padding:16px 20px;font-size:13.5px;color:var(--ink2)}
+  .no b{color:var(--ink)}
+  ul{margin:8px 0 0 20px;font-size:13.5px;color:var(--ink2)}
+  li{margin:4px 0}
+  .sw{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+  .sw div{width:132px}
+  .sw i{display:block;height:44px;border-radius:12px;border:1px solid var(--line)}
+  .sw span{display:block;font-family:Inter,sans-serif;font-size:11px;color:var(--ink2);margin-top:6px;line-height:1.4}
+</style></head>
+</head>
+<body><div class="wrap">
+
+  <div class="eyebrow">Toopdbq · home / map fullscreen · handoff</div>
+  <h1>マップの全画面（真上）で、見えている場所を 6 枚の OGP カードで — 上下の帯 200 に 3 枚ずつ、ピンと線で結ぶ</h1>
+  <p class="lead">home の地図をピンチ / pan / フリックで全画面にすると真上から見下ろす。その状態で<b>上の帯 200 と下の帯 200 に
+    場所のカードを 3 枚ずつ</b>置く。カード = <b>正方形の写真 + オーバーレイ</b>（名前 / ジャンル / 営業ステータス + 営業時間 / 距離 / 評価）。
+    どの 6 件かは<b>マップ帯を 3×2 に割り、各セル中心に最も近いピン</b>（上の行 → 上の帯・下の行 → 下の帯・同じ列）。
+    <b>ピンとカードは線で結ぶ</b>。仕様の正は <code>HANDOFF.md</code>（固定値・データ・探索軸の全文はそちら）。</p>
+  <div class="rule"></div>
+
+  <section>
+    <h2><span class="n">01</span>実測 — 何の上に載るか</h2>
+    <p class="sub">左 = 実機（iPhone 17e・mock）の今の全画面を 2x に落とし、帯・3×2・既存 chrome を描き込んだもの。右 = 402×874 の模式図に mock の場所 8 件を真上投影し、規則の結果（6 件の割当と線）を描いたもの。数値は <code>.phone</code>（402×874・status bar 62）換算。</p>
+    <div class="shots">
+      <div class="shot">
+        <img src="shots/mapfull-asbuilt.jpg" alt="今のマップ全画面（真上）。上の帯 200 / マップ帯 / 下の帯 200（一覧の覗き）と既存 chrome">
+        <h3>A. 今のマップ全画面（as-built）</h3>
+        <p><b>上の帯 0–200</b>（status bar の下 138 が使える）には<b>クエストラベル</b>（左・15 白 + 影）と<b>投稿 FAB</b>（右・icon 28 / tap 55）が
+          すでに載っている。<b>下の帯 674–874 は今は一覧の覗き</b>（白面 + grab bar 14 = 戻る導線）→ カード行に置き換える。
+          地図には<b>サークル名</b>（15 w800 白 + 黒ハロー）・<b>active の白い光のリング</b>・<b>場所ピン</b>（36 r11 写真タイル・密集は +N）が貼られている。</p>
+      </div>
+      <div class="shot">
+        <img src="shots/grid-rule.png" alt="3×2 のセル中心 → 最寄りピン → 同じ列のカードへ線、の模式図">
+        <h3>B. 3×2 の規則（模式図・仮のカード）</h3>
+        <p>マップ帯 200–674 を <b>3 列 × 2 行（134×237）</b>に割り、セル中心 x {67, 201, 335} × y {318.5, 555.5} に<b>最も近いピン</b>を
+          <b>同じ列のカード</b>へ（重複なし・候補が足りないセルは空）。8 件中 6 件が選ばれ、2 件は選ばれない。
+          カードは <b>122 角（左右 10・間 8）の例</b> = 写真 + 名前だけの仮。<b>デザインは Design 側</b>。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>固定値（契約）</h2>
+    <p class="sub">破ると実装できない。全文は HANDOFF.md。</p>
+    <div class="card">
+      <table>
+        <tr><th>項目</th><th>値</th></tr>
+        <tr><td class="k">画面</td><td><b>402×874</b>（<code>.phone</code>）・status bar 62 / home indicator 34・タップ最小 44</td></tr>
+        <tr><td class="k">地図</td><td>画面全面・<b>真上（pitch 0）</b>・openfreemap liberty のライトな街路図。カードは地図の上に載る（帯は透明でも glass でも可）</td></tr>
+        <tr><td class="k">帯</td><td>上 <b>y 0–200</b>（使えるのは 62–200 = 138）/ 下 <b>y 674–874</b>（使えるのは 674–840 = 166）。下の帯は<b>一覧の覗きを置き換える</b></td></tr>
+        <tr><td class="k">マップ帯</td><td><b>y 200–674（474）× 402</b> → 3×2 = セル 134×237。候補 = 中心がマップ帯の中にあるピン。1 場所 1 枚・空セルあり・集約ピンは代表 1 件</td></tr>
+        <tr><td class="k">ピン（今のまま）</td><td>36×36 r11 写真タイル・影 <code>0 2px 8px rgba(8,8,11,.35)</code>・写真なし = ink 地 + glyph 16 白・+N バッジ（白 18 / 11 w800）・選択 = 白枠 2.5 + scale 1.14。<b>新しいマーカーは発明しない</b></td></tr>
+        <tr><td class="k">線</td><td>ピン ⇄ カード。ライトな地図・他のピン・名前の上でも読める。<b>pan 中は毎フレーム追従</b> = 直線か単純な曲線</td></tr>
+        <tr><td class="k">カード</td><td>正方形・写真フルブリード（無ければ ink + glyph）・オーバーレイに <b>名前 / ジャンル / 営業 + 時間 / 距離 / 評価</b>。1 帯に 3 枚 = 同じ大きさなら ≤ 122 角（左右 10・間 8）</td></tr>
+        <tr><td class="k">残る要素</td><td>サークル名（域中心）と active のリングは地図に残る</td></tr>
+        <tr><td class="k">DS</td><td>Noto Sans JP / Inter・絵文字なし・glass ≤ 6 / 画面・アイコン <code>assets/icons/</code>・写真 <code>assets/sample/</code></td></tr>
+        <tr><td class="k">実装</td><td>Flutter。地図・ピンは WebView（DOM）、<b>カードと線は Flutter が上に描く</b>（JS が毎フレームピンの画面 px を流す）。specimen は静的 HTML + 最小 JS</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>出せる情報</h2>
+    <div class="card">
+      <table>
+        <tr><th>項目</th><th>例</th><th>備考</th></tr>
+        <tr><td class="k">名前</td><td>TK NIGHTCLUB / のんべい横丁 / キャットストリート</td><td>常にある。長い名前あり</td></tr>
+        <tr><td class="k">写真</td><td>og:image 1 枚</td><td><b>無い場所もある</b></td></tr>
+        <tr><td class="k">ジャンル</td><td><code>night_club</code> / <code>cafe</code> / <code>park</code></td><td>英語の type 文字列 → 表示名（ナイトクラブ）は要変換</td></tr>
+        <tr><td class="k">営業ステータス + 時間</td><td>営業中 5:00 まで / 営業時間外 20:00 から / 24時間営業 / 営業時間は未取得</td><td>深夜跨ぎあり</td></tr>
+        <tr><td class="k">距離</td><td>368m / 1.2km</td><td>現在地から</td></tr>
+        <tr><td class="k">評価</td><td>4.5 (1,500)</td><td><b>無い場所もある</b></td></tr>
+        <tr><td class="k">詳細未取得</td><td>—</td><td>ジャンル / 営業 / 評価が<b>全部無い</b>場所 = 名前 + 距離だけ</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span>決めてほしいこと（探索の軸）</h2>
+    <div class="axes">
+      <div class="ax"><b>① 帯の chrome</b><p>上の帯のクエストラベル・投稿 FAB と 3 枚のカードの折り合い（隠す / 動かす / 避ける）。下の帯は覗きを置き換えるので<b>戻る導線</b>（上ドラッグ / チップ / ×）を決める</p></div>
+      <div class="ax"><b>② カードの情報設計</b><p>~122 角に 5 項目。優先順位・段組み・何をチップに（● 営業中 / ★ 4.5）・写真をどこまで見せるか・最小文字 11</p></div>
+      <div class="ax"><b>③ 線</b><p>太さ / 色（白 + 暗ハロー・ink・破線）/ 端点 / ピンとの前後 / 近いとき遠いときの見え方。交差は避けなくてよい</p></div>
+      <div class="ax"><b>④ 状態</b><p>写真なし / 未取得 / 評価なし / 24 時間 / 深夜跨ぎ / 長い名前 / 空セル / 集約 +N / 選択中のピン</p></div>
+      <div class="ax"><b>⑤ モーション</b><p>pan で割当が変わるときの差し替え（cross-fade / スライド）と線の追従。全画面に入るとき（地図が 360ms で寝る）にカードが現れる</p></div>
+      <div class="ax"><b>⑥ タップ</b><p>カードのタップ = ピンのタップと同じ（全画面を解除して場所モード）。それ以外の役割を持たせるなら提案</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>成果物</h2>
+    <div class="no"><b>handoff/MapFullPlaceCards/MapFullPlaceCards.html</b>（<code>.phone</code> 実配置・地図 = <code>place-map.js</code> 真上 + 8 ピン + 6 カード + 6 線・<b>案 3〜4 を横に</b>・状態バリエーション・各案に <code>@dsCard</code> と狙い 1 行）
+      / <b>MapFullPlaceCards.css</b>（差分だけ）/ 推し案と理由 / <code>_ds_manifest.json</code> の cards に登録 / bundle。
+      触らない: <code>handoff/TimelinePlaceMode/*</code> / <code>handoff/PlaceCard/*</code> / <code>DesignSystem/colors_and_type.css</code></div>
+  </section>
+
+</div></body></html>

@@ -268,6 +268,13 @@
       "name": "PlaceRanking — brief",
       "subtitle": "プロフィールの「ランキング」タブ + 追加 FAB + 真上マップでサークルを選ぶ作成フロー。実測・固定値・探索軸",
       "viewport": "1440x900"
+    },
+    {
+      "path": "handoff/MapFullPlaceCards/brief.html",
+      "group": "MapFullPlaceCards",
+      "name": "MapFullPlaceCards — brief",
+      "subtitle": "マップ全画面（真上）の上下 200 の帯に場所の OGP カード 3×2。3×2 セルの最寄りピンを線で結ぶ。実測・固定値・探索軸",
+      "viewport": "1440x900"
     }
   ],
   "templates": [],

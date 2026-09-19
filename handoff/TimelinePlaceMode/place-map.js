@@ -132,6 +132,9 @@
     return Math.log2(78271.51696 * Math.cos(lat * Math.PI / 180) / mpp);
   }
 
+  // data-pitch="0" / data-bearing="0" を 0 のまま通す（|| だと既定値に化ける）
+  function num(v, fallback) { var n = parseFloat(v); return isNaN(n) ? fallback : n; }
+
   function init(host) {
     if (host._map || !window.maplibregl) return;
     var d = host.dataset;
@@ -142,7 +145,7 @@
       var map = new maplibregl.Map({
         container: host, style: LIBERTY, center: C,
         zoom: zoomFor(C[1], R * 2, w, parseFloat(d.frac) || 0.72),
-        pitch: parseFloat(d.pitch) || 60, bearing: parseFloat(d.bearing) || -18,
+        pitch: num(d.pitch, 60), bearing: num(d.bearing, -18),
         interactive: false, attributionControl: false, fadeDuration: 0,
         canvasContextAttributes: { preserveDrawingBuffer: true, antialias: true }
       });
