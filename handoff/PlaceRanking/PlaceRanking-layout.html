@@ -1,0 +1,94 @@
+<!-- @dsCard group="PlaceRanking" tier="spec" viewport="1500x1500" name="PlaceRanking v2 — 確認モードの配置検証（16:9 の行配置）" subtitle="乱数 3000 ケースで A = 地点に置くだけ と B = 上位優先の行配置（16:9・同じ高さに他の順位を置かない）を比較。カメラの余裕（×1.0〜1.8）を動かして収まる率を見る。実装向けの配置アルゴリズム付き" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PlaceRanking v2 — 確認モードの配置検証</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="PlaceRanking.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap">
+</head>
+<body class="pk">
+<div class="pk-doc">
+
+  <div>
+    <div class="pk-h1">確認モードの配置検証 — 16:9 の写真を順位ごとの行に置き、Best 3 がどんな位置関係でも 402×874 に収まるか</div>
+    <p class="pk-lead">
+      三角形の形（単位円内の 3 点をランダム）× 広がり（フロア 120m の zoom で見た最遠 6〜266px・近い側に偏らせる）× 順位の割当 × 店名の長さ をランダムに 3000 ケース作り、
+      <b>A = 地点に置くだけ</b>（16:9。as-built のすらし = 地点から他の重心と反対へ 高さ × 0.4、安全域へ clamp。重なりは解かない）と、
+      <b>B = 提案・上位優先の行配置</b>（写真は 16:9 = 1 位 352×198 / 2 位 280×158 / 3 位 216×122。<b>同じ高さに他の順位を置かない</b>。
+      1 位を地点の高さに置き、2 位・3 位は重ならない側（上 or 下）へ縦にずらす。上下の並び 6 通りを試し、「1 位のずれ × 10 + 2 位 × 3 + 3 位 × 1」が最小の並びを採る。写真の縁から 24 以上離れた地点は点線で結ぶ）を同じケースで比べる。
+      <b>安全域</b> = x 8〜394 / y 200（縁取りタイトルの下端）〜760（保存ピルの上端）。「収まる」= 3 つの写真（帯を含む外接箱）が互いに重ならず、<b>同じ高さの帯を共有せず</b>、安全域の中にある。
+    </p>
+  </div>
+
+  <div class="pk-sim" id="sim">
+    <div class="pk-sim-ctl">
+      <label>カメラの余裕 ×<b id="mv">1.8</b><input id="margin" type="range" min="1" max="1.8" step="0.1" value="1.8"></label>
+      <span>→ 最遠の地点は画面中心から <b id="spreadv">80</b>px 以内</span>
+      <button data-margin="1.8">as-built ×1.8</button><button data-margin="1.2">×1.2</button><button data-margin="1">×1.0</button>
+      <button id="only">失敗だけ表示</button>
+      <button id="reseed">別の 18 ケース</button>
+    </div>
+    <div class="pk-sim-legend">
+      <span><i style="background:#ff3e88"></i>1 位 352×198</span><span><i style="background:#005f67"></i>2 位 280×158</span><span><i style="background:#d0a052"></i>3 位 216×122</span>
+      <span><i style="background:#fff"></i>名前の帯（店名の長さぶん）</span><span><i style="background:#08080b; border-radius:50%"></i>地点</span>
+      <span><i style="background:none; box-shadow:0 0 0 2px #ff6b6b"></i>赤枠 = 収まらない（重なり / 同じ行 / はみ出し）</span>
+      <span><i style="background:rgba(8,8,11,.14)"></i>上 = タイトル / 下 = 保存の帯（安全域の外）</span>
+    </div>
+    <div class="pk-sim-grid" id="simGrid"></div>
+    <div class="pk-sim-stats" id="simStats"></div>
+  </div>
+
+  <div class="pk-h2"><span class="k">実描画</span>実物のスタックで見る — 3 点をドラッグ / 形 × 回転 × 広がり × 順位 の総当たり</div>
+  <div class="pk-scenes">
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="t">ピンクの持ち手をドラッグすると、その場で行配置が走る</span></div>
+      <div class="pk-live pk-flat" id="live" style="--gc: var(--gc-night); --h:874px">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="stage"></div>
+        <button class="pk-cta pk-save" type="button">保存</button>
+        <div class="handles"></div>
+      </div>
+      <div class="pk-sim-ctl">
+        <button id="liveRnd">ランダム</button><button id="liveRot">順位を回す</button><button id="liveAlt">別の店名（和文 / 長い / 写真なし）</button>
+        <button data-preset="[[0,-6],[6,4],[-6,4]]">全部同じ場所</button><button data-preset="[[-140,0],[0,0],[140,0]]">横一直線</button><button data-preset="[[0,-140],[0,0],[0,140]]">縦一直線</button>
+        <button data-preset="[[-150,-150],[150,-150],[0,150]]">広い三角形</button><button data-preset="[[170,-200],[180,-160],[160,-240]]">端に寄った</button>
+      </div>
+      <p class="pk-note">カメラは常に三角形の重心を画面中心に置くので、実機では地点は中心 80px 以内に集まる。ここでは検証のために画面のどこへでも置ける。赤枠 = 重なり / 同じ行 / はみ出し。</p>
+    </div>
+  </div>
+  <div>
+    <div class="pk-tag"><span class="t">総当たりボード</span><span class="pk-note" id="boardSum" style="margin-left:12px"></span></div>
+    <div id="board"></div>
+  </div>
+
+  <div class="pk-rec">
+    <b>分かること</b>
+    <ol>
+      <li><b>16:9 の写真を地点に置くだけ（A）では 0%。</b> 1 位だけで幅 360 あるので、地点がどこにあっても 2・3 位と重なる。「重なり」は例外ではなく通常の状態。</li>
+      <li><b>行にすると 100% 収まる。</b> 3 行の高さの合計（212 + 172 + 136 + 間 16 × 2 = 552）が安全域（560）に入るので、どんな三角形でも上下に並べられる。同じ高さに他の順位が来ないので、横は地点の x に寄せるだけでよい。</li>
+      <li><b>1 位は地点の高さに留まりにくい。</b> 3 行が縦に詰まるので、1 位が地点の高さ（±12px）に留まるのは約 2 割、縦ずれは平均 30px 台。ただし重み 10 で最優先しているので、ずれるのは 2・3 位を上下に置く余地が無いときだけ。</li>
+      <li><b>代償は引き出し線。</b> 2 位の 7 割・3 位のほぼ全部が地点から離れ、点線 1.5 で写真の縁と結ぶ。線が無いと「どの店がどこか」を失うので、これは省けない。1 位にはほぼ出ない。</li>
+    </ol>
+    <b>実装の規則（Flutter・確認モードの <code>_RankStacks</code>）</b>
+    <ol>
+      <li>カメラ: 三角形の重心を画面中心。囲む円 = max(120m, 最遠 × 1.8) を幅 72% に（as-built のまま）。1 件 = 地点を中心・120m。2 件 = 中点。角度は変えない。</li>
+      <li>写真: 16:9。1 位 352×198 / 2 位 280×158 / 3 位 216×122（白縁 4 込み）。行の高さ = 写真の高さ + 帯の 14。行の間 16（奥の写真の扇が上に 8 出るぶん）。安全域 x 8〜394 / y 200〜760。</li>
+      <li>横: 各順位の中心 x = 地点の x を安全域へ clamp（1 位はほぼ常に中央）。</li>
+      <li>縦: 上下の並び 6 通りそれぞれで、各行の上端を「地点の y − 高さ / 2」に置き、上から順に押し下げ → 下端からはみ出したぶんを引き上げ → 上端を守る、の 3 パスで詰める。コスト = Σ 重み × |行の中心 − 地点の y|（重み 1 位 10 / 2 位 3 / 3 位 1）が最小の並びを採る。</li>
+      <li>引き出し線: 地点が写真の縁（帯を含む）から 24 以上離れたら、地点の印（ink の点 10）から写真の上端 or 下端（地点の側・x は写真の幅に clamp）へ点線 1.5（ink 60%）。</li>
+      <li>描く順は 地点の印 → 3 位 → 2 位 → 1 位（地点の印は写真の後ろに隠れる）。4 位以下の写真ピンは写真の外に置く（重なる位置なら出さない）。</li>
+    </ol>
+  </div>
+
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#e9e5d9"/><rect x="24" y="52" width="192" height="150" rx="8" fill="none" stroke="#08080b" stroke-opacity=".3" stroke-width="3" stroke-dasharray="8 8"/><rect x="60" y="60" width="120" height="30" rx="5" fill="#fff"/><rect x="65" y="65" width="110" height="20" rx="2" fill="#005f67"/><rect x="34" y="100" width="172" height="56" rx="5" fill="#fff"/><rect x="39" y="105" width="162" height="46" rx="2" fill="#ff3e88"/><rect x="80" y="166" width="96" height="30" rx="5" fill="#fff"/><rect x="85" y="171" width="86" height="20" rx="2" fill="#d0a052"/><circle cx="110" cy="130" r="5" fill="#08080b" stroke="#fff" stroke-width="2"/><circle cx="130" cy="100" r="5" fill="#08080b" stroke="#fff" stroke-width="2"/><circle cx="140" cy="150" r="5" fill="#08080b" stroke="#fff" stroke-width="2"/></svg></template>
+
+<script src="ranking-layout.js"></script>
+<script src="ranking-live.js"></script>
+</body>
+</html>

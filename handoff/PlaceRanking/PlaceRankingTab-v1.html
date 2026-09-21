@@ -1,0 +1,541 @@
+<!-- @dsCard group="PlaceRanking" tier="screen" viewport="1760x4600" name="[v1 退避] PlaceRanking — ランキングタブ + サークル選択の作成フロー" subtitle="プロフィール 3 つ目のタブ「ランキング」と右下 FAB → 真上マップでサークルを選ぶ作成フロー。推し = A2 + B1-b、手順 3（選ぶ=順位 → 並べ替え → タイトル・保存）。402×874" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PlaceRanking — 行ったお店のランキング</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="PlaceRankingTab-v1.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap">
+</head>
+<body class="pr">
+<div class="pr-doc">
+
+  <div>
+    <div class="pr-h1">PlaceRanking — 行ったお店のランキング</div>
+    <p class="pr-lead">
+      プロフィールに <b>3 つ目のタブ「ランキング」</b>を足し、右下の追加 FAB から <b>home と同じ地図を全面に敷いた作成フロー</b>へ遷移する。
+      固定（タブ行 44・ライト面・402×874・真上 pitch 0・暗い chrome・名前 / 円 / 白い光のリングの 3 要素）は動かさず、
+      <b>A. 一覧の形と FAB</b> を 3 案、<b>B-1. サークル選択の確定のさせ方</b> を 3 案、<b>B-2 以降</b> は推し案の手順を 1 本通しで置いた。
+      地図は MapLibre（openfreemap liberty）を真上で。<code>ranking-map.js</code> がサークルの数だけ円を描き、名前は 64px で「代表名 +N」に集約する（pan / ピンチ可）。
+    </p>
+  </div>
+
+  <!-- ====================================================================
+       A. ランキングタブ（一覧の形 + FAB）
+       ==================================================================== -->
+  <div class="pr-h2"><span class="k">A</span>ランキングタブ — 一覧の形と FAB（3 案）</div>
+  <div class="pr-scenes">
+
+    <!-- @dsCard name="A1 全件展開 + ink FAB" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">A1</span><span class="t">全件展開 — 1. 2. 3. … を全部並べる / FAB は ink の円</span></div>
+      <div class="pr-aim">ランキングは「読む」もの。開かずに全部読める代わりに、行数で長くなるのを受け入れる。FAB は colorful を使わず ink で控えめに</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-feed">
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">渋谷の締めラーメン</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル渋谷</span></span><span class="rk-sub"><b>5</b> 件 · 9/12</span></div>
+              </div>
+              <div class="rk-row"><span class="rk-no">1</span><img class="rk-ph" src="../../assets/sample/reel/reel030.jpg" alt=""><div class="rk-col"><span class="rk-nm">一蘭 渋谷店</span><span class="rk-ad">渋谷区神南, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel030.jpg" alt=""><img src="../../assets/sample/reel/reel033.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel041.jpg" alt=""><div class="rk-col"><span class="rk-nm">はやし</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel041.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">3</span><img class="rk-ph" src="../../assets/sample/reel/reel021.jpg" alt=""><div class="rk-col"><span class="rk-nm">渋谷横丁</span><span class="rk-ad">渋谷区神宮前, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel021.jpg" alt=""><img src="../../assets/sample/reel/reel025.jpg" alt=""><img src="../../assets/sample/reel/reel027.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">4</span><span class="rk-ph none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span><div class="rk-col"><span class="rk-nm">名もない路地の屋台</span><span class="rk-ad">渋谷区, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel036.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">5</span><img class="rk-ph" src="../../assets/sample/reel/reel044.jpg" alt=""><div class="rk-col"><span class="rk-nm">麺屋 武蔵 武骨外伝</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel044.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">道玄坂で朝まで</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル道玄坂</span></span><span class="rk-sub"><b>3</b> 件 · 8/30</span></div>
+              </div>
+              <div class="rk-row"><span class="rk-no">1</span><img class="rk-ph" src="../../assets/sample/reel/reel012.jpg" alt=""><div class="rk-col"><span class="rk-nm">WOMB</span><span class="rk-ad">渋谷区円山町, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel012.jpg" alt=""><img src="../../assets/sample/reel/reel058.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel055.jpg" alt=""><div class="rk-col"><span class="rk-nm">TK NIGHTCLUB</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><span class="rk-th"><img src="../../assets/sample/reel/reel055.jpg" alt=""></span><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+          </div>
+          <button class="pr-fab ink" type="button" aria-label="ランキングを作る"><img src="../../assets/icons/icon_add.png" alt=""></button>
+          <div class="pr-mark" style="left:212px; top:262px"><span class="d">1</span><span class="l">自分の投稿サムネ 1〜3 枚</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">行 = 順位（Inter 700 16）+ 写真 44 / r12 + 店名（主役）+ 短い住所 + <b>自分の投稿サムネ</b>。行タップで場所モードへ。
+        サークル名はタイトルの脇に teal の chip（既存 <code>.tlp-chip</code>）。ブロックの区切りは 8px の帯。</p>
+    </div>
+
+    <!-- @dsCard name="A2 1位だけ大きい + 上位3 + もっと見る（推し）" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">A2</span><span class="t">1 位は写真で大きく、2〜3 位は行、以降は「他 N 件」でその場で展開</span><span class="rec">推し</span></div>
+      <div class="pr-aim">プロフィールは何本も並ぶ場所。1 本あたりの高さを一定にして流し読みでき、1 位の写真が「そのランキングの顔」になる。FAB は colorful（この画面で唯一の最重要アクション）</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-feed">
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">渋谷の締めラーメン</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル渋谷</span></span><span class="rk-sub"><b>5</b> 件 · 9/12</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel030.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">一蘭 渋谷店</span><span class="ad">渋谷区神南, 東京都</span></span></div></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel041.jpg" alt=""><div class="rk-col"><span class="rk-nm">はやし</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">3</span><img class="rk-ph" src="../../assets/sample/reel/reel021.jpg" alt=""><div class="rk-col"><span class="rk-nm">渋谷横丁</span><span class="rk-ad">渋谷区神宮前, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-more">他 2 件を見る<img src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">道玄坂で朝まで</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル道玄坂</span></span><span class="rk-sub"><b>3</b> 件 · 8/30</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel012.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">WOMB</span><span class="ad">渋谷区円山町, 東京都</span></span></div></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel055.jpg" alt=""><div class="rk-col"><span class="rk-nm">TK NIGHTCLUB</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+          </div>
+          <button class="pr-fab" type="button" aria-label="ランキングを作る"><img src="../../assets/icons/icon_add.png" alt=""></button>
+          <div class="pr-mark" style="left:180px; top:520px"><span class="d">2</span><span class="l">画面遷移なしでその場に展開</span></div>
+          <div class="pr-mark" style="left:216px; top:770px"><span class="d">3</span><span class="l">Ø56 · end 16 · bottom 34+16</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">1 位 = 写真 176 / r16 にスクリム 1 枚、順位 34 w900。2〜3 位は A1 と同じ行（サムネは落として住所のみ）。「他 N 件を見る」は行の中で展開する。
+        FAB は <b>スクロール中も残す</b>（縮めない）。下スクロールで隠すと、長い一覧の末尾で入口を失う。</p>
+    </div>
+
+    <!-- @dsCard name="A3 横スクロールの帯 + ラベル付き FAB" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">A3</span><span class="t">横スクロールの帯 — 1 本 = 1 段の写真タイル / FAB は「ランキングを作る」の pill</span></div>
+      <div class="pr-aim">写真で並べる「棚」。店名より写真の記憶で選ぶ人向け。FAB に文字を付けて、初見でも何が増えるか分かるようにする</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-feed">
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">渋谷の締めラーメン</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル渋谷</span></span><span class="rk-sub"><b>5</b> 件 · 9/12</span></div>
+              </div>
+              <div class="rk-strip">
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel030.jpg" alt=""><span class="n">1</span><span class="t">一蘭 渋谷店</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel041.jpg" alt=""><span class="n">2</span><span class="t">はやし</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel021.jpg" alt=""><span class="n">3</span><span class="t">渋谷横丁</span></div>
+                <div class="rk-tile none"><img class="i" src="../../assets/icons/icon_pin_location.png" alt=""><span class="n">4</span><span class="t">名もない路地の屋台</span></div>
+              </div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">道玄坂で朝まで</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル道玄坂</span></span><span class="rk-sub"><b>3</b> 件 · 8/30</span></div>
+              </div>
+              <div class="rk-strip">
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel012.jpg" alt=""><span class="n">1</span><span class="t">WOMB</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel055.jpg" alt=""><span class="n">2</span><span class="t">TK NIGHTCLUB</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel004.jpg" alt=""><span class="n">3</span><span class="t">ABOUT LIFE COFFEE</span></div>
+              </div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">原宿カフェ 5 選</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル神宮前</span></span><span class="rk-sub"><b>5</b> 件 · 7/2</span></div>
+              </div>
+              <div class="rk-strip">
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel014.jpg" alt=""><span class="n">1</span><span class="t">ABOUT LIFE COFFEE BREWERS</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel001.jpg" alt=""><span class="n">2</span><span class="t">キャットストリートの角</span></div>
+                <div class="rk-tile"><img class="p" src="../../assets/sample/reel/reel009.jpg" alt=""><span class="n">3</span><span class="t">Lattest</span></div>
+                <div class="rk-tile more">他 2 件</div>
+              </div>
+            </section>
+          </div>
+          <button class="pr-fab ink ext" type="button"><img src="../../assets/icons/icon_add.png" alt="">ランキングを作る</button>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">タイル 108×144 / r12、順位は白い丸 24。1 本の高さが 220 で揃うので 3 本が一画面に入る。住所・サムネは出ない = 「どの店か」は写真と名前だけで判断させる。
+        帯の末尾に「他 N 件」タイル。FAB は ink の pill 52（ラベルがあるので colorful は不要）。</p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       B-1. サークル選択
+       ==================================================================== -->
+  <div class="pr-h2"><span class="k">B-1</span>サークルを選ぶ — 確定のさせ方と選択中の示し方（3 案）</div>
+  <div class="pr-scenes">
+
+    <!-- @dsCard name="B1-a タップ即決" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">B1-a</span><span class="t">タップ即決 — 円をタップした瞬間に寄って次へ / chrome は × と案内だけ</span></div>
+      <div class="pr-aim">手数最小。home の active（白い光のリング）をそのまま見せ、ためらわず一発で選べる人向け。誤タップは「戻る」で回復する</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7030" data-lat="35.6595" data-zoom="13.6" data-sel="shibuya"></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">サークルを選ぶ</span><span class="s">1 / 3</span></div>
+          <div class="pr-hint pr-glass"><img src="../../assets/icons/icon_near.png" alt="">タップしたサークルで作ります</div>
+          <div class="pr-mark" style="left:64px; top:140px"><span class="d">1</span><span class="l">glass 2 / 6（× と案内）</span></div>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">初期構図 = 現在地中心 zoom 13.6（2〜3 群）。home の active には白い光のリングが乗ったまま = 「今いるサークル」の目印。
+        タップで <b>500ms でその円へ寄り（半径を幅 72%）</b>、寄り終わりで場所選びのシートが下から出る。確認は無い。</p>
+    </div>
+
+    <!-- @dsCard name="B1-b 選択 → 下端カード → CTA（推し）" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">B1-b</span><span class="t">選択 → 下端のカードで確認 → CTA — リングが選択中へ移り、他は落ちる</span><span class="rec">推し</span></div>
+      <div class="pr-aim">円は重なる。タップで「どこを選んだか」を名前と数字で読ませてから進めると、誤タップの戻りが消える。自分の場所が 0 のサークルもここで伝えられる</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7030" data-lat="35.6640" data-zoom="13.6" data-sel="shibuya" data-dim></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">サークルを選ぶ</span><span class="s">1 / 3</span></div>
+          <section class="pr-sheet">
+            <span class="grab"></span>
+            <div class="sh-head">
+              <span class="sh-name">サークル渋谷</span>
+              <span class="sh-desc">渋谷駅周辺のコミュニティ · 現在地から 320m</span>
+            </div>
+            <div class="sh-stats">
+              <span class="st"><b>3</b><span>自分が投稿した場所</span></span>
+              <span class="st"><b>12</b><span>サークルの場所</span></span>
+              <span class="st"><b>500</b><span>m 半径</span></span>
+            </div>
+            <button class="pr-cta" type="button">このサークルで作る</button>
+          </section>
+          <div class="pr-mark" style="left:150px; top:112px"><span class="d">2</span><span class="l">選択以外は塗り 8% / 線 40% / 名前 55%</span></div>
+          <div class="pr-mark" style="left:64px; top:560px"><span class="d">3</span><span class="l">白い光のリング = 選択中（home の active から移る）</span></div>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">タップ = 選択（未確定）。リングが home の active からそのサークルへ <b>200ms で移り</b>、他の円は塗り 8% / 線 40%、名前は 55% に落ちる。
+        下端シート（as-built の <code>rgba(10,10,14,.9)</code> r24）に 名前 / 説明 · 距離 / <b>自分の場所の数</b>（主役）/ 総数 / 半径。CTA 56 で確定 → 寄る。
+        glass は × の 1 つ（シートは opaque）。</p>
+      <div class="pr-detach">
+        <div class="box">
+          <section class="pr-sheet" style="position:relative; border-radius:24px; padding-bottom:20px">
+            <span class="grab"></span>
+            <div class="sh-head"><span class="sh-name">サークル代々木</span><span class="sh-desc">代々木公園とその周辺 · 1.6km</span></div>
+            <div class="sh-stats">
+              <span class="st zero"><b>0</b><span>自分が投稿した場所</span></span>
+              <span class="st"><b>9</b><span>サークルの場所</span></span>
+              <span class="st"><b>550</b><span>m 半径</span></span>
+            </div>
+            <div class="sh-warn">まだ投稿していないサークルです。<b>サークルの場所 9 件</b>から選べます。</div>
+            <button class="pr-cta ghost" type="button">このサークルで作る</button>
+          </section>
+          <p class="cap"><b>自分の場所が 0 のサークル</b> — 選べる（既定）。0 を <code>--text-3</code> に落とし、1 行で候補の出どころを書く。CTA は colorful を外して ghost。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- @dsCard name="B1-c 下端の帯で選ぶ + ヘッダー右で次へ" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">B1-c</span><span class="t">下端の帯（近い順）で選ぶ — 地図はタップでも帯でも / 確定はヘッダー右の「次へ」</span></div>
+      <div class="pr-aim">地図の外にも入口を置く。名前で探せる人・円が重なって狙えないときの逃げ道。距離順の帯が「近いサークルから」という app の前提を表す</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7030" data-lat="35.6600" data-zoom="13.6" data-sel="dogenzaka" data-dim></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">サークルを選ぶ</span></div>
+          <button class="pr-next pr-glass" type="button">次へ<img src="../../assets/icons/icon_next.png" alt=""></button>
+          <div class="pr-rail pr-glass">
+            <button class="pr-chip" type="button">渋谷<small>3</small></button>
+            <button class="pr-chip on" type="button">道玄坂<small>1</small></button>
+            <button class="pr-chip" type="button">神宮前<small>2</small></button>
+            <button class="pr-chip" type="button">代々木<small>0</small></button>
+            <button class="pr-chip" type="button">原宿<small>0</small></button>
+          </div>
+          <div class="pr-mark" style="left:40px; top:730px"><span class="d">4</span><span class="l">帯 = glass 1 枚。チップは面（白 12%）</span></div>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">帯のチップ = 「サークル」を外した名前 + 自分の場所の数（Inter 11）。タップで地図がそのサークルへ寄り、選択中は白地。地図の円タップでも同じ状態になる。
+        確定はヘッダー右「次へ」。glass 3 / 6（× / 次へ / 帯）。難点: 帯が地図の下端を隠し、片手では帯と円の往復が起きる。</p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       B-2 以降（推し案の通し）
+       ==================================================================== -->
+  <div class="pr-h2"><span class="k">B-2 →</span>推し案の通し — 選ぶ = 順位（同じ地図） → 並べ替え → タイトル・保存 → タブへ戻る</div>
+  <div class="pr-scenes">
+
+    <!-- @dsCard name="S2 場所を選ぶ = タップ順が順位" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">S2</span><span class="t">場所を選ぶ — 寄った同じ地図にピン、タップした順がそのまま順位になる</span></div>
+      <div class="pr-aim">「選ぶ」と「順位を決める」を 1 手に併合。ピンの件数バッジが順位バッジに変わるので、地図の上で順位が見える</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7010" data-lat="35.6535" data-zoom="14.2" data-sel="shibuya" data-nolabels data-nome data-pins="shibuya" data-ranks="1,2,0,0,3,0"></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">場所を選ぶ</span><span class="s">2 / 3 · サークル渋谷</span></div>
+          <section class="pr-sheet" style="height:452px">
+            <span class="grab"></span>
+            <div class="sh-head"><span class="sh-title">タップした順に順位がつきます</span></div>
+            <div class="sh-sub">あとから並べ替えられます。地図のピンをタップしても選べます。</div>
+            <div class="pl-list">
+              <div class="pl-grp">自分が投稿した場所</div>
+              <div class="pl-row"><span class="pl-ck on">1</span><img class="pl-ph" src="../../assets/sample/reel/reel012.jpg" alt=""><div class="pl-col"><span class="pl-nm">WOMB</span><span class="pl-ad">渋谷区円山町, 東京都</span></div><span class="pl-cnt">6 件</span></div>
+              <div class="pl-row"><span class="pl-ck on">2</span><img class="pl-ph" src="../../assets/sample/reel/reel055.jpg" alt=""><div class="pl-col"><span class="pl-nm">TK NIGHTCLUB</span><span class="pl-ad">渋谷区道玄坂, 東京都</span></div><span class="pl-cnt">4 件</span></div>
+              <div class="pl-row"><span class="pl-ck"></span><img class="pl-ph" src="../../assets/sample/reel/reel004.jpg" alt=""><div class="pl-col"><span class="pl-nm">ABOUT LIFE COFFEE</span><span class="pl-ad">渋谷区道玄坂, 東京都</span></div><span class="pl-cnt">1 件</span></div>
+              <div class="pl-grp">このサークルの他の場所</div>
+              <div class="pl-row"><span class="pl-ck on">3</span><img class="pl-ph" src="../../assets/sample/reel/reel030.jpg" alt=""><div class="pl-col"><span class="pl-nm">一蘭 渋谷店</span><span class="pl-ad">渋谷区神南, 東京都</span></div><span class="pl-cnt">5 件</span></div>
+              <div class="pl-row"><span class="pl-ck"></span><span class="pl-ph none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span><div class="pl-col"><span class="pl-nm">名もない路地の屋台</span><span class="pl-ad">渋谷区, 東京都</span></div><span class="pl-cnt">2 件</span></div>
+            </div>
+            <button class="pr-cta" type="button">次へ<span class="cnt">3</span></button>
+          </section>
+          <div class="pr-mark" style="left:150px; top:196px"><span class="d">5</span><span class="l">件数バッジ → 順位バッジ（白地）</span></div>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">確定で寄った地図（zoom ≈ 14.2、円を上側に寄せる）に場所ピン 36 / r11（既存流用）。<b>自分が投稿した場所</b> = 先頭グループで全不透明、
+        他は .72。選ぶと <code>scale 1.14</code> + バッジが件数（ink 地）→ <b>順位（白地）</b>に変わる。行の左は選択 = 番号入りの白丸。
+        リンク貼り付けで足す行はシート末尾（次カード）。</p>
+    </div>
+
+    <!-- @dsCard name="S3 順位を決める（ドラッグ）" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">S3</span><span class="t">順位を決める — シートが伸び、地図は暗く沈む。ドラッグで並べ替え、ピンの番号も追従</span></div>
+      <div class="pr-aim">S2 で決まった順を「直す」だけの画面。地図を残すのはピン番号が動くのを見せるためで、操作はリストに集中させる</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7010" data-lat="35.6535" data-zoom="14.2" data-sel="shibuya" data-nolabels data-nome data-pins="shibuya" data-ranks="1,3,4,0,2,0"></div>
+          <div class="pr-scrim" style="background:rgba(0,0,0,.45)"></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">順位を決める</span><span class="s">2 / 3 · サークル渋谷</span></div>
+          <section class="pr-sheet" style="height:560px">
+            <span class="grab"></span>
+            <div class="sh-head"><span class="sh-title">長押しして並べ替え</span></div>
+            <div class="pl-list">
+              <div class="pl-row"><span class="pl-no">1</span><img class="pl-ph" src="../../assets/sample/reel/reel012.jpg" alt=""><div class="pl-col"><span class="pl-nm">WOMB</span><span class="pl-ad">渋谷区円山町, 東京都</span></div><span class="pl-grip"><img src="../../assets/icons/icon_menu.png" alt=""></span></div>
+              <div class="pl-row drag"><span class="pl-no">2</span><img class="pl-ph" src="../../assets/sample/reel/reel030.jpg" alt=""><div class="pl-col"><span class="pl-nm">一蘭 渋谷店</span><span class="pl-ad">渋谷区神南, 東京都</span></div><span class="pl-grip"><img src="../../assets/icons/icon_menu.png" alt=""></span></div>
+              <div class="pl-row"><span class="pl-no">3</span><img class="pl-ph" src="../../assets/sample/reel/reel055.jpg" alt=""><div class="pl-col"><span class="pl-nm">TK NIGHTCLUB</span><span class="pl-ad">渋谷区道玄坂, 東京都</span></div><span class="pl-grip"><img src="../../assets/icons/icon_menu.png" alt=""></span></div>
+              <div class="pl-row"><span class="pl-no">4</span><img class="pl-ph" src="../../assets/sample/reel/reel004.jpg" alt=""><div class="pl-col"><span class="pl-nm">ABOUT LIFE COFFEE</span><span class="pl-ad">渋谷区道玄坂, 東京都</span></div><span class="pl-grip"><img src="../../assets/icons/icon_menu.png" alt=""></span></div>
+              <div class="pl-add"><span class="ic"><img src="../../assets/icons/icon_add.png" alt=""></span><span>Google マップのリンクを貼って足す<span class="s">投稿していない店も入れられます（既存の「リンクを追加」と同じ入力）</span></span></div>
+            </div>
+            <button class="pr-cta" type="button">次へ<span class="cnt">4</span></button>
+          </section>
+          <div class="pr-mark" style="left:150px; top:196px"><span class="d">6</span><span class="l">ピンの番号がリストに追従</span></div>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">S2 の「次へ」でシートが 452 → 560 に伸び、地図に 45% のスクリム。行 = 順位 18 / 写真 44 / 名前 + 住所 / 右端グリップ 44（<code>icon_menu</code>）。
+        持ち上げた行は面 8% + 影で浮く。末尾の「リンクを貼って足す」= 既存ダイアログを開き、解決した場所が末尾に付く。</p>
+    </div>
+
+    <!-- @dsCard name="S4 タイトル → 保存" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">S4</span><span class="t">タイトル → 保存 — 最後に 1 行だけ聞く。並びのサムネで「何を保存するか」を見せる</span></div>
+      <div class="pr-aim">タイトルは並べ終わってから付ける方が言葉が出る。空欄なら「サークル渋谷のランキング」を仮タイトルにして保存を止めない</div>
+      <div class="phone">
+        <div class="pr-flow">
+          <div class="pr-map" data-rmap data-lng="139.7010" data-lat="35.6535" data-zoom="14.2" data-sel="shibuya" data-nolabels data-nome data-pins="shibuya" data-ranks="1,3,4,0,2,0"></div>
+          <div class="pr-scrim" style="background:rgba(0,0,0,.45)"></div>
+          <button class="pr-x pr-glass" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>
+          <div class="pr-ttl"><span class="h">タイトル</span><span class="s">3 / 3 · サークル渋谷</span></div>
+          <section class="pr-sheet">
+            <span class="grab"></span>
+            <div class="sh-sum"><span class="chip"><img src="../../assets/icons/icon_group.png" alt="">サークル渋谷</span><span class="n"><b>4</b> 件</span></div>
+            <div class="sh-preview">
+              <img src="../../assets/sample/reel/reel012.jpg" alt=""><img src="../../assets/sample/reel/reel030.jpg" alt=""><img src="../../assets/sample/reel/reel055.jpg" alt=""><img src="../../assets/sample/reel/reel004.jpg" alt="">
+            </div>
+            <div class="pr-field"><span>渋谷の締めラーメン</span><span class="caret"></span></div>
+            <div class="pr-field-sub">空欄のままなら「サークル渋谷のランキング」で保存します</div>
+            <button class="pr-cta" type="button">保存する</button>
+          </section>
+        </div>
+        <div class="statusbar"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pr-note">入力 = <code>WdTextField</code> standart（地 <code>--surface-input</code> / 48 / pill）。上にサークル chip + 件数 + 並び順のサムネ 44。
+        保存 → 地図を dispose してタブへ戻る（全面フェード 240ms）。</p>
+      <div class="pr-detach">
+        <div class="box">
+          <button class="pr-cta busy" type="button"><span class="spin"></span></button>
+          <p class="cap"><b>保存中</b> — CTA のラベルをスピナー 20 に置き換え、× と入力を無効に。二重タップ防止。</p>
+        </div>
+        <div class="box">
+          <div class="pr-snack"><span class="e"></span>保存できませんでした<span class="r">再試行</span></div>
+          <p class="cap"><b>失敗</b> — シートの上端に <code>--surface-raised</code> のスナック。入力内容は保持し「再試行」で同じ保存を投げる。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- @dsCard name="S5 完了 → タブへ戻り、新しいランキングが先頭に" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">S5</span><span class="t">完了 — ランキングタブへ戻り、新しい 1 本が先頭に降りてくる</span></div>
+      <div class="pr-aim">「保存された」を通知で言わず、一覧の先頭に現れる動きだけで伝える。入場は 320ms・16px の下降 + teal のうすい地が 1.5 秒で消える</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-feed">
+            <section class="rk new">
+              <div class="rk-head">
+                <div class="rk-title">渋谷の締めラーメン</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル渋谷</span></span><span class="rk-sub"><b>4</b> 件 · たった今</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel012.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">WOMB</span><span class="ad">渋谷区円山町, 東京都</span></span></div></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel030.jpg" alt=""><div class="rk-col"><span class="rk-nm">一蘭 渋谷店</span><span class="rk-ad">渋谷区神南, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">3</span><img class="rk-ph" src="../../assets/sample/reel/reel055.jpg" alt=""><div class="rk-col"><span class="rk-nm">TK NIGHTCLUB</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-more">他 1 件を見る<img src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">道玄坂で朝まで</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル道玄坂</span></span><span class="rk-sub"><b>3</b> 件 · 8/30</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel058.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">WOMB</span><span class="ad">渋谷区円山町, 東京都</span></span></div></div>
+            </section>
+          </div>
+          <button class="pr-fab" type="button" aria-label="ランキングを作る"><img src="../../assets/icons/icon_add.png" alt=""></button>
+          <div class="pr-mark" style="left:230px; top:222px"><span class="d">7</span><span class="l">先頭に入場（320ms）</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">FAB → フローは <b>地図が下から現れる</b>（白面が残ったまま 360ms <code>--ease-out</code>）、戻りは全面フェード。行き帰りで動きを変え、「作って戻った」と分かるようにする。</p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       状態
+       ==================================================================== -->
+  <div class="pr-h2"><span class="k">状態</span>空（0 本）/ 写真なし・長い名前 / 他人のプロフィール</div>
+  <div class="pr-scenes">
+
+    <!-- @dsCard name="C1 ランキングが 0 本" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">C1</span><span class="t">ランキングが 0 本 — 案内は FAB を指す 2 行だけ</span></div>
+      <div class="pr-aim">空の面に大きな CTA を置かず、FAB の役目を文で説明する。FAB が唯一の入口だと学習させる</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-empty">
+            <span class="t">まだランキングがありません</span>
+            <span class="s">行ったお店に順位をつけて並べられます。<br>右下の <b>＋</b> から、サークルを選んで作りましょう。</span>
+          </div>
+          <button class="pr-fab" type="button" aria-label="ランキングを作る"><img src="../../assets/icons/icon_add.png" alt=""></button>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">見出し 15 w700 ink + 本文 12 ink-sub。中央寄せは画面全体が空のときだけ。投稿が 0 件（= 行ったお店が無い）のときは
+        2 行目を「投稿に Google マップのリンクを添えると、その店が候補になります」に差し替える。</p>
+    </div>
+
+    <!-- @dsCard name="C2 写真なし・長いタイトル・長い店名" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">C2</span><span class="t">写真なし・長いタイトル・長い店名（A2 の形で）</span></div>
+      <div class="pr-aim">1 位に写真が無いときも高さは 176 のまま。ink 地 + icon_pin_location で「場所」だと分かる。文字は折り返し 2 行 / 1 行省略で崩さない</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="self"></div>
+          <div class="pr-feed">
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">終電を逃した夜に、道玄坂から宮益坂まで歩いて見つけた深夜営業の店ぜんぶ</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル渋谷</span></span><span class="rk-sub"><b>7</b> 件 · 9/1</span></div>
+              </div>
+              <div class="rk-hero" style="display:grid; place-items:center"><img src="../../assets/icons/icon_pin_location.png" alt="" style="width:32px; height:32px; object-fit:contain; position:relative; z-index:1"><div class="cap"><span class="no">1</span><span class="c"><span class="nm" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">名もない路地の屋台（渋谷駅西口の高架下、看板なし）</span><span class="ad">渋谷区, 東京都</span></span></div></div>
+              <div class="rk-row"><span class="rk-no">2</span><span class="rk-ph none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span><div class="rk-col"><span class="rk-nm">Shibuya Late Night Curry Stand by the Station East Exit</span><span class="rk-ad">渋谷区渋谷2丁目, 東京都 · 詳細は未取得</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">3</span><img class="rk-ph" src="../../assets/sample/reel/reel036.jpg" alt=""><div class="rk-col"><span class="rk-nm">はやし</span><span class="rk-ad">渋谷区道玄坂, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-more">他 4 件を見る<img src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">原宿カフェ 5 選</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル神宮前</span></span><span class="rk-sub"><b>5</b> 件 · 7/2</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel014.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">ABOUT LIFE COFFEE BREWERS</span><span class="ad">渋谷区神宮前, 東京都</span></span></div></div>
+            </section>
+          </div>
+          <button class="pr-fab" type="button" aria-label="ランキングを作る"><img src="../../assets/icons/icon_add.png" alt=""></button>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">タイトルは 2 行で clamp（16 / lh 1.4）。店名は 1 行省略。詳細未取得の場所は住所の後ろに「· 詳細は未取得」を足し、無いのか読めていないのかを区別する。</p>
+    </div>
+
+    <!-- @dsCard name="C3 他人のプロフィール（閲覧のみ）" -->
+    <div class="pr-scene">
+      <div class="pr-tag"><span class="n">C3</span><span class="t">他人のプロフィール — 投稿 / ランキング の 2 タブ（各 201）、FAB なし</span></div>
+      <div class="pr-aim">同じブロックをそのまま読む。作れないので FAB を消し、ユーザーバーはフォローボタンに差し替わる（既存）</div>
+      <div class="phone">
+        <div class="pr-screen">
+          <div data-ubar="other"></div>
+          <div class="pr-feed">
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">キャットストリートの朝ごはん</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル神宮前</span></span><span class="rk-sub"><b>4</b> 件 · 8/19</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel001.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">キャットストリートの角</span><span class="ad">渋谷区神宮前, 東京都</span></span></div></div>
+              <div class="rk-row"><span class="rk-no">2</span><img class="rk-ph" src="../../assets/sample/reel/reel009.jpg" alt=""><div class="rk-col"><span class="rk-nm">Lattest</span><span class="rk-ad">渋谷区神宮前, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-row"><span class="rk-no">3</span><img class="rk-ph" src="../../assets/sample/reel/reel014.jpg" alt=""><div class="rk-col"><span class="rk-nm">ABOUT LIFE COFFEE BREWERS</span><span class="rk-ad">渋谷区神宮前, 東京都</span></div><img class="rk-nx" src="../../assets/icons/icon_next.png" alt=""></div>
+              <div class="rk-more">他 1 件を見る<img src="../../assets/icons/icon_next.png" alt=""></div>
+            </section>
+            <section class="rk">
+              <div class="rk-head">
+                <div class="rk-title">恵比寿で 2 軒目</div>
+                <div class="rk-meta"><span class="tlp-chip"><img src="../../assets/icons/icon_group.png" alt=""><span>サークル恵比寿</span></span><span class="rk-sub"><b>3</b> 件 · 7/28</span></div>
+              </div>
+              <div class="rk-hero"><img src="../../assets/sample/reel/reel047.jpg" alt=""><div class="cap"><span class="no">1</span><span class="c"><span class="nm">恵比寿横丁</span><span class="ad">渋谷区恵比寿, 東京都</span></span></div></div>
+            </section>
+          </div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pr-note">行タップは自分のときと同じく場所モードへ（他人のランキングから店を見に行ける）。ランキングが 0 本の他人 = 「ランキングはまだありません」の 1 行だけ（案内は出さない）。</p>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       推し案と理由
+       ==================================================================== -->
+  <div class="pr-h2"><span class="k">推し</span>A2 + B1-b、手順は 3（選ぶ = 順位 → 並べ替え → タイトル・保存）</div>
+  <div class="pr-rec">
+    <b>一覧の情報の優先順位</b> — タイトル（16 w700・主役）&gt; 1 位の写真 &gt; 順位 + 店名 &gt; サークル chip · 件数 · 日付 &gt; 住所。自分の投稿サムネは行から外した（店の写真と二重になり、主役が割れる）。
+    A1 は 5 本を超えると 1 画面に 1 本も入らず、A3 は住所も件数も無いので「どの店か」を写真の記憶に頼る。A2 は 1 本の高さがほぼ一定（≈ 380）で流し読みでき、開けば全件になる。
+    <ol>
+      <li><b>FAB の重み</b> — colorful の Ø56。プロフィールに colorful は他に無く、home の投稿 FAB と同じ「作る」の意味を持たせられる。スクロール中も残す。他人のプロフィールでは出さない。</li>
+      <li><b>サークル選択の確定</b> — B1-b の「選択 → 下端カード → CTA」。円は半径 500〜600m で重なるので、即決（B1-a）は誤タップの戻りが増える。カードに<b>自分が投稿した場所の数</b>を出せば、
+        0 のサークルを選んだときも「候補はサークルの場所から」と先に伝えられる。帯（B1-c）は逃げ道として良いが、下端を隠して地図が全面である意味が薄れる。</li>
+      <li><b>手順の数</b> — 4 → 3。場所のタップ順を順位にするので「順位を決める」は<b>直す画面</b>になり、迷わない人はそのまま次へ。タイトルは最後（並べ終わってから言葉が出る）。空欄なら仮タイトルで止めない。</li>
+      <li><b>glass 予算</b> — 全画面で × の 1 つだけが glass（B1-c のみ 3）。シートは as-built の opaque（<code>rgba(10,10,14,.9)</code>）で白文字 AA を面で担保。リストの行に glass は無い。</li>
+    </ol>
+  </div>
+
+</div>
+
+<template id="tpl-ubar-self">
+  <div class="pr-ubar">
+    <button class="ib" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+    <img class="av" src="../../assets/sample/user/user006.jpg" alt="">
+    <div class="col"><span class="nm">森 悠人</span><span class="sb">11件の投稿</span><span class="st"><span><b>0</b>フォロー</span><span><b>0</b>フォロワー</span></span></div>
+    <button class="ib" type="button" aria-label="メニュー"><img src="../../assets/icons/icon_menu.png" alt=""></button>
+  </div>
+  <div class="pr-tabs"><div class="pr-tab"><span>投稿</span></div><div class="pr-tab"><span>下書き</span></div><div class="pr-tab on"><span>ランキング</span></div></div>
+</template>
+<template id="tpl-ubar-other">
+  <div class="pr-ubar">
+    <button class="ib" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+    <img class="av" src="../../assets/sample/user/user009.jpg" alt="">
+    <div class="col"><span class="nm">Dreamy</span><span class="sb">28件の投稿</span><span class="st"><span><b>12</b>フォロー</span><span><b>40</b>フォロワー</span></span></div>
+    <button class="follow" type="button">フォロー</button>
+  </div>
+  <div class="pr-tabs two"><div class="pr-tab"><span>投稿</span></div><div class="pr-tab on"><span>ランキング</span></div></div>
+</template>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#0b0d13"/><circle cx="120" cy="112" r="58" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="3"/><circle cx="120" cy="112" r="58" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="14"/><circle cx="84" cy="150" r="40" fill="#08080b" fill-opacity=".3" stroke="#fff" stroke-opacity=".5" stroke-width="1.5"/><rect x="96" y="92" width="48" height="40" rx="10" fill="#fff"/><text x="120" y="121" text-anchor="middle" font-family="Inter,sans-serif" font-size="24" font-weight="800" fill="#08080b">1</text><text x="120" y="46" text-anchor="middle" font-family="Inter,sans-serif" font-size="20" font-weight="700" fill="#fff">RANKING</text><text x="120" y="222" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" fill="rgba(255,255,255,.6)">tab + map flow</text></svg></template>
+
+<script src="ranking-map.js"></script>
+<script>
+  /* specimen 補助のみ: status bar の中身と、固定のユーザーバー + タブ行を流し込む */
+  var SB = '<span class="time">9:41</span><span class="sys"><svg width="17" height="11" viewBox="0 0 17 11"><rect x="0" y="7" width="3" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="5" width="3" height="6" rx="1" fill="currentColor"/><rect x="9" y="2.5" width="3" height="8.5" rx="1" fill="currentColor"/><rect x="13.5" y="0" width="3" height="11" rx="1" fill="currentColor"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="1" width="20" height="10" rx="3" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="2.5" y="3" width="16" height="6" rx="1.5" fill="currentColor"/><rect x="22.5" y="4" width="2" height="4" rx="1" fill="currentColor" fill-opacity=".5"/></svg></span>';
+  document.querySelectorAll('.statusbar').forEach(function (el) { el.innerHTML = SB; });
+  document.querySelectorAll('[data-ubar]').forEach(function (el) {
+    var t = document.getElementById('tpl-ubar-' + el.dataset.ubar);
+    el.replaceWith(t.content.cloneNode(true));
+  });
+</script>
+</body>
+</html>

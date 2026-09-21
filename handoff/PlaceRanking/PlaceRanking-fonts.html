@@ -1,0 +1,198 @@
+<!-- @dsCard group="PlaceRanking" tier="explore" viewport="1760x2600" name="PlaceRanking — 確認モードの書体 6 案（和文 + 英数のペア）" subtitle="タイトルの縁取り文字 / 順位のステッカー / 名前の帯 の 3 つを、同じ配置で書体だけ入れ替えて比べる。A = 現行（Noto Sans JP 900 + Inter italic 900）" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PlaceRanking — 確認モードの書体 6 案</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="PlaceRanking.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,800;0,900;1,900&family=Noto+Sans+JP:wght@400;700;900&family=Zen+Kaku+Gothic+New:wght@700;900&family=Bebas+Neue&family=M+PLUS+Rounded+1c:wght@800;900&family=Nunito:ital,wght@0,900;1,900&family=Dela+Gothic+One&family=Anton&family=Shippori+Mincho+B1:wght@800&family=Playfair+Display:ital,wght@0,900;1,900&family=Kaisei+Decol:wght@700&family=Caveat:wght@700&display=swap">
+<style>
+  .pf-grid { display: flex; flex-wrap: wrap; gap: 26px; align-items: flex-start; }
+  .pf { display: flex; flex-direction: column; gap: 10px; width: 402px; }
+  .pf .pk-flat { --h: 520px; }
+  .pf .pk-tout { top: 18px; }
+  .pf .pk-lab, .pf .pk-lab .nm { max-width: 260px; }
+  .pf.upright .lat, .pf.upright .l2 { font-style: normal; }
+  .pf.one .l1, .pf.one .l2, .pf.one .nm, .pf.one .rs, .pf.one .r { font-weight: 400; }
+  .pf.hand .l1 { -webkit-text-stroke-width: 5px; }
+  .pf.hand .l2 { font-size: 40px; letter-spacing: 0; }
+  .pf.cond .l2 { font-size: 40px; letter-spacing: .06em; }
+  .pf.cond .nm.lat { font-size: 18px; letter-spacing: .04em; }
+  .pf.cond .rs { font-size: 17px; }
+  .pf.serif .l2 { letter-spacing: 0; }
+  .pf-fonts { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pf-fonts span { font-family: var(--font-latin); font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--ink); background: #fff; padding: 3px 8px; border-radius: var(--radius-pill); }
+  .pf-fonts span.jp { background: var(--grad-yellow); }
+</style>
+</head>
+<body class="pk">
+<div class="pk-doc">
+
+  <div>
+    <div class="pk-h1">確認モードの書体 — 6 つのペアで比べる</div>
+    <p class="pk-lead">
+      配置・大きさ・色は <a href="PlaceRanking.html" style="color:var(--grad-yellow)">v2 の確認モード</a>のまま、<b>和文（タイトル・和文の店名）</b>と<b>英数（BEST 3・1st・英字の店名）</b>の書体だけを入れ替えた。
+      見るのは 3 点 — (1) 縁取り 6px に耐える太さがあるか (2) 「1st」の小さな上付きが潰れないか (3) 帯の 15px で和文 / 英数の背の高さがそろうか。A が現行。
+    </p>
+  </div>
+
+  <div class="pk-h2"><span class="k">A — F</span>同じ地図・同じ配置。タイトル / 1 位（英字）/ 3 位（和文）/ 4 位のピン</div>
+  <div class="pf-grid">
+
+    <!-- A 現行 -->
+    <div class="pf">
+      <div class="pk-tag"><span class="n">A</span><span class="t">現行 — ゴシック 900 + Inter italic 900</span><span class="rec">現行</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'Noto Sans JP', sans-serif; --font-latin: 'Inter', sans-serif">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">Noto Sans JP 900</span><span>Inter italic 900</span></div>
+      <p class="pk-cap">基準。太さは十分、英数の斜体で「動き」が出る。和文と Inter の背の高さが近く、帯で並んでも違和感が無い。</p>
+    </div>
+
+    <!-- B コンデンス -->
+    <div class="pf upright cond">
+      <div class="pk-tag"><span class="n">B</span><span class="t">ポスター — Zen Kaku Gothic New 900 + Bebas Neue</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'Zen Kaku Gothic New', sans-serif; --font-latin: 'Bebas Neue', sans-serif">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">Zen Kaku Gothic New 900</span><span>Bebas Neue（斜体なし・単ウェイト）</span></div>
+      <p class="pk-cap">縦長の英数で「BEST 3」が看板になる。斜体が無いので英数は非斜体、代わりに字間 .06em。「1st」の上付きは細く見えるので 17px に上げた。</p>
+    </div>
+
+    <!-- C 丸ゴシック -->
+    <div class="pf">
+      <div class="pk-tag"><span class="n">C</span><span class="t">まる — M PLUS Rounded 1c 900 + Nunito italic 900</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'M PLUS Rounded 1c', sans-serif; --font-latin: 'Nunito', sans-serif">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">M PLUS Rounded 1c 900</span><span>Nunito italic 900</span></div>
+      <p class="pk-cap">丸い縁取りとステッカーの角丸が同じ語彙になる。柔らかいぶん「ランキング」の格は下がる。丸ゴの 900 は縁取り 6px でも潰れない。</p>
+    </div>
+
+    <!-- D ブロック -->
+    <div class="pf upright one">
+      <div class="pk-tag"><span class="n">D</span><span class="t">ブロック — Dela Gothic One + Anton</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'Dela Gothic One', sans-serif; --font-latin: 'Anton', sans-serif">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">Dela Gothic One（単ウェイト）</span><span>Anton（単ウェイト）</span></div>
+      <p class="pk-cap">いちばん「声が大きい」。縁取りをしても内側の白が太く残る。帯の 15px では Dela の懐が詰まり、長い和文店名は 1 段読みにくい。ウェイト 400 のみ。</p>
+    </div>
+
+    <!-- E 明朝 -->
+    <div class="pf serif">
+      <div class="pk-tag"><span class="n">E</span><span class="t">旅の記録 — Shippori Mincho B1 800 + Playfair Display italic 900</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'Shippori Mincho B1', serif; --font-latin: 'Playfair Display', serif">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">Shippori Mincho B1 800</span><span>Playfair Display italic 900</span></div>
+      <p class="pk-cap">雑誌の旅特集の空気。明朝の細い横画は縁取り 6px に負けて白が消える箇所がある（縁 4px なら成立）。英字の斜体は上品だが「1st」の上付きは小さく見える。</p>
+    </div>
+
+    <!-- F 手書き -->
+    <div class="pf hand">
+      <div class="pk-tag"><span class="n">F</span><span class="t">日記 — Kaisei Decol 700 + Caveat 700</span></div>
+      <div class="pk-flat" style="--gc: var(--gc-night); --font-jp: 'Kaisei Decol', serif; --font-latin: 'Caveat', cursive">
+        <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+        <div class="pk-pt" style="--x:120px; --y:195px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:245px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:445px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:430px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー</span></div>
+        </div>
+        <div class="pk-ppin" style="--x:60px; --y:440px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+      </div>
+      <div class="pf-fonts"><span class="jp">Kaisei Decol 700</span><span>Caveat 700（手書き）</span></div>
+      <p class="pk-cap">ステッカーとの相性はいちばん良い（手で貼った物に見える）。ただし Caveat は小さいと読めないので「BEST 3」は 40px、帯の英字店名は可読性の下限。和文の手書き系は太さが足りず縁取りは 5px に落とした。</p>
+    </div>
+
+  </div>
+
+  <div class="pk-h2"><span class="k">まとめ</span>選ぶ軸は「縁取りに耐える太さ」と「1st の上付きの可読性」</div>
+  <div class="pk-rec">
+    <ul>
+      <li><b>A（現行）/ C（まる）/ D（ブロック）</b>は 3 点とも合格。空気で選ぶ — A = ニュートラル、C = 親しみ、D = 主張。</li>
+      <li><b>B（ポスター）</b>は英数だけ替える案としても成立（和文は Noto のまま Bebas を入れる）。斜体を捨てるぶん、帯の傾き −4° が動きを担う。</li>
+      <li><b>E（明朝）/ F（手書き）</b>は縁取り 6px と両立しない。採るなら縁を 4px に落とすか、タイトルだけ白い面のステッカー（v2 のタイトル A 案）に戻す。</li>
+      <li>どの案でも<b>和文の店名は非斜体</b>のまま（擬似斜体は使わない）。英数の斜体は書体が italic を持つときだけ。</li>
+    </ul>
+  </div>
+
+</div>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#e9e5d9"/><text x="120" y="130" text-anchor="middle" font-family="Inter,sans-serif" font-size="64" font-weight="900" font-style="italic" fill="#fff" stroke="#08080b" stroke-width="10" paint-order="stroke fill">Aa</text><text x="120" y="190" text-anchor="middle" font-family="serif" font-size="40" font-weight="900" fill="#08080b">あ</text></svg></template>
+</body>
+</html>

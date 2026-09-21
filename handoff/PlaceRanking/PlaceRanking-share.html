@@ -1,0 +1,283 @@
+<!-- @dsCard group="PlaceRanking" tier="screen" viewport="1760x2400" name="PlaceRanking — Instagram ストーリーズへ共有（背景 = 地図 / 任意の画像）" subtitle="保存後の確認モードから 1 タップ。端末で 1080×1920 の JPG を合成し、instagram-stories:// に背景画像として渡す（現行の OS 共有シート + テキストとは別の専用経路）。背景は既定で地図、ランキングの写真 / ライブラリの画像にも差し替え可。Meta Policy 2.6 に従いロゴ・透かし・CTA は載せない" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PlaceRanking — ストーリーズへ共有</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="PlaceRanking.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&family=Pacifico&display=swap">
+<style>
+  /* ==== 共有: 確認モードの上に重なる 1 面 ======================================= */
+  .sh-scrim { position: absolute; inset: 0; background: rgba(8,8,11,.78); z-index: 14; }
+  .sh-hd { position: absolute; left: 0; right: 0; top: var(--safe-top); height: 56px; z-index: 16; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 16px; }
+  .sh-hd .x { position: absolute; left: 8px; top: 6px; width: 44px; height: 44px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; }
+  .sh-hd .x img { width: 16px; height: 16px; }
+  /* 9:16 のプレビュー（1080×1920 を 0.25 で表示 = 270×480） */
+  .sh-story { position: absolute; left: 50%; top: calc(var(--safe-top) + 64px); width: 270px; height: 480px; margin-left: -135px; border-radius: 14px; overflow: hidden; z-index: 16; background: #e9e5d9; box-shadow: 0 12px 40px rgba(0,0,0,.5); font-family: var(--font-jp); color: var(--ink); }
+  .sh-story .pk-map { border-radius: 14px; }
+  .sh-story .bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sh-story .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), transparent 30%, transparent 70%, rgba(0,0,0,.45)); }
+  .sh-story .pk-tout { top: 66px; left: 14px; right: 14px; }
+  .sh-story .pk-tout .l1 { font-size: 17px; -webkit-text-stroke-width: 4.5px; }
+  .sh-story .pk-tout .l2 { font-size: 21px; -webkit-text-stroke-width: 4.5px; }
+  .sh-story .pk-stack .rs { height: 22px; font-size: 11px; padding: 0 6px; line-height: 22px; left: -9px; top: -9px; }
+  .sh-story .pk-lab { bottom: -11px; max-width: 150px; }
+  .sh-story .pk-lab .nm { height: 21px; line-height: 21px; font-size: 11.5px; padding: 0 9px; max-width: 150px; }
+  .sh-story .pk-pt { width: 7px; height: 7px; left: calc(var(--x) - 3.5px); top: calc(var(--y) - 3.5px); box-shadow: 0 0 0 2px #fff, 0 1px 3px rgba(0,0,0,.3); }
+  .sh-story .pk-ppin { width: 26px; height: 26px; left: calc(var(--x) - 13px); top: calc(var(--y) - 13px); }
+  .sh-story .pk-ppin img { width: 26px; height: 26px; border-width: 2px; }
+  .sh-story .pk-ppin .r { height: 14px; font-size: 8px; padding: 0 4px; line-height: 14px; left: -6px; top: -5px; }
+  /* 下端の署名 = 白いステッカー: 「Toopdbq」の Pacifico + ユーザー名。ストーリーズの UI（下 250px）と被らないよう下端から 56 */
+  .sh-sign { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%) rotate(-2deg); height: 26px; padding: 0 10px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25); display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+  .sh-sign .w { font-family: 'Pacifico', cursive; font-size: 12px; color: var(--ink); line-height: 1; }
+  .sh-sign .u { font-family: var(--font-latin); font-weight: 700; font-size: 10px; color: var(--ink-sub); }
+  /* ストーリーズの安全域（上 250 / 下 250 @1080 → 62 / 62 @270）— specimen だけに描く */
+  .sh-safe { position: absolute; left: 0; right: 0; height: 62px; border: 1px dashed rgba(255,62,136,.6); border-left: 0; border-right: 0; pointer-events: none; z-index: 5; }
+  .sh-safe.t { top: 0; border-top: 0; } .sh-safe.b { bottom: 0; border-bottom: 0; }
+  /* 背景の選択 = 60 の枡が 1 行。地図（既定）/ ランキングの写真 / ライブラリ */
+  .sh-bgs { position: absolute; left: 16px; right: 16px; top: calc(var(--safe-top) + 566px); z-index: 16; }
+  .sh-bgs .eb { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.6); letter-spacing: .04em; height: 20px; }
+  .sh-bgs .row { display: flex; gap: 10px; margin-top: 4px; }
+  .sh-bg { position: relative; width: 60px; height: 60px; flex: none; border-radius: 10px; overflow: hidden; background: #e9e5d9; box-shadow: 0 0 0 1.5px rgba(255,255,255,.25); cursor: pointer; }
+  .sh-bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sh-bg.on { box-shadow: 0 0 0 2.5px #fff; }
+  .sh-bg.on::after { content: ''; position: absolute; right: 4px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink) url('../../assets/icons/icon_check.png') center / 9px no-repeat; box-shadow: 0 0 0 1.5px #fff; }
+  .sh-bg .l { position: absolute; left: 0; right: 0; bottom: 0; height: 18px; background: rgba(8,8,11,.7); color: #fff; font-size: 9px; font-weight: 700; line-height: 18px; text-align: center; }
+  .sh-bg.map { background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 1px, transparent 1px 12px), repeating-linear-gradient(0deg, rgba(255,255,255,.55) 0 1px, transparent 1px 12px), #e9e5d9; }
+  .sh-bg.lib { background: rgba(255,255,255,.08); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #fff; font-size: 9px; font-weight: 700; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.3); border: 0; }
+  .sh-bg.lib img { width: 18px; height: 18px; }
+  /* CTA = ink ではなく白のピル（暗いスクリムの上）。Instagram の文言はブランドガイドどおり「Instagram」表記 */
+  .sh-cta { position: absolute; left: 16px; right: 16px; bottom: calc(var(--safe-bot) + 12px); z-index: 16; height: 56px; border: 0; border-radius: var(--radius-pill); background: #fff; color: var(--ink); font-family: var(--font-jp); font-weight: 700; font-size: 17px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+  .sh-cta img { width: 18px; height: 18px; filter: invert(1); }
+  .sh-cta .sub { position: absolute; left: 0; right: 0; top: 62px; text-align: center; font-size: 11px; font-weight: 500; color: rgba(255,255,255,.55); }
+  .sh-alt { position: absolute; left: 0; right: 0; bottom: calc(var(--safe-bot) + 76px); z-index: 16; text-align: center; font-size: 13px; font-weight: 700; color: #fff; height: 44px; line-height: 44px; }
+  /* 保存後の確認モード: CTA が「ストーリーズに共有」へ、下に「閉じる」 */
+  .pk-save.share { white-space: nowrap; min-width: 260px; padding: 0 28px; }
+  .pk-save.share img { width: 18px; height: 18px; filter: invert(1); }
+  .pk-done { position: absolute; left: 50%; bottom: calc(var(--safe-bot) + 76px); transform: translateX(-50%); z-index: 9; height: 32px; padding: 0 12px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 2px 8px rgba(8,8,11,.15); font-size: 12px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .pk-done img { width: 12px; height: 12px; filter: invert(1); }
+  .pk-close { position: absolute; left: 50%; bottom: calc(var(--safe-bot) + 76px); transform: translateX(-50%); z-index: 9; }
+  /* 状態カード */
+  .sh-toast { position: absolute; left: 16px; right: 16px; bottom: 16px; height: 48px; border-radius: 12px; background: #fff; box-shadow: 0 8px 24px rgba(8,8,11,.2); display: flex; align-items: center; gap: 12px; padding: 0 16px; font-size: 13px; font-weight: 700; color: var(--ink); }
+  .sh-toast img { width: 16px; height: 16px; filter: invert(1); }
+  .sh-toast .a { margin-left: auto; font-weight: 700; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+</style>
+</head>
+<body class="pk">
+<div class="pk-doc">
+
+  <div>
+    <div class="pk-h1">Instagram ストーリーズへ共有 — 確認モードをそのまま 9:16 の画像に</div>
+    <p class="pk-lead">
+      入口は<b>保存後の確認モード</b>。「保存」が「ストーリーズに共有」に変わり、タップで暗いスクリムの上に <b>9:16 のプレビュー</b>と<b>背景の選択</b>が出る。
+      画像の中身は確認モードと同じ語彙（縁取りタイトル / 白い縁の写真のスタック / 順位のステッカー / 名前の帯）を 1080×1920 に組み直したもの。
+      背景は<b>既定で地図</b>（ランキングの 3 地点が入る範囲、pitch 0）、<b>ランキングの写真 / ライブラリの画像</b>に差し替え可。画像は端末で <b>1080×1920 JPG</b> に合成し、<b>Sharing to Stories の専用経路</b>（<code>instagram-stories://share?source_application={FB App ID}</code> + ペーストボード / content URI の背景画像）で渡す。現行の <code>WdTimelinePost.share</code>（OS 共有シート + テキスト）とは別物 — 共有シート経由ではストーリーズに画像が入る保証が無いため。ステッカーとしては渡さない（位置関係を崩さない）。<b>Meta Developer Policy 2.6</b> によりロゴ・透かし・CTA・宣伝文言は画像に載せない。
+    </p>
+  </div>
+
+  <div class="pk-h2"><span class="k">(1)(2)(3)</span>入口 → プレビュー（地図）→ 背景を写真に</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="(1) 入口 — 保存後の確認モード" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S1</span><span class="t">保存が済むと CTA が「ストーリーズに共有」に。閉じるは文字で</span></div>
+      <div class="pk-aim">共有は保存の直後がいちばん熱い。ボタンを増やさず、同じ位置の CTA を差し替えるだけ。「保存しました」は小さなステッカーで 2 秒</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.6985" data-lat="35.6588" data-radius="260" data-pitch="0" data-bearing="0"></div>
+          <button class="pk-back" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+          <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+          <div class="pk-pt" style="--x:150px; --y:545px"></div>
+          <div class="pk-pt" style="--x:285px; --y:395px"></div>
+          <div class="pk-pt" style="--x:168px; --y:372px"></div>
+          <svg class="pk-leader" aria-hidden="true"><path d="M168 372 L168 594" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/><path d="M285 395 L285 380" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></svg>
+          <div class="pk-stack wide" style="--x:168px; --y:655px; --w:216px; --h:122px">
+            <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+            <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+          </div>
+          <div class="pk-stack wide" style="--x:254px; --y:287px; --w:280px; --h:158px">
+            <div class="ph b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+            <div class="ph"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+            <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm lat">TK NIGHTCLUB</span></div>
+          </div>
+          <div class="pk-stack wide" style="--x:184px; --y:495px; --w:352px; --h:198px">
+            <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+            <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+            <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+            <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+          </div>
+          <div class="pk-done"><img src="../../assets/icons/icon_check.png" alt="">保存しました</div>
+          <button class="pk-cta pk-save share" type="button"><img src="../../assets/icons/icon_share.png" alt="">ストーリーズに共有</button>
+          <div class="pk-mark" style="left:40px; top:760px"><span class="d">1</span><span class="l">同じ位置・同じ材質のピル。文言だけ変わる</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pk-note">「保存」→ 保存が済んだ瞬間に同じピルの中で文言が「ストーリーズに共有」+ icon_share へ（cross-fade 160ms）。「保存しました」= 白いステッカー 32、2 秒で消える。戻る = 作ったランキングの詳細へ（フローを閉じる）。
+        Instagram が未インストール（<code>canLaunchUrl(instagram-stories://)</code> が false）なら文言は<b>「画像を共有」</b>= OS の共有シートに<b>画像ファイル</b>を渡す（下の状態）。</p>
+    </div>
+
+    <!-- @dsCard name="(2) プレビュー — 背景 = 地図（既定）" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S2</span><span class="t">9:16 のプレビュー + 背景の選択。既定は地図</span><span class="rec">既定</span></div>
+      <div class="pk-aim">確認モードで見ていた絵がそのまま縦長に組み直されて出る。背景の枡を叩くだけでプレビューが差し替わる。ストーリーズの UI に隠れる上下 250px には何も置かない</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.6985" data-lat="35.6588" data-radius="260" data-pitch="0" data-bearing="0"></div>
+          <div class="sh-scrim"></div>
+          <div class="sh-hd"><button class="x" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>ストーリーズに共有</div>
+
+          <div class="sh-story">
+            <div class="pk-map" data-map data-lng="139.6985" data-lat="35.6590" data-radius="300" data-pitch="0" data-bearing="0"></div>
+            <div class="sh-safe t"></div><div class="sh-safe b"></div>
+            <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+            <div class="pk-pt" style="--x:120px; --y:330px"></div>
+            <div class="pk-pt" style="--x:190px; --y:257px"></div>
+            <div class="pk-pt" style="--x:110px; --y:225px"></div>
+            <div class="pk-stack wide" style="--x:110px; --y:360px; --w:140px; --h:79px">
+              <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+              <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+            </div>
+            <div class="pk-stack wide" style="--x:170px; --y:197px; --w:180px; --h:101px">
+              <div class="ph b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+              <div class="ph"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+              <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm lat">TK NIGHTCLUB</span></div>
+            </div>
+            <div class="pk-stack wide" style="--x:135px; --y:275px; --w:220px; --h:124px">
+              <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+              <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+              <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+              <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+            </div>
+                      </div>
+
+          <div class="sh-bgs">
+            <div class="eb">背景</div>
+            <div class="row">
+              <div class="sh-bg map on"><span class="l">地図</span></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+              <div class="sh-bg lib"><img src="../../assets/icons/icon_image.png" alt="">ライブラリ</div>
+            </div>
+          </div>
+          <button class="sh-cta" type="button"><img src="../../assets/icons/icon_share.png" alt="">Instagram で開く</button>
+          <div class="pk-mark" style="left:220px; top:126px"><span class="d">2</span><span class="l">上下 250px = ストーリーズ UI の安全域</span></div>
+          <div class="pk-mark" style="left:110px; top:596px"><span class="d">3</span><span class="l">ロゴ・透かし・CTA は載せない（Meta 2.6）</span></div>
+        </div>
+        <div class="statusbar ink" style="color:#fff"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pk-note">スクリム 78% の上に <b>プレビュー 270×480</b>（= 1080×1920 の 1/4・r14・影）。中身は確認モードの行配置をそのまま縦長のカメラで再計算（1 位 880×495 / 2 位 720×405 / 3 位 560×315 @1080）。
+        <b>安全域</b>: 上下 250px（ピンクの破線は specimen だけ）にはタイトル・スタックを置かない。<b>署名・ロゴ・透かしは載せない</b>（Meta 2.6）。誰のランキングかは Instagram 側の投稿者で足りる。
+        背景の枡 60 r10: 地図（既定・選択 = 白 2.5 + チェック）/ ランキングの写真 3 枚（1 位 → 3 位の代表写真）/ ライブラリ（枡を叩く → OS の写真ピッカー）。
+        CTA = 白のピル 56「Instagram で開く」（スクリムの上なので白）。glass は無し（戻るも隠れる）。</p>
+    </div>
+
+    <!-- @dsCard name="(3) プレビュー — 背景 = 任意の画像（ライブラリ / ランキングの写真）" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S3</span><span class="t">背景を写真に — 地点の印と点線は消え、スタックは中央寄せの 3 行に</span></div>
+      <div class="pk-aim">地図でなくなると位置関係の意味が無い。3 行を中央に寄せ、上下に黒の protection gradient を敷いて白い縁取り文字とステッカーの可読性を保つ</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.6985" data-lat="35.6588" data-radius="260" data-pitch="0" data-bearing="0"></div>
+          <div class="sh-scrim"></div>
+          <div class="sh-hd"><button class="x" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button>ストーリーズに共有</div>
+
+          <div class="sh-story">
+            <img class="bg" src="../../assets/sample/background/background003.jpg" alt="">
+            <div class="veil"></div>
+            <div class="sh-safe t"></div><div class="sh-safe b"></div>
+            <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+            <div class="pk-stack wide" style="--x:135px; --y:195px; --w:200px; --h:112px">
+              <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+              <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+              <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+              <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+            </div>
+            <div class="pk-stack wide" style="--x:135px; --y:292px; --w:170px; --h:96px">
+              <div class="ph b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+              <div class="ph"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+              <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm lat">TK NIGHTCLUB</span></div>
+            </div>
+            <div class="pk-stack wide" style="--x:135px; --y:366px; --w:140px; --h:79px">
+              <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+              <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+            </div>
+                      </div>
+
+          <div class="sh-bgs">
+            <div class="eb">背景</div>
+            <div class="row">
+              <div class="sh-bg map"><span class="l">地図</span></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+              <div class="sh-bg"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+              <div class="sh-bg on"><img src="../../assets/sample/background/background003.jpg" alt=""></div>
+            </div>
+          </div>
+          <button class="sh-cta" type="button"><img src="../../assets/icons/icon_share.png" alt="">Instagram で開く</button>
+          <div class="pk-mark" style="left:40px; top:470px"><span class="d">4</span><span class="l">1 → 2 → 3 位を中央の 3 行に · 地点の印なし</span></div>
+        </div>
+        <div class="statusbar ink" style="color:#fff"></div><div class="dynamic-island"></div><div class="home-ind"></div>
+      </div>
+      <p class="pk-note">ライブラリから選ぶと、末尾の枡がその画像に置き換わり選択状態に（もう一度叩くと再選択）。画像は <b>9:16 に cover</b>（切り抜きの調整は無し = v1）。
+        地図以外の背景では<b>地点の印・点線を出さない</b>。スタックは幅の順（1 位 → 3 位）で中央に縦に並べ、行の間 24 @1080。上下に <code>rgba(0,0,0,.35) → transparent</code> の protection gradient を敷く（明るい写真でも白い縁取りが立つ）。
+        ランキングの写真を背景にしたときも同じ配置（1 位の写真が背景と重複するが、そのまま）。</p>
+    </div>
+  </div>
+
+  <div class="pk-h2"><span class="k">状態</span>生成中 / Instagram 未インストール / 完了して戻ってきたとき</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="共有 状態 — 生成中 / 未インストール / 完了" -->
+    <div class="pk-states">
+      <div class="pk-flat" style="--h:120px; background:#08080b">
+        <button class="sh-cta" type="button" style="bottom:32px"><span class="pk-cta spin" style="height:auto;background:none"></span><span class="spin" style="width:20px;height:20px;border-radius:50%;border:2.5px solid rgba(8,8,11,.2);border-top-color:var(--ink)"></span></button>
+      </div>
+      <p class="pk-cap"><b>生成中</b> — 「Instagram で開く」のラベルがスピナー 20 に。1080×1920 を端末で合成（地図は現在のカメラのスナップショット + 上に描き直したステッカー群 = 地図タイルの解像度に依存しない）。通常 1 秒未満。</p>
+
+      <div class="pk-flat" style="--h:150px; background:#08080b">
+        <div class="sh-alt" style="bottom:100px">画像を保存</div>
+        <button class="sh-cta" type="button" style="bottom:32px"><img src="../../assets/icons/icon_share.png" alt="">画像を共有</button>
+      </div>
+      <p class="pk-cap"><b>Instagram 未インストール</b>（<code>canLaunchUrl(instagram-stories://)</code> が false）— CTA が「画像を共有」= OS の共有シートに<b>合成した JPG ファイル</b>を渡す（現行のテキスト共有とは違い、ファイルそのものを渡す）。その上に「画像を保存」（写真ライブラリへ）の文字ボタン 44。入口 S1 の文言も同様に「画像を共有」。</p>
+
+      <div class="pk-flat white" style="--h:100px">
+        <div class="sh-toast"><img src="../../assets/icons/icon_check.png" alt="">Instagram に渡しました<span class="a">もう一度</span></div>
+      </div>
+      <p class="pk-cap"><b>完了</b> — Instagram へ遷移した後、アプリに戻ると共有面は閉じており、確認モードの上に白のトースト 48 が 3 秒。「もう一度」で共有面を再度開く（背景の選択は保持）。失敗（URL scheme 拒否・App ID 不備で Instagram 側が「対応していません」を出した場合）は同じトーストで「開けませんでした · 画像を共有」→ OS 共有シートへ。</p>
+    </div>
+  </div>
+
+  <div class="pk-h2"><span class="k">まとめ</span>共有は「確認モードの再レイアウト」。新しい語彙は署名のピルだけ</div>
+  <div class="pk-rec">
+    <ol>
+      <li><b>入口は保存後の CTA を差し替えるだけ</b>。ボタンを増やさない。未インストールなら「画像を保存」。</li>
+      <li><b>画像の中身は確認モードと同じ 4 つ</b>（写真 / 重なり / 順位 / 名前）+ 署名のピル。1080×1920、上下 250 は空ける。</li>
+      <li><b>背景 = 地図が既定</b>。地図のときだけ地点の印と点線が付く（位置関係に意味がある）。写真のときは中央の 3 行 + protection gradient。</li>
+      <li><b>Instagram には背景画像として渡す</b>（iOS: ペーストボード <code>com.instagram.sharedSticker.backgroundImage</code> / Android: <code>content://</code> の <code>interactive_asset_uri</code> ではなく background の <code>Intent.setDataAndType</code>）。ステッカー分離はしない = ユーザーが動かして配置が壊れるのを避ける。ストーリーズ上での加工は Instagram 側で。</li>
+      <li><b>画像に載せないもの</b>（Meta 2.6）— ロゴ・透かし・「Toopdbq で作ろう」の類の CTA・宣伝文言。載せるのは本人の固有コンテンツ（タイトル・自分の写真・順位）だけ。</li>
+      <li><b>色は無し</b>。ジャンル色も colorful グラデも使わない（確認モードと同じ方針）。CTA は暗いスクリムの上なので白のピル。</li>
+    </ol>
+    <b>実装の前提（今のアプリに無いもの）</b>
+    <ul>
+      <li><b>Facebook App ID</b> — 無いと Instagram 側で「このアプリはストーリーズ共有に対応していません」。<code>source_application</code> に渡す。</li>
+      <li><b>iOS</b> — <code>Info.plist</code> の <code>LSApplicationQueriesSchemes</code> に <code>instagram-stories</code> を追加（今は <code>instagram</code> のみ）。背景 JPG は <code>UIPasteboard</code> に <code>com.instagram.sharedSticker.backgroundImage</code> で置き、有効期限 5 分。</li>
+      <li><b>Android</b> — <code>FileProvider</code> で <code>content://</code> URI を作り、<code>com.instagram.share.ADD_TO_STORY</code> の Intent に <code>image/jpeg</code> + <code>source_application</code>、<code>FLAG_GRANT_READ_URI_PERMISSION</code>。</li>
+      <li><b>メディア</b> — JPG 1080×1920（最小 720×1280 を満たす・9:16）。動画背景は v1 では作らない（20 秒 / 50MB 制限と合成コストのため）。</li>
+      <li><b>合成</b> — 地図は MapLibre のスナップショット（1080×1920 相当のカメラ）、その上にステッカー群を Canvas / <code>RepaintBoundary.toImage</code> で描く。既存の <code>WdTimelinePost.share</code>（テキスト + URL の OS 共有）はそのまま残し、ランキングの共有だけこの経路。</li>
+    </ul>
+  </div>
+
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#08080b"/><rect x="80" y="40" width="80" height="142" rx="10" fill="#e9e5d9"/><g transform="rotate(-4 120 110)"><rect x="92" y="86" width="56" height="34" rx="4" fill="#fff"/><rect x="96" y="90" width="48" height="26" rx="2" fill="#ff3e88"/></g><rect x="90" y="52" width="60" height="14" rx="4" fill="#fff" transform="rotate(-3 120 59)"/><text x="120" y="63" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="900" font-style="italic" fill="#08080b" transform="rotate(-3 120 59)">BEST 3</text><rect x="96" y="158" width="48" height="12" rx="6" fill="#fff"/></svg></template>
+
+<script src="../TimelinePlaceMode/place-map.js"></script>
+<script src="ranking-flow.js"></script>
+</body>
+</html>

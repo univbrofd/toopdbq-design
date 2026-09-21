@@ -1,0 +1,436 @@
+<!-- @dsCard group="PlaceRanking" tier="screen" viewport="1760x5200" name="PlaceRanking v2 — 作成フローの 4 面 + 写真を追加（確認モード 2 案 / シート 3 面 / 状態）" subtitle="真上の地図の上に「白い縁の 16:9 写真のスタック + 白地の順位 + ジャンル色の帯」が順位ごとの行に並ぶ旅の記録の空気。推し = 確認モード A（行配置 + 帯・縁取りタイトル）+ 詳細は思い出の写真 3 枚 + 写真を追加が主役。主 CTA は ink のピル 1 作法。402×874・MapLibre pitch 0・glass 1 / 画面" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>PlaceRanking v2 — 場所のランキング作成フロー（4 面）</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<link rel="stylesheet" href="PlaceRanking.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap">
+</head>
+<body class="pk">
+<div class="pk-doc">
+
+  <div>
+    <div class="pk-h1">PlaceRanking v2 — 作成フローの 4 面を「地図の上に貼った思い出」の空気へ</div>
+    <p class="pk-lead">
+      骨格（真上の地図 / 上部のジャンル + 検索 / 1 本のシートに 3 セクション = 直前の操作に関わるものが先頭 / 「作成」で同じ地図の上の確認モード）と挙動はそのまま。
+      変えたのは <b>(1) 詳細 (2) ランキング調整 (3) リスト (4) 確認モード</b> の見た目と、新しく <b>(5) 選んだ場所に自分の写真を追加する導線</b>。
+      4 面で繰り返す語彙は 3 つだけ — <b>白い縁の写真（ステッカー）</b>・<b>白地に ink の順位</b>・<b>ジャンル色（選択中のチップだけ）</b>。リストの写真がそのままランキングの列のミニスタックになり、確認モードで大きなスタックになる。
+      主 CTA は「作成」= ink の面のピル 56、地図の上の「保存」= 白地 + ink の枠のピル 56（as-built は ink の角丸と透けた白で流儀が割れていた）。glass は戻るの 1 つだけ / 画面。ステッカー類は全部不透明の面。
+    </p>
+  </div>
+
+  <!-- ==================================================================== 確認モード -->
+  <div class="pk-h2"><span class="k">(4)</span>確認モード — 「作成」後、同じ地図の上。写真は 16:9、順位ごとに 1 行</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="確認モード — 16:9 の行配置 + 左上の順位 + 名前の帯（採用）" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">確認</span><span class="t">16:9 の横長を順位ごとの行に — 1 位は幅いっぱい（352）、2 位 280 / 3 位 216 は空いている上下へ</span><span class="rec">採用</span></div>
+      <div class="pk-aim">地図の上に出す物は 4 つだけ — 写真 / その枚数ぶんの重なり / 順位（白地に ink の「1st」・左上の角）/ 名前（白地に ink・下端）。地点の印は写真の後ろ。同じ高さに他の順位を置かないので、どの位置関係でも重ならない（3000 ケースで 100%）。地点から離れたぶんは点線で結ぶ</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.6985" data-lat="35.6588" data-radius="260" data-pitch="0" data-bearing="0"></div>
+          <button class="pk-back" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+          <div class="pk-tout"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 3</div></div>
+
+          <div class="pk-pt" style="--x:150px; --y:545px"></div>
+          <div class="pk-pt" style="--x:285px; --y:395px"></div>
+          <div class="pk-pt" style="--x:168px; --y:372px"></div>
+          <svg class="pk-leader" aria-hidden="true"><path d="M168 372 L168 624" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/><path d="M285 395 L285 380" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></svg>
+
+          <!-- 3 位 → 2 位 → 1 位の順に描く。行 = 2 位（上）/ 1 位（中）/ 3 位（下） -->
+          <div class="pk-stack wide" style="--x:168px; --y:685px; --w:216px; --h:122px">
+            <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+            <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+          </div>
+          <div class="pk-stack wide" style="--x:254px; --y:287px; --w:280px; --h:158px">
+            <div class="ph b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+            <div class="ph"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+            <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm lat">TK NIGHTCLUB</span></div>
+          </div>
+          <div class="pk-stack wide" style="--x:184px; --y:495px; --w:352px; --h:198px">
+            <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+            <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+            <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+            <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+          </div>
+
+          <div class="pk-ppin" style="--x:380px; --y:640px"><img src="../../assets/sample/reel/reel021.jpg" alt=""><span class="r">4<small>th</small></span></div>
+          <div class="pk-ppin" style="--x:40px; --y:330px"><img src="../../assets/sample/reel/reel025.jpg" alt=""><span class="r">5<small>th</small></span></div>
+
+          <button class="pk-cta pk-save" type="button">保存</button>
+          <div class="pk-mark" style="left:16px; top:170px"><span class="d">1</span><span class="l">Noto 900 27 + Inter italic 900 30 / stroke 6 ink</span></div>
+          <div class="pk-mark" style="left:200px; top:640px"><span class="d">2</span><span class="l">地点 → 写真の縁へ点線 1.5</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pk-note">写真 = 16:9（<b>1 位 352×198 / 2 位 280×158 / 3 位 216×122</b>、行の間 16）、白縁 4 / r6 / 影 <code>0 3 10 .25</code>。重なりは枚数ぶん（2 枚目 +2.5° (8,−6) / 3 枚目 −3° (−8,−5)）。
+        <b>配置 = 行</b>: 1 位を地点の高さに置き、2 位・3 位は 1 位と重ならない側（上 or 下）へ縦にずらす。横は地点の x に寄せて安全域（8〜394）へ clamp。上下の並び 6 通りのうち「1 位のずれ × 10 + 2 位 × 3 + 3 位 × 1」が最小の並びを採る（<a href="PlaceRanking-layout.html" style="color:var(--grad-yellow)">検証ページ</a>）。
+        地点は <b>ink の点 10 + 白縁</b>、写真の<b>後ろ</b>に隠れる（写真からはみ出した地点だけ見える）。写真の縁から 24 以上離れた地点は<b>点線 1.5</b> で写真の縁と結ぶ。順位 = 白地 + ink の「1st」のステッカーを写真の左上の角に −8°。名前 = 白地 + ink 15 w800 の帯を −4° で写真の下端に 45% 重ねる（ジャンルの色はこの画面では使わない）。英数は Inter italic、和文は非斜体。
+        タイトル = 白地 + ink の輪郭 6px。保存 = 白地 + ink の枠 1.5 + ink 文字のピル 56（件数は出さない）。glass は戻るの 1 つ。4 位以下 = 丸い写真ピン 36（写真の外へ）。</p>
+    </div>
+
+  </div>
+
+  <!-- 確認モードの状態 -->
+  <div class="pk-h2"><span class="k">状態</span>確認モード — 1 件だけ / 3 件が近い / 写真 1 枚・0 枚 / 長い店名 / 保存中</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="確認モード 状態 — 1 件だけ / 3 件が近い" -->
+    <div class="pk-states" style="--gc: var(--gc-night)">
+      <div class="pk-flat" style="--h:330px">
+        <div class="pk-tout" style="top:14px"><div class="l1">渋谷で踊るなら</div><div class="l2">BEST 1</div></div>
+        <div class="pk-pt" style="--x:201px; --y:215px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:200px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>1 件だけ</b> — 三角形が無いので地点を画面の中心に、円は下限 120m。1 位の行を地点の高さに置くだけ。「BEST 1」でも形は変えない。</p>
+
+      <div class="pk-flat" style="--h:600px">
+        <div class="pk-pt" style="--x:188px; --y:300px"></div>
+        <div class="pk-pt" style="--x:222px; --y:282px"></div>
+        <div class="pk-pt" style="--x:206px; --y:324px"></div>
+        <svg class="pk-leader" aria-hidden="true"><path d="M222 282 L222 212" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/><path d="M206 324 L206 456" stroke="#08080b" stroke-width="1.5" stroke-dasharray="4 4" opacity=".6"/></svg>
+        <div class="pk-stack wide" style="--x:206px; --y:517px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+        </div>
+        <div class="pk-stack wide" style="--x:222px; --y:119px; --w:280px; --h:158px">
+          <div class="ph b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+          <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm lat">TK NIGHTCLUB</span></div>
+        </div>
+        <div class="pk-stack wide" style="--x:188px; --y:327px; --w:352px; --h:198px">
+          <div class="ph b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div>
+          <div class="ph b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">CLUB CAMELOT</span></div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>3 件が近くて重なる</b>（地点の間隔 &lt; 写真の高さ）— 1 位は地点の高さに留まり、2 位は上、3 位は下の行へ。大きさは変えない。地点から離れた 2・3 位は<b>点線 1.5</b> で写真の縁と結ぶ（写真の下に隠れた地点は見えない）。
+        <b>この「近い」は例外ではなく通常の状態</b> — as-built のカメラでは地点が中心 80px 以内に集まる。行配置は <a href="PlaceRanking-layout.html" style="color:var(--grad-yellow)">PlaceRanking-layout.html</a> で 3000 ケース検証（100% 収まる）。</p>
+    </div>
+
+    <!-- @dsCard name="確認モード 状態 — 写真 1 枚だけ / 長い店名 / 保存中" -->
+    <div class="pk-states" style="--gc: var(--gc-night)">
+      <div class="pk-flat" style="--h:470px">
+        <div class="pk-pt" style="--x:140px; --y:150px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:120px; --w:352px; --h:198px">
+          <div class="ph"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">WOMB</span></div>
+        </div>
+        <div class="pk-pt" style="--x:300px; --y:330px"></div>
+        <div class="pk-stack wide" style="--x:246px; --y:350px; --w:280px; --h:158px">
+          <div class="ph none"><img src="../../assets/icons/icon_pin_location.png" alt=""></div>
+          <span class="rs">2<small>nd</small></span><div class="pk-lab"><span class="nm">名もない路地の屋台</span></div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>写真が代表 1 枚だけ</b>（上）— 1 枚を正面に置くだけ（重なり無し = 1 枚と分かる）。
+        <b>写真が 1 枚も無い</b>（下）— 暗い写真の地 <code>#101014</code> + pin グリフ。和文は非斜体。</p>
+
+      <div class="pk-flat" style="--h:440px">
+        <div class="pk-pt" style="--x:120px; --y:110px"></div>
+        <div class="pk-stack wide" style="--x:201px; --y:120px; --w:352px; --h:198px">
+          <div class="ph b2"><img src="../../assets/sample/reel/reel027.jpg" alt=""></div>
+          <div class="ph"><img src="../../assets/sample/reel/reel021.jpg" alt=""></div>
+          <span class="rs">1<small>st</small></span><div class="pk-lab"><span class="nm lat">Contact Tokyo Dogenzaka Underground Lounge &amp; Bar</span></div>
+        </div>
+        <div class="pk-pt" style="--x:305px; --y:330px"></div>
+        <div class="pk-stack wide" style="--x:250px; --y:335px; --w:216px; --h:122px">
+          <div class="ph"><img src="../../assets/sample/reel/reel025.jpg" alt=""></div>
+          <span class="rs">3<small>rd</small></span><div class="pk-lab"><span class="nm">終電後にだけ開く地下のバー 渋谷</span></div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>長い店名</b> — 帯は 1 行・最大 190 で省略（英数 / 和文とも）。16:9 なら 3 位（216）でも帯は写真の幅に収まる。省略された名前は保存後の詳細で全文が読める。</p>
+
+      <div class="pk-flat" style="--h:120px">
+        <button class="pk-cta pk-save" type="button" style="bottom:32px"><span class="spin"></span></button>
+      </div>
+      <p class="pk-cap"><b>保存中</b> — CTA のラベルをスピナー 20 に置き換え、戻るを無効に。スタックは触れない（pan も止める）。失敗はシート型のスナック（v1 の <code>.pr-snack</code>）で「再試行」。</p>
+    </div>
+  </div>
+
+  <!-- ==================================================================== シート 3 面 -->
+  <div class="pk-h2"><span class="k">(1)(2)(3)</span>シート 3 面 — 順番は 詳細 → 箱 → リスト に固定（詳細は選択中だけ現れる）</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="(3) リストが先頭 — ジャンルを選んだ直後" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S1</span><span class="t">選択なし — 箱（空）→ リスト。リストのチェックは箱に入れるだけで位置は動かない</span></div>
+      <div class="pk-aim">写真を白縁 + ±2° のステッカーにするだけで「地図の上の写真」と同じ物だと分かる。チェックすると写真の角に ink の順位が付き、そのまま箱の列と確認モードのラベルに引き継がれる</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.7000" data-lat="35.6620" data-radius="620" data-pitch="0" data-bearing="0"></div>
+          <button class="pk-back" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+          <div class="pk-chips">
+            <span class="pk-chip on">🪩 ナイトクラブ</span><span class="pk-chip">🍽️ レストラン</span><span class="pk-chip">☕ カフェ</span><span class="pk-chip">🍸 バー</span>
+          </div>
+          <div class="pk-search"><img src="../../assets/icons/icon_search.png" alt="">場所を検索</div>
+
+          <div class="pk-mk" style="--x:160px; --y:330px"><span class="b"><i></i></span></div>
+          <div class="pk-mk" style="--x:206px; --y:290px"><span class="b"><i></i></span></div>
+          <div class="pk-mk" style="--x:256px; --y:372px"><span class="b"><i></i></span></div>
+          <div class="pk-mk" style="--x:118px; --y:410px"><span class="b"><i></i></span></div>
+          <div class="pk-me" style="--x:232px; --y:420px"></div>
+
+          <section class="pk-sheet">
+            <div class="grab"></div>
+            <div class="pk-sec">
+              <div class="pk-ttl">私の<span class="band"><span>ナイトクラブ</span><img src="../../assets/icons/icon_edit.png" alt=""></span>ランキング</div>
+              <div class="pk-cols">
+                <div class="pk-colm empty"><div class="mini"><span class="rk">1<small>st</small></span></div><div class="nm">次の候補</div></div>
+                <div class="pk-colm empty"><div class="mini"><span class="rk">2<small>nd</small></span></div><div class="nm">&nbsp;</div></div>
+                <div class="pk-colm empty"><div class="mini"><span class="rk">3<small>rd</small></span></div><div class="nm">&nbsp;</div></div>
+              </div>
+              <button class="pk-cta off" type="button">作成</button>
+            </div>
+            <div class="pk-sec">
+              <div class="pk-eb">ナイトクラブ 候補<b>4</b></div>
+              <div class="pk-row"><div class="pic"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div><div class="col"><div class="nm">TK NIGHTCLUB</div><div class="ad">渋谷区, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row"><div class="pic"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div><div class="col"><div class="nm">CLUB CAMELOT</div><div class="ad">〒150-0042 東京都渋谷区宇田川町18-2</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row"><div class="pic"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div><div class="col"><div class="nm">WOMB</div><div class="ad">渋谷区円山町, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row"><div class="pic"><span class="none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span></div><div class="col"><div class="nm">名もない路地の屋台</div><div class="ad">渋谷区, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+            </div>
+          </section>
+          <div class="pk-mark" style="left:150px; top:790px"><span class="d">4</span><span class="l">チェック = 箱に入るだけ · 位置は動かない</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pk-note">行 88（写真 88×66 を白縁 3 + 影で ±2° 交互 / 名前 15 w700 1 行 / 住所 12 ink-sub 2 行 / チェック 24 r8・タップ 44）。行の面に glass は無い。写真が無い場所は暗い地 + pin グリフ。
+        <b>セクションの区切り</b> = 8px の帯はそのまま、見出しは<b>セクションごとに形を変える</b>: 候補 = 小さな eyebrow（件数つき）/ ランキング = 「私の ＿＿ ランキング」の下線フィールド / 詳細 = 店名 17 + ×。
+        <b>順番は固定</b>: 詳細（選択中のみ）→ 箱 → リスト。箱・リストで場所をタップ = 詳細が先頭に現れ、シートを一番上までスクロール。リストのチェック = 箱に入るだけで位置は動かない。上部 chrome の差分: チップは 面 + 影 の 1 群（選択 = ジャンル色の面 + 白文字。縁と glow は外した）。</p>
+    </div>
+
+    <!-- @dsCard name="(2) ランキング調整が先頭 — 2 件入れた直後 + 作成" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S2</span><span class="t">2 件入れた直後 — 箱 → リスト。入れた場所はミニスタックの列に、リストは順位つきでその場に残る</span></div>
+      <div class="pk-aim">列 = 確認モードの縮尺模型。ドラッグで並べ替えるときに「どんな絵になるか」が先に見える。タイトルは「私の ＿＿ ランキング」の真ん中だけ太字 + 下線 = 入力欄だと分かる。両端の「私の」「ランキング」は細く</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.7000" data-lat="35.6620" data-radius="620" data-pitch="0" data-bearing="0"></div>
+          <button class="pk-back" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+          <div class="pk-chips">
+            <span class="pk-chip on">🪩 ナイトクラブ</span><span class="pk-chip">🍽️ レストラン</span><span class="pk-chip">☕ カフェ</span><span class="pk-chip">🍸 バー</span>
+          </div>
+          <div class="pk-search"><img src="../../assets/icons/icon_search.png" alt="">場所を検索</div>
+
+          <div class="pk-mk rk" style="--x:160px; --y:330px"><span class="b"><i>2<small>nd</small></i></span></div>
+          <div class="pk-mk" style="--x:206px; --y:290px"><span class="b"><i></i></span></div>
+          <div class="pk-mk" style="--x:256px; --y:372px"><span class="b"><i></i></span></div>
+          <div class="pk-mk rk" style="--x:118px; --y:410px"><span class="b"><i>1<small>st</small></i></span></div>
+          <div class="pk-me" style="--x:232px; --y:420px"></div>
+
+          <section class="pk-sheet">
+            <div class="grab"></div>
+            <div class="pk-sec">
+              <div class="pk-ttl">私の<span class="band"><span>ナイトクラブ</span><img src="../../assets/icons/icon_edit.png" alt=""></span>ランキング</div>
+              <div class="pk-cols">
+                <div class="pk-colm">
+                  <div class="mini"><span class="rk">1<small>st</small></span><button class="x" type="button" aria-label="外す"><i><img src="../../assets/icons/icon_close.png" alt=""></i></button>
+                    <div class="p b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div><div class="p b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div><div class="p"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div></div>
+                  <div class="nm">CLUB CAMELOT</div>
+                </div>
+                <div class="pk-colm drag">
+                  <div class="mini"><span class="rk">2<small>nd</small></span><button class="x" type="button" aria-label="外す"><i><img src="../../assets/icons/icon_close.png" alt=""></i></button>
+                    <div class="p b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div><div class="p"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div></div>
+                  <div class="nm">TK NIGHTCLUB</div>
+                </div>
+                <div class="pk-colm empty"><div class="mini"><span class="rk">3<small>rd</small></span></div><div class="nm">次の候補</div></div>
+              </div>
+              <button class="pk-cta" type="button">作成</button>
+            </div>
+            <div class="pk-sec">
+              <div class="pk-eb">ナイトクラブ 候補<b>4</b></div>
+              <div class="pk-row on"><div class="pic"><img src="../../assets/sample/reel/reel055.jpg" alt=""><span class="r">2<small>nd</small></span></div><div class="col"><div class="nm">TK NIGHTCLUB</div><div class="ad">渋谷区, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row on"><div class="pic"><img src="../../assets/sample/reel/reel012.jpg" alt=""><span class="r">1<small>st</small></span></div><div class="col"><div class="nm">CLUB CAMELOT</div><div class="ad">〒150-0042 東京都渋谷区宇田川町18-2</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row"><div class="pic"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div><div class="col"><div class="nm">WOMB</div><div class="ad">渋谷区円山町, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+            </div>
+          </section>
+          <div class="pk-mark" style="left:110px; top:590px"><span class="d">5</span><span class="l">触った瞬間から動く · 1.08 倍</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pk-note">列 84（ミニスタック 64 = 白縁 3 / r5、2 枚目 +7° (5,−4)、3 枚目 −8° (−5,−2) / 順位 24 ink を左上の角に −8° / × 20 を右上・タップ 44 / 名前 11 w700 2 行）。
+        写真と名前ごと左右にドラッグ = 固定（持ち上げ 1.08 + 影）。動かさずにタップ = 詳細が先頭に現れてシートが一番上へスクロール。<b>空の 3 列目</b> = 破線の枡 + 白い順位「3」+ 「次の候補」で「まだ入る」を見せる（3 件以上入れたら消える）。
+        タイトル: 「私の ＿＿ ランキング」— 両端は 15 w400、真ん中は 16 w700 + 下線 1.5 ink + 鉛筆 12（50%）= テキストフィールド。タップ域は上下 6 を足して 44。空ならジャンル名、入力済みならタイトル（最大 250 で省略）。
+        「作成」= ink のピル 56（確認モードの「保存」と同じ作法）。colorful グラデはこのフローでは使わない（プロフィールの FAB に譲る）。空の箱 = 40%。</p>
+    </div>
+
+    <!-- @dsCard name="(1) 詳細が先頭 — 思い出の写真 3 枚 + 写真を追加（推し）" -->
+    <div class="pk-scene">
+      <div class="pk-tag"><span class="n">S3</span><span class="t">場所をタップ — 詳細 → 箱 → リスト。詳細が先頭に出てシートは一番上へ。右下のチェックでランキングに追加</span><span class="rec">推し</span></div>
+      <div class="pk-aim">16:9 の代表写真 1 枚をやめ、スタックの素材そのものを 3 枡で見せる。空いている枡が「写真を追加」= 導線が説明なしで読める。追加した写真は右の列のミニスタックと確認モードのスタックに即反映</div>
+      <div class="phone">
+        <div class="pk-screen" style="--gc: var(--gc-night)">
+          <div class="pk-map" data-map data-lng="139.7000" data-lat="35.6620" data-radius="620" data-pitch="0" data-bearing="0"></div>
+          <button class="pk-back" type="button" aria-label="戻る"><img src="../../assets/icons/icon_back.png" alt=""></button>
+          <div class="pk-chips">
+            <span class="pk-chip on">🪩 ナイトクラブ</span><span class="pk-chip">🍽️ レストラン</span><span class="pk-chip">☕ カフェ</span><span class="pk-chip">🍸 バー</span>
+          </div>
+          <div class="pk-search"><img src="../../assets/icons/icon_search.png" alt="">場所を検索</div>
+
+          <div class="pk-mk rk sel" style="--x:160px; --y:330px"><span class="b"><i>2<small>nd</small></i></span></div>
+          <div class="pk-mk" style="--x:206px; --y:290px"><span class="b"><i></i></span></div>
+          <div class="pk-mk" style="--x:256px; --y:372px"><span class="b"><i></i></span></div>
+          <div class="pk-mk rk" style="--x:118px; --y:410px"><span class="b"><i>1<small>st</small></i></span></div>
+          <div class="pk-me" style="--x:232px; --y:420px"></div>
+
+          <section class="pk-sheet" style="--sh:560px">
+            <div class="grab"></div>
+            <div class="pk-sec">
+              <div class="pk-dh"><div class="col"><div class="nm">TK NIGHTCLUB</div><div class="g">ナイトクラブ</div></div><button class="x" type="button" aria-label="閉じる"><img src="../../assets/icons/icon_close.png" alt=""></button></div>
+              <div class="pk-mem">
+                <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel055.jpg" alt=""></div>
+                <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel041.jpg" alt=""></div>
+                <div class="pk-slot add"><img src="../../assets/icons/icon_camera.png" alt="">写真を追加</div>
+              </div>
+              <div class="pk-meta"><span class="num">★ 4.5 (1,500)</span><span class="op">営業中<span>5:00 まで</span></span></div>
+              <div class="pk-foot"><div class="pk-addr">〒150-0043 東京都渋谷区道玄坂2-6-2</div><span class="ck on"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+            </div>
+            <div class="pk-sec">
+              <div class="pk-ttl">私の<span class="band"><span>ナイトクラブ</span><img src="../../assets/icons/icon_edit.png" alt=""></span>ランキング</div>
+              <div class="pk-cols">
+                <div class="pk-colm">
+                  <div class="mini"><span class="rk">1<small>st</small></span><button class="x" type="button" aria-label="外す"><i><img src="../../assets/icons/icon_close.png" alt=""></i></button>
+                    <div class="p b3"><img src="../../assets/sample/reel/reel036.jpg" alt=""></div><div class="p b2"><img src="../../assets/sample/reel/reel013.jpg" alt=""></div><div class="p"><img src="../../assets/sample/reel/reel012.jpg" alt=""></div></div>
+                  <div class="nm">CLUB CAMELOT</div>
+                </div>
+                <div class="pk-colm">
+                  <div class="mini"><span class="rk">2<small>nd</small></span><button class="x" type="button" aria-label="外す"><i><img src="../../assets/icons/icon_close.png" alt=""></i></button>
+                    <div class="p b2"><img src="../../assets/sample/reel/reel041.jpg" alt=""></div><div class="p"><img src="../../assets/sample/reel/reel055.jpg" alt=""></div></div>
+                  <div class="nm">TK NIGHTCLUB</div>
+                </div>
+                <div class="pk-colm empty"><div class="mini"><span class="rk">3<small>rd</small></span></div><div class="nm">次の候補</div></div>
+              </div>
+              <button class="pk-cta" type="button">作成</button>
+            </div>
+            <div class="pk-sec">
+              <div class="pk-eb">ナイトクラブ 候補<b>4</b></div>
+              <div class="pk-row on"><div class="pic"><img src="../../assets/sample/reel/reel055.jpg" alt=""><span class="r">2<small>nd</small></span></div><div class="col"><div class="nm">TK NIGHTCLUB</div><div class="ad">渋谷区, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row on"><div class="pic"><img src="../../assets/sample/reel/reel012.jpg" alt=""><span class="r">1<small>st</small></span></div><div class="col"><div class="nm">CLUB CAMELOT</div><div class="ad">〒150-0042 東京都渋谷区宇田川町18-2</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+              <div class="pk-row"><div class="pic"><img src="../../assets/sample/reel/reel058.jpg" alt=""></div><div class="col"><div class="nm">WOMB</div><div class="ad">渋谷区円山町, 東京都</div></div><span class="ck"><i><img src="../../assets/icons/icon_check.png" alt=""></i></span></div>
+            </div>
+          </section>
+          <div class="pk-mark" style="left:150px; top:410px"><span class="d">6</span><span class="l">空いている枡 = 導線（説明文なし）</span></div><div class="pk-mark" style="left:190px; top:562px"><span class="d">7</span><span class="l">チェック = ランキングに追加 / 外す</span></div>
+        </div>
+        <div class="statusbar ink"></div><div class="dynamic-island"></div><div class="home-ind dark"></div>
+      </div>
+      <p class="pk-note">枡 110×110 × 3（gap 12 = 幅いっぱい）。1 枡目 = 場所の代表写真（タグ「代表」）、2・3 枡目 = 自分の投稿画像（タグ = 日付 Inter）。空いている枡 = 破線 + カメラ 20 + 「写真を追加」。
+        タップ → 既存の投稿フローと同じ入口（カメラ / ライブラリ）。投稿が終わると枡に写真が入り、右の列と確認モードのスタックに増える。<b>3 枚そろうと追加の枡は消え、写真をタップで入れ替え / 削除</b>（下の状態）。
+        右下のチェック 24 r8（タップ 44）= ランキングに追加 / 外す（リストのチェックと同じ形）。× = 選択解除 = 詳細が消えて箱 → リストが上に詰まる。評価 Inter 13 w600 / 営業状態 緑の点 7 / 住所 13 / 営業時間 12 ink-sub の 2 列。
+        16:9 の写真は廃止（代表写真は 1 枡目で見える）。シートを 0.65 で開くと詳細と箱が見え、下へスクロールでリスト。</p>
+    </div>
+  </div>
+
+  <!-- 写真を追加の導線と、シートの状態 -->
+  <div class="pk-h2"><span class="k">(5) + 状態</span>写真を追加の入口 / 3 枚そろったとき / 空の箱 / タイトル編集 / リストの 3 状態</div>
+  <div class="pk-scenes">
+
+    <!-- @dsCard name="(5) 写真を追加 — 入口（カメラ / ライブラリ）と 3 枚そろったときの入れ替え" -->
+    <div class="pk-states" style="--gc: var(--gc-night)">
+      <div class="pk-flat" style="--h:300px">
+        <div class="pk-dim"></div>
+        <div class="pk-asheet" style="bottom:12px">
+          <div class="hd">TK NIGHTCLUB に写真を追加</div>
+          <div class="it"><img src="../../assets/icons/icon_camera.png" alt="">カメラで撮る</div>
+          <div class="it"><img src="../../assets/icons/icon_image.png" alt="">ライブラリから選ぶ</div>
+          <div class="it cancel">キャンセル</div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>写真を追加の入口</b> — 「写真を追加」の枡をタップ → 白いアクションシート（r16・行 56・見出し 12 に店名）。カメラ / ライブラリは既存の投稿フローに繋ぐ（場所のリンクは自動で付く）。投稿が終わるとこのフローへ戻り、枡に写真が入る（fade 200ms）。</p>
+
+      <div class="pk-flat white" style="--h:200px">
+        <div class="pk-sec" style="padding-top:16px">
+          <div class="pk-eb">思い出の写真<span class="s">写真をタップで入れ替え</span></div>
+          <div class="pk-mem">
+            <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel055.jpg" alt=""><span class="tag">代表</span></div>
+            <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel041.jpg" alt=""><span class="tag lat">9/12</span><div class="ovl"><button type="button"><span>入れ替え</span></button><button type="button" class="del"><span>削除</span></button></div></div>
+            <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel027.jpg" alt=""><span class="tag lat">9/20</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="pk-cap"><b>3 枚そろったとき</b> — 追加の枡が消え、eyebrow が「写真をタップで入れ替え」に。写真をタップ → その枡だけ 64% のスクリム + 「入れ替え」（白ピル 28・タップ 44）/「削除」（白縁・タップ 44）。入れ替え = 同じ入口を開き、戻った写真がその枡に入る。
+        代表写真（1 枡目）は削除できない（入れ替えだけ）。削除すると枡が空き、「写真を追加」が戻る。</p>
+    </div>
+
+    <!-- @dsCard name="(2) 状態 — 空の箱 / タイトル編集" -->
+    <div class="pk-states" style="--gc: var(--gc-night)">
+      <div class="pk-flat white" style="--h:250px">
+        <div class="pk-sec" style="padding-top:12px">
+          <div class="pk-ttl">私の<span class="band"><span>ナイトクラブ</span><img src="../../assets/icons/icon_edit.png" alt=""></span>ランキング</div>
+          <div class="pk-cols">
+            <div class="pk-colm empty"><div class="mini"><span class="rk">1<small>st</small></span></div><div class="nm">候補にチェック</div></div>
+            <div class="pk-colm empty"><div class="mini"><span class="rk">2<small>nd</small></span></div><div class="nm">&nbsp;</div></div>
+            <div class="pk-colm empty"><div class="mini"><span class="rk">3<small>rd</small></span></div><div class="nm">&nbsp;</div></div>
+          </div>
+          <button class="pk-cta off" type="button">作成</button>
+        </div>
+      </div>
+      <p class="pk-cap"><b>空の箱</b> — 「候補にチェックを入れると、ここに並びます」の 1 文をやめ、<b>破線の枡 3 つ + 白い順位</b>で「3 つ以上入る場所」と示す。1 列目の下に「候補にチェック」だけ。作成は 40%。</p>
+
+      <div class="pk-flat white" style="--h:300px">
+        <div class="pk-dim"></div>
+        <div class="pk-dlg">
+          <div class="l">私の</div>
+          <div class="in">渋谷で踊るなら<span class="caret"></span></div>
+          <div class="l">ランキング</div>
+          <button class="ok" type="button">決定</button>
+        </div>
+      </div>
+      <p class="pk-cap"><b>タイトル編集</b> — 下線のフィールドをタップ → 幅 280・r16 のダイアログ（as-built の r20 を radius スケールへ）。「私の / ＿＿ / ランキング」の 3 行、入力 22 w700 中央 + 下線 2、autofocus。決定 = ink のピル 44。空で決定 → フィールドはジャンル名に戻る。</p>
+    </div>
+
+    <!-- @dsCard name="(3) 状態 — 読み込み中 / 引きすぎ / 無し" -->
+    <div class="pk-states">
+      <div class="pk-flat white" style="--h:120px">
+        <div class="pk-sec" style="padding-top:16px"><div class="pk-eb">候補<span class="s">この範囲</span></div><div class="pk-empty"><span class="pk-spin"></span></div></div>
+      </div>
+      <div class="pk-flat white" style="--h:120px">
+        <div class="pk-sec" style="padding-top:16px"><div class="pk-eb">候補<span class="s">この範囲</span></div><div class="pk-empty">地図を寄せると場所が出ます</div></div>
+      </div>
+      <div class="pk-flat white" style="--h:120px">
+        <div class="pk-sec" style="padding-top:16px"><div class="pk-eb">候補<b>0</b><span class="s">この範囲</span></div><div class="pk-empty">この範囲にナイトクラブの場所はまだありません</div></div>
+      </div>
+      <p class="pk-cap"><b>リストの 3 状態</b> — eyebrow は残し（件数だけ消す / 0 にする）、本文は中央 12.5 ink-sub の 1 行。スピナー 18。文言は as-built のまま。</p>
+    </div>
+  </div>
+
+  <!-- ==================================================================== 推しとモーション -->
+  <div class="pk-h2"><span class="k">まとめ</span>確認モード + 詳細 S3。主役 = 写真のスタック、効果の予算は「面 + 影」の 1 群に集約</div>
+  <div class="pk-rec">
+    <b>何を主役にしたか</b> — 4 面とも<b>白い縁の写真</b>。リストの写真（88×66・±2°）→ 箱のミニスタック（64・3 枚）→ 確認モードのスタック（150 / 118 / 92）と、同じ物が縮尺を変えて現れる。
+    順位は常に <b>白地に ink の「1st」のステッカー（写真の左上）</b>、名前も白地に ink。確認モードに色は無い（ジャンルの色は選択中のチップだけ）。
+    <ol>
+      <li><b>確認モードは 16:9 の行配置 + 左上の順位 + 名前の帯</b>。写真を横長にして順位ごとに 1 行を使う — 1 位は幅いっぱい、2・3 位は空いている上下へ。同じ高さに他の順位を置かないので、どんな位置関係でも重ならない（3000 ケースで 100%）。帯は店名を写真の幅から解放し、タイトルは白地 + ink の輪郭 6px。地図の上に出すのは 写真 / 重なり / 順位 / 名前 の 4 つだけ。4 位以下は<b>丸い写真ピン 36</b>。</li>
+      <li><b>詳細は写真の 3 枡が主役</b>。「写真を追加」は説明文ではなく<b>空いている枡そのもの</b>。16:9 の代表写真は 1 枡目に吸収。追加はスタックへ即反映するので「何のために足すか」が見える。</li>
+      <li><b>効果の予算</b> — ステッカー = 白縁 + 影の 1 群（縁取り・グロー無し）。チップ = 面 + 影の 1 群（as-built の 面 + 縁 + glow を 3 → 2 に）。glass = 戻るの 1 つ / 画面。シート・帯・バッジは全部不透明。</li>
+      <li><b>CTA の作法</b> — シートの中の「作成」「決定」は ink の面のピル（56 / 44）。地図の上の「保存」は白地 + ink の枠のピル 56（白いステッカー群と同じ材質）。透けた白は廃止。colorful グラデはこのフローで使わない（プロフィールの FAB が入口として持っている）。</li>
+      <li><b>区切り</b> — 8px の帯 + セクションごとに違う見出しの形（eyebrow / 下線フィールドのタイトル / 店名 + ×）。同じ強さの見出しが並ばないので、先頭が入れ替わっても迷わない。</li>
+    </ol>
+    <b>モーション（言葉で）</b>
+    <ul>
+      <li><b>先頭のセクションが入れ替わる</b>: 先頭に来るセクションは高さ 0 → 実高さへ 240ms <code>--ease-out</code> で開き、中身は 12px 下から fade。元の先頭は同じ 240ms で下へ押し下げられる（消えない）。シートの高さは変えない。</li>
+      <li><b>「作成」→ 確認モード</b>: シートが 320ms <code>--ease-standard</code> で画面の下へ滑る。同時に地図が 3 件の重心へ 480ms で寄る（角度は変えない）。マーカーの白い順位は<b>その場で白いピルへ</b>形を変えて（120ms）ラベルの「1st」になる。</li>
+      <li><b>スタックの入場</b>: 地図が止まってから 1 位 → 2 位 → 3 位の順に 60ms ずらし、各スタックは地点の位置から行の位置へ 260ms <code>--ease-out</code> で滑る（scale .9 → 1 + fade）。奥の 2 枚は正面から扇状に開く（回転 0 → +2.5° / −3°、同じ 260ms）。点線はスタックが着いてから 120ms で伸びる。順位のステッカーは着地で pop（scale .6 → 1・120ms）、帯はその後 80ms 遅れて左から出る。</li>
+      <li><b>写真を追加</b>: 投稿フローから戻ると、その枡に写真が fade 200ms で入り、右の列のミニスタックに 1 枚増える（+7° へ開く 180ms）。</li>
+    </ul>
+  </div>
+
+</div>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><rect width="240" height="240" fill="#e9e5d9"/><g transform="rotate(-9 110 118)"><rect x="70" y="72" width="88" height="88" rx="6" fill="#fff"/><rect x="76" y="78" width="76" height="76" rx="3" fill="#005f67"/></g><g transform="rotate(7 126 126)"><rect x="82" y="80" width="88" height="88" rx="6" fill="#fff"/><rect x="88" y="86" width="76" height="76" rx="3" fill="#d0a052"/></g><rect x="74" y="88" width="88" height="88" rx="6" fill="#fff"/><rect x="80" y="94" width="76" height="76" rx="3" fill="#ff3e88"/><g transform="rotate(-4 118 178)"><rect x="82" y="166" width="96" height="24" rx="4" fill="#e040fb"/><circle cx="82" cy="178" r="14" fill="#08080b" stroke="#fff" stroke-width="2"/><text x="82" y="183" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#fff">1</text></g><rect x="60" y="28" width="120" height="30" rx="8" fill="#fff" transform="rotate(-2 120 43)"/><text x="120" y="49" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="800" fill="#08080b" transform="rotate(-2 120 43)">BEST 3</text></svg></template>
+
+<script src="../TimelinePlaceMode/place-map.js"></script>
+<script src="ranking-flow.js"></script>
+</body>
+</html>

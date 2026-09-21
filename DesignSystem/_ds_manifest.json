@@ -268,6 +268,27 @@
       "name": "MapFullPlaceCards — brief",
       "subtitle": "マップ全画面（真上）の上下 200 の帯に場所の OGP カード 3×2。3×2 セルの最寄りピンを線で結ぶ。実測・固定値・探索軸",
       "viewport": "1440x900"
+    },
+    {
+      "path": "handoff/PlaceRanking/PlaceRanking.html",
+      "group": "PlaceRanking",
+      "viewport": "1760x5200",
+      "subtitle": "真上の地図の上に白い縁の 16:9 写真のスタック + 白地の順位 + 名前の帯が順位ごとの行に並ぶ。詳細は思い出の写真 3 枚 + 写真を追加が主役。主 CTA は ink のピル 1 作法。402×874・MapLibre pitch 0・glass 1 / 画面",
+      "name": "PlaceRanking v2 — 作成フローの 4 面 + 写真を追加（確認モード / シート 3 面 / 状態）"
+    },
+    {
+      "path": "handoff/PlaceRanking/PlaceRanking-share.html",
+      "group": "PlaceRanking",
+      "viewport": "1760x2400",
+      "subtitle": "保存後の確認モードから 1 タップ。端末で 1080×1920 の JPG を合成し instagram-stories:// に背景画像として渡す。背景は既定で地図、ランキングの写真 / ライブラリの画像にも差し替え可",
+      "name": "PlaceRanking — Instagram ストーリーズへ共有（背景 = 地図 / 任意の画像）"
+    },
+    {
+      "path": "handoff/PlaceRanking/PlaceRanking-layout.html",
+      "group": "PlaceRanking",
+      "viewport": "1760x2600",
+      "subtitle": "16:9 の写真を順位ごとの行に置く PkRows.place。1 位を地点の高さに、2・3 位は空いている上下へ。同じ高さに他の順位を置かないので重ならない",
+      "name": "PlaceRanking — 確認モードの行配置（アルゴリズムの正本 + 3000 ケース検証）"
     }
   ],
   "templates": [],

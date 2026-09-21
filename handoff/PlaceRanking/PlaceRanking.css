@@ -1,0 +1,314 @@
+/* PlaceRanking v2 — 作成フローの 4 面（詳細 / ランキング調整 / リスト / 確認モード）+ 写真を追加の導線。
+   View 固有の差分のみ。foundation は ../../DesignSystem/colors_and_type.css / preview/card.css（.phone）。
+   地図は ../TimelinePlaceMode/place-map.js を pitch 0 で。地図の上の要素は絶対配置（Flutter は投影 px に置く）。
+   語彙: 白い縁の写真（ステッカー）/ ink の丸い順位 / ジャンル色の帯 = この 3 つだけを 4 面で繰り返す。 */
+
+.pk {
+  --ink: #08080b;
+  --ink-sub: rgba(8,8,11,.56);
+  --hairline: rgba(8,8,11,.08);
+  --band: rgba(8,8,11,.06);
+  --sel: rgba(8,8,11,.04);
+  --dark-ph: #101014;
+  --white-face: rgba(255,255,255,.95);
+  --open: #2FBF71;
+  /* ジャンルの色（as-built・primaryType ごと） */
+  --gc-night: #E040FB; --gc-bar: #7E57C2; --gc-cafe: #B5835A; --gc-rest: #FF7043; --gc-ramen: #F4B942; --gc-italian: #43A047;
+  --safe-top: 62px; --safe-bot: 34px;
+  /* 写真のスタック（as-built の実値） */
+  --st-border: 4px; --st-r: 6px; --st-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+
+/* ==== 紙面 ===================================================================== */
+.pk-doc { display: flex; flex-direction: column; gap: 34px; }
+.pk-h1 { font-family: var(--font-jp); font-weight: 700; font-size: 19px; color: #fff; }
+.pk-h2 { font-family: var(--font-jp); font-weight: 700; font-size: 15px; color: #fff; display: flex; gap: 10px; align-items: baseline; }
+.pk-h2 .k { font-family: var(--font-latin); font-weight: 700; font-size: 11px; letter-spacing: .12em; color: var(--grad-yellow); }
+.pk-lead { font-family: var(--font-jp); font-size: 12.5px; line-height: 1.8; color: var(--fg-2); max-width: 108ch; margin-top: 8px; }
+.pk-lead b, .pk-note b, .pk-cap b { color: #fff; font-weight: 700; }
+.pk-scenes { display: flex; gap: 26px; align-items: flex-start; flex-wrap: wrap; }
+.pk-scene { display: flex; flex-direction: column; gap: 12px; flex: none; width: 402px; }
+.pk-tag { display: flex; align-items: baseline; gap: 8px; }
+.pk-tag .n { font-family: var(--font-latin); font-weight: 700; font-size: 11px; letter-spacing: .12em; color: var(--fg-4); flex: none; }
+.pk-tag .t { font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff; }
+.pk-tag .rec { margin-left: auto; flex: none; white-space: nowrap; font-family: var(--font-latin); font-weight: 700; font-size: 9px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink); background: var(--grad-yellow); padding: 3px 7px; border-radius: var(--radius-pill); }
+.pk-aim { font-family: var(--font-jp); font-size: 11.5px; line-height: 1.6; color: var(--grad-yellow); }
+.pk-aim::before { content: '狙い — '; color: var(--fg-4); }
+.pk-note { font-family: var(--font-jp); font-size: 11.5px; line-height: 1.7; color: var(--fg-3); }
+.pk-note code { font-family: var(--font-latin); font-size: 10.5px; background: rgba(255,255,255,.08); padding: 1px 5px; border-radius: 4px; color: var(--fg-2); }
+.pk-cap { font-family: var(--font-jp); font-size: 10.5px; line-height: 1.6; color: var(--fg-3); }
+.pk-rec { max-width: 900px; padding: 20px 24px; border-radius: 16px; background: rgba(255,255,255,.05); box-shadow: 0 0 0 1px rgba(255,255,255,.10);
+  font-family: var(--font-jp); font-size: 12.5px; line-height: 1.85; color: var(--fg-2); }
+.pk-rec b { color: #fff; }
+.pk-rec ol, .pk-rec ul { margin: 8px 0 0 18px; }
+.pk-rec li { margin: 4px 0; }
+.pk-mark { position: absolute; z-index: 30; display: flex; align-items: center; gap: 6px; pointer-events: none; font-family: var(--font-jp); font-size: 10px; font-weight: 700; color: #fff; }
+.pk-mark .d { width: 18px; height: 18px; border-radius: 50%; background: var(--grad-pink); box-shadow: 0 0 0 3px rgba(255,62,136,.28); flex: none;
+  font-family: var(--font-latin); font-size: 10px; line-height: 18px; text-align: center; }
+.pk-mark .l { padding: 2px 7px; border-radius: var(--radius-pill); background: rgba(8,8,11,.84); white-space: nowrap; }
+.statusbar.ink { color: var(--ink); }
+.home-ind.dark { background: rgba(8,8,11,.28); }
+
+/* 地図の無い状態カード（淡い地図色の面） */
+.pk-flat { position: relative; width: 402px; height: var(--h, 300px); border-radius: 16px; overflow: hidden; font-family: var(--font-jp); color: var(--ink);
+  background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 1px, transparent 1px 58px), repeating-linear-gradient(0deg, rgba(255,255,255,.55) 0 1px, transparent 1px 58px), #e9e5d9; }
+.pk-flat.white { background: #fff; }
+.pk-states { display: flex; flex-direction: column; gap: 8px; width: 402px; }
+
+/* ==== 画面（地図 + 明るい地図の上の chrome） ============================================ */
+.pk-screen { position: absolute; inset: 0; background: #e9e5d9; overflow: hidden; font-family: var(--font-jp); color: var(--ink); }
+.pk-map { position: absolute; inset: 0; background: #e9e5d9; }
+.pk-map canvas { display: block; }
+.pk-map .maplibregl-control-container { display: none; }
+
+/* 戻る = 44 の暗いガラス（画面で唯一の glass） */
+.pk-back { position: absolute; left: 8px; top: calc(var(--safe-top) + 6px); width: 44px; height: 44px; border: 0; border-radius: 50%; display: grid; place-items: center; z-index: 10; cursor: pointer;
+  background: var(--lg-tint-dark); -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)); backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate));
+  box-shadow: inset 0 1px 0 var(--lg-specular-top), inset 0 -1px 0 var(--lg-specular-bot); }
+.pk-back img { width: 18px; height: 18px; }
+
+/* ジャンルのチップ（1 行・選んだものが先頭）— 効果を 面 + 影 の 1 群に減らす（縁と glow は外した） */
+.pk-chips { position: absolute; left: 60px; right: 0; top: calc(var(--safe-top) + 11px); height: 34px; display: flex; align-items: center; gap: 8px; overflow: hidden; z-index: 9; }
+.pk-chip { flex: none; height: 34px; padding: 0 12px; border-radius: 17px; background: var(--white-face); box-shadow: 0 2px 8px rgba(8,8,11,.12);
+  font-weight: 700; font-size: 13px; color: var(--ink); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.pk-chip.on { background: var(--gc, var(--ink)); color: #fff; }
+/* 検索欄 44・r22・白 95%（as-built） */
+.pk-search { position: absolute; left: 16px; right: 16px; top: calc(var(--safe-top) + 58px); height: 44px; border-radius: 22px; background: var(--white-face);
+  box-shadow: 0 2px 8px rgba(8,8,11,.12); display: flex; align-items: center; gap: 10px; padding: 0 16px; font-size: 15px; color: var(--ink-sub); z-index: 9; }
+.pk-search img { width: 16px; height: 16px; filter: invert(1); opacity: .6; }
+
+/* マーカー: ヒット = 赤 28×40（先端が地点）/ ランキングに入れた = 白 + 順位 / 選択中 1.2× */
+.pk-mk { position: absolute; left: calc(var(--x) - 14px); top: calc(var(--y) - 40px); width: 28px; height: 40px; z-index: 5; transform-origin: 50% 100%; }
+.pk-mk .b { position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--state-error);
+  box-shadow: 0 2px 6px rgba(8,8,11,.3), inset 0 0 0 2px rgba(255,255,255,.9); }
+.pk-mk .b i { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: #fff; }
+.pk-mk.rk .b { background: #fff; box-shadow: 0 2px 6px rgba(8,8,11,.3), inset 0 0 0 1.5px var(--ink); }
+.pk-mk.rk .b i { width: auto; height: auto; margin: 0; background: none; transform: translate(-50%, -50%) rotate(45deg); font-family: var(--font-latin); font-weight: 800; font-size: 12px; color: var(--ink); line-height: 1; white-space: nowrap; display: flex; align-items: baseline; }
+.pk-mk.sel { transform: scale(1.2); z-index: 6; }
+/* 現在地 — 白い点 + ink リング（既存の語彙） */
+.pk-me { position: absolute; left: calc(var(--x) - 7px); top: calc(var(--y) - 7px); width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2.5px var(--ink), 0 2px 8px rgba(0,0,0,.45); z-index: 4; }
+/* 地点の印（スタックの下・確認モード）— スタックが地点からずれるので、地点そのものを小さく残す */
+.pk-pt { position: absolute; left: calc(var(--x) - 5px); top: calc(var(--y) - 5px); width: 10px; height: 10px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2.5px #fff, 0 1px 4px rgba(0,0,0,.3); z-index: 5; }
+
+/* ==== 確認モード: 写真のスタック + ステッカー ============================================ */
+.pk-stack { position: absolute; width: var(--w, var(--s)); height: var(--h, var(--s)); left: calc(var(--x) - var(--w, var(--s)) / 2); top: calc(var(--y) - var(--h, var(--s)) / 2); z-index: 7; }
+.pk-stack .ph { position: absolute; inset: 0; border: var(--st-border) solid #fff; border-radius: var(--st-r); box-shadow: var(--st-shadow); background: var(--dark-ph); overflow: hidden; }
+.pk-stack .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pk-stack .ph.b2 { transform: translate(9px, -6px) rotate(7deg); }
+.pk-stack .ph.b3 { transform: translate(-9px, -4px) rotate(-9deg); }
+/* 16:9 の横長（v3）— 扇の角度は横長に合わせて浅く */
+.pk-stack.wide .ph.b2 { transform: translate(8px, -6px) rotate(2.5deg); }
+.pk-stack.wide .ph.b3 { transform: translate(-8px, -5px) rotate(-3deg); }
+.pk-leader { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; }
+.pk-stack .ph.none { display: grid; place-items: center; }
+.pk-stack .ph.none img { width: 26%; height: 26%; object-fit: contain; opacity: .55; }
+/* ラベル = 順位の丸 26 + 名前の帯（ジャンル色・r4・15 w800）を −4° でスタックの下端に 45% 重ねる。JP は斜体にしない（擬似斜体を避ける）。英数だけ Inter italic */
+.pk-lab { position: absolute; left: calc(50% + var(--lx, 0px)); bottom: -14px; transform: translateX(-50%) rotate(-4deg); display: flex; align-items: center; z-index: 3; white-space: nowrap; max-width: 190px; }
+.pk-lab .r { flex: none; height: 26px; min-width: 26px; padding: 0 7px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 0 0 1.5px var(--ink); color: var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 13px;
+  display: flex; align-items: baseline; justify-content: center; position: relative; z-index: 1; line-height: 26px; }
+.pk small { font-size: .68em; font-weight: 800; margin-left: 1px; }
+.pk-lab .nm { flex: 1 1 auto; min-width: 0; height: 26px; padding: 0 12px; border-radius: 4px; background: #fff; color: var(--ink); font-weight: 800; font-size: 15px; line-height: 26px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2); max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.pk-lab .nm.lat { font-family: var(--font-latin); font-style: italic; letter-spacing: .01em; }
+/* 日付バッジ（カレンダー風・最初に投稿した日）— 1 位だけ */
+.pk-date { position: absolute; left: -10px; top: -12px; width: 34px; border-radius: 6px; overflow: hidden; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25); transform: rotate(-6deg); z-index: 3; text-align: center; }
+.pk-date .m { height: 12px; background: var(--ink); color: #fff; font-family: var(--font-latin); font-weight: 800; font-size: 8px; letter-spacing: .08em; line-height: 12px; }
+.pk-date .d { height: 22px; font-family: var(--font-latin); font-weight: 800; font-size: 15px; color: var(--ink); line-height: 22px; }
+/* 件数（写真の枚数）— 2 枚以上のとき */
+.pk-cnt { position: absolute; right: -9px; top: -9px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1.5px var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 12px; color: var(--ink);
+  display: grid; place-items: center; z-index: 3; }
+/* 自分（行った人）— 1 位の右下 */
+.pk-av { position: absolute; right: -8px; bottom: 6px; width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); z-index: 3; }
+/* 4 位以下 = 小さな丸い写真ピン 36 + 順位 16 */
+.pk-ppin { position: absolute; left: calc(var(--x) - 18px); top: calc(var(--y) - 18px); width: 36px; height: 36px; z-index: 6; }
+.pk-ppin img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2.5px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.3); display: block; background: var(--dark-ph); }
+.pk-ppin .r { position: absolute; left: -8px; top: -6px; height: 18px; padding: 0 5px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 0 0 1.5px var(--ink); color: var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 10px; line-height: 18px;
+  display: flex; align-items: baseline; }
+
+/* ==== 配置シミュレーター（PlaceRanking-layout.html） ============================== */
+.pk-sim { display: flex; flex-direction: column; gap: 16px; }
+.pk-sim-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-family: var(--font-jp); font-size: 12px; color: var(--fg-2); }
+.pk-sim-ctl label { display: flex; align-items: center; gap: 8px; }
+.pk-sim-ctl input[type=range] { width: 160px; accent-color: #fff; }
+.pk-sim-ctl b { font-family: var(--font-latin); color: #fff; min-width: 3ch; display: inline-block; }
+.pk-sim-ctl button { height: 30px; padding: 0 12px; border-radius: var(--radius-pill); border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.06); color: #fff; font-family: var(--font-jp); font-size: 11.5px; font-weight: 600; cursor: pointer; }
+.pk-sim-ctl button.on { background: #fff; color: var(--ink); border-color: #fff; }
+.pk-sim-grid { display: grid; grid-template-columns: repeat(6, auto); gap: 14px 18px; }
+.pk-sim-pair { display: flex; gap: 6px; align-items: flex-start; }
+.pk-sim-pair svg { display: block; border-radius: 6px; }
+.pk-sim-pair .who { font-family: var(--font-latin); font-size: 9px; font-weight: 700; letter-spacing: .1em; color: var(--fg-3); text-align: center; margin-top: 4px; }
+.pk-sim-pair .who.ng { color: var(--state-error); }
+.pk-sim-pair .who.sh { color: var(--grad-yellow); }
+.pk-sim-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; max-width: 900px; }
+.pk-sim-stat { padding: 14px 16px; border-radius: 12px; background: rgba(255,255,255,.05); box-shadow: 0 0 0 1px rgba(255,255,255,.10); font-family: var(--font-jp); font-size: 12px; line-height: 1.7; color: var(--fg-2); }
+.pk-sim-stat .h { font-weight: 700; color: #fff; font-size: 12.5px; margin-bottom: 4px; }
+.pk-sim-stat b { font-family: var(--font-latin); color: #fff; font-weight: 700; }
+.pk-sim-stat .ng { color: var(--state-error); }
+.pk-sim-stat .ok { color: #8be08e; }
+.pk-sim-stat .bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.10); margin: 4px 0 8px; overflow: hidden; }
+.pk-sim-stat .bar i { display: block; height: 100%; background: #8be08e; }
+.pk-sim-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-family: var(--font-jp); font-size: 11px; color: var(--fg-3); }
+.pk-sim-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* 実描画検証: ドラッグの phone + 総当たりボード */
+.pk-live { position: relative; width: 402px; height: 874px; border-radius: 40px; overflow: hidden; flex: none; }
+.pk-live .stage, .pk-tile .stage { position: absolute; inset: 0; }
+.pk-live .handles { position: absolute; inset: 0; z-index: 20; }
+.pk-handle { position: absolute; width: 44px; height: 44px; border-radius: 50%; cursor: grab; touch-action: none; display: grid; place-items: center; }
+.pk-handle span { width: 22px; height: 22px; border-radius: 50%; background: var(--grad-pink); color: #fff; font-family: var(--font-latin); font-weight: 800; font-size: 11px; display: grid; place-items: center; box-shadow: 0 0 0 3px rgba(255,62,136,.3); pointer-events: none; }
+.pk-handle:active { cursor: grabbing; }
+.pk-live.ng::after, .pk-tile.ng::after { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 0 6px var(--state-error); pointer-events: none; z-index: 30; }
+.pk-live .pk-save { pointer-events: none; }
+.pk-tile-wrap { width: 100px; }
+.pk-tile { width: 402px; height: 874px; border-radius: 24px; transform: scale(.25); transform-origin: 0 0; margin-bottom: calc(-874px * .75); }
+.pk-tile-wrap .who { font-family: var(--font-latin); font-size: 9px; font-weight: 700; letter-spacing: .04em; color: var(--fg-3); text-align: center; margin-top: 4px; white-space: nowrap; }
+.pk-board-h { font-family: var(--font-jp); font-weight: 700; font-size: 13px; color: #fff; margin: 20px 0 8px; }
+.pk-board-row { display: flex; flex-wrap: wrap; gap: 12px 10px; }
+
+/* 別案 B: ポラロイド（白い縁の下辺を広げて名前を書き込む）+ 順位のステッカーは角に */
+.pk-stack.pola .ph { border-width: 0; padding: var(--st-border) var(--st-border) 26px; background: #fff; }
+.pk-stack.pola .ph img { border-radius: 2px; }
+.pk-stack.pola .cp { position: absolute; left: 0; right: 0; bottom: 5px; text-align: center; font-weight: 800; font-size: 11px; line-height: 16px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; z-index: 2; }
+.pk-stack.pola .cp.lat { font-family: var(--font-latin); font-style: italic; }
+.pk-stack .rs { position: absolute; left: -12px; top: -12px; height: 28px; padding: 0 8px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 0 0 1.5px var(--ink), 0 2px 6px rgba(0,0,0,.25); color: var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 14px; line-height: 28px;
+  display: flex; align-items: baseline; z-index: 3; transform: rotate(-8deg); }
+
+/* タイトル A: 白い面のステッカー（面で可読性を担保・−2°） */
+.pk-tcard { position: absolute; left: 64px; right: 64px; top: calc(var(--safe-top) + 6px); z-index: 8; transform: rotate(-2deg); background: var(--white-face); border-radius: 12px; padding: 10px 16px 11px;
+  box-shadow: 0 6px 18px rgba(8,8,11,.18); text-align: center; }
+.pk-tcard .t { font-weight: 800; font-size: 20px; line-height: 1.3; color: var(--ink); text-wrap: balance; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pk-tcard .m { margin-top: 3px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; color: var(--ink-sub); }
+.pk-tcard .m b { font-family: var(--font-latin); font-weight: 800; font-size: 12px; color: var(--ink); letter-spacing: .02em; }
+/* タイトル B: 太い縁取り文字（面なし・白地 + ink の輪郭で可読性を担保）— 参考デザインの「NEW-YORK」 */
+.pk-tout { position: absolute; left: 20px; right: 20px; top: calc(var(--safe-top) + 14px); z-index: 8; transform: rotate(-3deg); text-align: center; pointer-events: none; }
+.pk-tout .l1 { font-weight: 900; font-size: 27px; line-height: 1.25; color: #fff; -webkit-text-stroke: 6px var(--ink); paint-order: stroke fill; text-wrap: balance; }
+.pk-tout .l2 { margin-top: 2px; font-family: var(--font-latin); font-style: italic; font-weight: 900; font-size: 30px; line-height: 1.1; color: #fff; -webkit-text-stroke: 6px var(--ink); paint-order: stroke fill; letter-spacing: .02em; }
+
+/* 主 CTA を 1 つの作法に: ink の面のピル 56・白 17 w700（「作成」も「保存」も同じ） */
+.pk-cta { height: 56px; border: 0; border-radius: var(--radius-pill); background: var(--ink); color: #fff; font-family: var(--font-jp); font-weight: 700; font-size: 17px;
+  display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; }
+.pk-cta:active { transform: scale(.97); }
+.pk-cta.off { opacity: .4; pointer-events: none; }
+.pk-cta .n { font-family: var(--font-latin); font-weight: 700; font-size: 13px; padding: 2px 8px; border-radius: var(--radius-pill); background: rgba(255,255,255,.2); }
+.pk-cta .spin { width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; transform: rotate(40deg); }
+.pk-save { position: absolute; left: 50%; bottom: calc(var(--safe-bot) + 12px); transform: translateX(-50%); min-width: 220px; padding: 0 40px; z-index: 9; background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink), 0 8px 24px rgba(8,8,11,.18); }
+.pk-save .spin { border-color: rgba(8,8,11,.2); border-top-color: var(--ink); }
+.pk-save:active { transform: translateX(-50%) scale(.97); }
+
+/* ==== シート（白・上角 r16・3 セクション） ============================================== */
+.pk-sheet { position: absolute; left: 0; right: 0; bottom: 0; height: var(--sh, 393px); background: #fff; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,.2); overflow: hidden; z-index: 12; color: var(--ink); }
+.pk-sheet .grab { width: 36px; height: 4px; border-radius: 2px; background: rgba(8,8,11,.16); margin: 6px auto; }
+.pk-sec { padding: 8px 16px 16px; }
+.pk-sec + .pk-sec { border-top: 8px solid var(--band); padding-top: 12px; }
+/* セクションの区切り: 帯 8 + 各セクションだけの見出しの形（候補 = eyebrow / ランキング = タイトルの帯 / 詳細 = 店名 + ×） */
+.pk-eb { display: flex; align-items: center; gap: 8px; height: 24px; font-size: 11px; font-weight: 700; color: var(--ink-sub); letter-spacing: .04em; }
+.pk-eb b { font-family: var(--font-latin); font-weight: 800; color: var(--ink); font-size: 12px; }
+.pk-eb .s { margin-left: auto; font-weight: 500; letter-spacing: 0; }
+
+/* (3) リスト: OGP カード 88（写真はステッカー = 白縁 3 + ±2°）/ 右端にチェック 24 r8（タップ 44）/ 選ぶと写真の角に順位 */
+.pk-row { display: flex; align-items: center; gap: 12px; height: 88px; margin: 0 -16px; padding: 0 16px; border-bottom: 1px solid var(--hairline); }
+.pk-row:last-child { border-bottom: 0; }
+.pk-row.on { background: var(--sel); }
+.pk-row .pic { position: relative; width: 88px; height: 66px; flex: none; }
+.pk-row .pic img, .pk-row .pic .none { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(8,8,11,.22); transform: rotate(-2deg); display: block; background: var(--dark-ph); }
+.pk-row:nth-child(even) .pic img, .pk-row:nth-child(even) .pic .none { transform: rotate(2deg); }
+.pk-row .pic .none { display: grid; place-items: center; }
+.pk-row .pic .none img { width: 20px; height: 20px; border: 0; box-shadow: none; transform: none; opacity: .5; }
+.pk-row .pic .r { position: absolute; left: -8px; top: -8px; height: 22px; padding: 0 6px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 0 0 1.5px var(--ink); color: var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 11px; line-height: 22px;
+  display: flex; align-items: baseline; transform: rotate(-8deg); }
+.pk-row .col { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.pk-row .nm { font-weight: 700; font-size: 15px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pk-row .ad { font-size: 12px; line-height: 1.4; color: var(--ink-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pk-row .ck { width: 44px; height: 44px; flex: none; display: grid; place-items: center; margin-right: -10px; }
+.pk-row .ck i { width: 24px; height: 24px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px rgba(8,8,11,.30); display: grid; place-items: center; }
+.pk-row.on .ck i, .pk-row .ck.on i { background: var(--ink); box-shadow: none; }
+.pk-row .ck img { width: 13px; height: 13px; display: none; }
+.pk-row.on .ck img, .pk-row .ck.on img { display: block; }
+.pk-empty { padding: 20px 0 8px; text-align: center; font-size: 12.5px; color: var(--ink-sub); line-height: 1.6; }
+.pk-spin { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(8,8,11,.15); border-top-color: var(--ink); margin: 0 auto; }
+
+/* (2) ランキング調整: タイトル行（「私の」「ランキング」は細く、真ん中は下線のテキストフィールド）+ 横並びの列（ミニスタック 64 + 順位のステッカー + 名前）+ 作成 */
+.pk-ttl { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; min-height: 44px; font-weight: 400; font-size: 15px; color: var(--ink); }
+.pk-ttl .band { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 2px 0 4px; border-bottom: 1.5px solid var(--ink); color: var(--ink); font-weight: 700; font-size: 16px;
+  cursor: text; white-space: nowrap; max-width: 250px; }
+.pk-ttl .band::before { content: ''; position: absolute; inset: -6px 0; }   /* タップ域を 44 に */
+.pk-ttl .band img { position: absolute; left: -7px; top: -4px; width: 16px; height: 16px; padding: 4px; box-sizing: border-box; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1.5px #fff; z-index: 1; }
+.pk-ttl .band span { overflow: hidden; text-overflow: ellipsis; }
+.pk-cols { display: flex; gap: 2px; padding: 10px 0 2px; margin: 0 -6px; overflow: hidden; }
+.pk-colm { position: relative; width: 84px; flex: none; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 10px; transition: transform 160ms var(--ease-standard); }
+.pk-colm .mini { position: relative; width: 64px; height: 64px; }
+.pk-colm .mini .p { position: absolute; inset: 0; border: 3px solid #fff; border-radius: 5px; overflow: hidden; background: var(--dark-ph); box-shadow: 0 2px 8px rgba(8,8,11,.22); }
+.pk-colm .mini .p img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pk-colm .mini .p.b2 { transform: translate(5px, -4px) rotate(7deg); }
+.pk-colm .mini .p.b3 { transform: translate(-5px, -2px) rotate(-8deg); }
+.pk-colm .mini .p.none { display: grid; place-items: center; }
+.pk-colm .mini .p.none img { width: 18px; height: 18px; opacity: .5; }
+.pk-colm .rk { position: absolute; left: -10px; top: -10px; height: 24px; padding: 0 6px; border-radius: var(--radius-pill); background: #fff; box-shadow: 0 0 0 1.5px var(--ink); color: var(--ink); font-family: var(--font-latin); font-weight: 800; font-size: 12px; line-height: 24px;
+  display: flex; align-items: baseline; z-index: 2; transform: rotate(-8deg); }
+.pk-colm .x { position: absolute; right: -20px; top: -20px; width: 44px; height: 44px; display: grid; place-items: center; z-index: 2; border: 0; background: none; cursor: pointer; }
+.pk-colm .x i { width: 20px; height: 20px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 1.5px #fff; display: grid; place-items: center; }
+.pk-colm .x img { width: 8px; height: 8px; }
+.pk-colm .nm { font-weight: 700; font-size: 11px; line-height: 1.3; text-align: center; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; padding: 0 4px; }
+.pk-colm.drag { transform: translateY(-4px) scale(1.08); z-index: 3; }
+.pk-colm.drag .mini .p { box-shadow: 0 10px 22px rgba(8,8,11,.30); }
+.pk-colm.empty .mini { border: 1.5px dashed rgba(8,8,11,.22); border-radius: 6px; }
+.pk-colm.empty .rk { color: var(--ink-sub); box-shadow: 0 0 0 1.5px rgba(8,8,11,.22); }
+.pk-colm.empty .nm { color: var(--ink-sub); font-weight: 500; }
+.pk-sec .pk-cta { margin-top: 12px; width: 100%; background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+
+/* (1) 詳細: 名前 + ジャンル + × / 思い出の写真 3 枚 + 写真を追加（主役） / 入れる・外す / 評価・営業・住所・営業時間 */
+.pk-dh { display: flex; align-items: flex-start; gap: 8px; }
+.pk-dh .col { flex: 1; min-width: 0; padding-top: 6px; }
+.pk-dh .nm { font-weight: 700; font-size: 17px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pk-dh .g { font-size: 12px; color: var(--ink-sub); margin-top: 2px; }
+.pk-dh .x { width: 44px; height: 44px; flex: none; margin-right: -12px; display: grid; place-items: center; border: 0; background: none; cursor: pointer; }
+.pk-dh .x img { width: 14px; height: 14px; filter: invert(1); opacity: .6; }
+.pk-mem { display: flex; gap: 12px; margin-top: 8px; padding: 4px 0 6px; }
+.pk-slot { position: relative; width: 110px; height: 110px; flex: none; }
+.pk-slot img.p { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(8,8,11,.22); display: block; background: var(--dark-ph); }
+.pk-slot .tag { position: absolute; left: 6px; bottom: 6px; height: 20px; padding: 0 7px; border-radius: 4px; background: var(--white-face); color: var(--ink); font-size: 10px; font-weight: 800; line-height: 20px; box-shadow: 0 1px 4px rgba(8,8,11,.2); }
+.pk-slot .tag.lat { font-family: var(--font-latin); }
+.pk-slot .cnt { position: absolute; right: -6px; top: -6px; width: 22px; height: 22px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 2px #fff; color: #fff; font-family: var(--font-latin); font-weight: 800; font-size: 11px; display: grid; place-items: center; }
+.pk-slot.add { border: 1.5px dashed rgba(8,8,11,.28); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-weight: 700; font-size: 12px; color: var(--ink); }
+.pk-slot.add img { width: 20px; height: 20px; filter: invert(1); }
+.pk-slot.add:active { background: var(--sel); }
+.pk-slot .ovl { position: absolute; inset: 0; border-radius: 8px; background: var(--scrim); display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 4px 8px; }
+.pk-slot .ovl button { height: 44px; padding: 0; border: 0; background: none; color: #fff; font-family: var(--font-jp); font-weight: 700; font-size: 12px; display: grid; place-items: center; }
+.pk-slot .ovl button span { height: 28px; padding: 0 12px; border-radius: var(--radius-pill); background: #fff; color: var(--ink); font-size: 11px; line-height: 28px; }
+.pk-slot .ovl button.del span { background: none; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.6); }
+.pk-pill { height: 44px; padding: 0 20px; border: 0; border-radius: var(--radius-pill); font-family: var(--font-jp); font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.pk-pill.ink { background: var(--ink); color: #fff; }
+.pk-pill.ghost { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1.5px rgba(8,8,11,.18); }
+.pk-pill.wide { width: 100%; }
+.pk-pill img { width: 14px; height: 14px; }
+.pk-pill.ghost img { filter: invert(1); }
+.pk-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.pk-meta .num { font-family: var(--font-latin); font-weight: 600; }
+.pk-meta .op { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; }
+.pk-meta .op::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--open); }
+.pk-meta .op span { color: var(--ink-sub); font-weight: 400; }
+.pk-addr { margin-top: 10px; font-size: 13px; line-height: 1.5; color: var(--ink); }
+.pk-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.pk-foot .ck { width: 44px; height: 44px; flex: none; display: grid; place-items: center; margin: 0 -10px -10px 0; cursor: pointer; }
+.pk-foot .ck i { width: 24px; height: 24px; border-radius: 8px; box-shadow: inset 0 0 0 1.5px rgba(8,8,11,.30); display: grid; place-items: center; }
+.pk-foot .ck.on i { background: var(--ink); box-shadow: none; }
+.pk-foot .ck img { width: 13px; height: 13px; display: none; }
+.pk-foot .ck.on img { display: block; }
+.pk-hours { margin-top: 6px; font-size: 12px; line-height: 1.7; color: var(--ink-sub); display: grid; grid-template-columns: 2.5em 1fr; column-gap: 8px; }
+.pk-hours b { font-weight: 600; color: var(--ink); }
+
+/* 写真を追加 — 既存の投稿フローと同じ入口（カメラ / ライブラリ）のアクションシート */
+.pk-asheet { position: absolute; left: 8px; right: 8px; bottom: calc(var(--safe-bot) + 8px); background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 -4px 20px rgba(0,0,0,.2); z-index: 20; }
+.pk-asheet .hd { padding: 14px 16px 6px; font-size: 12px; color: var(--ink-sub); text-align: center; }
+.pk-asheet .it { display: flex; align-items: center; gap: 14px; height: 56px; padding: 0 20px; font-weight: 700; font-size: 15px; color: var(--ink); border-top: 1px solid var(--hairline); }
+.pk-asheet .it img { width: 20px; height: 20px; filter: invert(1); }
+.pk-asheet .it.cancel { justify-content: center; font-weight: 600; color: var(--ink-sub); border-top: 8px solid var(--band); }
+.pk-dim { position: absolute; inset: 0; background: rgba(0,0,0,.45); z-index: 19; }
+
+/* タイトル編集ダイアログ（as-built 幅 280・r20 → r16 に正規化） */
+.pk-dlg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 280px; background: #fff; border-radius: 16px; padding: 24px 20px 20px; z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.pk-dlg .l { font-size: 15px; font-weight: 700; color: var(--ink); }
+.pk-dlg .in { width: 100%; height: 44px; display: flex; align-items: center; justify-content: center; gap: 2px; font-size: 22px; font-weight: 700; color: var(--ink); border-bottom: 2px solid var(--ink); }
+.pk-dlg .in .caret { width: 2px; height: 24px; background: var(--ink); }
+.pk-dlg .ok { width: 100%; height: 44px; margin-top: 10px; border: 0; border-radius: var(--radius-pill); background: var(--ink); color: #fff; font-family: var(--font-jp); font-weight: 700; font-size: 15px; }
