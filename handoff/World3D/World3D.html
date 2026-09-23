@@ -11,7 +11,8 @@
 
   出しているデータは**渋谷のナイトクラブ 20 件だけ**（本番 DB の場所 = Places 由来。
   位置・店の写真・ジャンル・営業時間・評価を持つ）。開発用のモック（サークル / 投稿 / お題）は出さない。
-  既定の「ポイント」は 店の写真（36 の角丸タイル）+ 光の柱。操作盤で写真だけ / 柱だけにもできる。
+  既定の「ポイント」は **光の柱（90m）の先端に店の写真**。操作盤で 地上の写真タイル（アプリの場所ピン）/
+  柱だけ / 赤いマーカー にも切り替えられる。
 
   engine / vendor / data は R2（https://media.toopdbq.com/design/world3d/…）から読む。
   engine = アプリ実装（assets/web/earth/*.js）の一方向の写しなので、ここから編集しない。
@@ -50,7 +51,31 @@
   #center-marker-glow { filter: blur(4px); }
   .maplibregl-canvas-container, .maplibregl-canvas { background: transparent !important; }
 
-  /* --- 店名（このページ固有。DOM マーカー = engine の場所ピンと同じ方式） ---------
+  /* --- 柱の先端の写真（このページ固有）-------------------------------------------
+     位置は engine が壁の名前でやっているのと同じ投影
+     （transform.coordinatePoint(MercatorCoordinate, 高さ m)）。DOM なので 3D ビルや壁の
+     depth に負けず常に前面に出る。 */
+  #tips { position: absolute; inset: 0; z-index: 4; pointer-events: none; overflow: hidden; }
+  .tip {
+    position: absolute; top: 0; left: 0; width: 44px; height: 44px;
+    pointer-events: auto; cursor: pointer; will-change: transform;
+  }
+  .tip-photo {
+    width: 100%; height: 100%; border-radius: 10px; overflow: hidden;
+    background: #16131f; box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+    outline: 1px solid rgba(255, 255, 255, .55); outline-offset: -1px;
+  }
+  .tip-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .tip-name {
+    position: absolute; top: calc(100% + 5px); left: 50%; transform: translateX(-50%);
+    max-width: 124px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 10px; font-weight: 600; line-height: 1; padding: 3px 6px; border-radius: 99px;
+    color: #fff; background: rgba(0, 0, 0, .55); text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+  }
+  .tip.lounge .tip-photo { outline-color: rgba(255, 255, 255, .3); }
+  .tip.lounge .tip-name { opacity: .62; font-weight: 500; }
+
+  /* --- 店名（柱 / マーカーのときの DOM マーカー = engine の場所ピンと同じ方式） -----
      20 点が半径 580m に密集するので今は素の pill。衝突回避はデザインで決める話。 */
   .club-label {
     max-width: 124px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -121,6 +146,8 @@
     <ellipse id="center-marker" cx="0" cy="0" rx="10" ry="10"
              fill="rgba(66,133,244,0.80)" stroke="#FFFFFF" stroke-width="1.2" />
   </svg>
+  <!-- 柱の先端の写真（ページ固有。engine の DOM ではない） -->
+  <div id="tips"></div>
 </div>
 
 <div id="readout"></div>
@@ -168,7 +195,7 @@
 <!-- vendor: アプリが同梱しているものと同一版（MapLibre GL JS 5.6.0） -->
 <script src="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.js"></script>
 <!-- data: 本番 DB の場所（placeDetails）から渋谷のナイトクラブだけを抜いた生成物 -->
-<script src="https://media.toopdbq.com/design/world3d/data.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/data.js?v=d2e3e1ad"></script>
 <script>
 // engine（map-core.js）は**自分が読み込まれた瞬間の URL クエリ**（lat / lng / zoom / pitch / bearing）で
 // 初回カメラを確定する。engine より前にここで data のエリアとページの既定を書いておけば、起動の瞬間から
@@ -187,12 +214,12 @@
 </script>
 
 <!-- engine: アプリ実装 assets/web/earth/*.js の写し。読み込み順は earth.html と同じ -->
-<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js?v=cc213411"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js?v=cc213411"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/pins.js?v=cc213411"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/circles.js?v=cc213411"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js?v=cc213411"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/places.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js?v=d2e3e1ad"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js?v=d2e3e1ad"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/pins.js?v=d2e3e1ad"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/circles.js?v=d2e3e1ad"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js?v=d2e3e1ad"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/places.js?v=d2e3e1ad"></script>
 
 <script>
 // ============================================================================
@@ -275,7 +302,8 @@
   const SRC_PT = 'w3d-club-pts', SRC_BEAM = 'w3d-club-beams';
   const L_DISC = 'w3d-club-disc', L_BEAM = 'w3d-club-beam';
   const POINT_COLOR = '#ff3e88';  // DS の --state-like / --grad-pink（アプリの唯一のアクセント）
-  const BEAM_R_M = 7, BEAM_H_M = 60;
+  // 柱は渋谷のビル（おおむね 20〜80m）より高くして、先端の写真が屋上に埋もれないようにする
+  const BEAM_R_M = 7, BEAM_H_M = 90;
 
   function discRing(lat, lng, rM, seg) {
     const dLat = rM / 111320, dLng = rM / (111320 * Math.cos(lat * Math.PI / 180));
@@ -328,11 +356,66 @@
       });
     }
   }
+  // 柱の先端の写真（DOM）。投影は engine が壁の名前で使っているのと同じ
+  //   transform.coordinatePoint(MercatorCoordinate, z[m]) — pixelMatrix が z を m でスケール済み。
+  // globe 描画中（引いたとき）は取れないので地表の投影で代用する。
+  const tipsHost = document.getElementById('tips');
+  let tips = [];
+  function tipPx(c) {
+    try {
+      const tr = map.transform;
+      const mt = tr.currentTransform || tr;
+      if (typeof mt.coordinatePoint === 'function') {
+        return mt.coordinatePoint(
+          maplibregl.MercatorCoordinate.fromLngLat({ lng: c.lng, lat: c.lat }), BEAM_H_M);
+      }
+    } catch (_) {}
+    return map.project([c.lng, c.lat]);
+  }
+  function positionTips() {
+    if (!tips.length) return;
+    const w = stage.clientWidth, h = stage.clientHeight;
+    for (const t of tips) {
+      const p = tipPx(t.c);
+      if (!p || !Number.isFinite(p.x) || p.x < -120 || p.y < -140 || p.x > w + 120 || p.y > h + 140) {
+        t.el.style.visibility = 'hidden';
+        continue;
+      }
+      t.el.style.visibility = '';
+      // 要素の下辺の中央 = 柱の先端
+      t.el.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px) translate(-50%, -100%)`;
+    }
+  }
+  function buildTips(list) {
+    tipsHost.textContent = '';
+    tips = list.map((c) => {
+      const el = document.createElement('div');
+      el.className = 'tip' + (c.kind === 'club' ? '' : ' lounge');
+      const photo = document.createElement('div');
+      photo.className = 'tip-photo';
+      const img = document.createElement('img');
+      img.src = c.imageUrl; img.alt = ''; img.loading = 'eager';
+      photo.appendChild(img);
+      el.appendChild(photo);
+      const nm = document.createElement('div');
+      nm.className = 'tip-name';
+      nm.textContent = c.name;
+      nm.hidden = !S.labels;
+      el.appendChild(nm);
+      el.addEventListener('click', (e) => { e.stopPropagation(); showCard(c); });
+      tipsHost.appendChild(el);
+      return { c, el, nm };
+    });
+    positionTips();
+  }
+
   let labelMarkers = [];
   function applyLabels() {
+    // 「写真+柱」のときは名前を先端の写真の下に出す（別マーカーにしない）
+    for (const t of tips) t.nm.hidden = !S.labels;
     labelMarkers.forEach((m) => m.remove());
     labelMarkers = [];
-    if (!S.labels || S.points === 'off') return;
+    if (!S.labels || S.points === 'off' || S.points === 'both') return;
     for (const c of visible()) {
       const el = document.createElement('div');
       el.className = 'club-label' + (c.kind === 'club' ? '' : ' lounge');
@@ -349,16 +432,17 @@
   function applyPoints() {
     if (!map.isStyleLoaded()) { whenReady(applyPoints); return; }
     const list = visible();
-    // 写真 / マーカーは engine の場所ピン（アプリの既存ボキャブラリそのもの）
-    const tile = S.points === 'both' || S.points === 'photo';
-    if (tile || S.points === 'pin') {
+    // 「写真」「マーカー」は engine の場所ピン（地面に置くアプリの既存ボキャブラリそのもの）
+    if (S.points === 'photo' || S.points === 'pin') {
       window.setPlacePins({
         pins: list.map((c) => ({ key: c.key, lat: c.lat, lng: c.lng, imageUrl: c.imageUrl })),
-        style: tile ? 'tile' : 'pin',
+        style: S.points === 'photo' ? 'tile' : 'pin',
       });
     } else {
       window.clearPlacePins();
     }
+    // 「写真+柱」は柱の先端に写真を置く（このページ固有の 3D 表現）
+    buildTips(S.points === 'both' ? list : []);
     const beam = (S.points === 'both' || S.points === 'beam') ? list : [];
     setGeo(SRC_PT, ptGeo(beam));
     setGeo(SRC_BEAM, beamGeo(beam));
@@ -463,7 +547,7 @@
     if (act === 'frame') {
       S.framed = v === '1';
       document.body.classList.toggle('framed', S.framed);
-      requestAnimationFrame(() => { map.resize(); applyWall(); });
+      requestAnimationFrame(() => { map.resize(); applyWall(); positionTips(); });
     }
     if (act === 'toggle') {
       S[v] = !S[v];
@@ -506,6 +590,7 @@
     syncUi();
     paint();
     map.on('move', paint);
+    map.on('render', positionTips);
     map.on('pitchend', syncUi);
     map.on('click', (e) => {
       const layers = [L_BEAM, L_DISC].filter((id) => map.getLayer(id));
@@ -514,12 +599,13 @@
       if (hit.length) showCard(D.clubs[hit[0].properties.i]);
     });
   });
-  window.addEventListener('resize', () => { map.resize(); });
+  window.addEventListener('resize', () => { map.resize(); positionTips(); });
 
   // 自分のコードから触るための口（コンソールでも使える）
   window.World3D = {
     state: S, data: D, area: AREA, map,
     applyAll, applyCamera, applyPoints, applyLabels, applyWall, applyBuildings, showCard,
+    positionTips,
     visible,
   };
 })();
