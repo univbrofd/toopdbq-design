@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>World3D — 3D マップだけのサンドボックス（アプリ実装の地図エンジンそのまま）</title>
+
+<!--
+  World3D — アプリ（Toopdbq）が画面の背景に敷いている 3D マップ**だけ**を出すページ。
+  新機能の「3D 世界」のビジュアルを、実物の地図の上で考えるための土台。
+
+  engine / vendor / data は R2（https://media.toopdbq.com/design/world3d/…）から読む。
+  engine = アプリ実装（assets/web/earth/*.js）の一方向の写しなので、ここから編集しない。
+  新しい 3D 表現は **このページの中**（下の host スクリプトか、その下に足す自分の script）で
+  MapLibre の custom layer / three.js として書く。map インスタンスは `map` でグローバルに触れる。
+
+  受け取り方・守る値・戻し方は同じフォルダの HANDOFF.md を読む。
+-->
+<link rel="stylesheet" href="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff;
+    font-family: -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-font-smoothing: antialiased;
+  }
+
+  /* stage = 地図の器。既定は全画面。`body.framed` で実機（iPhone 17・402×874）の枠に収める */
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  /* 枠モードは縦に収まらない窓でも切れないようスクロールさせる（transform は使わない。
+     scale すると MapLibre のポインタ座標がずれる） */
+  body.framed { display: block; overflow: auto; background: #0a0a0e; padding: 20px 0 160px; }
+  body.framed #stage {
+    position: relative; inset: auto; margin: 0 auto; width: 402px; height: 874px; border-radius: 55px;
+    box-shadow: 0 0 0 2px #2a2a31, 0 0 0 12px #0a0a0e, 0 0 0 13px #303039,
+                0 36px 90px rgba(0, 0, 0, .62);
+  }
+
+  /* --- ここから下 3 つは earth.html（実装）と同じ DOM。engine が id で掴む --- */
+  #bg-white { position: absolute; inset: 0; background: #000; z-index: 0; }
+  #map { position: absolute; inset: 0; background: transparent; z-index: 2; }
+  #center-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 3; overflow: visible;
+  }
+  #center-marker-glow { filter: blur(4px); }
+  .maplibregl-canvas-container, .maplibregl-canvas { background: transparent !important; }
+
+  /* --- サンドボックスの操作盤（デザインではない。提案では消してよい） --- */
+  #sandbox {
+    position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 50;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+    padding: 10px 12px; border-radius: 16px;
+    background: rgba(12, 14, 18, .72); border: 1px solid rgba(255, 255, 255, .14);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    font-size: 11px; letter-spacing: .02em;
+  }
+  #sandbox[hidden] { display: none; }
+  #sandbox .grp { display: flex; align-items: center; gap: 4px; }
+  #sandbox .lbl { opacity: .5; margin-right: 2px; }
+  #sandbox button {
+    appearance: none; border: 1px solid rgba(255, 255, 255, .18); color: #fff;
+    background: rgba(255, 255, 255, .06); border-radius: 99px; padding: 5px 10px;
+    font: inherit; cursor: pointer; white-space: nowrap;
+  }
+  #sandbox button[aria-pressed="true"] { background: #fff; color: #111; border-color: #fff; }
+  #sandbox input[type="range"] { width: 76px; accent-color: #fff; }
+  #sandbox .sep { width: 1px; height: 16px; background: rgba(255, 255, 255, .16); }
+  #hint { opacity: .45; }
+  #fold { margin-left: auto; width: 24px; padding: 4px 0; text-align: center; }
+  #unfold {
+    position: fixed; left: 12px; bottom: 12px; z-index: 50; font: inherit; font-size: 11px;
+    color: #fff; background: rgba(12, 14, 18, .72); border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 99px; padding: 7px 12px; cursor: pointer;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  }
+  #readout {
+    position: fixed; top: 12px; right: 14px; z-index: 50; font-size: 11px;
+    font-variant-numeric: tabular-nums; opacity: .55; text-align: right; line-height: 1.5;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="bg-white"></div>
+  <div id="map"></div>
+  <!-- 地図中心の装飾（青ドット）。engine（overlay.js）が cx/cy/ry を毎イベント更新する -->
+  <svg id="center-overlay" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+    <ellipse id="center-marker-glow" cx="0" cy="0" rx="0" ry="0" fill="rgba(66,133,244,0.33)" />
+    <ellipse id="center-marker" cx="0" cy="0" rx="10" ry="10"
+             fill="rgba(66,133,244,0.80)" stroke="#FFFFFF" stroke-width="1.2" />
+  </svg>
+</div>
+
+<div id="readout"></div>
+
+<div id="sandbox">
+  <div class="grp"><span class="lbl">スタイル</span>
+    <button data-act="style" data-v="liberty">Liberty</button>
+    <button data-act="style" data-v="dark">Dark</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp"><span class="lbl">Pitch</span>
+    <button data-act="pitch" data-v="0">0</button>
+    <button data-act="pitch" data-v="35">35</button>
+    <button data-act="pitch" data-v="55">55</button>
+    <button data-act="pitch" data-v="60">60</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp"><span class="lbl">要素</span>
+    <button data-act="toggle" data-v="circles">サークル名</button>
+    <button data-act="toggle" data-v="ring">円のリング</button>
+    <button data-act="toggle" data-v="wall">エリアの壁</button>
+    <button data-act="toggle" data-v="quest">お題</button>
+    <button data-act="toggle" data-v="buildings">3D ビル</button>
+  </div>
+  <div class="grp"><span class="lbl">場所</span>
+    <button data-act="places" data-v="tile">写真</button>
+    <button data-act="places" data-v="pin">マーカー</button>
+    <button data-act="places" data-v="off">なし</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp"><span class="lbl">地図の明度</span>
+    <input id="dim" type="range" min="0" max="1" step="0.05">
+  </div>
+  <div class="grp"><span class="lbl">枠</span>
+    <button data-act="frame" data-v="0">全画面</button>
+    <button data-act="frame" data-v="1">iPhone 17</button>
+  </div>
+  <span id="hint">ドラッグ=移動 / ホイール=ズーム / 右ドラッグ・2 本指=回転と傾き</span>
+  <button id="fold" title="操作盤をしまう">×</button>
+</div>
+<button id="unfold" hidden>操作盤</button>
+
+<!-- vendor: アプリが同梱しているものと同一版（MapLibre GL JS 5.6.0） -->
+<script src="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.js"></script>
+<!-- data: assets/mock（アプリのモックデータの単一の正）からの生成物 -->
+<script src="https://media.toopdbq.com/design/world3d/data.js"></script>
+<!-- engine: アプリ実装 assets/web/earth/*.js の写し。読み込み順は earth.html と同じ -->
+<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/pins.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/circles.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/places.js"></script>
+
+<script>
+// ============================================================================
+// host — 実機で Flutter がやっている役（カメラ操作・データ投入・指の入力）の代役。
+// アプリでは WebView がタッチを受けず Flutter が全部送るので、engine 側は
+// MapLibre の標準ハンドラを切っている。ここではサンドボックスなので触れるように戻す。
+// ============================================================================
+(function () {
+  const D = window.World3DData || { center: { lat: 35.65905, lng: 139.70064 }, circles: [], places: [], posts: [] };
+  const P = new URLSearchParams(location.search);
+  const num = (k, d) => { const v = parseFloat(P.get(k)); return Number.isFinite(v) ? v : d; };
+  const on = (k, d) => (P.get(k) == null ? d : P.get(k) !== '0');
+
+  // URL クエリで初期状態を指定できる（?pitch=85&style=dark&places=pin&framed=1 等）
+  const S = {
+    zoom: num('zoom', 16.4),
+    pitch: num('pitch', 55),
+    bearing: num('bearing', 0),
+    style: P.get('style') === 'dark' ? 'dark' : 'liberty',
+    circles: on('circles', true),
+    ring: on('ring', false),
+    wall: on('wall', true),
+    quest: on('quest', true),
+    buildings: on('buildings', true),
+    places: ['tile', 'pin', 'off'].includes(P.get('places')) ? P.get('places') : 'tile',
+    dim: num('dim', 1),
+    framed: P.get('framed') === '1',
+  };
+
+  const stage = document.getElementById('stage');
+  const readout = document.getElementById('readout');
+  // style の読み込み完了待ち。MapLibre は style 切替の途中でも idle を撃つので、
+  // isStyleLoaded() を見張る（途中で addSource すると "Style is not done loading" で落ちる）。
+  const whenReady = (fn) => {
+    const tick = () => (map.isStyleLoaded() ? fn() : setTimeout(tick, 120));
+    tick();
+  };
+
+  // --- 要素ごとの投入（すべて engine の公開 API。実機と同じ入口） -------------
+  function applyCamera() {
+    window.setCenter(D.center.lat, D.center.lng);
+    window.setCamera({ zoom: S.zoom });
+    window.setPitch(S.pitch);
+    map.jumpTo({ bearing: S.bearing });
+  }
+  function applyCircles() {
+    // 実機（home）は「名前だけ」を出す = 面も線も描かない（域は active の壁だけが担う）。
+    // `ring` は比較用に面を塗る（Planet の値 0.08 / 0.4）。
+    const paint = S.ring
+      ? { color: '#6c8bff', fillOpacity: 0.08, lineOpacity: 0.4 }
+      : { color: '#08080b', fillOpacity: 0, lineOpacity: 0 };
+    const list = (S.circles || S.ring)
+      ? D.circles.map((c) => ({ ...c, ...paint, label: S.circles ? c.label : '' }))
+      : [];
+    window.setCircles({ circles: list, viewH: stage.clientHeight });
+  }
+  function applyWall() {
+    if (!S.wall || !D.focus) { window.clearCircleFocusArea(); return; }
+    window.setCircleFocusArea({
+      lat: D.focus.lat, lng: D.focus.lng, radiusMeters: D.focus.radiusMeters,
+      // 実機は画面比で渡す（下に一覧やシートが来る構図。ここは画面高の 23% を上に空ける）
+      padTop: Math.round(stage.clientHeight * 0.23), padBottom: 0,
+      label: D.focus.label,
+    });
+  }
+  function applyQuest() {
+    // お題の文字はエリア（フォーカス域）の中心上空に浮くので、壁が無いと置き場所が無い
+    if (!S.quest || !S.wall || !D.quest) { window.clearQuestPopup(); return; }
+    window.setQuestPopup({ title: D.quest.title, startMs: Date.now() - 1000, endMs: D.quest.endMs });
+  }
+  // 3D ビル。liberty には style 標準の building-3d があるが dark には fill-extrusion が
+  // 1 枚も無い（openfreemap dark の仕様）ので、同じ vector source から自前で立てる。
+  const OWN_BUILDINGS = 'w3d-buildings';
+  function applyBuildings() {
+    if (!map.isStyleLoaded()) { whenReady(applyBuildings); return; }
+    const own = map.getLayer(OWN_BUILDINGS);
+    if (S.style === 'dark') {
+      if (S.buildings && !own) {
+        map.addLayer({
+          id: OWN_BUILDINGS, type: 'fill-extrusion', source: 'openmaptiles',
+          'source-layer': 'building', minzoom: 14,
+          paint: {
+            'fill-extrusion-color': '#1c2029',
+            'fill-extrusion-height': ['get', 'render_height'],
+            'fill-extrusion-base': ['get', 'render_min_height'],
+            'fill-extrusion-opacity': 0.9,
+          },
+        });
+        applyWall(); // 壁は常に最前面（circles.js が layer を持ち上げ直す）
+      } else if (!S.buildings && own) {
+        map.removeLayer(OWN_BUILDINGS);
+      }
+      return;
+    }
+    if (own) map.removeLayer(OWN_BUILDINGS);
+    for (const l of (map.getStyle().layers || [])) {
+      if (l.type !== 'fill-extrusion') continue;
+      try { map.setLayoutProperty(l.id, 'visibility', S.buildings ? 'visible' : 'none'); } catch (_) {}
+    }
+  }
+
+  function applyPlaces() {
+    if (S.places === 'off') { window.clearPlacePins(); return; }
+    window.setPlacePins({ pins: D.places, style: S.places });
+  }
+  // setMapStyle は style 由来の layer / source / image を捨てるので、idle（新 style の
+  // 描画が落ち着いた後）で自前の要素を貼り直す。
+  function switchStyle(name) {
+    window.setMapStyle(name);
+    whenReady(() => { applyAll(); syncUi(); });
+  }
+
+  function applyAll() {
+    applyCircles(); applyWall(); applyQuest(); applyPlaces(); applyBuildings();
+    window.setMapDim(S.dim);
+  }
+
+  // --- 指の入力（実機では Flutter が送る。ここは MapLibre のハンドラを戻す） ---
+  function enableInput() {
+    ['scrollZoom', 'dragPan', 'dragRotate', 'touchZoomRotate', 'touchPitch', 'keyboard', 'doubleClickZoom']
+      .forEach((k) => { try { map[k] && map[k].enable(); } catch (_) {} });
+  }
+
+  // --- 操作盤 ---------------------------------------------------------------
+  function syncUi() {
+    document.querySelectorAll('#sandbox button').forEach((b) => {
+      const act = b.dataset.act, v = b.dataset.v;
+      const pressed =
+        act === 'style' ? S.style === v :
+        act === 'pitch' ? Math.round(map.getPitch()) === Number(v) :
+        act === 'places' ? S.places === v :
+        act === 'frame' ? (S.framed ? v === '1' : v === '0') :
+        act === 'toggle' ? !!S[v] : false;
+      b.setAttribute('aria-pressed', String(pressed));
+    });
+    document.getElementById('dim').value = String(S.dim);
+  }
+  document.getElementById('sandbox').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    const { act, v } = b.dataset;
+    if (act === 'style') { S.style = v; switchStyle(v); }
+    if (act === 'pitch') { S.pitch = Number(v); window.setPitch(S.pitch); }
+    if (act === 'places') { S.places = v; applyPlaces(); }
+    if (act === 'frame') {
+      S.framed = v === '1';
+      document.body.classList.toggle('framed', S.framed);
+      requestAnimationFrame(() => { map.resize(); applyCircles(); applyWall(); });
+    }
+    if (act === 'toggle') {
+      S[v] = !S[v];
+      if (v === 'circles' || v === 'ring') applyCircles();
+      if (v === 'wall') { applyWall(); applyQuest(); }
+      if (v === 'quest') applyQuest();
+      if (v === 'buildings') applyBuildings();
+    }
+    syncUi();
+  });
+  const panel = document.getElementById('sandbox');
+  const unfold = document.getElementById('unfold');
+  document.getElementById('fold').addEventListener('click', () => {
+    panel.hidden = true; unfold.hidden = false; readout.hidden = true;
+  });
+  unfold.addEventListener('click', () => {
+    panel.hidden = false; unfold.hidden = true; readout.hidden = false;
+  });
+  document.getElementById('dim').addEventListener('input', (e) => {
+    S.dim = Number(e.target.value); window.setMapDim(S.dim);
+  });
+
+  // --- カメラの数値を右上に出す（構図を決めるときの物差し） -------------------
+  function paint() {
+    const c = map.getCenter();
+    readout.textContent =
+      `zoom ${map.getZoom().toFixed(2)}  pitch ${map.getPitch().toFixed(0)}°  bearing ${map.getBearing().toFixed(0)}°\n`
+      + `${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`;
+    readout.style.whiteSpace = 'pre';
+  }
+
+  // --- 起動 -----------------------------------------------------------------
+  document.body.classList.toggle('framed', S.framed);
+  whenReady(() => {
+    enableInput();
+    applyCamera();
+    // ?style=dark で起動したときは style.load を待ってから貼る（switchStyle が idle で applyAll）
+    if (S.style !== 'liberty') switchStyle(S.style); else applyAll();
+    syncUi();
+    paint();
+    map.on('move', paint);
+    map.on('pitchend', syncUi);
+  });
+  window.addEventListener('resize', () => { map.resize(); applyCircles(); });
+
+  // 自分のコードから触るための口（コンソールでも使える）
+  window.World3D = { state: S, data: D, map, applyAll, applyCamera, applyCircles, applyWall, applyQuest, applyPlaces };
+})();
+</script>
+</body>
+</html>
