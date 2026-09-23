@@ -3,11 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>World3D — 3D マップだけのサンドボックス（アプリ実装の地図エンジンそのまま）</title>
+<title>World3D — 渋谷のナイトクラブのポイント（アプリ実装の 3D マップそのまま）</title>
 
 <!--
   World3D — アプリ（Toopdbq）が画面の背景に敷いている 3D マップ**だけ**を出すページ。
-  新機能の「3D 世界」のビジュアルを、実物の地図の上で考えるための土台。
+  新機能の「3D 世界」のビジュアルを、モックの絵ではなく**動く地図の上**で考えるための土台。
+
+  出しているデータは**渋谷のナイトクラブ 20 件だけ**（本番 DB の場所 = Places 由来。
+  位置・店の写真・ジャンル・営業時間・評価を持つ）。開発用のモック（サークル / 投稿 / お題）は出さない。
 
   engine / vendor / data は R2（https://media.toopdbq.com/design/world3d/…）から読む。
   engine = アプリ実装（assets/web/earth/*.js）の一方向の写しなので、ここから編集しない。
@@ -45,6 +48,31 @@
   }
   #center-marker-glow { filter: blur(4px); }
   .maplibregl-canvas-container, .maplibregl-canvas { background: transparent !important; }
+
+  /* --- 店名（このページ固有。DOM マーカー = engine の場所ピンと同じ方式） ---------
+     20 点が半径 580m に密集するので今は素の pill。衝突回避はデザインで決める話。 */
+  .club-label {
+    max-width: 124px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size: 10px; font-weight: 600; letter-spacing: .01em; line-height: 1;
+    padding: 3px 6px; border-radius: 99px; cursor: pointer;
+    color: #fff; background: rgba(0, 0, 0, .55);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, .9);
+  }
+  .club-label.lounge { opacity: .62; font-weight: 500; }
+
+  /* --- 素の情報の確認用カード（デザインではない。点が持っている値を見るためだけ） --- */
+  #card {
+    position: fixed; top: 12px; left: 14px; z-index: 50; width: 260px;
+    padding: 10px; border-radius: 12px; font-size: 11px; line-height: 1.55;
+    background: rgba(12, 14, 18, .82); border: 1px solid rgba(255, 255, 255, .14);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  }
+  #card[hidden] { display: none; }
+  #card img { width: 100%; height: 96px; object-fit: cover; border-radius: 8px; display: block; }
+  #card .nm { font-size: 13px; font-weight: 700; margin: 7px 0 2px; }
+  #card .kv { opacity: .66; }
+  #card a { color: #ff3e88; }
+  #card .x { position: absolute; top: 6px; right: 8px; cursor: pointer; opacity: .6; font-size: 14px; }
 
   /* --- サンドボックスの操作盤（デザインではない。提案では消してよい） --- */
   #sandbox {
@@ -95,11 +123,12 @@
 </div>
 
 <div id="readout"></div>
+<div id="card" hidden></div>
 
 <div id="sandbox">
   <div class="grp"><span class="lbl">スタイル</span>
-    <button data-act="style" data-v="liberty">Liberty</button>
     <button data-act="style" data-v="dark">Dark</button>
+    <button data-act="style" data-v="liberty">Liberty</button>
   </div>
   <div class="sep"></div>
   <div class="grp"><span class="lbl">Pitch</span>
@@ -109,17 +138,17 @@
     <button data-act="pitch" data-v="60">60</button>
   </div>
   <div class="sep"></div>
-  <div class="grp"><span class="lbl">要素</span>
-    <button data-act="toggle" data-v="circles">サークル名</button>
-    <button data-act="toggle" data-v="ring">円のリング</button>
-    <button data-act="toggle" data-v="wall">エリアの壁</button>
-    <button data-act="toggle" data-v="quest">お題</button>
-    <button data-act="toggle" data-v="buildings">3D ビル</button>
+  <div class="grp"><span class="lbl">ポイント</span>
+    <button data-act="points" data-v="beam">光の柱</button>
+    <button data-act="points" data-v="photo">写真</button>
+    <button data-act="points" data-v="pin">マーカー</button>
+    <button data-act="points" data-v="off">なし</button>
   </div>
-  <div class="grp"><span class="lbl">場所</span>
-    <button data-act="places" data-v="tile">写真</button>
-    <button data-act="places" data-v="pin">マーカー</button>
-    <button data-act="places" data-v="off">なし</button>
+  <div class="grp"><span class="lbl">要素</span>
+    <button data-act="toggle" data-v="labels">店名</button>
+    <button data-act="toggle" data-v="clubOnly">クラブだけ</button>
+    <button data-act="toggle" data-v="wall">クラブ街の壁</button>
+    <button data-act="toggle" data-v="buildings">3D ビル</button>
   </div>
   <div class="sep"></div>
   <div class="grp"><span class="lbl">地図の明度</span>
@@ -129,22 +158,22 @@
     <button data-act="frame" data-v="0">全画面</button>
     <button data-act="frame" data-v="1">iPhone 17</button>
   </div>
-  <span id="hint">ドラッグ=移動 / ホイール=ズーム / 右ドラッグ・2 本指=回転と傾き</span>
+  <span id="hint">ドラッグ=移動 / ホイール=ズーム / 右ドラッグ・2 本指=回転と傾き / 点をタップ=情報</span>
   <button id="fold" title="操作盤をしまう">×</button>
 </div>
 <button id="unfold" hidden>操作盤</button>
 
 <!-- vendor: アプリが同梱しているものと同一版（MapLibre GL JS 5.6.0） -->
 <script src="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.js"></script>
-<!-- data: assets/mock（アプリのモックデータの単一の正）からの生成物 -->
-<script src="https://media.toopdbq.com/design/world3d/data.js"></script>
+<!-- data: 本番 DB の場所（placeDetails）から渋谷のナイトクラブだけを抜いた生成物 -->
+<script src="https://media.toopdbq.com/design/world3d/data.js?v=0861fdab"></script>
 <!-- engine: アプリ実装 assets/web/earth/*.js の写し。読み込み順は earth.html と同じ -->
-<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/pins.js"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/circles.js"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/places.js"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/pins.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/circles.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/places.js?v=0861fdab"></script>
 
 <script>
 // ============================================================================
@@ -153,68 +182,177 @@
 // MapLibre の標準ハンドラを切っている。ここではサンドボックスなので触れるように戻す。
 // ============================================================================
 (function () {
-  const D = window.World3DData || { center: { lat: 35.65905, lng: 139.70064 }, circles: [], places: [], posts: [] };
+  const D = window.World3DData || {};
+  if (!Array.isArray(D.clubs)) D.clubs = [];
+  const STATION = Number.isFinite(D.station?.lat) ? D.station : { lat: 35.658034, lng: 139.701636 };
+  const AREA = Number.isFinite(D.area?.lat)
+    ? D.area
+    : { lat: STATION.lat, lng: STATION.lng, radiusMeters: 500, label: '渋谷' };
   const P = new URLSearchParams(location.search);
   const num = (k, d) => { const v = parseFloat(P.get(k)); return Number.isFinite(v) ? v : d; };
   const on = (k, d) => (P.get(k) == null ? d : P.get(k) !== '0');
 
-  // URL クエリで初期状態を指定できる（?pitch=85&style=dark&places=pin&framed=1 等）
+  // URL クエリで初期状態を指定できる
+  // （?style=liberty&pitch=60&points=photo&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6）
   const S = {
-    zoom: num('zoom', 16.4),
+    zoom: num('zoom', 15.8),
     pitch: num('pitch', 55),
     bearing: num('bearing', 0),
-    style: P.get('style') === 'dark' ? 'dark' : 'liberty',
-    circles: on('circles', true),
-    ring: on('ring', false),
-    wall: on('wall', true),
-    quest: on('quest', true),
+    style: P.get('style') === 'liberty' ? 'liberty' : 'dark',   // 夜の街が主題なので既定は dark
+    points: ['beam', 'photo', 'pin', 'off'].includes(P.get('points')) ? P.get('points') : 'beam',
+    labels: on('labels', true),
+    clubOnly: on('clubonly', false),
+    wall: on('wall', false),
     buildings: on('buildings', true),
-    places: ['tile', 'pin', 'off'].includes(P.get('places')) ? P.get('places') : 'tile',
     dim: num('dim', 1),
     framed: P.get('framed') === '1',
   };
 
   const stage = document.getElementById('stage');
   const readout = document.getElementById('readout');
+  const card = document.getElementById('card');
   // style の読み込み完了待ち。MapLibre は style 切替の途中でも idle を撃つので、
   // isStyleLoaded() を見張る（途中で addSource すると "Style is not done loading" で落ちる）。
   const whenReady = (fn) => {
     const tick = () => (map.isStyleLoaded() ? fn() : setTimeout(tick, 120));
     tick();
   };
+  // 出す点。kind: 'club' = 踊る箱 / 'lounge' = 型が lounge_bar 等で拾われた夜の店
+  const visible = () => D.clubs.filter((c) => !S.clubOnly || c.kind === 'club');
 
-  // --- 要素ごとの投入（すべて engine の公開 API。実機と同じ入口） -------------
+  // --- カメラ（engine の公開 API。実機と同じ入口） ---------------------------
   function applyCamera() {
-    window.setCenter(D.center.lat, D.center.lng);
+    window.setCenter(AREA.lat, AREA.lng);
     window.setCamera({ zoom: S.zoom });
     window.setPitch(S.pitch);
     map.jumpTo({ bearing: S.bearing });
   }
-  function applyCircles() {
-    // 実機（home）は「名前だけ」を出す = 面も線も描かない（域は active の壁だけが担う）。
-    // `ring` は比較用に面を塗る（Planet の値 0.08 / 0.4）。
-    const paint = S.ring
-      ? { color: '#6c8bff', fillOpacity: 0.08, lineOpacity: 0.4 }
-      : { color: '#08080b', fillOpacity: 0, lineOpacity: 0 };
-    const list = (S.circles || S.ring)
-      ? D.circles.map((c) => ({ ...c, ...paint, label: S.circles ? c.label : '' }))
-      : [];
-    window.setCircles({ circles: list, viewH: stage.clientHeight });
+  // engine は起動時に一度だけ「初回カメラ確定」で URL クエリの既定（zoom 6.4・東京駅）へ
+  // jumpTo する（style.load / 即時ガード / 1s ポーリングの三重なので発火の順が読めない）。
+  // ページの構図がそれに負けないよう、指が触るまでの数秒だけ当て直す。engine の確定は
+  // 一度きりなので必ず収束する。
+  let camHeld = false;
+  function holdCamera(ms) {
+    const t0 = Date.now();
+    const tick = () => {
+      if (camHeld) return;
+      const c = map.getCenter();
+      const off = Math.abs(c.lat - AREA.lat) > 1e-4 || Math.abs(c.lng - AREA.lng) > 1e-4
+        || Math.abs(map.getZoom() - S.zoom) > 0.02 || Math.abs(map.getPitch() - S.pitch) > 0.5;
+      if (off) applyCamera();
+      if (Date.now() - t0 < ms) setTimeout(tick, 150);
+    };
+    ['dragstart', 'wheel', 'touchstart', 'pitchstart', 'rotatestart']
+      .forEach((ev) => map.on(ev, () => { camHeld = true; }));
+    tick();
   }
+
+  // --- ポイント（このページ固有の層 = 新機能の「点」の素） -------------------
+  // 光の柱: 地点に半径 7m の多角形を置いて fill-extrusion で 60m 立てる + 地面のにじみ。
+  // 高さ・色を data の値（rating / ratingCount / overnight / closeHour）で振るのはデザインの判断。
+  const SRC_PT = 'w3d-club-pts', SRC_BEAM = 'w3d-club-beams';
+  const L_DISC = 'w3d-club-disc', L_BEAM = 'w3d-club-beam';
+  const POINT_COLOR = '#ff3e88';  // DS の --state-like / --grad-pink（アプリの唯一のアクセント）
+  const BEAM_R_M = 7, BEAM_H_M = 60;
+
+  function discRing(lat, lng, rM, seg) {
+    const dLat = rM / 111320, dLng = rM / (111320 * Math.cos(lat * Math.PI / 180));
+    const ring = [];
+    for (let i = 0; i <= seg; i++) {
+      const t = (i / seg) * Math.PI * 2;
+      ring.push([lng + Math.cos(t) * dLng, lat + Math.sin(t) * dLat]);
+    }
+    return [ring];
+  }
+  const feat = (c, geometry) => ({
+    type: 'Feature',
+    properties: { i: D.clubs.indexOf(c), kind: c.kind, h: BEAM_H_M },
+    geometry,
+  });
+  const ptGeo = (list) => ({
+    type: 'FeatureCollection',
+    features: list.map((c) => feat(c, { type: 'Point', coordinates: [c.lng, c.lat] })),
+  });
+  const beamGeo = (list) => ({
+    type: 'FeatureCollection',
+    features: list.map((c) => feat(c, { type: 'Polygon', coordinates: discRing(c.lat, c.lng, BEAM_R_M, 12) })),
+  });
+  function setGeo(id, geo) {
+    const src = map.getSource(id);
+    if (src) src.setData(geo);
+    else map.addSource(id, { type: 'geojson', data: geo });
+  }
+  function ensurePointLayers() {
+    if (!map.getLayer(L_DISC)) {
+      map.addLayer({
+        id: L_DISC, type: 'circle', source: SRC_PT,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 2.5, 16, 7, 18, 14],
+          'circle-color': POINT_COLOR,
+          'circle-opacity': ['case', ['==', ['get', 'kind'], 'club'], 0.9, 0.55],
+          'circle-blur': 0.6,
+        },
+      });
+    }
+    if (!map.getLayer(L_BEAM)) {
+      map.addLayer({
+        id: L_BEAM, type: 'fill-extrusion', source: SRC_BEAM,
+        paint: {
+          'fill-extrusion-color': POINT_COLOR,
+          'fill-extrusion-height': ['get', 'h'],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.45,
+        },
+      });
+    }
+  }
+  let labelMarkers = [];
+  function applyLabels() {
+    labelMarkers.forEach((m) => m.remove());
+    labelMarkers = [];
+    if (!S.labels || S.points === 'off') return;
+    for (const c of visible()) {
+      const el = document.createElement('div');
+      el.className = 'club-label' + (c.kind === 'club' ? '' : ' lounge');
+      el.textContent = c.name;
+      el.addEventListener('click', (e) => { e.stopPropagation(); showCard(c); });
+      labelMarkers.push(new maplibregl.Marker({
+        // 写真タイル（36）の下に出す。柱 / マーカーのときは地点のすぐ下
+        element: el, anchor: 'top', offset: [0, S.points === 'photo' ? 22 : 10],
+        pitchAlignment: 'viewport', rotationAlignment: 'viewport',
+      }).setLngLat([c.lng, c.lat]).addTo(map));
+    }
+  }
+  function applyPoints() {
+    if (!map.isStyleLoaded()) { whenReady(applyPoints); return; }
+    const list = visible();
+    // 写真 / マーカーは engine の場所ピン（アプリの既存ボキャブラリそのもの）
+    if (S.points === 'photo' || S.points === 'pin') {
+      window.setPlacePins({
+        pins: list.map((c) => ({ key: c.key, lat: c.lat, lng: c.lng, imageUrl: c.imageUrl })),
+        style: S.points === 'photo' ? 'tile' : 'pin',
+      });
+    } else {
+      window.clearPlacePins();
+    }
+    const beam = S.points === 'beam' ? list : [];
+    setGeo(SRC_PT, ptGeo(beam));
+    setGeo(SRC_BEAM, beamGeo(beam));
+    ensurePointLayers();
+    applyLabels();
+  }
+
+  // --- クラブ街の壁（アプリ既存の 3D ボキャブラリ。点の範囲から出した円） -----
   function applyWall() {
-    if (!S.wall || !D.focus) { window.clearCircleFocusArea(); return; }
+    if (!S.wall) { window.clearCircleFocusArea(); return; }
     window.setCircleFocusArea({
-      lat: D.focus.lat, lng: D.focus.lng, radiusMeters: D.focus.radiusMeters,
+      lat: AREA.lat, lng: AREA.lng, radiusMeters: AREA.radiusMeters,
       // 実機は画面比で渡す（下に一覧やシートが来る構図。ここは画面高の 23% を上に空ける）
       padTop: Math.round(stage.clientHeight * 0.23), padBottom: 0,
-      label: D.focus.label,
+      label: AREA.label,
     });
   }
-  function applyQuest() {
-    // お題の文字はエリア（フォーカス域）の中心上空に浮くので、壁が無いと置き場所が無い
-    if (!S.quest || !S.wall || !D.quest) { window.clearQuestPopup(); return; }
-    window.setQuestPopup({ title: D.quest.title, startMs: Date.now() - 1000, endMs: D.quest.endMs });
-  }
+
   // 3D ビル。liberty には style 標準の building-3d があるが dark には fill-extrusion が
   // 1 枚も無い（openfreemap dark の仕様）ので、同じ vector source から自前で立てる。
   const OWN_BUILDINGS = 'w3d-buildings';
@@ -232,7 +370,7 @@
             'fill-extrusion-base': ['get', 'render_min_height'],
             'fill-extrusion-opacity': 0.9,
           },
-        });
+        }, map.getLayer(L_DISC) ? L_DISC : undefined); // 点はビルより手前
         applyWall(); // 壁は常に最前面（circles.js が layer を持ち上げ直す）
       } else if (!S.buildings && own) {
         map.removeLayer(OWN_BUILDINGS);
@@ -241,25 +379,35 @@
     }
     if (own) map.removeLayer(OWN_BUILDINGS);
     for (const l of (map.getStyle().layers || [])) {
-      if (l.type !== 'fill-extrusion') continue;
+      if (l.type !== 'fill-extrusion' || l.id === L_BEAM) continue;
       try { map.setLayoutProperty(l.id, 'visibility', S.buildings ? 'visible' : 'none'); } catch (_) {}
     }
   }
 
-  function applyPlaces() {
-    if (S.places === 'off') { window.clearPlacePins(); return; }
-    window.setPlacePins({ pins: D.places, style: S.places });
-  }
-  // setMapStyle は style 由来の layer / source / image を捨てるので、idle（新 style の
-  // 描画が落ち着いた後）で自前の要素を貼り直す。
+  // setMapStyle は style 由来の layer / source / image を捨てるので、読み込み完了後に貼り直す。
   function switchStyle(name) {
     window.setMapStyle(name);
     whenReady(() => { applyAll(); syncUi(); });
   }
-
   function applyAll() {
-    applyCircles(); applyWall(); applyQuest(); applyPlaces(); applyBuildings();
+    applyPoints(); applyWall(); applyBuildings();
     window.setMapDim(S.dim);
+  }
+
+  // --- 点が持っている値の確認（デザインではない） ----------------------------
+  function showCard(c) {
+    const kv = [];
+    if (c.genreLabel || c.genre) kv.push(`${c.genreLabel || c.genre}${c.kind === 'club' ? '' : '（型で拾った夜の店）'}`);
+    if (c.rating != null) kv.push(`★ ${c.rating}（${c.ratingCount ?? 0} 件）`);
+    if (c.open) kv.push(`${c.open}–${c.close || '?'}${c.overnight ? ' 深夜' : ''}`);
+    if (c.address) kv.push(c.address);
+    kv.push(`渋谷駅から ${c.distanceM}m`);
+    card.innerHTML = `<span class="x">×</span>`
+      + (c.imageUrl ? `<img src="${c.imageUrl}" alt="">` : '')
+      + `<div class="nm">${c.name}</div><div class="kv">${kv.join('<br>')}</div>`
+      + (c.mapsUrl ? `<div class="kv"><a href="${c.mapsUrl}" target="_blank" rel="noopener">Google マップ</a></div>` : '');
+    card.hidden = false;
+    card.querySelector('.x').addEventListener('click', () => { card.hidden = true; });
   }
 
   // --- 指の入力（実機では Flutter が送る。ここは MapLibre のハンドラを戻す） ---
@@ -275,7 +423,7 @@
       const pressed =
         act === 'style' ? S.style === v :
         act === 'pitch' ? Math.round(map.getPitch()) === Number(v) :
-        act === 'places' ? S.places === v :
+        act === 'points' ? S.points === v :
         act === 'frame' ? (S.framed ? v === '1' : v === '0') :
         act === 'toggle' ? !!S[v] : false;
       b.setAttribute('aria-pressed', String(pressed));
@@ -287,17 +435,17 @@
     const { act, v } = b.dataset;
     if (act === 'style') { S.style = v; switchStyle(v); }
     if (act === 'pitch') { S.pitch = Number(v); window.setPitch(S.pitch); }
-    if (act === 'places') { S.places = v; applyPlaces(); }
+    if (act === 'points') { S.points = v; applyPoints(); }
     if (act === 'frame') {
       S.framed = v === '1';
       document.body.classList.toggle('framed', S.framed);
-      requestAnimationFrame(() => { map.resize(); applyCircles(); applyWall(); });
+      requestAnimationFrame(() => { map.resize(); applyWall(); });
     }
     if (act === 'toggle') {
       S[v] = !S[v];
-      if (v === 'circles' || v === 'ring') applyCircles();
-      if (v === 'wall') { applyWall(); applyQuest(); }
-      if (v === 'quest') applyQuest();
+      if (v === 'labels') applyLabels();
+      if (v === 'clubOnly') applyPoints();
+      if (v === 'wall') applyWall();
       if (v === 'buildings') applyBuildings();
     }
     syncUi();
@@ -319,7 +467,7 @@
     const c = map.getCenter();
     readout.textContent =
       `zoom ${map.getZoom().toFixed(2)}  pitch ${map.getPitch().toFixed(0)}°  bearing ${map.getBearing().toFixed(0)}°\n`
-      + `${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}`;
+      + `${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}  /  ポイント ${visible().length}`;
     readout.style.whiteSpace = 'pre';
   }
 
@@ -328,17 +476,28 @@
   whenReady(() => {
     enableInput();
     applyCamera();
-    // ?style=dark で起動したときは style.load を待ってから貼る（switchStyle が idle で applyAll）
+    holdCamera(3000);
+    // ?style=… が liberty 以外なら style.load を待ってから貼る（switchStyle が完了後に applyAll）
     if (S.style !== 'liberty') switchStyle(S.style); else applyAll();
     syncUi();
     paint();
     map.on('move', paint);
     map.on('pitchend', syncUi);
+    map.on('click', (e) => {
+      const layers = [L_BEAM, L_DISC].filter((id) => map.getLayer(id));
+      if (!layers.length) return;
+      const hit = map.queryRenderedFeatures(e.point, { layers });
+      if (hit.length) showCard(D.clubs[hit[0].properties.i]);
+    });
   });
-  window.addEventListener('resize', () => { map.resize(); applyCircles(); });
+  window.addEventListener('resize', () => { map.resize(); });
 
   // 自分のコードから触るための口（コンソールでも使える）
-  window.World3D = { state: S, data: D, map, applyAll, applyCamera, applyCircles, applyWall, applyQuest, applyPlaces };
+  window.World3D = {
+    state: S, data: D, area: AREA, map,
+    applyAll, applyCamera, applyPoints, applyLabels, applyWall, applyBuildings, showCard,
+    visible,
+  };
 })();
 </script>
 </body>
