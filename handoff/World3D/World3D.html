@@ -11,6 +11,7 @@
 
   出しているデータは**渋谷のナイトクラブ 20 件だけ**（本番 DB の場所 = Places 由来。
   位置・店の写真・ジャンル・営業時間・評価を持つ）。開発用のモック（サークル / 投稿 / お題）は出さない。
+  既定の「ポイント」は 店の写真（36 の角丸タイル）+ 光の柱。操作盤で写真だけ / 柱だけにもできる。
 
   engine / vendor / data は R2（https://media.toopdbq.com/design/world3d/…）から読む。
   engine = アプリ実装（assets/web/earth/*.js）の一方向の写しなので、ここから編集しない。
@@ -139,8 +140,9 @@
   </div>
   <div class="sep"></div>
   <div class="grp"><span class="lbl">ポイント</span>
-    <button data-act="points" data-v="beam">光の柱</button>
+    <button data-act="points" data-v="both">写真+柱</button>
     <button data-act="points" data-v="photo">写真</button>
+    <button data-act="points" data-v="beam">光の柱</button>
     <button data-act="points" data-v="pin">マーカー</button>
     <button data-act="points" data-v="off">なし</button>
   </div>
@@ -166,14 +168,31 @@
 <!-- vendor: アプリが同梱しているものと同一版（MapLibre GL JS 5.6.0） -->
 <script src="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.js"></script>
 <!-- data: 本番 DB の場所（placeDetails）から渋谷のナイトクラブだけを抜いた生成物 -->
-<script src="https://media.toopdbq.com/design/world3d/data.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/data.js?v=cc213411"></script>
+<script>
+// engine（map-core.js）は**自分が読み込まれた瞬間の URL クエリ**（lat / lng / zoom / pitch / bearing）で
+// 初回カメラを確定する。engine より前にここで data のエリアとページの既定を書いておけば、起動の瞬間から
+// 目的の構図になる（後から setCamera で当て直すと engine の初回確定と競合して構図が飛ぶ）。
+// URL で明示された値はそのまま残す（?zoom=17 等が勝つ）。
+(function () {
+  try {
+    const a = (window.World3DData || {}).area;
+    const u = new URL(location.href);
+    const set = (k, v) => { if (!u.searchParams.has(k)) u.searchParams.set(k, String(v)); };
+    if (a && Number.isFinite(a.lat)) { set('lat', a.lat.toFixed(6)); set('lng', a.lng.toFixed(6)); }
+    set('zoom', 15.8); set('pitch', 55); set('bearing', 0);
+    history.replaceState(null, '', u);
+  } catch (_) {}
+})();
+</script>
+
 <!-- engine: アプリ実装 assets/web/earth/*.js の写し。読み込み順は earth.html と同じ -->
-<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js?v=0861fdab"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js?v=0861fdab"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/pins.js?v=0861fdab"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/circles.js?v=0861fdab"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js?v=0861fdab"></script>
-<script src="https://media.toopdbq.com/design/world3d/engine/places.js?v=0861fdab"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/bridge.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/map-core.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/pins.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/circles.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/overlay.js?v=cc213411"></script>
+<script src="https://media.toopdbq.com/design/world3d/engine/places.js?v=cc213411"></script>
 
 <script>
 // ============================================================================
@@ -193,13 +212,14 @@
   const on = (k, d) => (P.get(k) == null ? d : P.get(k) !== '0');
 
   // URL クエリで初期状態を指定できる
-  // （?style=liberty&pitch=60&points=photo&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6）
+  // （?style=liberty&pitch=60&points=photo|beam|pin|off&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6）
   const S = {
     zoom: num('zoom', 15.8),
     pitch: num('pitch', 55),
     bearing: num('bearing', 0),
     style: P.get('style') === 'liberty' ? 'liberty' : 'dark',   // 夜の街が主題なので既定は dark
-    points: ['beam', 'photo', 'pin', 'off'].includes(P.get('points')) ? P.get('points') : 'beam',
+    // 既定は店の写真 + 光の柱（写真が DB にある 20 件すべてに付く）
+    points: ['both', 'beam', 'photo', 'pin', 'off'].includes(P.get('points')) ? P.get('points') : 'both',
     labels: on('labels', true),
     clubOnly: on('clubonly', false),
     wall: on('wall', false),
@@ -242,8 +262,10 @@
       if (off) applyCamera();
       if (Date.now() - t0 < ms) setTimeout(tick, 150);
     };
+    // 止めるのは**指の操作だけ**。originalEvent を持たないイベントは自分の jumpTo が出したもの
+    // （setPitch の pitchstart で自分を止めてしまうため）
     ['dragstart', 'wheel', 'touchstart', 'pitchstart', 'rotatestart']
-      .forEach((ev) => map.on(ev, () => { camHeld = true; }));
+      .forEach((ev) => map.on(ev, (e) => { if (e && e.originalEvent) camHeld = true; }));
     tick();
   }
 
@@ -318,7 +340,8 @@
       el.addEventListener('click', (e) => { e.stopPropagation(); showCard(c); });
       labelMarkers.push(new maplibregl.Marker({
         // 写真タイル（36）の下に出す。柱 / マーカーのときは地点のすぐ下
-        element: el, anchor: 'top', offset: [0, S.points === 'photo' ? 22 : 10],
+        element: el, anchor: 'top',
+        offset: [0, (S.points === 'both' || S.points === 'photo') ? 22 : 10],
         pitchAlignment: 'viewport', rotationAlignment: 'viewport',
       }).setLngLat([c.lng, c.lat]).addTo(map));
     }
@@ -327,15 +350,16 @@
     if (!map.isStyleLoaded()) { whenReady(applyPoints); return; }
     const list = visible();
     // 写真 / マーカーは engine の場所ピン（アプリの既存ボキャブラリそのもの）
-    if (S.points === 'photo' || S.points === 'pin') {
+    const tile = S.points === 'both' || S.points === 'photo';
+    if (tile || S.points === 'pin') {
       window.setPlacePins({
         pins: list.map((c) => ({ key: c.key, lat: c.lat, lng: c.lng, imageUrl: c.imageUrl })),
-        style: S.points === 'photo' ? 'tile' : 'pin',
+        style: tile ? 'tile' : 'pin',
       });
     } else {
       window.clearPlacePins();
     }
-    const beam = S.points === 'beam' ? list : [];
+    const beam = (S.points === 'both' || S.points === 'beam') ? list : [];
     setGeo(SRC_PT, ptGeo(beam));
     setGeo(SRC_BEAM, beamGeo(beam));
     ensurePointLayers();
@@ -476,7 +500,7 @@
   whenReady(() => {
     enableInput();
     applyCamera();
-    holdCamera(3000);
+    holdCamera(6000);
     // ?style=… が liberty 以外なら style.load を待ってから貼る（switchStyle が完了後に applyAll）
     if (S.style !== 'liberty') switchStyle(S.style); else applyAll();
     syncUi();

@@ -5,9 +5,9 @@
 （本番 DB の実データ）。開発用のモック（サークル・投稿・お題）は出さない。
 
 - ページ: `World3D.html`（Claude Design のページ一覧の「World3D」）
-- 直リンク: `https://media.toopdbq.com/design/world3d/World3D.html?v=0861fdab`
+- 直リンク: `https://media.toopdbq.com/design/world3d/World3D.html?v=cc213411`
   （`?v=` は配信キャッシュ避け。古い版が出たら本体側で再生成した新しい `?v=` をもらう）
-- 見た目の記録: `shots/points.jpg`（既定 = 夜 + 光の柱）/ `shots/photos.jpg`（店の写真）/
+- 見た目の記録: `shots/points.jpg`（既定 = 夜 + 店の写真 + 光の柱）/ `shots/beam.jpg`（柱だけ）/
   `shots/wall.jpg`（既存のエリアの壁と同居）/ `shots/liberty.jpg`（昼）
 
 ## 依頼
@@ -17,9 +17,9 @@
 
 決めてほしいこと:
 
-1. **ポイントの姿** — 今は素の光の柱（ピンク `#ff3e88` / 半径 7m / 高さ 60m の押し出し）。
-   これは「点がそこにある」以上の意味を持たない仮の形。クラブの箱・音・混み具合のどれを立体で
-   語るのかを決める
+1. **ポイントの姿** — 今は 店の写真（36 の角丸タイル = アプリ既存の場所ピン）+ 素の光の柱
+   （ピンク `#ff3e88` / 半径 7m / 高さ 60m の押し出し）。柱は「点がそこにある」以上の意味を持たない
+   仮の形。クラブの箱・音・混み具合のどれを立体で語るのかを決める（写真だけ / 柱だけにも切り替えられる）
 2. **密集の扱い** — 20 点が半径 580m に入る（道玄坂・円山町は 1 ビルに複数）。今は店名の pill が
    素直に重なる。まとめる / 寄ると分かれる / 遠いと 1 つになる、のどれか
 3. **遠近** — 街の中（zoom 16〜17.5）と、引いた渋谷全体（zoom 14 前後）と、地球（zoom 6.4）で
@@ -49,7 +49,7 @@
 DOM マーカー、いずれも足せる。
 
 操作盤（左下）はサンドボックスの道具でデザインではない。`×` でしまえる。提案では消してよい。
-URL クエリ: `?style=liberty&pitch=60&points=photo|pin|off&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6`
+URL クエリ: `?style=liberty&pitch=60&points=both|photo|beam|pin|off&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6`
 
 ## データ（`data.js`）
 
@@ -84,6 +84,8 @@ URL クエリ: `?style=liberty&pitch=60&points=photo|pin|off&labels=0&wall=1&bui
 - pitch に応じて上パディングが入る（最大 = 画面高の 40%）。壁を出す間は呼び出し側が画面比で固定
   （このページは画面高の 23%）
 - 実機の画面は 402×874、SafeArea は上 62 / 下 34、タップ目標は 44pt 以上
+- engine は**読み込まれた瞬間の URL クエリ**（`lat` / `lng` / `zoom` / `pitch` / `bearing`）で初回カメラを
+  確定する。構図はそこに書く（後から当て直すと engine の初回確定と競合して飛ぶ）
 
 **3D ビル**
 - `liberty` は style 標準の `building-3d`（`fill-extrusion`・minzoom 14・色 hsl(35,8%,85%)・不透明度 .8）
