@@ -46,7 +46,7 @@
   /* 一覧 = 確認モードのスナップ（1 位を上中央に大きく、2・3 位を下に） */
   .rk { padding: 0; border-bottom: 8px solid var(--band); cursor: pointer; }
   .rk-stage { position: relative; overflow: hidden; background: repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 1px, transparent 1px 58px), repeating-linear-gradient(0deg, rgba(255,255,255,.55) 0 1px, transparent 1px 58px), #e9e5d9; }
-  .rk-stage .pk-tout { left: 16px; right: auto; top: 14px; max-width: 72%; text-align: left; transform: rotate(-3deg); transform-origin: 0 0; z-index: 9; }
+  .rk-stage .pk-tout { left: 28px; right: auto; top: 28px; max-width: 80%; text-align: left; transform: rotate(-3deg); transform-origin: 0 0; z-index: 25; }
   .rk-stage .pk-tout .l1 { font-size: 22px; -webkit-text-stroke-width: 5px; line-height: 1.2; }
   .rk-stage .pk-tout .l2 { font-size: 24px; -webkit-text-stroke-width: 5px; }
   .rk-stage .pk-stack { transition: none; }
@@ -208,7 +208,7 @@
   .pr-tab { color: var(--d-fg3); }
   .pr-tab.on, .pr-tab.on span { color: var(--d-fg); border-bottom-color: var(--d-fg); }
   .rk { border-bottom: 8px solid var(--d-band); }
-  .rk-stage { background: repeating-linear-gradient(90deg, rgba(255,255,255,.07) 0 1px, transparent 1px 58px), repeating-linear-gradient(0deg, rgba(255,255,255,.07) 0 1px, transparent 1px 58px), #0b0b0f; }
+  .rk-stage { background: #000; isolation: isolate; z-index: 0; }
   .rk-title { color: var(--d-fg); }
   .rk-gm { color: var(--d-fg2); }
   .pr-empty .t { color: var(--d-fg); } .pr-empty .s { color: var(--d-fg2); } .pr-empty .s b { color: var(--d-fg); }
@@ -425,8 +425,8 @@
     ],
     cafe: [
       { nm: 'ABOUT LIFE COFFEE BREWERS', posts: [{ ph: RL + 'reel028.jpg', tx: '立ち飲みのラテ。朝いちばんに寄る店。' }, { ph: RL + 'reel022.jpg', tx: '豆を買って帰った日。' }], ad: '渋谷区道玄坂, 東京都', c: [139.6975, 35.6588], ph: RL + 'reel004.jpg', my: [], rating: 4.5, rev: 980, until: '18:00', hours: HOURS_DAY },
-      { nm: 'Lattest', ad: '渋谷区神宮前, 東京都', c: [139.7050, 35.6650], ph: RL + 'reel009.jpg', my: [], rating: 4.3, rev: 640, until: '19:00', hours: HOURS_DAY },
-      { nm: 'Camelback', ad: '渋谷区神山町, 東京都', c: [139.6930, 35.6690], ph: RL + 'reel014.jpg', my: [], rating: 4.4, rev: 720, until: '17:00', hours: HOURS_DAY },
+      { nm: 'Lattest', posts: [{ ph: RL + 'reel007.jpg', tx: '窓際の席で打ち合わせ。' }, { ph: RL + 'reel011.jpg', tx: '' }], ad: '渋谷区神宮前, 東京都', c: [139.7050, 35.6650], ph: RL + 'reel009.jpg', my: [], rating: 4.3, rev: 640, until: '19:00', hours: HOURS_DAY },
+      { nm: 'Camelback', posts: [{ ph: RL + 'reel005.jpg', tx: 'たまごサンドが名物。' }], ad: '渋谷区神山町, 東京都', c: [139.6930, 35.6690], ph: RL + 'reel014.jpg', my: [], rating: 4.4, rev: 720, until: '17:00', hours: HOURS_DAY },
       { nm: '猿田彦珈琲', ad: '渋谷区渋谷, 東京都', c: [139.7080, 35.6580], ph: RL + 'reel002.jpg', my: [], rating: 4.2, rev: 1100, until: '20:00', hours: HOURS_DAY }
     ],
     bar: [
@@ -440,8 +440,8 @@
   var genre = function (id) { return GENRES.filter(function (g) { return g.id === id; })[0]; };
 
   var RANKINGS = [
-    { title: '渋谷で踊るなら', g: 'night', date: '9/12', ids: ['night0', 'night1', 'night2'] },
-    { title: '打ち合わせに使えるカフェ', g: 'cafe', date: '8/30', ids: ['cafe0', 'cafe2', 'cafe1', 'cafe3'] }
+    { title: '渋谷で踊るなら', g: 'night', date: '9/12', cover: RL + 'reel036.jpg', ids: ['night0', 'night1', 'night2'] },
+    { title: '打ち合わせに使えるカフェ', g: 'cafe', date: '8/30', cover: '../../assets/sample/background/background003.jpg', ids: ['cafe0', 'cafe2', 'cafe1', 'cafe3'] }
   ];
   var items = function (r) { return r.ids.map(function (i) { return byId[i]; }); };
 
@@ -451,15 +451,66 @@
       (p.ph ? '<img src="' + p.ph + '" alt="">' : '<img class="i" src="' + IC + 'icon_pin_location.png" alt="">') +
       '<div class="cap"><span class="no">' + no + '</span><span class="c"><span class="nm">' + esc(p.nm) + '</span><span class="ad">' + esc(p.ad) + '</span></span></div></div>';
   }
-  var FEED_H = 330, FEED_POS = [[201, 96, 268, 151], [102, 246, 176, 99], [300, 246, 176, 99]];
+  /* 一覧: 左半分 = 写真 / 右半分 = 上から 1・2・3 位 */
+  var FEED_PAD = 14, FEED_COVER_H = 232, FEED_BOT = 212, FEED_H = FEED_PAD * 2 + FEED_COVER_H + FEED_BOT;
+  function feedMedia(p) {
+    var a = [p.ph].concat(p.my || [], (p.posts || []).map(function (x) { return x.ph; })), seen = {};
+    return a.filter(function (s) { if (!s || seen[s]) return false; seen[s] = 1; return true; }).slice(0, 4);
+  }
+  var FAN_ROT = [-3, 5, -6, 7], FAN_DY = [0, -4, 5, -2];
+  /* 扇を大きく広げる（ステージ端で見切れてよい）。1 位 = 中央から左右へ / 2 位 = 左へ / 3 位 = 右へ */
+  function fanFrames(n, w, h, anchor) {
+    var ch = h * 0.98, cw = ch * 0.75;
+    if (n <= 1) { cw = Math.min(w, ch * 1.4); return [[(w - cw) / 2, (h - ch) / 2, cw, ch, -2]]; }
+    var step = anchor === 'c' ? cw * 0.86 : Math.min(cw * 0.86, (w * 1.3 - cw) / (n - 1)), out = [], j, x;
+    for (j = 0; j < n; j++) {
+      if (anchor === 'l') x = w - cw - step * j;          // 2 位: 先頭は枠の右端（内側）、残りは左の画面外へ
+      else if (anchor === 'r') x = step * j;              // 3 位: 先頭は枠の左端（内側）、残りは右の画面外へ
+      else x = (w - (cw + step * (n - 1))) / 2 + step * j;
+      out.push([x, (h - ch) / 2 + FAN_DY[j], cw, ch, FAN_ROT[j]]);
+    }
+    return out;
+  }
+  function feedGroupHtml(p, i, w, h, k) {
+    var m = feedMedia(p), fs = fanFrames(m.length, w, h, 'l'), out;
+    if (!m.length) out = '<div class="ph none"><img src="' + IC + 'icon_pin_location.png" alt=""></div>';
+    else out = m.map(function (src, j) {
+      var f = fs[j];
+      return '<div class="ph fp" style="left:' + f[0].toFixed(1) + 'px; top:' + f[1].toFixed(1) + 'px; width:' + f[2].toFixed(1) + 'px; height:' + f[3].toFixed(1) + 'px; transform: rotate(' + f[4] + 'deg); z-index:' + (m.length - j) + '"><img src="' + src + '" alt=""></div>';
+    }).join('');
+    return out;
+  }
+  /* 上半分 = タイトル + ランキングのメイン画像（横長）/ 下半分 = 左から 1・2・3 位（縦長の写真を重ねて傾ける・角は丸めない） */
+  function rnd(seed) { var h = 2166136261; for (var i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; }
+  function feedCover(r, W) {
+    var src = r.cover || (items(r)[0] || {}).ph;
+    var cr = (rnd(r.title + 'c') * 2 - 1) * 2.5;
+    return '<div style="position:absolute; left:2px; right:2px; top:' + (FEED_PAD + 6) + 'px; height:' + FEED_COVER_H + 'px; border:4px solid #fff; overflow:hidden; background:#1a1a20; box-shadow:0 6px 20px rgba(0,0,0,.6); transform:rotate(' + cr.toFixed(1) + 'deg); z-index:20">' +
+      (src ? '<img src="' + src + '" alt="" style="width:100%; height:100%; object-fit:cover; display:block">' : '') +
+      '<div style="position:absolute; inset:0 0 auto 0; height:60%; background:linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0))"></div></div>';
+  }
+  function feedCol(p, j, W) {
+    var cw = (W - 12) / 3, cx = 6 + cw * j + cw / 2, top = FEED_PAD + FEED_COVER_H + 22;
+    var src = feedMedia(p)[0], pw = 142, ph = 189, z = [30, 28, 26][j];
+    var rot = (rnd(p.id + 'r') * 2 - 1) * 10, dx = (rnd(p.id + 'x') * 2 - 1) * 6;
+    var photo = '<div style="position:absolute; left:' + (cx - pw / 2 + dx).toFixed(1) + 'px; top:' + top + 'px; width:' + pw + 'px; height:' + ph + 'px; border:3px solid #fff; overflow:hidden; background:#1a1a20; box-shadow:0 4px 14px rgba(0,0,0,.6); transform:rotate(' + rot.toFixed(1) + 'deg); z-index:' + z + '">' +
+      (src ? '<img src="' + src + '" alt="" style="width:100%; height:100%; object-fit:cover; display:block">' : '') + '</div>';
+    var nr = (rnd(p.id + 'n') * 2 - 1) * 9, nw = Math.min(cw + 4, 128);
+    var tw = 0; for (var c = 0; c < p.nm.length; c++) tw += /[\u3000-\u9fff\uff00-\uffef]/.test(p.nm[c]) ? 12 : 7.4;
+    var two = tw > nw - 12 - 30, fs = two ? 10 : 12;
+    var name = '<div style="position:absolute; left:' + (cx - dx * 0.5).toFixed(1) + 'px; top:' + (top - 12) + 'px; width:max-content; max-width:' + nw.toFixed(0) + 'px; padding:4px 7px 5px 6px; background:#fff; color:#08080b; box-shadow:0 3px 10px rgba(0,0,0,.6); transform:translateX(-50%) rotate(' + nr.toFixed(1) + 'deg); z-index:' + (z + 1) + '; display:flex; flex-direction:row; align-items:center; gap:5px; box-sizing:border-box">' +
+      '<span style="flex:none; font-family:var(--font-latin); font-weight:900; font-style:italic; font-size:13px; line-height:1">' + ORD[j] + '</span>' +
+      '<span style="flex:0 1 auto; min-width:0; font-weight:800; font-size:' + fs + 'px; line-height:1.25; word-break:break-word; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden' + (isLat(p.nm) ? '; font-family:var(--font-latin)' : '') + '">' + esc(p.nm) + '</span></div>';
+    return photo + name;
+  }
   function renderFeed() {
     var feed = $('rankFeed');
     $('rankEmpty').hidden = RANKINGS.length > 0 || cur !== 'ranking';
     feed.innerHTML = RANKINGS.map(function (r, i) {
       var it = items(r), g = genre(r.g);
-      var st = it.slice(0, 3).map(function (p, j) {
-        var b = FEED_POS[j];
-        return '<div class="pk-stack wide" style="--x:' + b[0] + 'px; --y:' + b[1] + 'px; --w:' + b[2] + 'px; --h:' + b[3] + 'px">' + groupHtml(p, j, b[2], b[3], 0.78) + '</div>';
+      var W = feed.clientWidth || 393;
+      var st = feedCover(r, W) + it.slice(0, 3).map(function (p, j) {
+        return feedCol(p, j, W);
       }).join('');
       return '<section class="rk pk' + (r.fresh ? ' new' : '') + '" data-rk="' + i + '" style="--gc:' + g.gc + '"><div class="rk-stage" style="height:' + FEED_H + 'px">' + st +
         '<div class="pk-tout"><div class="l1">' + esc(r.title) + '</div><div class="l2">BEST ' + it.length + '</div></div></div></section>';

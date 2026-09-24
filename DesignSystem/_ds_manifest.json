@@ -182,6 +182,13 @@
       "name": "WdEriaWall"
     },
     {
+      "path": "preview/comp-place-detail-card.html",
+      "group": "Components",
+      "viewport": "1340x1400",
+      "subtitle": "場所の詳細カード — ランキングのシート最上段。4:3 カバーの上下グラデに 名前 / ジャンル / ★評価 / 営業 / 住所 を重ね、投稿があればストーリーズのミシン目で横めくり。dark 既定・light 併記 · 402pt 幅",
+      "name": "PlaceDetailCard"
+    },
+    {
       "path": "preview/comp-quest-board.html",
       "group": "Components",
       "viewport": "1340x520",

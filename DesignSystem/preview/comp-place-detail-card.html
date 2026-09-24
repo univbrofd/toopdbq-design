@@ -1,0 +1,269 @@
+<!-- @dsCard group="Components" tier="component" name="PlaceDetailCard" subtitle="場所の詳細カード — ランキングのシート最上段。4:3 カバーの上下グラデに 名前 / ジャンル / ★評価 / 営業 / 住所 を重ね、投稿があればストーリーズのミシン目で横めくり。dark 既定・light 併記 · 402pt 幅" -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PlaceDetailCard — 場所の詳細カード</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="card.css">
+<style>
+  /* ── 場所まわりのローカルトークン（canonical 化は未。foundation 候補は --open / --gc-*） ── */
+  :root {
+    --ink: #08080b; --ink-sub: rgba(8,8,11,.56); --band: rgba(8,8,11,.06);
+    --dark-ph: #101014; --white-face: rgba(255,255,255,.95); --open: #2FBF71;
+    --gc-night: #E040FB; --gc-bar: #7E57C2; --gc-cafe: #B5835A; --gc-rest: #FF7043;
+    --d-sheet: #0e0e12; --d-fg: #fff; --d-fg2: rgba(255,255,255,.58); --d-band: rgba(255,255,255,.06);
+  }
+  body { background: #0d0d0f; }
+  .head .ttl { font-family: var(--font-jp); font-weight: 700; font-size: 14px; color: var(--text-1); }
+  .head .sub { font-family: var(--font-latin); font-size: 11px; color: var(--text-3); margin-top: 3px; line-height: 1.6; }
+  .specimens { display: grid; grid-template-columns: repeat(3, 402px); align-items: start; gap: 22px 18px; }
+  .sp { display: flex; flex-direction: column; gap: 7px; }
+  .sp .cap { font-family: var(--font-jp); font-weight: 700; font-size: 11.5px; color: var(--text-2); }
+  .sp .cap em { font-style: normal; font-family: var(--font-latin); font-weight: 500; color: var(--text-3); margin-left: 6px; }
+
+  /* ── シート（カードが乗る面）──────────────────────────── */
+  .pk-sheet { position: relative; width: 402px; border-radius: 16px 16px 0 0; overflow: hidden;
+    font-family: var(--font-jp); color: var(--d-fg); background: var(--d-sheet);
+    box-shadow: 0 -8px 30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); }
+  .pk-sheet.light { color: var(--ink); background: #fff; box-shadow: 0 -4px 20px rgba(0,0,0,.2); }
+  .pk-sheet > .grab { position: absolute; left: 50%; top: 6px; width: 36px; height: 5px; margin-left: -18px;
+    border-radius: 3px; background: rgba(255,255,255,.7); z-index: 3; }
+  .pk-sheet.light > .grab { height: 4px; background: rgba(255,255,255,.75); }
+  .pk-sec { padding: 0 16px 16px; }
+
+  /* ── カバー（4:3・上下グラデ）───────────────────────── */
+  .pk-cover { position: relative; margin: 0 -16px; aspect-ratio: 4 / 3; overflow: hidden; background: #1a1a20; }
+  .light .pk-cover { background: var(--dark-ph); }
+  .pk-cover img.c { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pk-cover .none { position: absolute; inset: 0; display: grid; place-items: center; }
+  .pk-cover .none img { width: 28px; height: 28px; opacity: .55; }
+  .pk-cover::before, .pk-cover::after { content: ''; position: absolute; left: 0; right: 0; pointer-events: none; }
+  .pk-cover::before { top: 0; height: 48%; background: linear-gradient(180deg, rgba(0,0,0,.78), rgba(0,0,0,0)); }
+  .pk-cover::after { bottom: 0; height: 58%; background: linear-gradient(0deg, rgba(0,0,0,.72), rgba(0,0,0,0)); }
+  .light .pk-cover::before { height: 40%; background: linear-gradient(180deg, rgba(0,0,0,.62), rgba(0,0,0,0)); }
+
+  /* 名前（2 行まで）・順位は名前の頭に付く */
+  .co-nm { position: absolute; left: 16px; top: 14px; right: 120px; z-index: 2; color: #fff;
+    font-weight: 800; font-size: 20px; line-height: 1.3; letter-spacing: -.005em; text-shadow: 0 2px 6px rgba(0,0,0,.6);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .light .co-nm { font-weight: 700; font-size: 18px; letter-spacing: 0; }
+  .co-nm .o { font-family: var(--font-latin); font-style: italic; font-weight: 900; font-size: 15px; margin-right: 8px; opacity: .95; }
+  .co-nm .o small { font-size: .68em; font-weight: 800; margin-left: 1px; }
+
+  /* ジャンル（色はジャンル変数 --gc）*/
+  .co-g { position: absolute; right: 12px; top: 12px; z-index: 2; height: 24px; padding: 0 10px; border-radius: 12px;
+    background: var(--gc, var(--ink)); color: #fff; font-weight: 700; font-size: 11px; line-height: 24px;
+    white-space: nowrap; box-shadow: 0 2px 8px rgba(8,8,11,.3); }
+  .light .co-g { height: 26px; line-height: 26px; border-radius: 13px; }
+
+  /* 下段メタ = ★評価（件数）/ 営業（点は --open）/ 住所。投稿ページでは本文 1 つに入れ替わる */
+  .co-meta { position: absolute; left: 16px; bottom: 14px; right: 150px; z-index: 2; display: flex; flex-direction: column;
+    gap: 4px; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,.7); }
+  .light .co-meta { gap: 3px; }
+  .co-meta .ad { font-size: 12px; line-height: 1.4; }
+  .co-meta .num { font-family: var(--font-latin); font-weight: 600; font-size: 13px; }
+  .co-meta .op { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; }
+  .co-meta .op::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--open); box-shadow: 0 0 0 1px rgba(0,0,0,.25); }
+  .co-meta .op span { font-weight: 400; opacity: .82; }
+  .co-meta .tx { font-size: 13px; line-height: 1.5; font-weight: 500;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* 写真を追加（自分の写真が 0 枚・カバーページ・編集可のときだけ）*/
+  .co-add { position: absolute; right: 12px; bottom: 12px; z-index: 2; height: 36px; padding: 0 14px; border-radius: 18px;
+    background: #fff; color: var(--ink); box-shadow: 0 4px 14px rgba(0,0,0,.45); display: flex; align-items: center; gap: 7px;
+    font-weight: 700; font-size: 12px; white-space: nowrap; cursor: pointer; }
+  .light .co-add { background: var(--white-face); box-shadow: 0 2px 8px rgba(8,8,11,.3); }
+  .co-add img { width: 16px; height: 16px; filter: invert(1); }
+
+  /* 場所の投稿を横にめくる（ストーリーズのミシン目）*/
+  .co-bars { position: absolute; left: 12px; right: 12px; top: 10px; z-index: 4; display: flex; gap: 3px; }
+  .co-bars i { flex: 1; height: 2px; border-radius: 2px; background: rgba(255,255,255,.3); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+  .co-bars i.on { background: #fff; }
+  .light .co-bars { top: 8px; gap: 4px; } .light .co-bars i { height: 2.5px; background: rgba(255,255,255,.34); }
+  .pk-cover.bars .co-nm { top: 22px; }
+  .pk-cover.bars .co-g { top: 22px; }
+  .light .pk-cover.bars .co-g { top: 20px; }
+
+  /* ── 思い出の写真（自分の写真 最大 3 枚 + 追加枠）───────── */
+  .pk-eb { display: flex; align-items: center; gap: 8px; height: 24px; margin-top: 12px;
+    font-size: 11.5px; font-weight: 700; color: var(--d-fg2); letter-spacing: .06em; }
+  .light .pk-eb { font-size: 11px; letter-spacing: .04em; color: var(--ink-sub); }
+  .pk-eb .s { margin-left: auto; font-weight: 500; letter-spacing: 0; }
+  .pk-mem { display: flex; gap: 10px; margin-top: 8px; padding: 4px 0 6px; }
+  .pk-mem .pk-slot { position: relative; width: auto; flex: 1 1 0; aspect-ratio: 1 / 1; height: auto; }
+  .pk-mem.ro .pk-slot { cursor: default; }
+  .pk-slot img.p { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; border: 3px solid #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5); background: #1a1a20; display: block; }
+  .light .pk-slot img.p { border-radius: 8px; box-shadow: 0 2px 8px rgba(8,8,11,.22); background: var(--dark-ph); }
+  .pk-slot.add { border: 1.5px dashed rgba(255,255,255,.26); border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 6px; cursor: pointer; font-weight: 700; font-size: 12px; color: var(--d-fg); }
+  .light .pk-slot.add { border-color: rgba(8,8,11,.28); border-radius: 8px; color: var(--ink); }
+  .pk-slot.add img { width: 20px; height: 20px; opacity: .9; }
+  .light .pk-slot.add img { filter: invert(1); opacity: 1; }
+
+  /* ── 寸法表 ───────────────────────────────────────── */
+  .spec { max-width: 1240px; display: grid; grid-template-columns: 200px 1fr; gap: 4px 18px;
+    font-size: 11.5px; line-height: 1.6; color: var(--text-2); font-family: var(--font-jp); }
+  .spec dt { font-family: var(--font-latin); font-weight: 600; color: var(--text-1); }
+  .spec dd { color: var(--text-3); }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="ttl">PlaceDetailCard — 場所の詳細カード</div>
+  <div class="sub">
+    ランキングの作成 / 閲覧シートで場所をタップすると最上段に出るカード。カバー写真だけで場所を伝え、文字は全部その上に乗る（面を足さない）。<br>
+    出自: handoff/PlaceRanking（App-ProfileRanking-Dark · v2 Dark）· 実装 = Flutter lib/feature/PlaceRanking
+  </div>
+</div>
+
+<div class="specimens">
+
+  <figure class="sp">
+    <figcaption class="cap">1. 基本<em>dark · 投稿なしの場所 · 編集可</em></figcaption>
+    <div class="pk-sheet" style="--gc: var(--gc-night)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover">
+          <img class="c" src="../../assets/sample/reel/reel041.jpg" alt="">
+          <div class="co-nm">Contact</div>
+          <div class="co-g">ナイトクラブ</div>
+          <div class="co-meta">
+            <span class="num">★ 4.0 (880)</span>
+            <span class="op">営業中 <span>5:00 まで</span></span>
+            <span class="ad">渋谷区道玄坂, 東京都</span>
+          </div>
+          <div class="co-add"><img src="../../assets/icons/icon_camera.png" alt="">写真を追加</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="sp">
+    <figcaption class="cap">2. 場所の投稿<em>ミシン目で横めくり · メタは本文に入れ替わる</em></figcaption>
+    <div class="pk-sheet" style="--gc: var(--gc-night)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover bars">
+          <img class="c" src="../../assets/sample/reel/reel049.jpg" alt="">
+          <div class="co-bars"><i></i><i class="on"></i><i></i></div>
+          <div class="co-nm">CLUB CAMELOT</div>
+          <div class="co-g">ナイトクラブ</div>
+          <div class="co-meta">
+            <span class="tx">フロア広くて音がいい。金曜のヒップホップの日がいちばん好き。</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="sp">
+    <figcaption class="cap">3. 思い出の写真<em>自分の写真 2 枚 + 追加枠（あると「写真を追加」は消える）</em></figcaption>
+    <div class="pk-sheet" style="--gc: var(--gc-cafe)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover">
+          <img class="c" src="../../assets/sample/reel/reel002.jpg" alt="">
+          <div class="co-nm">猿田彦珈琲</div>
+          <div class="co-g">カフェ</div>
+          <div class="co-meta">
+            <span class="num">★ 4.2 (1,100)</span>
+            <span class="op">営業中 <span>20:00 まで</span></span>
+            <span class="ad">渋谷区渋谷, 東京都</span>
+          </div>
+        </div>
+        <div class="pk-eb">思い出の写真<span class="s">写真をタップで入れ替え</span></div>
+        <div class="pk-mem">
+          <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel028.jpg" alt=""></div>
+          <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel022.jpg" alt=""></div>
+          <div class="pk-slot add"><img src="../../assets/icons/icon_camera.png" alt="">写真を追加</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="sp">
+    <figcaption class="cap">4. 順位つき・読み取り専用<em>保存したランキングを見るとき（投稿 3 件 = ミシン目 4 本）</em></figcaption>
+    <div class="pk-sheet" style="--gc: var(--gc-night)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover bars">
+          <img class="c" src="../../assets/sample/reel/reel058.jpg" alt="">
+          <div class="co-bars"><i class="on"></i><i></i><i></i><i></i></div>
+          <div class="co-nm"><b class="o">1<small>st</small></b>WOMB</div>
+          <div class="co-g">ナイトクラブ</div>
+          <div class="co-meta">
+            <span class="num">★ 4.4 (3,200)</span>
+            <span class="op">営業中 <span>4:00 まで</span></span>
+            <span class="ad">渋谷区円山町, 東京都</span>
+          </div>
+        </div>
+        <div class="pk-eb">思い出の写真</div>
+        <div class="pk-mem ro">
+          <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel033.jpg" alt=""></div>
+          <div class="pk-slot"><img class="p" src="../../assets/sample/reel/reel046.jpg" alt=""></div>
+          <div class="pk-slot" style="visibility:hidden"></div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="sp">
+    <figcaption class="cap">5. 写真なし<em>Places に写真が無い場所</em></figcaption>
+    <div class="pk-sheet" style="--gc: var(--gc-bar)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover">
+          <span class="none"><img src="../../assets/icons/icon_pin_location.png" alt=""></span>
+          <div class="co-nm">Bar Trench</div>
+          <div class="co-g">バー</div>
+          <div class="co-meta">
+            <span class="num">★ 4.4 (380)</span>
+            <span class="op">営業中 <span>1:00 まで</span></span>
+            <span class="ad">渋谷区恵比寿西, 東京都</span>
+          </div>
+          <div class="co-add"><img src="../../assets/icons/icon_camera.png" alt="">写真を追加</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+  <figure class="sp">
+    <figcaption class="cap">6. ライト<em>v1 の明るい面（参考）</em></figcaption>
+    <div class="pk-sheet light" style="--gc: var(--gc-night)">
+      <span class="grab"></span>
+      <div class="pk-sec">
+        <div class="pk-cover">
+          <img class="c" src="../../assets/sample/reel/reel055.jpg" alt="">
+          <div class="co-nm">TK NIGHTCLUB</div>
+          <div class="co-g">ナイトクラブ</div>
+          <div class="co-meta">
+            <span class="num">★ 4.5 (1,500)</span>
+            <span class="op">営業中 <span>5:00 まで</span></span>
+            <span class="ad">渋谷区, 東京都</span>
+          </div>
+          <div class="co-add"><img src="../../assets/icons/icon_camera.png" alt="">写真を追加</div>
+        </div>
+      </div>
+    </div>
+  </figure>
+
+</div>
+
+<dl class="spec">
+  <dt>カバー</dt><dd>幅いっぱい（シート padding 16 を打ち消す margin 0 -16）· aspect-ratio 4 / 3 · 角丸なし · 背景 #1a1a20（light: --dark-ph）</dd>
+  <dt>グラデ</dt><dd>上 48%（light 40%）rgba(0,0,0,.78)→0 / 下 58% rgba(0,0,0,.72)→0。文字は面を持たず、このグラデだけで読ませる</dd>
+  <dt>名前</dt><dd>left 16 / top 14（バーあり 22）/ right 120 · 20px w800（light 18px w700）· 2 行クランプ · 順位は頭に latin italic 900 15px</dd>
+  <dt>ジャンル</dt><dd>right 12 / top 12（バーあり 22）· h24 r12 · 背景 var(--gc) = --gc-night #E040FB / --gc-bar #7E57C2 / --gc-cafe #B5835A / --gc-rest #FF7043</dd>
+  <dt>メタ</dt><dd>left 16 / bottom 14 / right 150 · 縦 gap 4 · ★latin 600 13px →営業 12.5px（点 7px --open #2FBF71）→住所 12px。投稿ページでは本文 13px 3 行クランプ 1 本に置き換え</dd>
+  <dt>写真を追加</dt><dd>right 12 / bottom 12 · h36 r18 白面 · 自分の写真 0 枚 かつ カバーページ かつ 編集可 のときだけ</dd>
+  <dt>ミシン目</dt><dd>left/right 12 · top 10 · gap 3 · h2 · 現在ページ #fff / 他 rgba(255,255,255,.3)。タップ領域は左 38% = 戻る / 右 62% = 進む</dd>
+  <dt>思い出の写真</dt><dd>ラベル 11.5px w700 .06em · 3 列 1:1 等分 gap 10 · 写真 r10 白 3px 枠 · 追加枠は破線 rgba(255,255,255,.26)</dd>
+  <dt>面</dt><dd>シート #0e0e12（light #fff）· 詳細を開いている間はカバーをシート上端まで上げ、グラブは写真の上に白 70% で重ねる</dd>
+</dl>
+
+</body>
+</html>
