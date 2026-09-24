@@ -22,6 +22,7 @@
   受け取り方・守る値・戻し方は同じフォルダの HANDOFF.md を読む。
 -->
 <link rel="stylesheet" href="https://media.toopdbq.com/design/world3d/vendor/maplibre-gl-5.6.0.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,700;0,900;1,800;1,900&family=Noto+Sans+JP:wght@700;800;900&display=swap">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
@@ -60,6 +61,28 @@
     position: absolute; top: 0; left: 0; width: 44px; height: 44px;
     pointer-events: auto; cursor: pointer; will-change: transform;
   }
+  .w3r { position: absolute; left: -196.5px; top: -472px; width: 393px; height: 472px; pointer-events: none;
+    transform-origin: 50% 100%; transform: scale(.3); transition: transform 480ms cubic-bezier(.4,0,.2,1);
+    font-family: "Noto Sans JP", sans-serif; color: #08080b; isolation: isolate; }
+  .w3r > [data-i] { pointer-events: auto; cursor: pointer; }
+  .w3r-cv { position: absolute; transition: left 480ms cubic-bezier(.4,0,.2,1), top 480ms cubic-bezier(.4,0,.2,1), width 480ms cubic-bezier(.4,0,.2,1), height 480ms cubic-bezier(.4,0,.2,1), transform 480ms cubic-bezier(.4,0,.2,1); border: 4px solid #fff; overflow: hidden; background: #1a1a20; box-shadow: 0 6px 20px rgba(0,0,0,.6); z-index: 20; }
+  .w3r-cv img, .w3r-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .w3r-cv i { position: absolute; inset: 0 0 auto 0; height: 60%; background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,0)); }
+  .w3r-ph { position: absolute; transition: left 480ms cubic-bezier(.4,0,.2,1), top 480ms cubic-bezier(.4,0,.2,1), width 480ms cubic-bezier(.4,0,.2,1), height 480ms cubic-bezier(.4,0,.2,1), transform 480ms cubic-bezier(.4,0,.2,1); width: 142px; height: 189px; border: 3px solid #fff; overflow: hidden; background: #1a1a20; box-shadow: 0 4px 14px rgba(0,0,0,.6); }
+  .w3r-nm { position: absolute; transition: left 480ms cubic-bezier(.4,0,.2,1), top 480ms cubic-bezier(.4,0,.2,1), width 480ms cubic-bezier(.4,0,.2,1), height 480ms cubic-bezier(.4,0,.2,1), transform 480ms cubic-bezier(.4,0,.2,1); width: max-content; padding: 4px 7px 5px 6px; background: #fff; box-shadow: 0 3px 10px rgba(0,0,0,.6); display: flex; align-items: center; gap: 5px; box-sizing: border-box; }
+  .w3r-nm .o { flex: none; font-family: Inter, sans-serif; font-weight: 900; font-style: italic; font-size: 13px; line-height: 1; }
+  .w3r-nm .t { flex: 0 1 auto; min-width: 0; font-weight: 800; line-height: 1.25; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .w3r-nm .t.lat { font-family: Inter, sans-serif; }
+  .w3r:not(.open) .w3r-nm .t { display: none; }
+  .w3r-ph, .w3r-nm { transition-property: left, top, width, height, transform, opacity !important; }
+  .w3r:not(.open) .w3r-ph, .w3r:not(.open) .w3r-nm { opacity: 0; pointer-events: none; }
+  .w3r:not(.open) .w3r-nm { padding: 4px 6px; }
+  .w3r-tout { transition: opacity 320ms cubic-bezier(.4,0,.2,1); }
+  .w3r:not(.open) .w3r-tout { opacity: 0; }
+  .w3r small { font-size: .68em; font-weight: 800; margin-left: 1px; }
+  .w3r-tout { position: absolute; left: 28px; top: 28px; max-width: 80%; transform: rotate(-3deg); transform-origin: 0 0; z-index: 25; pointer-events: none; }
+  .w3r-tout .l1 { font-weight: 900; font-size: 22px; line-height: 1.2; color: #fff; -webkit-text-stroke: 5px #000; paint-order: stroke fill; text-wrap: balance; }
+  .w3r-tout .l2 { margin-top: 2px; font-family: Inter, sans-serif; font-style: italic; font-weight: 900; font-size: 24px; line-height: 1.1; color: #fff; -webkit-text-stroke: 5px #000; paint-order: stroke fill; }
   .tip-photo {
     width: 100%; height: 100%; border-radius: 10px; overflow: hidden;
     background: #16131f; box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
@@ -133,7 +156,49 @@
     font-variant-numeric: tabular-nums; opacity: .55; text-align: right; line-height: 1.5;
     text-shadow: 0 1px 3px rgba(0, 0, 0, .8);
   }
+  #w3d-header {
+    position: absolute; left: 0; right: 0; top: 0; z-index: 5; pointer-events: none;
+    padding: 62px 20px 40px; text-align: center;
+    background: linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,0));
+    font-family: "Noto Sans JP", -apple-system, sans-serif; text-shadow: 0 0 8px rgba(0,0,0,.6);
+  }
+  #w3d-header h1 { font-size: 22px; font-weight: 700; line-height: 1.3; letter-spacing: .01em; text-wrap: pretty; }
+
+  /* --- ランキング投稿のタイムライン（半分の高さのモーダルシート） --- */
+  #w3d-header { display: none; }
+  #rk-sheet { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; z-index: 200000; display: flex; flex-direction: column;
+    background: #0e0e12; border-radius: 24px 24px 0 0; overflow: hidden; font-family: "Noto Sans JP", sans-serif; color: #fff;
+    box-shadow: 0 -10px 34px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10);
+    transition: height 320ms cubic-bezier(.4,0,.2,1), border-radius 320ms cubic-bezier(.4,0,.2,1), padding 320ms cubic-bezier(.4,0,.2,1); }
+  #rk-sheet[data-s="short"] { height: 112px; }
+  #rk-sheet[data-s="full"] { height: 100%; border-radius: 0; padding-top: 54px; }
+  #rk-sheet[data-s="full"] .rs-list { overflow-y: auto; }
+  #rk-sheet[hidden] { display: none; }
+  .rs-hd { flex: none; cursor: pointer; padding: 8px 16px 10px; display: flex; flex-direction: column; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .rs-hd .grab { width: 36px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.28); }
+  .rs-hd .row { align-self: stretch; display: flex; align-items: baseline; gap: 8px; }
+  .rs-hd .t { font-weight: 700; font-size: 16px; line-height: 1.3; }
+  .rs-hd .n { font-family: Inter, sans-serif; font-weight: 700; font-size: 13px; color: rgba(255,255,255,.58); }
+  .rs-list { position: relative; flex: 1; min-height: 0; overflow-y: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+  .rs-list::-webkit-scrollbar { display: none; }
+  .rs-post { border-bottom: 8px solid rgba(255,255,255,.06); cursor: pointer; }
+  .rs-post:active { opacity: .9; }
+  .rs-ub { display: flex; align-items: center; gap: 10px; padding: 12px 16px 4px; }
+  .rs-ub img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; object-position: 50% 30%; flex: none; box-shadow: 0 0 0 1px rgba(255,255,255,.08); }
+  .rs-ub .nm { font-family: Inter, sans-serif; font-weight: 700; font-size: 14px; line-height: 1.2; }
+  .rs-ub .pl { margin-left: auto; min-width: 0; max-width: 55%; display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: rgba(255,255,255,.78); }
+  .rs-ub .pl img { width: 14px; height: 14px; border-radius: 0; box-shadow: none; opacity: .78; }
+  .rs-ub .pl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rs-act { display: flex; align-items: center; gap: 4px; padding: 4px 8px 10px; }
+  .rs-act button { appearance: none; border: 0; background: none; color: #fff; height: 44px; min-width: 44px; padding: 0 8px; display: flex; align-items: center; gap: 6px; cursor: pointer; font: 600 13px Inter, sans-serif; }
+  .rs-act button:active { transform: scale(.94); }
+  .rs-act button img { width: 22px; height: 22px; }
+  .rs-act .tm { margin-left: auto; padding-right: 8px; font-size: 11px; color: rgba(255,255,255,.58); }
+  .rs-stage { position: relative; height: 472px; overflow: hidden; background: #000; isolation: isolate; }
+  .rs-stage .w3r { left: 50%; top: 0; margin-left: -196.5px; transform: none; transition: none; pointer-events: none; }
+  .rs-stage .w3r * { transition: none !important; }
 </style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500;700&display=swap">
 </head>
 <body>
 
@@ -148,6 +213,10 @@
   </svg>
   <!-- 柱の先端の写真（ページ固有。engine の DOM ではない） -->
   <div id="tips"></div>
+  <div id="w3d-header"><h1>渋谷のおすすめナイトクラブ</h1></div>
+  <div id="rk-sheet" data-s="half">
+    <div class="rs-list" id="rs-list"></div>
+  </div>
 </div>
 
 <div id="readout"></div>
@@ -164,6 +233,10 @@
     <button data-act="pitch" data-v="35">35</button>
     <button data-act="pitch" data-v="55">55</button>
     <button data-act="pitch" data-v="60">60</button>
+    <button data-act="pitch" data-v="70">70</button>
+    <button data-act="pitch" data-v="75">75</button>
+    <button data-act="pitch" data-v="80">80</button>
+    <button data-act="pitch" data-v="85">85</button>
   </div>
   <div class="sep"></div>
   <div class="grp"><span class="lbl">ポイント</span>
@@ -178,6 +251,7 @@
     <button data-act="toggle" data-v="clubOnly">クラブだけ</button>
     <button data-act="toggle" data-v="wall">クラブ街の壁</button>
     <button data-act="toggle" data-v="buildings">3D ビル</button>
+    <button data-act="toggle" data-v="sheet">タイムライン</button>
   </div>
   <div class="sep"></div>
   <div class="grp"><span class="lbl">地図の明度</span>
@@ -206,8 +280,9 @@
     const a = (window.World3DData || {}).area;
     const u = new URL(location.href);
     const set = (k, v) => { if (!u.searchParams.has(k)) u.searchParams.set(k, String(v)); };
-    if (a && Number.isFinite(a.lat)) { set('lat', a.lat.toFixed(6)); set('lng', a.lng.toFixed(6)); }
-    set('zoom', 15.8); set('pitch', 55); set('bearing', 0);
+    // 既定の構図（渋谷・北向き・80° 傾け）
+    set('lat', '35.67891'); set('lng', '139.69910');
+    set('zoom', 14.19); set('pitch', 60); set('bearing', 0);
     history.replaceState(null, '', u);
   } catch (_) {}
 })();
@@ -241,8 +316,10 @@
   // URL クエリで初期状態を指定できる
   // （?style=liberty&pitch=60&points=photo|beam|pin|off&labels=0&wall=1&buildings=0&clubonly=1&framed=1&zoom=17&bearing=30&dim=.6）
   const S = {
-    zoom: num('zoom', 15.8),
-    pitch: num('pitch', 55),
+    lat: num('lat', 35.67891),
+    lng: num('lng', 139.69910),
+    zoom: num('zoom', 14.19),
+    pitch: num('pitch', 60),
     bearing: num('bearing', 0),
     style: P.get('style') === 'liberty' ? 'liberty' : 'dark',   // 夜の街が主題なので既定は dark
     // 既定は店の写真 + 光の柱（写真が DB にある 20 件すべてに付く）
@@ -252,7 +329,8 @@
     wall: on('wall', false),
     buildings: on('buildings', true),
     dim: num('dim', 1),
-    framed: P.get('framed') === '1',
+    framed: P.get('framed') !== '0',
+    sheet: on('sheet', true),
   };
 
   const stage = document.getElementById('stage');
@@ -268,10 +346,17 @@
   const visible = () => D.clubs.filter((c) => !S.clubOnly || c.kind === 'club');
 
   // --- カメラ（engine の公開 API。実機と同じ入口） ---------------------------
+  // MapLibre の既定上限は 60°。85° まで開放し、engine の setPitch が 60° で抑えても直接当てる
+  const MAX_PITCH = 85;
+  function pitchTo(p) {
+    if (map.getMaxPitch() < MAX_PITCH) map.setMaxPitch(MAX_PITCH);
+    window.setPitch(p);
+    if (Math.abs(map.getPitch() - p) > 0.5) map.jumpTo({ pitch: p });
+  }
   function applyCamera() {
-    window.setCenter(AREA.lat, AREA.lng);
+    window.setCenter(S.lat, S.lng);
     window.setCamera({ zoom: S.zoom });
-    window.setPitch(S.pitch);
+    pitchTo(S.pitch);
     map.jumpTo({ bearing: S.bearing });
   }
   // engine は起動時に一度だけ「初回カメラ確定」で URL クエリの既定（zoom 6.4・東京駅）へ
@@ -284,7 +369,7 @@
     const tick = () => {
       if (camHeld) return;
       const c = map.getCenter();
-      const off = Math.abs(c.lat - AREA.lat) > 1e-4 || Math.abs(c.lng - AREA.lng) > 1e-4
+      const off = Math.abs(c.lat - S.lat) > 1e-4 || Math.abs(c.lng - S.lng) > 1e-4
         || Math.abs(map.getZoom() - S.zoom) > 0.02 || Math.abs(map.getPitch() - S.pitch) > 0.5;
       if (off) applyCamera();
       if (Date.now() - t0 < ms) setTimeout(tick, 150);
@@ -304,6 +389,9 @@
   const POINT_COLOR = '#ff3e88';  // DS の --state-like / --grad-pink（アプリの唯一のアクセント）
   // 柱は渋谷のビル（おおむね 20〜80m）より高くして、先端の写真が屋上に埋もれないようにする
   const BEAM_R_M = 7, BEAM_H_M = 90;
+  // 柱の長さは拡大率によらず画面上で一定にする：zoom 13.8 のときの長さを基準に、m を 2^(13.8 - zoom) 倍する
+  const REF_Z = 13.8;
+  const zk = () => Math.pow(2, REF_Z - map.getZoom());
 
   function discRing(lat, lng, rM, seg) {
     const dLat = rM / 111320, dLng = rM / (111320 * Math.cos(lat * Math.PI / 180));
@@ -349,7 +437,8 @@
         id: L_BEAM, type: 'fill-extrusion', source: SRC_BEAM,
         paint: {
           'fill-extrusion-color': POINT_COLOR,
-          'fill-extrusion-height': ['get', 'h'],
+          'fill-extrusion-height': ['interpolate', ['exponential', 2], ['zoom'],
+            0, ['*', ['get', 'h'], Math.pow(2, REF_Z)], 24, ['*', ['get', 'h'], Math.pow(2, REF_Z - 24)]],
           'fill-extrusion-base': 0,
           'fill-extrusion-opacity': 0.45,
         },
@@ -367,7 +456,7 @@
       const mt = tr.currentTransform || tr;
       if (typeof mt.coordinatePoint === 'function') {
         return mt.coordinatePoint(
-          maplibregl.MercatorCoordinate.fromLngLat({ lng: c.lng, lat: c.lat }), BEAM_H_M);
+          maplibregl.MercatorCoordinate.fromLngLat({ lng: c.lng, lat: c.lat }), BEAM_H_M * zk());
       }
     } catch (_) {}
     return map.project([c.lng, c.lat]);
@@ -409,6 +498,276 @@
     positionTips();
   }
 
+  // --- 白い柱 + 先端の写真の束（写真+柱）-------------------------------------------
+  // 近い店（150m 以内・最大 7 軒）を 1 本の柱にまとめ、柱は束の先頭（評価の高い店）の位置に立てる。
+  // 画面の判定点に最も近い 1 本だけ 400m に伸びて写真を展開、他は 100m で上位 3 枚を重ねた束。
+  // 柱は fill-extrusion だと光源で側面が灰色になるので、陰影なしの純白を custom layer で描く。
+  const POLE = 'w3d-pole', POLE_H = 400, POLE_LOW = 100, PHOTO = 96, EASE = 'cubic-bezier(.4,0,.2,1)';
+  const POLE_LAYOUT = {
+    1: [[0, 0]],
+    2: [[-40, 0], [40, 0]],
+    3: [[0, -100], [-42, 0], [42, 0]],
+    4: [[-40, -100], [42, -104], [-44, 0], [40, 0]],
+    5: [[-40, -102], [44, -100], [-78, 0], [2, -4], [80, 2]],
+    6: [[-76, -104], [4, -110], [82, -98], [-72, 0], [8, -6], [86, 4]],
+    7: [[-46, -206], [40, -214], [-82, -106], [5, -98], [86, -110], [-41, -8], [48, 0]],
+  };
+  const RK_POS = [[201, 96, 268, 151], [102, 246, 176, 99], [300, 246, 176, 99]];
+  const RK_SZ = [[23.4, 13.3, 11.7], [20.3, 11.7, 10.1], [17.9, 10.1, 9]]; // [帯の高さ, 名前, 順位]（プロフィール一覧の k=0.78）
+  const RK_ORD = ['1<small>st</small>', '2<small>nd</small>', '3<small>rd</small>'];
+  const RK_OPEN = 0.66, RK_SHUT = 0.28;
+  const rkLat = (s) => !/[\u3040-\u30ff\u4e00-\u9fff]/.test(s);
+  const rkEsc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const rkRnd = (s) => { let x = 2166136261; for (let i = 0; i < s.length; i++) { x ^= s.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 10000) / 10000; };
+  const mDist = (a, b) => Math.hypot((a.lat - b.lat) * 111320, (a.lng - b.lng) * 111320 * Math.cos(a.lat * Math.PI / 180));
+  function groupClubs(list) {
+    const score = (c) => (c.rating || 0) * Math.log10(10 + (c.ratingCount || 0));
+    const rest = list.filter((c) => c.imageUrl).sort((a, b) => score(b) - score(a));
+    const out = [];
+    while (rest.length) {
+      const head = rest.shift();
+      const near = rest.map((c) => [c, mDist(head, c)]).filter(([, d]) => d <= 150)
+        .sort((a, b) => a[1] - b[1]).slice(0, 6).map(([c]) => c);
+      near.forEach((c) => rest.splice(rest.indexOf(c), 1));
+      out.push([head, ...near]);
+    }
+    return out;
+  }
+  function applyPoles(list) {
+    if (map.getLayer(POLE)) map.removeLayer(POLE);
+    document.querySelectorAll('.w3d-pole-img').forEach((n) => n.remove());
+    if (!list.length) return;
+    const M = (p, z) => maplibregl.MercatorCoordinate.fromLngLat(p, z);
+    let seed = 20260923;
+    const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const v = [], poles = [], sheetItems = [];
+    for (const group of groupClubs(list)) {
+      const { lat, lng } = group[0];
+      const w = 1.5, dLat = w / 111320, dLng = w / (111320 * Math.cos(lat * Math.PI / 180));
+      const ring = [[lng - dLng, lat - dLat], [lng + dLng, lat - dLat], [lng + dLng, lat + dLat], [lng - dLng, lat + dLat]].map((p) => M(p, 0));
+      const first = v.length / 4;
+      const push = (q, top) => v.push(q.x, q.y, q.z, top);
+      const quad = (a, b) => { push(a, 0); push(b, 0); push(b, 1); push(a, 0); push(b, 1); push(a, 1); };
+      for (let i = 0; i < 4; i++) quad(ring[i], ring[(i + 1) % 4]);
+      [0, 1, 2, 0, 2, 3].forEach((i) => push(ring[i], 1));
+      // プロフィールのランキングタブの 1 本（393×330 の台紙）をそのまま柱の先端に載せる
+      const el = document.createElement('div');
+      el.className = 'w3d-pole-img';
+      Object.assign(el.style, { position: 'absolute', left: '0', top: '0', width: '0', height: '0', pointerEvents: 'none', willChange: 'transform' });
+      const card = document.createElement('div');
+      card.className = 'w3r';
+      const top3 = group.slice(0, 3);
+      // 展開 = App-ProfileRanking-Dark の一覧 1 本 / 束 = メイン写真を正方形にして中心へ、1・2・3 位をその後ろに寄せる
+      const SQ = 200, SX = 196.5 - SQ / 2, SY = 472 - SQ - 6;
+      const cr = (rkRnd(group[0].name + 'c') * 2 - 1) * 2.5;
+      const cover = document.createElement('div');
+      cover.className = 'w3r-cv'; cover.dataset.i = '0';
+      cover.innerHTML = '<img src="' + group[0].imageUrl + '" alt=""><i></i>';
+      cover._o = { left: '2px', top: '20px', width: '389px', height: '232px', transform: 'rotate(' + cr.toFixed(1) + 'deg)' };
+      cover._s = { left: SX + 'px', top: SY + 'px', width: SQ + 'px', height: SQ + 'px', transform: 'rotate(' + (cr * 0.6).toFixed(1) + 'deg)' };
+      card.appendChild(cover);
+      const parts = [cover];
+      const cw = (393 - 12) / 3, ctop = 14 + 232 + 22;
+      top3.forEach((c, j) => {
+        const cx = 6 + cw * j + cw / 2, z = [30, 28, 26][j];
+        const rot = (rkRnd(c.name + 'r') * 2 - 1) * 10, dx = (rkRnd(c.name + 'x') * 2 - 1) * 6, nr = (rkRnd(c.name + 'n') * 2 - 1) * 9;
+        const nw = Math.min(cw + 4, 128);
+        let tw = 0; for (const ch of c.name) tw += /[\u3000-\u9fff\uff00-\uffef]/.test(ch) ? 12 : 7.4;
+        const ph = document.createElement('div');
+        ph.className = 'w3r-ph'; ph.dataset.i = String(j); ph.style.zIndex = String(z - 20);
+        ph.innerHTML = '<img src="' + c.imageUrl + '" alt="">';
+        ph._o = { left: (cx - 71 + dx).toFixed(1) + 'px', top: ctop + 'px', transform: 'rotate(' + rot.toFixed(1) + 'deg)', zIndex: String(z) };
+        // 束: 正方形の後ろで扇状に（左右と上にだけ覗く）
+        const sdx = [0, -58, 58][j], sdy = [-40, -14, -14][j], srot = [3, -11, 12][j];
+        ph._s = { left: (196.5 - 71 + sdx) + 'px', top: (SY + sdy) + 'px', transform: 'rotate(' + srot + 'deg) scale(.82)', zIndex: String(10 - j) };
+        const nm = document.createElement('div');
+        nm.className = 'w3r-nm'; nm.dataset.i = String(j);
+        nm.innerHTML = '<span class="o">' + RK_ORD[j] + '</span><span class="t' + (rkLat(c.name) ? ' lat' : '') + '" style="font-size:' + (tw > nw - 42 ? 10 : 12) + 'px">' + rkEsc(c.name) + '</span>';
+        nm._o = { left: (cx - dx * 0.5).toFixed(1) + 'px', top: (ctop - 12) + 'px', maxWidth: nw.toFixed(0) + 'px', transform: 'translateX(-50%) rotate(' + nr.toFixed(1) + 'deg)', zIndex: String(z + 1) };
+        // 束: 順位だけを正方形の下辺に 1・2・3 と並べる
+        nm._s = { left: (196.5 + (j - 1) * 62) + 'px', top: (SY + SQ - 30 - (j === 0 ? 8 : 0)) + 'px', maxWidth: '200px', transform: 'translateX(-50%) rotate(' + [-4, 5, -6][j] + 'deg) scale(' + (j === 0 ? 1.9 : 1.5) + ')', zIndex: String(40 - j) };
+        card.appendChild(ph); card.appendChild(nm);
+        parts.push(ph, nm);
+      });
+      const tout = document.createElement('div');
+      tout.className = 'w3r-tout';
+      tout.innerHTML = '<div class="l1">' + rkEsc(group[0].name) + ' 周辺</div><div class="l2">BEST ' + group.length + '</div>';
+      card.appendChild(tout);
+      card._parts = parts;
+      sheetItems.push({ group, card });
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (card._post) {
+          setSheet('half');
+          rsList.scrollTo({ top: card._post.offsetTop, behavior: 'smooth' });
+        }
+      });
+      el.appendChild(card);
+      tipsHost.appendChild(el);
+      poles.push({ lat, lng, el, card, first, count: v.length / 4 - first, unit: M([lng, lat], 1).z, base: M([lng, lat], 0), h: POLE_LOW, open: null });
+    }
+    const setOpen = (p, open) => {
+      if (p.open === open) return;
+      p.open = open;
+      p.card.style.transform = 'scale(' + (open ? RK_OPEN : RK_SHUT) + ')';
+      p.card.classList.toggle('open', open);
+      p.card._parts.forEach((n) => Object.assign(n.style, open ? n._o : n._s));
+    };
+    // 伸びた柱は奥の束の写真（DOM）に隠れないよう、DOM の線でも重ねて前面に出す
+    const stick = document.createElement('div');
+    stick.className = 'w3d-pole-img';
+    Object.assign(stick.style, { position: 'absolute', left: '0', top: '0', height: '3px', background: '#ffffff', transformOrigin: '0 50%', pointerEvents: 'none', zIndex: '99999', willChange: 'transform' });
+    tipsHost.appendChild(stick);
+    renderSheet(sheetItems);
+    const verts = new Float32Array(v);
+    map.addLayer({
+      id: POLE, type: 'custom', renderingMode: '3d',
+      onAdd(_m, gl) {
+        const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+        this.prog = gl.createProgram();
+        gl.attachShader(this.prog, sh(gl.VERTEX_SHADER, 'uniform mat4 u_m; uniform float u_h; attribute vec4 a_p; void main(){ gl_Position = u_m * vec4(a_p.x, a_p.y, a_p.z + a_p.w * u_h, 1.0); }'));
+        gl.attachShader(this.prog, sh(gl.FRAGMENT_SHADER, 'precision mediump float; void main(){ gl_FragColor = vec4(1.0); }'));
+        gl.linkProgram(this.prog);
+        this.aP = gl.getAttribLocation(this.prog, 'a_p');
+        this.uM = gl.getUniformLocation(this.prog, 'u_m');
+        this.uH = gl.getUniformLocation(this.prog, 'u_h');
+        this.buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
+        gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+        this.t = performance.now();
+      },
+      render(gl, args) {
+        const m = (args && args.defaultProjectionData && args.defaultProjectionData.mainMatrix) || (args && args.modelViewProjectionMatrix) || args;
+        const now = performance.now(), dt = Math.min(64, now - this.t); this.t = now;
+        // 判定点：地図の center から、傾けた分だけ画面下（bearing 0 なら南）へずらす
+        const cv = map.getCanvas();
+        const c = map.unproject([cv.clientWidth / 2, judgeY()]), cosL = Math.cos(c.lat * Math.PI / 180);
+        let near = poles[0], best = Infinity;
+        for (const p of poles) {
+          const d = (p.lat - c.lat) ** 2 + ((p.lng - c.lng) * cosL) ** 2;
+          if (d < best) { best = d; near = p; }
+        }
+        gl.useProgram(this.prog);
+        gl.uniformMatrix4fv(this.uM, false, m);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
+        gl.enableVertexAttribArray(this.aP);
+        gl.vertexAttribPointer(this.aP, 4, gl.FLOAT, false, 0, 0);
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.disable(gl.BLEND);
+        let moving = false;
+        const k = zk();
+        for (const p of poles) {
+          const target = p === near ? POLE_H : POLE_LOW;
+          p.h += (target - p.h) * (1 - Math.exp(-dt / 110));
+          if (Math.abs(target - p.h) < 0.5) p.h = target; else moving = true;
+          setOpen(p, p === near);
+          gl.uniform1f(this.uH, p.h * k * p.unit);
+          gl.drawArrays(gl.TRIANGLES, p.first, p.count);
+          const proj = (x, y, z) => {
+            const w = m[3]*x + m[7]*y + m[11]*z + m[15];
+            if (w <= 0) return null;
+            return [((m[0]*x + m[4]*y + m[8]*z + m[12]) / w * 0.5 + 0.5) * cv.clientWidth, (0.5 - (m[1]*x + m[5]*y + m[9]*z + m[13]) / w * 0.5) * cv.clientHeight];
+          };
+          const top = proj(p.base.x, p.base.y, p.base.z + p.h * k * p.unit);
+          if (p === near) {
+            const bot = proj(p.base.x, p.base.y, p.base.z);
+            if (top && bot) {
+              const dx = top[0] - bot[0], dy = top[1] - bot[1];
+              stick.style.display = '';
+              stick.style.width = Math.hypot(dx, dy).toFixed(1) + 'px';
+              stick.style.transform = `translate(${bot[0]}px, ${bot[1] - 1.5}px) rotate(${Math.atan2(dy, dx)}rad)`;
+            } else stick.style.display = 'none';
+          }
+          if (!top) { p.el.style.display = 'none'; continue; }
+          const [sx, sy] = top;
+          p.el.style.display = '';
+          p.el.style.zIndex = String(p === near ? 100000 : 2 + Math.max(0, Math.round(sy))); // 手前（画面下）ほど上
+          p.el.style.transform = `translate(${sx}px, ${sy}px)`;
+        }
+        if (moving) map.triggerRepaint();
+      },
+    });
+  }
+
+  // --- ランキング投稿のタイムライン（柱の先端と同じ 1 本を、いろんなユーザーの投稿として縦に並べる） ---
+  const RS_USERS = ['SunnyVi', 'Kawaii', 'Dreamy', 'foodie', 'Pixel', 'ZenGarden', 'Starry', 'o_cean', 'Mocha'];
+  const RS_TIME = ['12分前', '1時間前', '3時間前', '昨日', '2日前', '3日前', '5日前', '1週間前', '2週間前'];
+  const rsList = document.getElementById('rs-list');
+  function renderSheet(items) {
+    rsList.textContent = '';
+    items.forEach(({ group, card }, i) => {
+      const post = document.createElement('section');
+      post.className = 'rs-post';
+      const u = RS_USERS[i % RS_USERS.length];
+      post.innerHTML = '<div class="rs-ub"><img src="../../assets/sample/user/user' + String((i % 16) + 1).padStart(3, '0') + '.jpg" alt=""><span class="nm">' + u + '</span><span class="pl"><img src="../../assets/icons/icon_pin_location.png" alt=""><span>' + rkEsc(group[0].name) + '</span></span></div>';
+      const st = document.createElement('div');
+      st.className = 'rs-stage';
+      const cl = card.cloneNode(true);
+      cl.classList.add('open');
+      cl.querySelectorAll('.w3r-cv, .w3r-ph, .w3r-nm').forEach((n, k) => Object.assign(n.style, card._parts[k]._o));
+      st.appendChild(cl);
+      card._post = post;
+      post.appendChild(st);
+      const act = document.createElement('div');
+      act.className = 'rs-act';
+      const lk = 12 + Math.floor(rkRnd(u + 'l') * 240), cm = Math.floor(rkRnd(u + 'c') * 24);
+      act.innerHTML = '<button type="button" data-a="like"><img src="../../assets/icons/icon_like.png" alt=""><span>' + lk + '</span></button>'
+        + '<button type="button"><img src="../../assets/icons/icon_comment.png" alt=""><span>' + cm + '</span></button>'
+        + '<button type="button"><img src="../../assets/icons/icon_share.png" alt=""></button>'
+        + '<span class="tm">' + RS_TIME[i % RS_TIME.length] + '</span>';
+      act.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const b = e.target.closest('[data-a="like"]'); if (!b) return;
+        const onL = b.classList.toggle('on');
+        b.querySelector('img').src = '../../assets/icons/icon_like' + (onL ? '_fill' : '') + '.png';
+        b.querySelector('span').textContent = lk + (onL ? 1 : 0);
+      });
+      post.appendChild(act);
+      post.addEventListener('click', () => {
+        map.easeTo({ center: [group[0].lng, group[0].lat], offset: [0, judgeY() - stage.clientHeight / 2], duration: 700 });
+      });
+      rsList.appendChild(post);
+    });
+  }
+  const rsSheet = document.getElementById('rk-sheet');
+  const applySheet = () => { rsSheet.hidden = !S.sheet; };
+  // シートの高さ = short（地図を触っているとき）/ half（初期）/ full
+  let sheetState = 'half', lock = 0, atTop = 0;
+  function setSheet(s) {
+    if (sheetState === s) return;
+    sheetState = s; rsSheet.dataset.s = s; lock = Date.now();
+    setTimeout(() => map.triggerRepaint(), 340);
+  }
+  const UP = { short: 'half', half: 'full', full: 'full' }, DOWN = { short: 'short', half: 'short', full: 'half' };
+  rsList.addEventListener('scroll', () => { if (rsList.scrollTop <= 0 && !atTop) atTop = Date.now(); if (rsList.scrollTop > 0) atTop = 0; });
+  rsList.addEventListener('wheel', (e) => {
+    const top = rsList.scrollTop <= 0;
+    if (sheetState === 'full' && !(e.deltaY < 0 && top)) return;
+    e.preventDefault();
+    if (Date.now() - lock < 600 || Math.abs(e.deltaY) < 4) return;
+    if (e.deltaY > 0) setSheet(UP[sheetState]);
+    else if (sheetState !== 'full' || !atTop || Date.now() - atTop > 250) setSheet(DOWN[sheetState]);
+  }, { passive: false });
+  let ty = null, tTop = false;
+  rsList.addEventListener('touchstart', (e) => { ty = e.touches[0].clientY; tTop = rsList.scrollTop <= 0; }, { passive: true });
+  rsList.addEventListener('touchmove', (e) => {
+    if (ty == null) return;
+    const dy = e.touches[0].clientY - ty;
+    if (sheetState !== 'full' || (tTop && dy > 0 && rsList.scrollTop <= 0)) e.preventDefault();
+  }, { passive: false });
+  rsList.addEventListener('touchend', (e) => {
+    if (ty == null) return;
+    const dy = e.changedTouches[0].clientY - ty; ty = null;
+    if (sheetState !== 'full') { if (dy < -30) setSheet(UP[sheetState]); else if (dy > 30) setSheet(DOWN[sheetState]); }
+    else if (tTop && dy > 40) setSheet('half');
+  });
+  // 中心判定の高さ = シートのすぐ上（シートを出していないときは従来の傾き連動）
+  function judgeY() {
+    const h = stage.clientHeight;
+    if (rsSheet.hidden) return h * (0.5 + 0.22 * Math.min(1, map.getPitch() / 60));
+    const top = rsSheet.getBoundingClientRect().top - stage.getBoundingClientRect().top;
+    return Math.max(0, Math.min(h, top - 28));
+  }
+
   let labelMarkers = [];
   function applyLabels() {
     // 「写真+柱」のときは名前を先端の写真の下に出す（別マーカーにしない）
@@ -442,8 +801,9 @@
       window.clearPlacePins();
     }
     // 「写真+柱」は柱の先端に写真を置く（このページ固有の 3D 表現）
-    buildTips(S.points === 'both' ? list : []);
-    const beam = (S.points === 'both' || S.points === 'beam') ? list : [];
+    buildTips([]);
+    applyPoles(S.points === 'both' ? list : []);
+    const beam = S.points === 'beam' ? list : [];
     setGeo(SRC_PT, ptGeo(beam));
     setGeo(SRC_BEAM, beamGeo(beam));
     ensurePointLayers();
@@ -542,7 +902,7 @@
     const b = e.target.closest('button'); if (!b) return;
     const { act, v } = b.dataset;
     if (act === 'style') { S.style = v; switchStyle(v); }
-    if (act === 'pitch') { S.pitch = Number(v); window.setPitch(S.pitch); }
+    if (act === 'pitch') { S.pitch = Number(v); pitchTo(S.pitch); }
     if (act === 'points') { S.points = v; applyPoints(); }
     if (act === 'frame') {
       S.framed = v === '1';
@@ -555,6 +915,7 @@
       if (v === 'clubOnly') applyPoints();
       if (v === 'wall') applyWall();
       if (v === 'buildings') applyBuildings();
+      if (v === 'sheet') applySheet();
     }
     syncUi();
   });
@@ -581,7 +942,9 @@
 
   // --- 起動 -----------------------------------------------------------------
   document.body.classList.toggle('framed', S.framed);
+  applySheet();
   whenReady(() => {
+    map.setMaxPitch(MAX_PITCH);
     enableInput();
     applyCamera();
     holdCamera(6000);
@@ -592,6 +955,8 @@
     map.on('move', paint);
     map.on('render', positionTips);
     map.on('pitchend', syncUi);
+    ['dragstart', 'zoomstart', 'rotatestart', 'pitchstart']
+      .forEach((ev) => map.on(ev, (e) => { if (e && e.originalEvent) setSheet('short'); }));
     map.on('click', (e) => {
       const layers = [L_BEAM, L_DISC].filter((id) => map.getLayer(id));
       if (!layers.length) return;
