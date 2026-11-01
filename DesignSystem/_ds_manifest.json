@@ -296,6 +296,13 @@
       "viewport": "1760x2600",
       "subtitle": "16:9 の写真を順位ごとの行に置く PkRows.place。1 位を地点の高さに、2・3 位は空いている上下へ。同じ高さに他の順位を置かないので重ならない",
       "name": "PlaceRanking — 確認モードの行配置（アルゴリズムの正本 + 3000 ケース検証）"
+    },
+    {
+      "path": "handoff/PlanTimeBudget/brief.html",
+      "group": "PlanTimeBudget",
+      "viewport": "1440x900",
+      "subtitle": "web plan の時間帯と予算のダイアログ。板なし・中心が濃いスクリム・泡の部品。時間帯は直感的に 3 案、予算は好みの店の値段から作る 2〜5 段を縦に並べてタップ 3 案",
+      "name": "PlanTimeBudget — brief"
     }
   ],
   "templates": [],

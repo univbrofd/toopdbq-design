@@ -1,0 +1,166 @@
+<!-- @dsCard group="PlanTimeBudget" name="PlanTimeBudget — brief" subtitle="web plan の時間帯と予算のダイアログ。板なし・中心が濃いスクリム・泡の部品。時間帯は直感的に 3 案、予算は好みの店の値段から作る 2〜5 段を縦に並べてタップ 3 案" --><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<title>PlanTimeBudget — brief</title>
+<style>
+  :root { --ink:#111114; --ink2:rgba(0,0,0,.62); --ink3:rgba(0,0,0,.42); --line:rgba(0,0,0,.12); --paper:#fbfbfa; --card:#fff;
+    --teal:#005f67; --pink:#ff3e88; --golden:#d0a052; --gcl:linear-gradient(135deg,#fff0a6 0%,#005f67 38%,#ff3e88 70%,#d0a052 100%); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;-webkit-font-smoothing:antialiased;padding:56px 64px 80px;line-height:1.7}
+  .wrap{max-width:1312px;margin:0 auto}
+  .eyebrow{font-family:Inter,sans-serif;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
+  h1{font-size:34px;font-weight:700;margin:6px 0 10px;line-height:1.35}
+  .lead{font-size:16px;color:var(--ink2);max-width:860px}
+  .rule{height:3px;width:120px;background:var(--gcl);border-radius:2px;margin:22px 0 40px}
+  h2{font-size:19px;font-weight:700;margin:0 0 4px} h2 .n{font-family:Inter,sans-serif;color:var(--pink);margin-right:10px}
+  section{margin:0 0 44px} .sub{font-size:13px;color:var(--ink3);margin-bottom:18px}
+  .shots{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+  .shot{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+  .shot img{display:block;width:100%;border-radius:12px;border:1px solid var(--line)}
+  .shot h3{font-size:14px;font-weight:700;margin:12px 0 4px} .shot p{font-size:12.5px;color:var(--ink2);line-height:1.6} .shot p b{color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+  table{border-collapse:collapse;width:100%;font-size:13.5px}
+  th,td{text-align:left;padding:9px 14px;border-top:1px solid var(--line);vertical-align:top}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);border-top:0}
+  td.k{width:24%;color:var(--ink2)} td b{color:var(--ink)}
+  code{font-family:Inter,ui-monospace,monospace;font-size:12.5px;background:rgba(0,0,0,.05);padding:1px 6px;border-radius:5px}
+  .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+  .st{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;position:relative}
+  .st .num{font-family:Inter,sans-serif;font-size:12px;font-weight:800;color:#fff;width:24px;height:24px;border-radius:999px;display:grid;place-items:center;background:var(--teal)}
+  .st.open .num{background:var(--pink)}
+  .st h3{font-size:13.5px;font-weight:700;margin:10px 0 6px;line-height:1.45} .st p{font-size:12px;color:var(--ink2);line-height:1.6}
+  .st .tag{position:absolute;top:12px;right:12px;font-family:Inter,sans-serif;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .st.open .tag{color:var(--pink)}
+  .axes{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .ax{background:#fff;border:1px solid var(--line);border-left:4px solid var(--golden);border-radius:12px;padding:16px 18px}
+  .ax b{display:block;font-size:14px;margin-bottom:4px} .ax p{font-size:12.5px;color:var(--ink2);line-height:1.6}
+  .no{background:#fff;border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:12px;padding:16px 20px;font-size:13.5px;color:var(--ink2)} .no b{color:var(--ink)}
+  ul{margin:8px 0 0 20px;font-size:13.5px;color:var(--ink2)} li{margin:4px 0}
+  .tiers{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+  .tier{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .tier b{display:block;font-size:13.5px;margin-bottom:6px}
+  .tier table{font-size:12.5px} .tier td{padding:5px 8px}
+  .sw{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px} .sw div{width:150px;font-size:12px;color:var(--ink2)}
+  .sw i{display:block;height:44px;border-radius:10px;border:1px solid var(--line);margin-bottom:6px}
+  .bub{display:inline-grid;place-items:center;width:48px;height:48px;border-radius:50%;background:url(../../assets/images/bubble.webp) center/100% no-repeat, rgba(0,0,0,.18);font-size:20px;vertical-align:middle;margin-right:8px}
+  .dark{background:#0d1017;color:#fff;border-radius:12px;padding:14px 16px}
+</style></head>
+<body><div class="wrap">
+  <div class="eyebrow">Toopdbq · web plan · handoff</div>
+  <h1>PlanTimeBudget — 時間帯と予算を決める 2 つのダイアログ</h1>
+  <p class="lead">3D の街の上に漂うシャボン玉のヒアリングのうち、<b>時間帯</b>と<b>予算</b>だけは画面の中央に 1 つずつ出るダイアログで決める。
+    今の時間帯（縦スライダー）は直感的でない。予算はスライダーをやめ、<b>選んだ好みの店の値段から作る 2〜5 段を縦に並べてタップ</b>で選び、ヒアリングの最後へ移す。
+    時間帯 3 案・予算 3 案。仕様の正は <code>HANDOFF.md</code>。</p>
+  <div class="rule"></div>
+
+  <section>
+    <h2><span class="n">01</span>as-built（今の実装・headless Chrome・402×874）</h2>
+    <p class="sub">弱点は画像から読めることだけ書いている。4 枚目の中央の大きな玉に、決めた後の 🕐 時間帯 / 💰 予算 の小さな玉が入る（押すと弾けてダイアログが再び開く）</p>
+    <div class="shots">
+      <div class="shot"><img src="shots/time-asbuilt.jpg" alt="時間帯の as-built"><h3>時間帯 — 縦スライダー（初期値）</h3>
+        <p>月 → 帯 → 太陽、泡のつまみ 2 つ、値「14:30〜翌0:00」、決定。<b>どちらが始まりか分からない・時刻の目盛りが無い・値は下の文字でしか読めない</b></p></div>
+      <div class="shot"><img src="shots/time-dragged.jpg" alt="つまみを動かした後"><h3>時間帯 — 動かした後</h3>
+        <p>6:00〜翌4:30。帯の暗い部分で<b>つまみの泡が見えにくい</b>。「今から」「夜だけ」が 1 操作でできない</p></div>
+      <div class="shot"><img src="shots/budget-asbuilt.jpg" alt="予算の as-built"><h3>予算 — 縦スライダー（置き換える）</h3>
+        <p>¥1,000〜¥30,000 を同じ長さに置くので<b>ジャンルの相場と無関係な刻み</b>。ラーメンに ¥30,000 の目盛りは要らない</p></div>
+      <div class="shot"><img src="shots/prefs-center-bubble.jpg" alt="好みの段と中央の玉"><h3>好みの段（この後に予算を聞く）</h3>
+        <p>泡 = 選択肢（いくつでも）。中央の大きな玉（r ≈ 150・中心 y ≈ 610）に答えの小さな玉。右下の泡ボタン 52 はスクリムより上に残る</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>ヒアリングの順（新）— 予算は最後</h2>
+    <p class="sub">ピンク = この依頼で設計する画面。予算を最後にするのは、好みが決まって初めて「その店の値段の分布」から段が作れるから</p>
+    <div class="flow">
+      <div class="st"><span class="tag">泡</span><div class="num">1</div><h3>どんなお出かけ？</h3><p>遊ぶ / デート / 飲み会 / お祝い / 観光</p></div>
+      <div class="st"><span class="tag">泡</span><div class="num">2</div><h3>誰と？ …</h3><p>1 人 / 友達 / 恋人 / 家族 / 職場 → 人数・種類</p></div>
+      <div class="st open"><span class="tag">dialog</span><div class="num">3</div><h3>何時から何時まで？</h3><p>6:00〜翌 6:00・30 分刻み・最短 60 分。始まりと終わり</p></div>
+      <div class="st"><span class="tag">泡</span><div class="num">4</div><h3>好みの段</h3><p>何を食べたい？ / 何して過ごす？ / その後は？（いくつでも）</p></div>
+      <div class="st open"><span class="tag">dialog</span><div class="num">5</div><h3>予算はいくらまで？</h3><p>選んだ好みの店の値段から 2〜5 段。縦に並べてタップ</p></div>
+      <div class="st"><span class="tag">AI</span><div class="num">6</div><h3>プラン</h3><p>時間帯・好み・予算を渡して行程を組む</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>固定値（契約）</h2>
+    <p class="sub">破ると実装できないもの。板を置かず、中心ほど濃いスクリムの上に「泡」の部品を直に置く</p>
+    <div class="card"><table>
+      <tr><th>項目</th><th>値</th></tr>
+      <tr><td class="k">画面</td><td><b>402×874</b>（<code>DesignSystem/preview/card.css</code> の <code>.phone</code>）。status bar 62 / home indicator 34。タップ範囲 ≥ 44</td></tr>
+      <tr><td class="k">スクリム</td><td><code>radial-gradient(ellipse 70% 56% at 50% 50%, rgba(V,.9), rgba(V,.66) 50%, rgba(V,.1) 100%)</code>、V = <b>0,0,0</b>（ダーク）/ <b>255,255,255</b>（ライト）。板・カードは置かない</td></tr>
+      <tr><td class="k">文字</td><td><b>#fff</b> / ライトは <b>#08080b</b>。<code>-apple-system, "Hiragino Sans", "Noto Sans JP"</code>、数字は tabular。見出し 18 w700・値 17 w700</td></tr>
+      <tr><td class="k">泡（部品の語彙）</td><td><span class="bub">🌙</span><code>assets/images/bubble.webp</code> の輪 + <code>rgba(V,.18)</code> + <code>backdrop-filter: blur(6px)</code>、中央にアイコン / 絵文字 / 数字。実装済みの寸法: 右下ボタン 52・ダイアログの絵 48・つまみ 34。白い塗りの丸・角丸の箱・罫線のリストは使わない。glass ≤ 6 形状 / 画面</td></tr>
+      <tr><td class="k">決定ボタン</td><td>幅いっぱい（≤ 352）・高さ 54・r14・<b>#f0cf6a</b> 地 / <b>#1d1503</b> 文字・16 w700・<code>box-shadow: 0 0 18px rgba(240,207,106,.3)</code>。最初の設定は裏を押しても閉じない / 決め直しは裏で閉じる</td></tr>
+      <tr><td class="k">下に見えるもの</td><td>中央の大きな玉（r ≈ 150・中心 x 201 / y ≈ 610）と見出し「時間と予算を決めてね」（隠してよい）。右下の泡ボタン x 334–386 / y 696–748・757–809 は<b>スクリムより上</b>（その上に部品を置かない）</td></tr>
+      <tr><td class="k">時間帯</td><td><b>6:00 〜 翌 6:00</b>・30 分刻み・最短 60 分・始まりは 23:30 まで。初期値 = 今（30 分へ切上げ）〜 24:00（23 時以降 → 翌 6:00・6 時前 → 6:00〜）。表記 <code>14:30〜翌0:00</code> / en <code>14:30 – 0:00 +1</code>。出力 = 分（360 … 1800）。<b>タップだけで決められる案を最低 1 つ</b></td></tr>
+      <tr><td class="k">予算</td><td>行 = <b>2〜5 段</b>・縦に並べてタップで 1 つ。「こだわらない」を含む。出力 = グループごとの上限 <code>{ dinner: [0, 6000], bar: [0, 3000] }</code>（0 = 上限なし）</td></tr>
+      <tr><td class="k">実装</td><td>web（React + CSS・タッチ）。<code>input[type=range]</code> を CSS で回した縦スライダーは Chrome で値が動かない → DOM + pointer events で作れる形に。specimen は静的 HTML + 最小の JS</td></tr>
+      <tr><td class="k">文言 ja / en</td><td>何時から何時まで？ / What time? ・ 予算はいくらまで？ / What's your budget? ・ 決定 / Done ・ こだわらない / Any ・ 1 人 {amount}まで / Up to {amount} per person ・ 1 点あたり / per item。新しい文言は足してよい（2 行以内）</td></tr>
+    </table>
+    <div class="sw">
+      <div><i style="background:#0d1017"></i>街（ダーク）≈ #0d1017</div>
+      <div><i style="background:#e9e7e2"></i>街（ライト）≈ #e9e7e2</div>
+      <div><i style="background:#f0cf6a"></i>accent #f0cf6a</div>
+      <div><i style="background:linear-gradient(0deg,#ffcf5c,#8fd3ff 26%,#ffb36b 47%,#e0603e 53%,#3b3f8f 63%,#0d1238)"></i>今の時間帯の帯（朝 → 夜）</div>
+      <div><i style="background:linear-gradient(0deg,#8fe3a2,#d9e06a 45%,#ffcf5c 75%,#ffa53a)"></i>今の予算の帯（安 → 高）</div>
+    </div></div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span>予算の段のデータ（実装がこう作る）</h2>
+    <p class="sub">値段を持つグループ = カフェ snack / 昼 lunch / 夜 dinner / 夜の店 bar / 服 wear / 靴 shoes（服・靴は 1 点あたり）。映画・カラオケ・名所は値段なし → 段に出さない。
+      選んだ好みに当たる店の値段をグループごとに集め、20 / 40 / 60 / 80 パーセンタイルをきりのいい額に丸める。同じ額は 1 つに → 段は 1〜4 + こだわらない。複数グループは同じ段 = 同じパーセンタイル</p>
+    <div class="tiers">
+      <div class="tier"><b>A デート × 気軽に — イタリアン・カフェ・映画 → 5 行</b><table>
+        <tr><th>段</th><th>夜 イタリアン（85 店）</th><th>カフェ（319 店）</th></tr>
+        <tr><td>20%</td><td>〜¥3,000（18 店）</td><td>〜¥750（59 店）</td></tr>
+        <tr><td>40%</td><td>〜¥4,000（36）</td><td>〜¥1,000（133）</td></tr>
+        <tr><td>60%</td><td>〜¥5,000（67）</td><td>〜¥1,250（229）</td></tr>
+        <tr><td>80%</td><td>〜¥6,000（81）</td><td>〜¥1,500（290）</td></tr>
+        <tr><td>—</td><td colspan="2">こだわらない（映画は値段なし）</td></tr></table></div>
+      <div class="tier"><b>B 友達 4 人 × 遊ぶ — 焼肉・カラオケ・ビール → 焼肉は 3 段だけ</b><table>
+        <tr><th>段</th><th>夜 焼肉（113 店）</th><th>夜の店 ビール（50 店）</th></tr>
+        <tr><td>20%</td><td>〜¥5,000（41）</td><td>〜¥2,500（12）</td></tr>
+        <tr><td>40%</td><td>〜¥6,000（80）</td><td>〜¥3,000（29）</td></tr>
+        <tr><td>60%</td><td>（40% と同額 → 空欄か同額。Design が決める）</td><td>〜¥3,500（37）</td></tr>
+        <tr><td>80%</td><td>〜¥7,000（94）</td><td>〜¥4,000（48）</td></tr>
+        <tr><td>—</td><td colspan="2">こだわらない（カラオケは値段なし）</td></tr></table></div>
+      <div class="tier"><b>C 1 人 × 観光 食べ歩き — ラーメン・スイーツ・名所 → 4 行</b><table>
+        <tr><th>段</th><th>昼 ラーメン（98 店）</th><th>カフェ スイーツ（96 店）</th></tr>
+        <tr><td>20%</td><td>〜¥1,000（79）</td><td>〜¥750（18）</td></tr>
+        <tr><td>40%</td><td>（同額）</td><td>〜¥1,250（52）</td></tr>
+        <tr><td>60%</td><td>（同額）</td><td>〜¥1,500（74）</td></tr>
+        <tr><td>—</td><td colspan="2">こだわらない（ラーメンは 1 段しか無い = 相場が狭い）</td></tr></table></div>
+      <div class="tier"><b>D 古着 + カフェ → 5 行（服は 1 点あたり）</b><table>
+        <tr><th>段</th><th>服 古着（418 店・1 点）</th><th>カフェ（319 店）</th></tr>
+        <tr><td>20%</td><td>〜¥8,000（97）</td><td>〜¥750（59）</td></tr>
+        <tr><td>40%</td><td>〜¥12,000（191）</td><td>〜¥1,000（133）</td></tr>
+        <tr><td>60%</td><td>〜¥16,000（255）</td><td>〜¥1,250（229）</td></tr>
+        <tr><td>80%</td><td>〜¥30,000（348）</td><td>〜¥1,500（290）</td></tr>
+        <tr><td>—</td><td colspan="2">こだわらない</td></tr></table></div>
+    </div>
+    <p class="sub" style="margin-top:14px">行に出す情報の候補（取捨は Design）: 段の名前（例: 気軽に / ふつう / ちょっと贅沢 / 贅沢）/ グループごとの上限額（1〜3 グループ）/ その上限までに入る店の数 / 店の写真の例（<code>assets/sample/</code>）</p>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>探索してほしいこと（似た案を 2 つ出さない）</h2>
+    <div class="axes">
+      <div class="ax"><b>時間帯 ① 1 日の縦の帯</b><p>時刻の目盛りと帯の名前（朝 / 昼 / 夕 / 夜 / 深夜）。始まりと終わりの泡に時刻を内包し、どちらが始まりか一目で分かる</p></div>
+      <div class="ax"><b>時間帯 ② 24 時間の円（アーク）</b><p>日の出 → 日没 → 夜の円で、範囲を弧として見せる。今の値は中央に常に読める</p></div>
+      <div class="ax"><b>時間帯 ③ タップだけ</b><p>よくある枠（今から / 昼 / 夕方〜夜 / 夜〜深夜）の泡 + ±30 分の微調整。ドラッグ無しで決められる</p></div>
+      <div class="ax"><b>予算 ① 段の名前 + 額</b><p>1 行 = 段の名前と、グループ別の上限額（1〜3 個）。2〜5 行で崩れない</p></div>
+      <div class="ax"><b>予算 ② 店の数のはしご</b><p>段ごとに「入る店の数」を長さで見せる。多い段 / 少ない段が分かる</p></div>
+      <div class="ax"><b>予算 ③ 店の写真つき</b><p>各段に店の写真 2〜3 枚（<code>assets/sample/</code>）。相場が顔で伝わる</p></div>
+    </div>
+    <div class="no" style="margin-top:18px"><b>どの案も:</b> 部品は泡（白い塗りの丸・箱・罫線のリストにしない）/ ダークとライトの両方 / 選んだものが 1 つだけ強調 / 決定ボタンは固定の形 / 決め直しで開いたときは今の値が入っている</div>
+  </section>
+
+  <section>
+    <h2><span class="n">06</span>納品</h2>
+    <ul>
+      <li><code>handoff/PlanTimeBudget/time-a.html</code> <code>time-b.html</code> <code>time-c.html</code> / <code>budget-a.html</code> <code>budget-b.html</code> <code>budget-c.html</code> + 並べる <code>gallery.html</code></li>
+      <li>各ファイル冒頭コメントに設計意図（どの探索軸か・なぜ直感的か）。<code>.phone</code> の枠に 402×874。街は <code>shots/prefs-center-bubble.jpg</code> を背景に敷いてよい</li>
+      <li>各 specimen 先頭に <code>@dsCard</code>（group="PlanTimeBudget"）を付け <code>DesignSystem/_ds_manifest.json</code> に登録。アセットは <code>../../assets/</code>（複製しない）</li>
+      <li><code>HANDOFF.md</code> / <code>brief.html</code> / <code>shots/</code> は上書きしない。最終はダウンロード可能な bundle で</li>
+    </ul>
+  </section>
+</div></body></html>
