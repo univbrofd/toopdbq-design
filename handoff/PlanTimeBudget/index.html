@@ -1,0 +1,30 @@
+<!-- 入口: 上のタブで 実機デモ / 時間 / 予算 / ギャラリー を切り替える（1 ページの中で切り替わる） -->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Toopdbq — 時間と予算</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#0d0d0f;color:#fff;font-family:-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif}
+  a{color:#f0cf6a}
+  body{display:flex;flex-direction:column}
+  nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;flex:none;border-bottom:1px solid #222}
+  nav button{flex:none;height:36px;padding:0 14px;border-radius:99px;border:0;background:rgba(255,255,255,.08);color:#ddd;font:700 13px/36px inherit;cursor:pointer}
+  nav button.on{background:#f0cf6a;color:#1d1503}
+  iframe{flex:1;width:100%;border:0;background:#0d1017}
+</style></head>
+<body>
+<nav id="nav">
+  <button data-src="app.html">実機デモ</button>
+  <button data-src="time-final.html">時間</button>
+  <button data-src="budget-a.html">予算</button>
+  <button data-src="gallery.html">ギャラリー</button>
+</nav>
+<iframe id="f" title="page"></iframe>
+<script>
+  const f = document.getElementById('f'), bs = [...document.querySelectorAll('nav button')];
+  const go = src => { bs.forEach(b => b.classList.toggle('on', b.dataset.src === src)); f.src = src + (src === 'app.html' ? '' : ''); history.replaceState(null, '', '#' + src); };
+  bs.forEach(b => b.onclick = () => go(b.dataset.src));
+  go(bs.some(b => b.dataset.src === location.hash.slice(1)) ? location.hash.slice(1) : 'app.html');
+</script>
+</body></html>

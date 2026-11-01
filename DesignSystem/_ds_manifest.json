@@ -303,6 +303,34 @@
       "viewport": "1440x900",
       "subtitle": "web plan の時間帯と予算のダイアログ。板なし・中心が濃いスクリム・泡の部品。時間帯は直感的に 3 案、予算は好みの店の値段から作る 2〜5 段を縦に並べてタップ 3 案",
       "name": "PlanTimeBudget — brief"
+    },
+    {
+      "path": "handoff/PlanTimeBudget/gallery.html",
+      "group": "PlanTimeBudget",
+      "viewport": "1440x900",
+      "subtitle": "採用案 — 時間帯（縦の棒 + 棒の泡 + よくある 4 枠）と予算（段の名前 + グループ別の上限）をダーク・ライトで。行数 2〜5 と決め直しの状態つき",
+      "name": "PlanTimeBudget — gallery"
+    },
+    {
+      "path": "handoff/PlanTimeBudget/app.html",
+      "group": "PlanTimeBudget",
+      "viewport": "402x874",
+      "subtitle": "スマホで開くと全画面で動く。時間帯 → 予算 → 中央の玉に答えの泡。押すと今の値入りで決め直し",
+      "name": "PlanTimeBudget — 実機で動くデモ"
+    },
+    {
+      "path": "handoff/PlanTimeBudget/time-final.html",
+      "group": "PlanTimeBudget",
+      "viewport": "520x1000",
+      "subtitle": "1 日を 1 本の縦の棒に。から の泡は左・まで の泡は右に棒で生え、なぞって範囲を動かす。上の 4 枠の泡を押すとその範囲が入る",
+      "name": "時間帯 — 採用（縦の棒 + 棒の泡 + よくある 4 枠）"
+    },
+    {
+      "path": "handoff/PlanTimeBudget/budget-a.html",
+      "group": "PlanTimeBudget",
+      "viewport": "520x1000",
+      "subtitle": "1 行 = 段の名前 + グループごとの上限額（列で揃える）。選んだ行に ✓ の泡が滑る。データ A〜E で 2〜5 行",
+      "name": "予算 — 採用（段の名前 + グループ別の上限・タップで即決定）"
     }
   ],
   "templates": [],

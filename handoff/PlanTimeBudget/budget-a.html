@@ -1,0 +1,73 @@
+<!-- @dsCard group="PlanTimeBudget" name="予算 — 採用（段の名前 + グループ別の上限・タップで即決定）" subtitle="1 行 = 段の名前 + グループごとの上限額（列で揃える）。決定ボタンなし — 行を押すと ✓ の泡が滑ってそのまま決まる。データ A〜E で 2〜5 行" viewport="520x1000" -->
+<!--
+  設計意図 — 予算 A「段の名前 + グループ別の上限額」（探索軸 ①）
+  - 言葉で選ぶ: 「気軽に / ふつう / ちょっと贅沢 / 贅沢 / こだわらない」。人は予算を金額より先に「どのくらいの感じ」で考えるので、名前を主役にする。
+  - 額は列で揃える: 列の頭にグループ名と「1 人まで / 1 点まで」を 1 回だけ書き、各行は数字だけ。2 グループで桁が違っても（古着 ¥30,000 とカフェ ¥1,500）
+    同じ列の中で上から下へ増えていくのが読める。1〜3 グループまで列を足すだけ。
+  - 前の段と同じ額（焼肉の 40% と 60% が ¥6,000）は空欄にせず薄く出す。空欄だと「その段では焼肉に上限が無い」と読めてしまうため。
+  - 選んだ行は ✓ の泡が行の左に滑ってきて、段の名前が金色になる（1 つだけ）。泡は 1 つなので glass を食わない。
+  - 決定ボタンは置かない: 1 つ選ぶだけの画面なので、行を押した瞬間に決まる。✓ の泡が滑り終えるのを少し見せて（350ms）から閉じる。
+    決め直しで開いたときも同じ（今の値の行を押せばそのまま閉じる / 裏を押すと変えずに閉じる）。
+  - 行は 2〜5 で上下中央に寄る。行の高さ 56（タップ範囲 ≥ 44）。
+  - glass: 💰 48 + ✓ 34 + 右下 2 = 4 / 画面。
+-->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>予算 A — 段の名前 + 上限額</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="ptb.css">
+<style>
+  .area{position:absolute;left:25px;width:352px;top:200px;height:480px;display:flex;flex-direction:column;justify-content:center}
+  .list{position:relative}
+  .grid{display:grid;align-items:center;column-gap:8px}
+  .hd{padding-bottom:6px}
+  .hd .g{text-align:right;font-size:12px;font-weight:700;color:var(--fg2);line-height:1.35}
+  .hd .g small{display:block;font-size:11px;font-weight:400;color:var(--fg3)}
+  .row{height:56px;cursor:pointer;background:none;border:0;width:100%;padding:0;font:inherit;color:inherit;text-align:left}
+  .row .nm{font-size:17px;font-weight:700;color:var(--fg2);transition:color .2s}
+  .row .a{text-align:right;font-size:16px;font-weight:700;color:var(--fg3);transition:color .2s}
+  .row .a.same{opacity:.55}
+  .row .none{text-align:right;font-size:13px;color:var(--fg3)}
+  .row.on .nm{color:var(--hi)}
+  .row.on .a{color:var(--fg)}
+  .row.on .none{color:var(--fg2)}
+  .mark{position:absolute;left:0;top:0;transition:transform .25s cubic-bezier(.16,1,.3,1);pointer-events:none}
+</style></head>
+<body>
+<div class="ctl" id="ctl"></div>
+<div class="phone" id="phone">
+  <div class="city"></div><div class="scrim"></div>
+  <div class="dlg" id="dlg">
+    <div class="bub s48" style="position:absolute;left:177px;top:78px;font-size:22px">💰</div>
+    <div class="ttl" style="top:138px">予算はいくらまで？</div>
+    <div class="sub" style="top:166px">選んだお店の値段から</div>
+    <div class="area"><div class="list" id="list"></div></div>
+  </div>
+</div>
+<div class="out" id="out"></div>
+<script src="ptb.js"></script>
+<script>
+  const D = PTB.DATA[PTB.dataKey()], rows = PTB.tiers(D), G = D.groups.length;
+  const cols = `34px minmax(0,1fr) repeat(${G}, ${G > 2 ? 72 : 92}px)`;
+  const list = document.getElementById('list');
+  list.innerHTML = `<div class="grid hd" style="grid-template-columns:${cols}"><span></span><span></span>${D.groups.map(g => `<span class="g">${g.name}<small>1 ${g.per}まで</small></span>`).join('')}</div>` +
+    rows.map((r, k) => `<button class="row grid" data-k="${k}" style="grid-template-columns:${cols}"><span></span><span class="nm">${r.name}</span>${
+      r.any ? `<span class="none" style="grid-column:span ${G}">上限なし</span>` :
+      r.cells.map(c => `<span class="a ${c.same ? 'same' : ''}">${PTB.yen(c.amt)}</span>`).join('')}</button>`).join('') +
+    `<div class="mark bub s34" id="mark"><img class="ico" src="../../assets/icons/icon_check.png" alt="" style="width:16px;height:16px"></div>`;
+  let sel;
+  function render() {
+    document.querySelectorAll('.row').forEach(el => el.classList.toggle('on', +el.dataset.k === sel));
+    const el = document.querySelector(`.row[data-k="${sel}"]`);
+    document.getElementById('mark').style.transform = `translateY(${el.offsetTop + 11}px)`;
+    PTB.out(`budgets: ${JSON.stringify(PTB.budgets(rows[sel]))}`);
+  }
+  let commit = () => {}, busy = false;
+  document.querySelectorAll('.row').forEach(el => el.onclick = () => { if (busy) return; busy = true; sel = +el.dataset.k; render(); setTimeout(() => { commit(); busy = false; }, 350); });
+  PTB.controls([{ k: 'data', label: 'データ', def: 'A', opts: Object.keys(PTB.DATA).map(k => [k, `${k}・${PTB.tiers(PTB.DATA[k]).length}行`]) }]);
+  ({ commit } = PTB.mount({ emoji: '💰', noDone: true, initial: PTB.defaultTier(rows), reopenValue: PTB.reopenTier(rows),
+    get: () => sel, set: v => { sel = v; render(); },
+    answer: k => rows[k].any ? 'こだわらない' : `${rows[k].name}<br>${PTB.yen(rows[k].cells[0].amt)}` }));
+</script>
+</body></html>

@@ -1,0 +1,101 @@
+<!-- @dsCard group="PlanTimeBudget" name="時間帯 — 採用（縦の棒 + 棒の泡 + よくある 4 枠）" subtitle="1 日を 1 本の縦の棒（上 = 6:00・下 = 翌6:00）に。から の泡は左・まで の泡は右に棒で生え、なぞって範囲を動かす。上の 4 つの泡（今から / 昼 / 夕方〜夜 / 夜〜深夜）を押すとその範囲が棒に入る" viewport="520x1000" -->
+<!--
+  設計意図 — 時間帯 採用案（縦の棒）
+  - 1 日を上から下へ 1 本の棒で読む（6:00 が上・翌6:00 が下）。選んだ範囲だけ空の色で塗る（朝の黄 → 昼の青 → 夕の橙 → 夜の紫）。
+  - から の泡は棒の左、まで の泡は棒の右に、細い棒で生やす。左右に分かれているので最短 60 分まで近づけても泡が重ならず、どちらが始まりか取り違えない。
+    泡の中に時刻。棒の左半分をなぞると から、右半分をなぞると まで が動く（押した位置へ跳ぶのでタップでも決まる）。
+  - 上に よくある 4 枠 の泡。押すとその範囲へ棒の色がすべって入る（ドラッグ必須にしない）。今の範囲と一致する枠だけ金の輪で光る。
+  - 今の値は 棒の上に「14:30 / ~ 翌0:00」の 2 行で常に読める。
+  - glass（backdrop-filter）: から / まで の泡 2 + 決定 1 + 右下 2（スクリムの下）= 5 / 画面。4 枠の泡は同じ輪 + 面で blur なし。
+-->
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>時間帯 — 採用</title>
+<link rel="stylesheet" href="../../DesignSystem/colors_and_type.css">
+<link rel="stylesheet" href="../../DesignSystem/preview/card.css">
+<link rel="stylesheet" href="ptb.css">
+<style>
+  .flat{-webkit-backdrop-filter:none;backdrop-filter:none}
+  .presets{position:absolute;left:25px;top:630px;width:352px;display:grid;grid-template-columns:repeat(4,1fr)}
+  .phone .done{top:724px}
+  .pre{display:grid;justify-items:center;gap:5px;background:none;border:0;color:var(--fg);cursor:pointer;padding:0;font:inherit}
+  .pre .bub{font-size:22px;transition:box-shadow .2s}
+  .pre .n{font-size:13px;font-weight:700;margin-top:2px;transition:color .2s}
+  .pre.on .bub{box-shadow:0 0 0 2px var(--hiLine),0 0 18px rgba(240,207,106,.45)}
+  .pre.on .n{color:var(--hi)}
+  .val{position:absolute;left:0;right:0;top:124px;display:grid;justify-items:center;gap:2px;pointer-events:none}
+  .val b{font-size:22px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+  .bar{position:absolute;left:196px;width:10px;border-radius:5px;background:var(--fg4)}
+  .sel{position:absolute;left:196px;width:10px;border-radius:5px;background:linear-gradient(180deg,var(--sky))}
+  svg.sticks{position:absolute;left:0;top:0;width:402px;height:874px;pointer-events:none;overflow:visible;color:var(--fg2)}
+  .phone .dlg > svg.sticks{pointer-events:none}
+  .knob{position:absolute;pointer-events:none;align-content:center;gap:1px;text-align:center}
+  .knob b{font-size:13px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+  .knob small{font-size:10px;font-weight:700;color:var(--fg2);line-height:1}
+  .zone{position:absolute;touch-action:none;cursor:ns-resize}
+</style></head>
+<body>
+<div class="ctl" id="ctl"></div>
+<div class="phone" id="phone">
+  <div class="city"></div><div class="scrim"></div>
+  <div class="dlg" id="dlg">
+    <div class="ttl" style="top:80px">時間は？</div>
+    <div class="presets" id="presets"></div>
+    <div class="val"><b id="vs"></b></div>
+    <div class="bar" id="bar"></div>
+    <div class="sun" style="position:absolute;left:214px;top:182px;font-size:18px;line-height:1;pointer-events:none">☀️</div>
+    <div class="moon" style="position:absolute;left:170px;top:576px;font-size:18px;line-height:1;pointer-events:none">🌙</div>
+    <div class="sel" id="sel"></div>
+    <svg class="sticks"><line id="l0" stroke="currentColor" stroke-width="1.5"/><line id="l1" stroke="currentColor" stroke-width="1.5"/>
+      <circle id="d0" r="3" fill="currentColor"/><circle id="d1" r="3" fill="currentColor"/></svg>
+    <div class="knob bub s52" id="k0"><b id="t0"></b><small>から</small></div>
+    <div class="knob bub s52" id="k1"><b id="t1"></b><small>まで</small></div>
+    <div class="zone" id="z0"></div>
+    <div class="zone" id="z1"></div>
+  </div>
+</div>
+<div class="out" id="out"></div>
+<script src="ptb.js"></script>
+<script>
+  const BX = 201, Y0 = 196, H = 384, KX = 72;   // 棒の中心 x / 6:00 の y / 棒の長さ / 泡までの棒の長さ
+  const y = m => Y0 + (m - 360) / 1440 * H, mOf = py => PTB.snap(360 + (py - Y0) / H * 1440);
+  const $ = id => document.getElementById(id);
+  const PRE = [['🕑', '今から', PTB.initTime()], ['☀️', '昼', [660, 1020]], ['🌆', '夕方〜夜', [1020, 1380]], ['🌙', '夜〜深夜', [1200, 1620]]];
+  $('presets').innerHTML = PRE.map(([em, n], i) =>
+    `<button class="pre" data-i="${i}"><span class="bub s52 flat">${em}</span><span class="n">${n}</span></button>`).join('');
+  Object.assign($('bar').style, { top: Y0 - 5 + 'px', height: H + 10 + 'px' });
+  Object.assign($('z0').style, { left: '40px', width: BX - 40 + 'px', top: Y0 - 30 + 'px', height: H + 60 + 'px' });
+  Object.assign($('z1').style, { left: BX + 'px', width: 362 - BX + 'px', top: Y0 - 30 + 'px', height: H + 60 + 'px' });
+  const line = (id, a) => a.forEach((v, j) => $(id).setAttribute(['x1', 'y1', 'x2', 'y2'][j], v));
+  let s, e;
+  function draw(ds, de) {
+    const sel = $('sel'), y0 = y(ds), y1 = y(de);
+    sel.style.top = y0 - 5 + 'px'; sel.style.height = y1 - y0 + 10 + 'px';
+    sel.style.backgroundSize = `10px ${H + 10}px`; sel.style.backgroundPosition = `0 ${Y0 - y0}px`;
+    line('l0', [BX - 7, y0, BX - KX, y0]); line('l1', [BX + 7, y1, BX + KX, y1]);
+    $('d0').setAttribute('cx', BX - 7); $('d0').setAttribute('cy', y0); $('d1').setAttribute('cx', BX + 7); $('d1').setAttribute('cy', y1);
+    $('k0').style.left = BX - KX - 26 + 'px'; $('k0').style.top = y0 - 26 + 'px';
+    $('k1').style.left = BX + KX - 26 + 'px'; $('k1').style.top = y1 - 26 + 'px';
+  }
+  function render() {
+    draw(s, e);
+    $('t0').textContent = PTB.fmt(s); $('t1').textContent = PTB.fmt(e); $('vs').textContent = `${PTB.fmt(s)} ~ ${PTB.fmt(e)}`;
+    document.querySelectorAll('.pre').forEach(el => { const [a, b] = PRE[el.dataset.i][2]; el.classList.toggle('on', a === s && b === e); });
+    PTB.out(`start ${s} / end ${e}  (${PTB.range(s, e)})`);
+  }
+  let raf;
+  function tweenTo(ns, ne) {
+    const fs = s, fe = e, t0 = performance.now(); s = ns; e = ne; render(); cancelAnimationFrame(raf);
+    const step = t => { const k = Math.min(1, (t - t0) / 320), q = 1 - Math.pow(1 - k, 3); draw(fs + (ns - fs) * q, fe + (ne - fe) * q); if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  }
+  document.querySelectorAll('.pre').forEach(el => el.onclick = () => tweenTo(...PRE[el.dataset.i][2]));
+  const phone = $('phone');
+  PTB.drag($('z0'), ev => { cancelAnimationFrame(raf); [s, e] = PTB.clampStart(mOf(PTB.local(ev, phone).y), e); render(); });
+  PTB.drag($('z1'), ev => { cancelAnimationFrame(raf); [s, e] = PTB.clampEnd(s, mOf(PTB.local(ev, phone).y)); render(); });
+  PTB.controls();
+  PTB.mount({ emoji: '🕐', initial: PTB.initTime(), reopenValue: [1080, 1560],
+    get: () => [s, e], set: v => { cancelAnimationFrame(raf); [s, e] = v; render(); },
+    answer: v => `${PTB.fmt(v[0])}〜<br>${PTB.fmt(v[1])}` });
+</script>
+</body></html>
