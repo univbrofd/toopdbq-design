@@ -1,0 +1,281 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-02T12:24:27.715Z"
+  },
+  "title": "Toopdbq Bubble",
+  "namespace": "ToopdbqBubble",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Logos",
+    "Bubble",
+    "Faces",
+    "DayLine",
+    "Photos"
+  ],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "logo_toopdbq_bubble.png",
+        "logo_toopdbq_bubble_word.png",
+        "logo_toopdbq_bubble_dark.png",
+        "logo_web.webp",
+        "logo_word_web.webp"
+      ],
+      "files": {
+        "logo_toopdbq_bubble.png": {
+          "name": "logo_toopdbq_bubble.png",
+          "blob": "e0e11633fce51f834ce1af1905a2a8e1",
+          "size": 338740,
+          "type": "image/png"
+        },
+        "logo_toopdbq_bubble_word.png": {
+          "name": "logo_toopdbq_bubble_word.png",
+          "blob": "7407f9705ef2d25da9dbbd0d86ac6725",
+          "size": 244478,
+          "type": "image/png"
+        },
+        "logo_toopdbq_bubble_dark.png": {
+          "name": "logo_toopdbq_bubble_dark.png",
+          "blob": "a6e557cc2041d21d9d07ed2837c7c48b",
+          "size": 1261257,
+          "type": "image/png"
+        },
+        "logo_web.webp": {
+          "name": "logo_web.webp",
+          "blob": "46a61403a027f7655412427dfe1c8d01",
+          "size": 96276,
+          "type": "image/webp"
+        },
+        "logo_word_web.webp": {
+          "name": "logo_word_web.webp",
+          "blob": "5a1ddc0168931732bf07c60b3c27b060",
+          "size": 21448,
+          "type": "image/webp"
+        }
+      }
+    },
+    "Bubble": {
+      "name": "Bubble",
+      "tile": "m",
+      "order": [
+        "bubble.webp",
+        "bubble.s.webp"
+      ],
+      "files": {
+        "bubble.webp": {
+          "name": "bubble.webp",
+          "blob": "f6044300f050280a7091ca1bc171bafa",
+          "size": 79224,
+          "type": "image/webp"
+        },
+        "bubble.s.webp": {
+          "name": "bubble.s.webp",
+          "blob": "b3c2b6fb1ed97caac9b2081b617569c7",
+          "size": 4182,
+          "type": "image/webp"
+        }
+      }
+    },
+    "Faces": {
+      "name": "Faces",
+      "tile": "s",
+      "order": [
+        "hyakumeiten.webp",
+        "plan.webp",
+        "talk.webp",
+        "lunch.ramen.webp",
+        "dinner.yakiniku.webp",
+        "bar.beer.webp",
+        "snack.coffee.webp",
+        "sauna.webp",
+        "culture.art.webp"
+      ],
+      "files": {
+        "hyakumeiten.webp": {
+          "name": "hyakumeiten.webp",
+          "blob": "cda3c000310b16feca264fe2969a993d",
+          "size": 27872,
+          "type": "image/webp"
+        },
+        "plan.webp": {
+          "name": "plan.webp",
+          "blob": "630dd73777836dea79f88b1ebd7a7eb6",
+          "size": 28744,
+          "type": "image/webp"
+        },
+        "talk.webp": {
+          "name": "talk.webp",
+          "blob": "48d344f1502e4d4debbde41a8a2e7b3a",
+          "size": 33818,
+          "type": "image/webp"
+        },
+        "lunch.ramen.webp": {
+          "name": "lunch.ramen.webp",
+          "blob": "d7a4cc3d8b18a26e59634b817caa2240",
+          "size": 33328,
+          "type": "image/webp"
+        },
+        "dinner.yakiniku.webp": {
+          "name": "dinner.yakiniku.webp",
+          "blob": "263b764cd07eab89e1ac5fc81c744aaa",
+          "size": 32982,
+          "type": "image/webp"
+        },
+        "bar.beer.webp": {
+          "name": "bar.beer.webp",
+          "blob": "e2d8e8e29167ab150b8279505c56e8df",
+          "size": 25892,
+          "type": "image/webp"
+        },
+        "snack.coffee.webp": {
+          "name": "snack.coffee.webp",
+          "blob": "1b6b7e5361899c2857dadd62c69fac26",
+          "size": 19442,
+          "type": "image/webp"
+        },
+        "sauna.webp": {
+          "name": "sauna.webp",
+          "blob": "ae1df2c654b849497bc96a4f65fb7a3b",
+          "size": 23252,
+          "type": "image/webp"
+        },
+        "culture.art.webp": {
+          "name": "culture.art.webp",
+          "blob": "231afcbe2cd5939c417f97bf3552229e",
+          "size": 31546,
+          "type": "image/webp"
+        }
+      }
+    },
+    "Photos": {
+      "name": "Photos",
+      "tile": "m",
+      "order": [
+        "reel001.jpg",
+        "reel002.jpg",
+        "reel003.jpg",
+        "background001.jpg"
+      ],
+      "files": {
+        "reel001.jpg": {
+          "name": "reel001.jpg",
+          "blob": "82966cca93851d912e1aa46624723fe8",
+          "size": 329056,
+          "type": "image/jpeg"
+        },
+        "reel002.jpg": {
+          "name": "reel002.jpg",
+          "blob": "ba11aad38505bc67cd5335b37bf6ed95",
+          "size": 198935,
+          "type": "image/jpeg"
+        },
+        "reel003.jpg": {
+          "name": "reel003.jpg",
+          "blob": "bb45ef5673413d6b4611ed1583637f93",
+          "size": 206061,
+          "type": "image/jpeg"
+        },
+        "background001.jpg": {
+          "name": "background001.jpg",
+          "blob": "0dcf2ffe41a4d7df6736d83a9e9bd43f",
+          "size": 373010,
+          "type": "image/jpeg"
+        }
+      }
+    },
+    "DayLine": {
+      "name": "DayLine",
+      "tile": "m",
+      "order": [
+        "dayLine.webp",
+        "dayBand.webp",
+        "early.webp",
+        "morning.webp",
+        "noon.webp",
+        "afternoon.webp",
+        "evening.webp",
+        "night.webp",
+        "late.webp",
+        "dawn.webp"
+      ],
+      "files": {
+        "dayLine.webp": {
+          "name": "dayLine.webp",
+          "blob": "bcbede4dfe7159d92e136b86064eb5a8",
+          "size": 150996,
+          "type": "image/webp"
+        },
+        "dayBand.webp": {
+          "name": "dayBand.webp",
+          "blob": "c870c6d9eb0a2c4e33dc51391678e481",
+          "size": 193330,
+          "type": "image/webp"
+        },
+        "early.webp": {
+          "name": "early.webp",
+          "blob": "e11a5e0a538639165b8e893190768643",
+          "size": 15666,
+          "type": "image/webp"
+        },
+        "morning.webp": {
+          "name": "morning.webp",
+          "blob": "bc4627f925e3cbf355a2ed254a54aed0",
+          "size": 20796,
+          "type": "image/webp"
+        },
+        "noon.webp": {
+          "name": "noon.webp",
+          "blob": "7072a6fd48c0d540742897ededa30f9d",
+          "size": 21524,
+          "type": "image/webp"
+        },
+        "afternoon.webp": {
+          "name": "afternoon.webp",
+          "blob": "d1b70f2094d5bc1d6eb375b2d8f3a926",
+          "size": 21468,
+          "type": "image/webp"
+        },
+        "evening.webp": {
+          "name": "evening.webp",
+          "blob": "fc91a95a40b22f15bf53eab4dc1d7733",
+          "size": 15520,
+          "type": "image/webp"
+        },
+        "night.webp": {
+          "name": "night.webp",
+          "blob": "f4c7b6d07928cd5b8920a5f051e6ce12",
+          "size": 15302,
+          "type": "image/webp"
+        },
+        "late.webp": {
+          "name": "late.webp",
+          "blob": "d364d0a254839c15e3f6d7c68f1ec778",
+          "size": 7184,
+          "type": "image/webp"
+        },
+        "dawn.webp": {
+          "name": "dawn.webp",
+          "blob": "936436324e48f3bb4f991293faf5ebed",
+          "size": 15850,
+          "type": "image/webp"
+        }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Asaka Ko",
+    "at": "2026-11-08T03:10:00Z",
+    "via": "Claude Code · univbrofd/toopdbq@5254d5422 (site/ の作業ツリー)",
+    "note": "ボタンは全部泡の絵: 丸 = bubble.webp を 100%（.bub）・文字 / チップ / いいね / 入力欄 = 9 スライスで伸ばした皮（.bubx・--bw = 高さの半分）。選んだ = bubble-on + shadow-halo。図形の泡（放射の照り・conic の虹の縁・白い枠線）と虹の弾ける輪を撤去。続けて行の中のアイコン（.dr-x / .fd-more / .dk-more / 共有）・文字のリンク・食事のスイッチも泡に、予算の段 / 映画の回 / ジャンルの行は泡の絵を伸ばした枠で囲む"
+  }
+}

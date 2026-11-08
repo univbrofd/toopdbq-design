@@ -1,0 +1,37 @@
+<!-- @dsCard group="Controls" width=402 height=471 subtitle="泡の絵を伸ばしたチップ .pl-chip2: 日の切り替え（aria-pressed）・直したいところ・直している間（押した 1 つだけ明るく・ほかは disabled）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>Chip</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding:8px 0 20px}
+.cap{display:block;margin:8px 32px 0;font-size:11px;line-height:1.45;color:var(--fg3)}
+.cap.c{margin:8px 16px 0;text-align:center}
+.w > .pl-endin{padding-top:12px}
+</style></head><body><div class="w">
+<div class="pl-days">
+  <button type="button" class="pl-chip2" aria-pressed="true">1 日目 · 11/7(土)</button>
+  <button type="button" class="pl-chip2" aria-pressed="false">2 日目 · 11/8(日)</button>
+</div>
+<span class="cap c">日の切り替え .pl-days（中央・間 8）: aria-pressed="true" = 泡の中を白 .2 で満たす + shadow-halo・600</span>
+
+<div class="pl-endin">
+  <h3>変えたいところは？</h3>
+  <div class="pl-tunes">
+    <button type="button" class="pl-chip2" aria-pressed="false">もっと安く</button>
+    <button type="button" class="pl-chip2" aria-pressed="false">歩くのを減らす</button>
+    <button type="button" class="pl-chip2" aria-pressed="false">もう 1 軒</button>
+    <button type="button" class="pl-chip2" aria-pressed="false">個人店を多めに</button>
+    <button type="button" class="pl-chip2" aria-pressed="false">カフェで休憩を</button>
+  </div>
+</div>
+<span class="cap">直したいところ .pl-tunes（折り返し・間 8）: 素 = 泡の絵の皮（--bw 17）だけ・面なし</span>
+
+<div class="pl-endin">
+  <div class="pl-tunes">
+    <button type="button" class="pl-chip2" aria-pressed="false" disabled>もっと安く</button>
+    <button type="button" class="pl-chip2" aria-pressed="true" disabled>歩くのを減らす</button>
+    <button type="button" class="pl-chip2" aria-pressed="false" disabled>もう 1 軒</button>
+    <button type="button" class="pl-chip2" aria-pressed="false" disabled>個人店を多めに</button>
+    <button type="button" class="pl-chip2" aria-pressed="false" disabled>カフェで休憩を</button>
+  </div>
+</div>
+<span class="cap">直している間: 全部 disabled（.45）・押した 1 つは aria-pressed のまま明るい</span>
+</div></body></html>

@@ -1,0 +1,20 @@
+<!-- @dsCard group="Controls" width=402 height=295 subtitle="1 行の入力のカプセル .pl-field + 送信の泡: 空（送信は disabled）・入力あり（.pl-bub.on）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>InputBar</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding:0 0 20px}
+.cap{display:block;margin-top:8px;font-size:11px;line-height:1.45;color:var(--fg3)}
+.w .pl-field + .cap + .pl-field{margin-top:18px}
+</style></head><body><div class="w"><div class="pl-endin">
+<h3>変えたいところは？</h3>
+<form class="pl-field">
+  <input type="text" maxlength="300" enterkeyhint="send" placeholder="ほかの希望を書く（例: 最後はラーメン）" aria-label="ほかの希望を書く（例: 最後はラーメン）">
+  <button type="submit" class="pl-bub" disabled aria-label="送信"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</form>
+<span class="cap">空: プレースホルダは fg3・送信の泡は disabled（.5）</span>
+<form class="pl-field">
+  <input type="text" maxlength="300" enterkeyhint="send" value="最後はラーメン" placeholder="ほかの希望を書く（例: 最後はラーメン）" aria-label="ほかの希望を書く（例: 最後はラーメン）">
+  <button type="submit" class="pl-bub on" aria-label="送信"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+</form>
+<span class="cap">入力あり: 送信の泡が .on（泡の中を白 .2 で満たす + shadow-halo）</span>
+<p class="pl-note">送ると、上のプランをその場で直します。</p>
+</div></div></body></html>

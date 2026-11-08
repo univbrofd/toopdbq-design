@@ -1,0 +1,24 @@
+<!-- @dsCard group="Plan" width=402 height=600 subtitle="段のカード .tm-ask-card（段の写真・名前 + 時刻・言葉）と PlanFlow の .fl-card（全部選んだ / 組み立て中の進み線 .fl-pg）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>AskCard</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding:6px 0 18px}
+.pad{padding:0 16px}
+.cap{margin:8px 16px 14px;font-size:11px;line-height:1.5;color:var(--fg3)}
+</style></head><body><div class="w">
+<div class="pad"><header class="tm-ask">
+<section class="tm-ask-card" aria-live="polite"><img alt="" src="../img/bands/noon.webp" decoding="async"><div class="tm-ask-bn"><h2>昼</h2><small>12:00〜15:00</small></div><p>お昼ごはんの時間。ランチか、人気のラーメンがおすすめです。</p></section>
+</header></div>
+<p class="cap">段のカード（.tm-ask-card・Mood）: 写真 = その段の bands/noon.webp</p>
+<div class="pad"><header class="tm-ask">
+<section class="tm-ask-card" aria-live="polite"><img alt="" src="../img/bands/evening.webp" decoding="async"><div class="tm-ask-bn"><h2>夕方・夜</h2><small>18:00〜21:00</small></div><p>夕ごはんの時間。焼肉か居酒屋がおすすめです。</p></section>
+</header></div>
+<p class="cap">同じ形で段ごとに写真と言葉が替わる（bands/evening.webp）</p>
+<div class="fl choose"><header class="tm-ask pl-ask">
+<section class="tm-ask-card fl-card" aria-live="polite"><img alt="" src="../img/dayLine.webp" decoding="async"><div class="tm-ask-bn"><h2>この流れで組みます</h2><small>10:00〜翌0:00</small></div><p>予算を選んで決定すると、組みはじめます。</p><span class="fl-pg" aria-hidden="true"><i></i></span></section>
+</header></div>
+<p class="cap">全部選んだ（.fl.choose の .fl-card）: 写真 = 1 日の帯 dayLine.webp・時刻 = プランの時間</p>
+<div class="fl build"><header class="tm-ask pl-ask">
+<section class="tm-ask-card fl-card" aria-live="polite"><img alt="" src="../img/dayLine.webp" decoding="async"><div class="tm-ask-bn"><h2>プランを組み立て中</h2><small>10:00〜翌0:00</small></div><p>午後のお店を見比べています。</p><span class="fl-pg" aria-hidden="true"><i></i></span></section>
+</header></div>
+<p class="cap">組み立て中（.fl.build）: 下端に 2px の進み線 .fl-pg が 1.5s で流れ続ける</p>
+</div></body></html>

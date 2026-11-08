@@ -1,0 +1,121 @@
+<!-- @dsCard group="Plan" width=402 height=1000 subtitle="1 日の写真の帯 .al: 聞いている段（.cur + .al-dim）/ 全部選んだ（.done）/ 組み立て中（.al-sweep + .work / .res）/ 開いたプラン（.pl-ask の .cur に顔）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>DayLine</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding-bottom:8px}
+.st{position:relative}
+.pad{padding:0 16px}
+.cap{position:relative;z-index:3;margin:30px 16px 22px;font-size:11px;line-height:1.5;color:var(--fg3)}
+</style></head><body><div class="w">
+<div class="st pad"><button type="button" class="tm-bub pl-x tm-back" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><button type="button" class="tm-bub pl-x tm-quit" aria-label="閉じる"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+<header class="tm-ask"><h1 class="tm-ask-h" id="h">プラン作成</h1>
+<div class="al">
+<div class="al-img" role="group" aria-labelledby="h" style="height:189px;margin-top:-55px;margin-bottom:-32px">
+<i class="al-ph" style="top:0px;height:198.43px;background-size:595.28px 198.43px;background-position:-86.22px 0"></i>
+<i class="al-top" style="height:67px"></i>
+<i class="al-bd end" style="left:36.8px;top:55px"></i>
+<i class="al-bd" style="left:86.41px;top:55px"></i>
+<i class="al-bd" style="left:157.84px;top:55px"></i>
+<i class="al-bd" style="left:229.28px;top:55px"></i>
+<i class="al-bd" style="left:309.64px;top:55px"></i>
+<i class="al-bd end" style="left:390px;top:55px"></i>
+<i class="al-dim" style="left:0;width:229.28px"></i>
+<i class="al-dim" style="left:309.64px;width:92.36px"></i>
+<span class="al-t" style="left:12px;top:62px" aria-hidden="true">9</span>
+<span class="al-t" style="left:86.41px;top:62px" aria-hidden="true">12</span>
+<span class="al-t" style="left:157.84px;top:62px" aria-hidden="true">15</span>
+<span class="al-t" style="left:229.28px;top:62px" aria-hidden="true">18</span>
+<span class="al-t" style="left:309.64px;top:62px" aria-hidden="true">21</span>
+<span class="al-t" style="left:390px;top:62px" aria-hidden="true">24</span>
+<button type="button" class="al-seg" style="left:36.8px;width:49.61px;top:55px;height:102px" aria-label="10:00〜12:00 午前 を選び直す"><span class="al-n">午前</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/snack.coffee.webp"></span><small>カフェ</small></span></button>
+<button type="button" class="al-seg" style="left:86.41px;width:71.43px;top:55px;height:102px" aria-label="12:00〜15:00 昼 を選び直す"><span class="al-n">昼</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/lunch.ramen.webp"></span><small>ラーメン</small></span></button>
+<button type="button" class="al-seg" style="left:157.84px;width:71.43px;top:55px;height:102px" aria-label="15:00〜18:00 午後 を選び直す"><span class="al-n">午後</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/snack.sweets.webp"></span><small>スイーツ</small></span></button>
+<button type="button" class="al-seg cur" style="left:229.28px;width:80.36px;top:55px;height:102px" aria-label="18:00〜21:00 夕方・夜 を選び直す" aria-current="step"><span class="al-n">夕方・夜</span></button>
+<button type="button" class="al-seg" style="left:309.64px;width:80.36px;top:55px;height:102px" aria-label="21:00〜翌0:00 夜 を選び直す"><span class="al-n">夜</span></button>
+</div></div>
+</header></div>
+<p class="cap">聞いている段（.al-seg.cur・名前 15px 800）だけ写真のまま。ほかの段とプランの外は .al-dim（幕 .56 + blur 3px）。答えた段は顔の泡（.al-f 30px）</p>
+<div class="st fl choose"><button type="button" class="tm-bub pl-x tm-back" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><button type="button" class="tm-bub pl-x tm-quit" aria-label="閉じる"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+<header class="tm-ask pl-ask"><h1 class="tm-ask-h">プラン作成</h1>
+<div class="al done">
+<div class="al-img" role="group" aria-labelledby="h" style="height:189px;margin-top:-55px;margin-bottom:-32px">
+<i class="al-ph" style="top:0px;height:198.43px;background-size:595.28px 198.43px;background-position:-86.22px 0"></i>
+<i class="al-top" style="height:67px"></i>
+<i class="al-bd end" style="left:36.8px;top:55px"></i>
+<i class="al-bd" style="left:86.41px;top:55px"></i>
+<i class="al-bd" style="left:157.84px;top:55px"></i>
+<i class="al-bd" style="left:229.28px;top:55px"></i>
+<i class="al-bd" style="left:309.64px;top:55px"></i>
+<i class="al-bd end" style="left:390px;top:55px"></i>
+<i class="al-dim" style="left:0;width:36.8px"></i>
+<i class="al-dim" style="left:390px;width:12px"></i>
+<span class="al-t" style="left:12px;top:62px" aria-hidden="true">9</span>
+<span class="al-t" style="left:86.41px;top:62px" aria-hidden="true">12</span>
+<span class="al-t" style="left:157.84px;top:62px" aria-hidden="true">15</span>
+<span class="al-t" style="left:229.28px;top:62px" aria-hidden="true">18</span>
+<span class="al-t" style="left:309.64px;top:62px" aria-hidden="true">21</span>
+<span class="al-t" style="left:390px;top:62px" aria-hidden="true">24</span>
+<button type="button" class="al-seg" style="left:36.8px;width:49.61px;top:55px;height:102px" aria-label="10:00〜12:00 午前 を選び直す"><span class="al-n">午前</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/snack.coffee.webp"></span><small>カフェ</small></span></button>
+<button type="button" class="al-seg" style="left:86.41px;width:71.43px;top:55px;height:102px" aria-label="12:00〜15:00 昼 を選び直す"><span class="al-n">昼</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/lunch.ramen.webp"></span><small>ラーメン</small></span></button>
+<button type="button" class="al-seg" style="left:157.84px;width:71.43px;top:55px;height:102px" aria-label="15:00〜18:00 午後 を選び直す"><span class="al-n">午後</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/snack.sweets.webp"></span><small>スイーツ</small></span></button>
+<button type="button" class="al-seg" style="left:229.28px;width:80.36px;top:55px;height:102px" aria-label="18:00〜21:00 夕方・夜 を選び直す"><span class="al-n">夕方・夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/dinner.yakiniku.webp"></span><small>焼肉</small></span></button>
+<button type="button" class="al-seg" style="left:309.64px;width:80.36px;top:55px;height:102px" aria-label="21:00〜翌0:00 夜 を選び直す"><span class="al-n">夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/bar.cocktail.webp"></span><small>バー</small></span></button>
+</div></div>
+</header></div>
+<p class="cap">全部選んだ（.al.done・PlanFlow）: 段の幕が消え、プランの外（9:00〜10:00 / 24:00 の右）だけ暗い</p>
+<div class="st fl build"><button type="button" class="tm-bub pl-x tm-back" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
+<header class="tm-ask pl-ask"><h1 class="tm-ask-h">プラン作成</h1>
+<div class="al done">
+<div class="al-img" role="group" aria-labelledby="h" style="height:189px;margin-top:-55px;margin-bottom:-32px">
+<i class="al-ph" style="top:0px;height:198.43px;background-size:595.28px 198.43px;background-position:-86.22px 0"></i>
+<i class="al-top" style="height:67px"></i>
+<i class="al-bd end" style="left:36.8px;top:55px"></i>
+<i class="al-bd" style="left:86.41px;top:55px"></i>
+<i class="al-bd" style="left:157.84px;top:55px"></i>
+<i class="al-bd" style="left:229.28px;top:55px"></i>
+<i class="al-bd" style="left:309.64px;top:55px"></i>
+<i class="al-bd end" style="left:390px;top:55px"></i>
+<i class="al-dim" style="left:0;width:36.8px"></i>
+<i class="al-dim" style="left:390px;width:12px"></i>
+<i class="al-sweep" style="top:55px;height:102px"></i>
+<span class="al-t" style="left:12px;top:62px" aria-hidden="true">9</span>
+<span class="al-t" style="left:86.41px;top:62px" aria-hidden="true">12</span>
+<span class="al-t" style="left:157.84px;top:62px" aria-hidden="true">15</span>
+<span class="al-t" style="left:229.28px;top:62px" aria-hidden="true">18</span>
+<span class="al-t" style="left:309.64px;top:62px" aria-hidden="true">21</span>
+<span class="al-t" style="left:390px;top:62px" aria-hidden="true">24</span>
+<button type="button" class="al-seg res" style="left:36.8px;width:49.61px;top:55px;height:102px" aria-label="10:00〜12:00 午前 を選び直す"><span class="al-n">午前</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/cafe.jpg"></span><small>喫茶 白煙珈琲店 渋谷駅前店</small></span></button>
+<button type="button" class="al-seg res" style="left:86.41px;width:71.43px;top:55px;height:102px" aria-label="12:00〜15:00 昼 を選び直す"><span class="al-n">昼</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/ramen.jpg"></span><small>らぁ麺はやし田渋谷宇田川町店</small></span></button>
+<button type="button" class="al-seg work" style="left:157.84px;width:71.43px;top:55px;height:102px" aria-label="15:00〜18:00 午後 を選び直す"><span class="al-n">午後</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/snack.sweets.webp"></span><small>スイーツ</small></span></button>
+<button type="button" class="al-seg" style="left:229.28px;width:80.36px;top:55px;height:102px" aria-label="18:00〜21:00 夕方・夜 を選び直す"><span class="al-n">夕方・夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/dinner.yakiniku.webp"></span><small>焼肉</small></span></button>
+<button type="button" class="al-seg" style="left:309.64px;width:80.36px;top:55px;height:102px" aria-label="21:00〜翌0:00 夜 を選び直す"><span class="al-n">夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/faces/bar.cocktail.webp"></span><small>バー</small></span></button>
+</div></div>
+</header></div>
+<p class="cap">組み立て中: .al-sweep が横切り続ける・今の段 .work は光で満ちる・決まった段 .res は顔が店の写真 + 光る縁</p>
+<div class="st"><header class="tm-ask pl-ask"><button type="button" class="tm-bub pl-x tm-back" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button><h1 class="tm-ask-h">渋谷 カフェから焼肉とバーまで</h1>
+<div class="al">
+<div class="al-img" role="group" aria-labelledby="h" style="height:189px;margin-top:-55px;margin-bottom:-32px">
+<i class="al-ph" style="top:0px;height:198.43px;background-size:595.28px 198.43px;background-position:-86.22px 0"></i>
+<i class="al-top" style="height:67px"></i>
+<i class="al-bd end" style="left:36.8px;top:55px"></i>
+<i class="al-bd" style="left:86.41px;top:55px"></i>
+<i class="al-bd" style="left:157.84px;top:55px"></i>
+<i class="al-bd" style="left:229.28px;top:55px"></i>
+<i class="al-bd" style="left:309.64px;top:55px"></i>
+<i class="al-bd end" style="left:390px;top:55px"></i>
+<i class="al-dim" style="left:0;width:229.28px"></i>
+<i class="al-dim" style="left:309.64px;width:92.36px"></i>
+<span class="al-t l" style="left:12px;top:62px" aria-hidden="true"><em>明日</em>9</span>
+<span class="al-t" style="left:86.41px;top:62px" aria-hidden="true">12</span>
+<span class="al-t" style="left:157.84px;top:62px" aria-hidden="true">15</span>
+<span class="al-t" style="left:229.28px;top:62px" aria-hidden="true">18</span>
+<span class="al-t" style="left:309.64px;top:62px" aria-hidden="true">21</span>
+<span class="al-t" style="left:390px;top:62px" aria-hidden="true">24</span>
+<button type="button" class="al-seg" style="left:36.8px;width:49.61px;top:55px;height:102px" aria-label="10:00〜12:00 午前 を選び直す"><span class="al-n">午前</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/cafe.jpg"></span><small>カフェ</small></span></button>
+<button type="button" class="al-seg" style="left:86.41px;width:71.43px;top:55px;height:102px" aria-label="12:00〜15:00 昼 を選び直す"><span class="al-n">昼</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/ramen.jpg"></span><small>ラーメン</small></span></button>
+<button type="button" class="al-seg" style="left:157.84px;width:71.43px;top:55px;height:102px" aria-label="15:00〜18:00 午後 を選び直す"><span class="al-n">午後</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/pancake.jpg"></span><small>スイーツ</small></span></button>
+<button type="button" class="al-seg cur" style="left:229.28px;width:80.36px;top:55px;height:102px" aria-label="18:00〜21:00 夕方・夜 を選び直す" aria-current="step"><span class="al-n">夕方・夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/kuroda.jpg"></span><small>焼肉</small></span></button>
+<button type="button" class="al-seg" style="left:309.64px;width:80.36px;top:55px;height:102px" aria-label="21:00〜翌0:00 夜 を選び直す"><span class="al-n">夜</span><span class="al-a"><span class="al-f"><img alt="" src="../img/sample/oak.jpg"></span><small>バー</small></span></button>
+</div></div>
+</header></div>
+<p class="cap">開いたプラン（PlanView・.pl-ask）: 開いた段にも顔（.cur .al-f に光る縁）・明日のプランは左端の時刻の前に「明日」（.al-t.l）</p>
+</div></body></html>

@@ -1,0 +1,24 @@
+<!-- @dsCard group="Navigation" width=402 height=280 subtitle="地域名のパンくず: 最初の画面の左上 .tm-ring-name（親は押せる・右に共有の泡）/ プラン作成の上端の中央 .tm-ring-name.tm-crumb（親は押せない・戻る / 閉じるの泡の間）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>AreaCrumb</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding:0 0 2px}
+.scr{position:relative;height:72px;background:radial-gradient(120% 140% at 50% 100%, #1f1f22, #000 70%)}
+.scr.plan{height:62px;padding:0 16px}
+.cap{display:block;margin:8px 16px 16px;font-size:11px;line-height:1.45;color:var(--fg3)}
+</style></head><body><div class="w">
+
+<div class="scr">
+  <p class="tm-ring-name"><span><button type="button">東京</button><i aria-hidden="true">›</i></span><span><button type="button">渋谷区</button><i aria-hidden="true">›</i></span><b>道玄坂</b></p>
+  <button type="button" class="tm-bub tm-share" aria-label="共有"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 11H5.5a1 1 0 0 0-1 1v7.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V12a1 1 0 0 0-1-1H17"/></svg></button>
+</div>
+<span class="cap">.tm-ring-name（最初の画面・地域を選んだ後）: 左上 left 12 / top 8・高さ 44・明朝 700。親 = button 16px（白 .72・押すとその区画へ）、› = 15px 白 .5、最後 = b 22px。右上 = 共有 .tm-bub.tm-share 44</span>
+
+<div class="scr plan">
+  <header class="tm-ask">
+    <h1 class="tm-ask-h" id="tm-ask-h"><span class="tm-ring-name tm-crumb"><span><em>東京</em><i aria-hidden="true">›</i></span><span><em>渋谷区</em><i aria-hidden="true">›</i></span><b>道玄坂</b></span></h1>
+  </header>
+  <button type="button" class="tm-bub pl-x tm-back" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
+  <button type="button" class="tm-bub pl-x tm-quit" aria-label="閉じる"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+</div>
+<span class="cap">.tm-ring-name.tm-crumb（プラン作成の題 h1.tm-ask-h の中）: 中央寄せ・高さ 40・左右 60 空ける。親 = em 16px（押せない）。左右に 戻る / 閉じる の .pl-x 40</span>
+</div></body></html>

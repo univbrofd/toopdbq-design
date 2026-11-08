@@ -1,0 +1,48 @@
+<!-- @dsCard group="Plan" width=402 height=1300 subtitle="泡の枠で囲んだ写真の行 .tm-gd-r: 説明のシートの行（選んだ .on・写真 3 枚 n3 / 1 枚 n1）と PlanFlow の段の行 .fl-it（選び直す / 決まった .done）" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>GenreCell</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding-bottom:10px}
+.pad{padding:0 16px}
+.panel{background:var(--sheet);padding-top:8px}
+.cap{margin:8px 16px 16px;font-size:11px;line-height:1.5;color:var(--fg3)}
+</style></head><body><div class="w">
+<div class="pad panel"><ul class="tm-gd">
+<li><button type="button" class="tm-gd-r on n3" aria-pressed="true">
+<span class="tm-gd-ph tm-gd-i"><img alt="" src="../img/faces/snack.sweets.webp" decoding="async"><span class="tm-gd-hd"><span class="tm-gd-nm"><b>スイーツ</b><em>おすすめ</em></span><span class="tm-gd-yen">1 人 ¥1,000〜¥1,500</span></span><span class="tm-gd-d">甘い菓子やデザートを選ぶ時間。パフェや和菓子で季節の見せ方を楽しむ。</span></span>
+<span class="tm-gd-ph" aria-hidden="true"><img alt="" src="../img/sample/pancake.jpg" decoding="async"></span>
+<span class="tm-gd-ph" aria-hidden="true"><img alt="" src="../img/sample/mercer.jpg" decoding="async"></span>
+<span class="tm-gd-ph" aria-hidden="true"><img alt="" src="../img/sample/bern.jpg" decoding="async"></span>
+</button></li>
+<li><button type="button" class="tm-gd-r n1" aria-pressed="false">
+<span class="tm-gd-ph tm-gd-i"><img alt="" src="../img/faces/snack.coffee.webp" decoding="async"><span class="tm-gd-hd"><span class="tm-gd-nm"><b>カフェ</b><em>おすすめ</em></span><span class="tm-gd-yen">1 人 ¥900〜¥1,300</span></span><span class="tm-gd-d">飲み物や軽食でひと休みする店。季節限定メニューや丁寧な接客を楽しむ。</span></span>
+<span class="tm-gd-ph" aria-hidden="true"><img alt="" src="../img/sample/cafe.jpg" decoding="async"></span>
+</button></li>
+</ul></div>
+<p class="cap">説明のシート（AskGuide・午後の段）: 上 = 選んだ行（.on・aria-pressed）。行は泡の絵を伸ばした枠（角 24）・.on = 行の外に shadow-halo / 写真が 3 枚 .n3・1 枚 .n1 は右の 2 × 2 を埋め直す</p>
+<div class="fl choose" style="--fl-pn:0px"><ol class="fl-list">
+<li class="fl-it "><button type="button" class="fl-b" aria-label="18:00〜21:00 夕方・夜 を選び直す">
+<span class="fl-lb"><i class="fl-dot" style="background:#ff86c8" aria-hidden="true"></i><span class="fl-tm">18:00〜21:00</span><span class="fl-st">夕方・夜</span><span class="fl-rt">選び直す<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5.5L16 12l-6.5 6.5"/></svg></span></span>
+<span class="tm-gd-r fl-r">
+<span class="tm-gd-ph tm-gd-i"><img alt="" src="../img/faces/dinner.yakiniku.webp" decoding="async"><span class="tm-gd-hd fl-tx a"><span class="tm-gd-nm"><b>焼肉</b><em>おすすめ</em></span><span class="tm-gd-yen">1 人 ¥5,000〜¥7,000</span></span><span class="tm-gd-d fl-tx a">肉を卓上の網で焼いて食べる店。焼き加減を見ながらタレや塩で味わう。</span></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.00s" aria-hidden="true"><img alt="" src="../img/sample/kuroda.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.40s" aria-hidden="true"><img alt="" src="../img/sample/en.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.80s" aria-hidden="true"><img alt="" src="../img/sample/nikuya.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:1.20s" aria-hidden="true"><img alt="" src="../img/sample/kan.jpg" decoding="async"></span>
+<i class="fl-scan" style="animation-delay:0.66s" aria-hidden="true"></i>
+</span></button></li>
+</ol></div>
+<p class="cap">PlanFlow の段の行（.fl-it・全部選んだ）: 頭 .fl-lb = 予算の棒と同じ色の印・時刻・段の名前・右に「選び直す ›」</p>
+<div class="fl build" style="--fl-pn:0px"><ol class="fl-list">
+<li class="fl-it done"><div class="fl-b">
+<span class="fl-lb"><i class="fl-dot" style="background:#ff86c8" aria-hidden="true"></i><span class="fl-tm">18:00〜21:00</span><span class="fl-st">夕方・夜</span><span class="fl-rt">18:00 着</span></span>
+<span class="tm-gd-r fl-r">
+<span class="tm-gd-ph tm-gd-i"><img alt="" src="../img/faces/dinner.yakiniku.webp" decoding="async"><img class="fl-shop" alt="" src="../img/sample/kuroda.jpg" decoding="async"><span class="tm-gd-hd fl-tx a"><span class="tm-gd-nm"><b>焼肉</b><em>おすすめ</em></span><span class="tm-gd-yen">1 人 ¥5,000〜¥7,000</span></span><span class="tm-gd-d fl-tx a">肉を卓上の網で焼いて食べる店。焼き加減を見ながらタレや塩で味わう。</span><span class="tm-gd-hd fl-tx b"><span class="tm-gd-nm"><b>焼肉 黒田</b><span class="fl-ok" aria-hidden="true"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5"/></svg></span></span></span><span class="tm-gd-d fl-tx b">焼肉店</span></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.00s" aria-hidden="true"><img alt="" src="../img/sample/kuroda.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.40s" aria-hidden="true"><img alt="" src="../img/sample/en.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:0.80s" aria-hidden="true"><img alt="" src="../img/sample/nikuya.jpg" decoding="async"></span>
+<span class="tm-gd-ph fl-ph" style="animation-delay:1.20s" aria-hidden="true"><img alt="" src="../img/sample/kan.jpg" decoding="async"></span>
+<i class="fl-scan" style="animation-delay:0.66s" aria-hidden="true"></i>
+</span></div></li>
+</ol></div>
+<p class="cap">決まった行（.fl-it.done・組み立て中）: 左の絵が店の写真に替わり、店名 + ✓ の泡（.fl-ok）と種類。右の写真は暗く（brightness .38）、右上は着く時刻</p>
+</div></body></html>

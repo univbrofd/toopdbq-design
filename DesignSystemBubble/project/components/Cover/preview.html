@@ -1,0 +1,58 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Toopdbq Bubble</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg, #000); color:var(--fg, #fff); font-family:var(--font-body, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif); overflow:hidden; -webkit-font-smoothing:antialiased; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .sky { fill:var(--pastel-sky, #c6e6ff); }
+  .pink { fill:var(--pastel-pink, #ffc6e2); }
+  .mint { fill:var(--pastel-mint, #c6f7e6); }
+  .lilac { fill:var(--pastel-lilac, #dccfff); }
+  .ring { fill:none; stroke:var(--white-45, rgba(255,255,255,.45)); stroke-width:1.5; }
+  .cut { fill:none; stroke:var(--bg, #000); stroke-width:2; }
+  .words { position:absolute; left:32px; bottom:28px; max-width:440px; }
+  .name { margin:0; font-size:96px; line-height:.95; font-weight:800; letter-spacing:-.02em; color:var(--fg, #fff); }
+  .tag { margin:12px 0 0 4px; font-size:14px; line-height:20px; color:var(--fg2, rgba(255,255,255,.66)); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      pastel-sky disc ⌀256 (16 × gutter) bleeding off the bottom, the film's cool side as the figure · pastel-pink ⌀112 (strip-photo) · pastel-mint ⌀66 (bubble-preset) · pastel-lilac ⌀52 (bubble-nav) — the soap film's pastels, ≈24% of 960×288 on the black ground
+  arrangement one large bubble with three smaller ones drifting up and left of it, none touching, like the mood screen's ring of bubbles around the title bubble
+  pattern     discs and rings, from "泡がこのシステムの唯一のモチーフ": nine hollow rings in white-45 floating between the discs, three cut into the large disc in bg (the logo's 泡の中に泡)
+  scales      diameters from size tokens (bubble-dock 40 → ring ⌀12–48, bubble-preset 66, bubble-nav 52, strip-photo 112); ring stroke 1.5 like the fallback ring; corners are circles (radius-circle)
+-->
+<circle class="sky" cx="340" cy="176" r="128"/>
+<circle class="pink" cx="120" cy="92" r="56"/>
+<circle class="mint" cx="150" cy="232" r="33"/>
+<circle class="lilac" cx="232" cy="40" r="26"/>
+<circle class="cut" cx="300" cy="140" r="24"/>
+<circle class="cut" cx="384" cy="214" r="14"/>
+<circle class="cut" cx="332" cy="246" r="8"/>
+<circle class="ring" cx="30" cy="160" r="10"/>
+<circle class="ring" cx="64" cy="250" r="16"/>
+<circle class="ring" cx="200" cy="128" r="12"/>
+<circle class="ring" cx="178" cy="22" r="8"/>
+<circle class="ring" cx="20" cy="40" r="6"/>
+<circle class="ring" cx="440" cy="24" r="12"/>
+<circle class="ring" cx="186" cy="176" r="10"/>
+<circle class="ring" cx="96" cy="170" r="6"/>
+<circle class="ring" cx="276" cy="22" r="6"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Toopdbq<br>Bubble</h1>
+<p class="tag">夜の街の上に、シャボン玉が湧く。</p>
+</div>
+</div>
+</body>
+</html>

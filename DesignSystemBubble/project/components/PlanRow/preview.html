@@ -1,0 +1,19 @@
+<!-- @dsCard group="Plan" width=402 height=470 subtitle="プラン一覧 .tm-planlist: 頭 .tp-top + 説明、下書きの行 .dr（札・×）、作ったプラン / リンクから開いたプランの行（顔の重なり・いいね・›）、新しくプランを作る" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>PlanRow</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding-bottom:10px}
+.pad{padding:0 16px}
+.cap{margin:12px 16px 14px;font-size:11px;line-height:1.5;color:var(--fg3)}
+</style></head><body><div class="w">
+<div class="tm-plans pad">
+<div class="tp-top"><span></span><h1>プラン一覧</h1><span class="n">3 件</span></div>
+<p class="tp-hint">作ったプランと、リンクから開いたプラン</p>
+<ul class="tm-planlist">
+<li class="dr"><button type="button" class="dr-go"><span class="cv" aria-hidden="true"><span class="pl-bub" style="left:0px"><img alt="" src="../img/faces/snack.coffee.webp" decoding="async"></span><span class="pl-bub" style="left:16px"><img alt="" src="../img/faces/lunch.ramen.webp" decoding="async"></span><span class="pl-bub" style="left:32px"><img alt="" src="../img/faces/snack.sweets.webp" decoding="async"></span></span><span class="tx"><b>カフェ・ラーメン・スイーツ</b><small><em class="dr-tag">下書き</em>10:00〜翌0:00</small></span></button><button type="button" class="dr-x" aria-label="カフェ・ラーメン・スイーツ の下書きを消す"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></li>
+<li><a href="#"><span class="cv" aria-hidden="true"><span class="pl-bub" style="left:0px"><img alt="" src="../img/sample/cafe.jpg" decoding="async"></span><span class="pl-bub" style="left:16px"><img alt="" src="../img/sample/ramen.jpg" decoding="async"></span><span class="pl-bub" style="left:32px"><img alt="" src="../img/sample/pancake.jpg" decoding="async"></span></span><span class="tx"><b>渋谷 カフェから焼肉とバーまで</b><small>11/7(土) · 作成</small><small class="lk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C6.1 14.9 3 12.1 3 8.6 3 5.8 5.2 3.6 8 3.6c1.6 0 3.1.7 4 1.9.9-1.2 2.4-1.9 4-1.9 2.8 0 5 2.2 5 5 0 3.5-3.1 6.3-7.7 10.5z"/></svg>いいね 2</small></span><svg class="go" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5.5L16 12l-6.5 6.5"/></svg></a></li>
+<li><a href="#"><span class="cv" aria-hidden="true"><span class="pl-bub" style="left:0px"><img alt="" src="../img/sample/kuroda.jpg" decoding="async"></span><span class="pl-bub" style="left:16px"><img alt="" src="../img/sample/oak.jpg" decoding="async"></span></span><span class="tx"><b>道玄坂 焼肉からバーへ</b><small>11/3(火) · リンクから開いた</small><small class="lk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3l-1.3-1.2C6.1 14.9 3 12.1 3 8.6 3 5.8 5.2 3.6 8 3.6c1.6 0 3.1.7 4 1.9.9-1.2 2.4-1.9 4-1.9 2.8 0 5 2.2 5 5 0 3.5-3.1 6.3-7.7 10.5z"/></svg>いいね 0</small></span><svg class="go" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 5.5L16 12l-6.5 6.5"/></svg></a></li>
+</ul>
+<button type="button" class="pl-pill quiet wide">新しくプランを作る</button>
+</div>
+<p class="cap">上から 下書きの行（.dr・押すと作成の続き / × で消す）・作ったプラン（作成）・リンクから開いたプラン。題とプランの中身はサンプル。.tp の 100vh とアプリバーの余白は外した</p>
+</div></body></html>

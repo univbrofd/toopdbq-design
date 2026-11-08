@@ -1,0 +1,56 @@
+<!-- @dsCard group="Bubble" width=402 height=809 subtitle="丸い泡: .tm-bub（48 / 戻る・閉じる .pl-x 40 / 共有 .tm-share 44 / 決定 .tm-done 104）・.pl-bub（写真・.on）・.dk-btn・.tn button" -->
+<!doctype html><html lang="ja" data-theme="dark"><head><meta charset="utf-8"><title>Bubble</title><style>
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+.w{width:402px;padding:14px 0 18px;display:grid;gap:8px}
+.cap{display:block;padding:0 16px;font-size:11px;line-height:1.45;color:var(--fg3)}
+.strip{position:relative;height:56px}
+.strip.top{height:54px}
+.row{display:flex;align-items:center;gap:18px;padding:4px 16px}
+.cell-done{position:relative;height:110px}
+.photo{position:relative;background:url(../img/sample/kuroda.jpg) center 40% / cover}
+.photo.b{background-image:url(../img/sample/oak.jpg);background-position:center 30%}
+.bar{position:relative;height:72px;transform:translateZ(0)}
+</style></head><body><div class="w">
+
+<div class="strip top">
+  <button type="button" class="tm-bub pl-x" aria-label="戻る"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 5.5L8 12l6.5 6.5"/></svg></button>
+  <button type="button" class="tm-bub pl-x tm-quit" aria-label="閉じる"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
+</div>
+<span class="cap">.tm-bub.pl-x 40 = 戻る（左上 left 16 / top 7）· .pl-x.tm-quit = 閉じる（右上 right 16）</span>
+
+<div class="strip">
+  <button type="button" class="tm-bub tm-share" aria-label="共有"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v11M8 7.5l4-4 4 4M7 11H5.5a1 1 0 0 0-1 1v7.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V12a1 1 0 0 0-1-1H17"/></svg></button>
+</div>
+<span class="cap">.tm-bub.tm-share 44 = 共有（右上 right 12 / top 8）</span>
+
+<div class="row"><span class="tm-bub tm-money-ic" aria-hidden="true">💰</span></div>
+<span class="cap">.tm-bub 48（素の大きさ・例: 予算のダイアログの頭 .tm-money-ic）</span>
+
+<div class="cell-done"><button type="button" class="tm-bub tm-done"><span>決定</span></button></div>
+<span class="cap">.tm-bub.tm-done 104 = 時間 / 予算のダイアログの決定（下端の中央）</span>
+
+<div class="row">
+  <span class="pl-bub"><img alt="" src="../img/sample/kuroda.jpg"></span>
+  <span class="pl-bub on"><img alt="" src="../img/sample/en.jpg"></span>
+  <span class="pl-bub" role="img" aria-label="リンクをコピー"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M9 8.5h10v11.5H9zM5 15.5V4h10"/></svg></span>
+  <span class="pl-bub on" role="img" aria-label="送信"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span>
+</div>
+<span class="cap">.pl-bub 40: 写真入り / .on（光を満たす + halo）/ 線の絵 / .on の送信</span>
+
+<div class="photo"><div class="dk"><div class="dk-btns">
+  <button type="button" class="dk-btn" aria-label="メニュー"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h10.5a2 2 0 0 1 2 2v15H8a2 2 0 0 1-2-2z"/><path d="M9.5 8.5h5.5M9.5 12h5.5M9.5 15.5h3.5"/></svg></button>
+  <button type="button" class="dk-btn" aria-label="Google マップで開く"><svg viewBox="0 0 24 24" fill="currentColor"><path transform="translate(3 3) scale(.75)" d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/></svg></button>
+  <button type="button" class="dk-btn" aria-label="電話をかける"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M5.5 3.8h3l1.5 4-2 1.3a11 11 0 0 0 6.9 6.9l1.3-2 4 1.5v3a1.7 1.7 0 0 1-1.8 1.7A16.7 16.7 0 0 1 3.8 5.6a1.7 1.7 0 0 1 1.7-1.8z"/></svg></button>
+  <a class="dk-btn" href="#" aria-label="公式サイト"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><path d="M3.4 12h17.2M12 3.4c2.3 2.4 3.5 5.3 3.5 8.6s-1.2 6.2-3.5 8.6c-2.3-2.4-3.5-5.3-3.5-8.6s1.2-6.2 3.5-8.6z"/></svg></a>
+  <a class="dk-btn" href="#" aria-label="食べログ"><svg viewBox="0 0 24 24"><text x="12" y="19" text-anchor="middle" font-size="18" font-weight="800" fill="currentColor" stroke="currentColor" stroke-width="0.35">食</text></svg></a>
+</div></div></div>
+<span class="cap">.dk-btn 40 = 店の下端の欄のアイコン（.dk-btns は row-reverse = 右から メニュー → マップ → 電話 → サイト → 評価サイト）</span>
+
+<div class="photo b bar"><nav class="tn">
+  <button type="button" aria-label="ホーム" aria-current="page"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5.5h-5V20H5a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button type="button" aria-label="プラン一覧"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M5 6.5h14a1.5 1.5 0 0 1 1.5 1.5v10.5A1.5 1.5 0 0 1 19 20H5a1.5 1.5 0 0 1-1.5-1.5V8A1.5 1.5 0 0 1 5 6.5zM3.5 10.5h17M8 4v5M16 4v5M8.5 15l2.2 2.2 4.6-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  <button type="button" aria-label="保存したお店"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.4-6.5 4.4v-16a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</nav></div>
+<span class="cap">.tn button 52 = アプリバー（白 .62 / aria-current は白・裏に暗いにじみ）。fixed のバーを transform の箱で枠に収めている</span>
+
+</div></body></html>
